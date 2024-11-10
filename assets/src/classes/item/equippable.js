@@ -4,6 +4,7 @@ class Equippable extends Item{
   posY = 0
   /** @type {Component} */
   component = null
+  stackSize = 1
   /** (extra) Rotation in degrees */
   get rotation() {
     if(!this.component) return 0;

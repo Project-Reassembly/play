@@ -1,0 +1,1 @@
+class NPC extends Entity{}

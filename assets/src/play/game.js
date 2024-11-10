@@ -19,17 +19,7 @@ const borders = [-2000, -2000, 2000, 2000]
 let fonts = {};
 
 async function preload() {
-  //For each category defined
-  for (let category in Object.getOwnPropertyDescriptors(images)) {
-    //For each image in it
-    for (let image in Object.getOwnPropertyDescriptors(images[category])) {
-      let thing = images[category][image];
-      //Load it if it's an image container
-      if (thing instanceof ImageContainer) {
-        await thing.load();
-      }
-    }
-  }
+  Registry.images.forEachAsync((name, el) => el.load())
   fonts.ocr = loadFont("assets/font/ocr_a_extended.ttf");
   fonts.darktech = loadFont("assets/font/darktech_ldr.ttf");
 }

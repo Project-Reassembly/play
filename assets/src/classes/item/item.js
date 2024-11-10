@@ -6,6 +6,7 @@ class Item{
   name = "<unnamed item>"
   description = "<no description>"
   rarity = 0
+  stackSize = 99
   /**
    * 
    * @param {number} rarity Item rarity. 0 is most common. Must be between 0 and 5 inclusive.

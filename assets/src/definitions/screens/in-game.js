@@ -28,8 +28,8 @@ Object.defineProperties(
     "",
     true,
     20
-  ),
-  { y: { get: () => -height / 2 + 50 } , width: {get: () => width/2 - 75}, x: { get: () => width/4 + 37.5}}
+  ).anchorRight(),
+  { y: { get: () => -height / 2 + 50 } , width: {get: () => width/2 - 75}}
 );
 UIComponent.setCondition("paused:false")
 Object.defineProperties(
@@ -45,11 +45,11 @@ Object.defineProperties(
     "",
     true,
     20
-  ),
-  { y: { get: () => -height / 2 + 50 } , width: {get: () => width/2 - 75}, x: { get: () => -(width/4 + 37.5)}}
+  ).anchorLeft(),
+  { y: { get: () => -height / 2 + 50 } , width: {get: () => width/2 - 75}}
 );
 UIComponent.setCondition("menu:none")
-Object.defineProperty(createUIComponent(
+createUIComponent(
   ["in-game"],
   ["menu:none"],
   0,
@@ -57,11 +57,104 @@ Object.defineProperty(createUIComponent(
   500,
   60,
   "trapezium",
-  () => {
-    pause()
-    UIComponent.setCondition("menu:inventory")
-  },
+  null,
   "",
   true,
   20
-), "y", {get: () => height/2 - 30})
+).anchorBottom()
+
+createUIComponent(
+  ["in-game"],
+  ["menu:none"],
+  295,
+  0,
+  80,
+  50,
+  "reverse",
+).anchorBottom() 
+
+createUIImageComponent(
+  ["in-game"],
+  ["menu:none"],
+  295,
+  0,
+  50,
+  50,
+  () => {
+    UIComponent.setCondition("menu:inventory")
+  },
+  "icon.chest",
+  false,
+  0.5
+).anchorBottom()
+
+createUIComponent(
+  ["in-game"],
+  ["menu:none"],
+  -295,
+  0,
+  80,
+  50,
+  "both",
+).anchorBottom() 
+
+createUIImageComponent(
+  ["in-game"],
+  ["menu:none"],
+  -295,
+  0,
+  50,
+  50,
+  () => {
+    
+  },
+  "icon.cross",
+  false,
+  0.5
+).anchorBottom()
+
+createUIComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  -200,
+  0,
+  500,
+  400
+)
+//Inventory
+createUIComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  200,
+  0,
+  300,
+  500
+)
+createUIComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  -400,
+  -225,
+  100,
+  50,
+  "none",
+  () => {
+    UIComponent.setCondition("menu:none")
+  },
+  "X",
+  false,
+  40
+)
+createUIComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  -150,
+  -225,
+  400,
+  50,
+  "none",
+  null,
+  "Inventory",
+  false,
+  30
+)

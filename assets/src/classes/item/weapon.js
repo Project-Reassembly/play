@@ -1,4 +1,4 @@
-class Weapon {
+class Weapon extends Equippable{
   reload = 30;
   shoot = {
     bullet: null,
@@ -8,6 +8,7 @@ class Weapon {
       spacing: 0,
     },
   };
+  rarity = 1;
 
   //Internal
   #delay = 0;
@@ -20,22 +21,11 @@ class Weapon {
   #accelerated = 0;
   constructor() {}
   tick() {
-    if (!this.slot) return;
-    if (this.slot.entity) {
-      this.x = this.entity.x + this.posX;
-      this.y = this.entity.y + this.posY;
-      this.rotation = degrees(
-        p5.Vector.sub(
-          createVector(this.entity.target.x, this.entity.target.y), //Mouse pos 'B'
-          createVector(this.x, this.y) //Weapon pos 'A'
-        ).heading() //'A->B' = 'B' - 'A'
-      );
-    }
+    super.tick();
     this.decelerate()
     if (this.#cooldown > 0) {
       this.#cooldown--;
     }
-    this.parts.forEach((x) => x.tick()); //Tick all parts
   }
   getAcceleratedReloadRate(){
     if(this.#acceleration <= -1 || this.#acceleration > this.maxAccel) return this.reload; //If bad acceleration then ignore it
@@ -81,10 +71,9 @@ class Weapon {
         this.rotation,
         this.shoot.pattern.spread,
         this.shoot.pattern.spacing,
-        this.slot.entity.world,
-        this.slot.entity
+        this.holder.world,
+        this.holder
       );
-      this.parts.forEach((x) => x.fire()); //Tick all parts
     }
   }
 }
@@ -109,7 +98,7 @@ function patternedBulletExpulsion(
   //For each bullet to fire
   for (let index = 0; index < amount; index++) {
     /** @type {Bullet} */
-    let bulletToFire = bullet(bulletToSpawn);
+    let bulletToFire = construct(bulletToSpawn, "bullet");
     //Put the bullet in position
     bulletToFire.x = x;
     bulletToFire.y = y;

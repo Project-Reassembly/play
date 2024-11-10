@@ -30,7 +30,7 @@ class Entity {
   }
   init() {
     this.maxHealth = this.health; //Stop part-damaged entities spawning
-    this.components = this.components.map(x => construct(x))
+    this.components = this.components.map(x => construct(x, "component"))
   }
   addToWorld(world) {
     world.entities.push(this);

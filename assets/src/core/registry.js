@@ -101,4 +101,19 @@ class Registry {
     //Add new entry with the same content
     this.add(as, current);
   }
+  /**
+   * Performs a function on each item in registry.
+   * @param {(name: string, item) => void} callback Function to perform on each item.
+   */
+  forEach(callback){
+    this.#content.forEach((value, key) => void callback(key, value))
+    return true
+  }
+  /**
+   * Performs a function on each item in registry asynchronously.
+   * @param {(name: string, item) => void} callback Function to perform on each item.
+   */
+  async forEachAsync(callback){
+    this.#content.forEach(async (value, key) => await void callback(key, value))
+  }
 }

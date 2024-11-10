@@ -1,0 +1,1 @@
+Registry.items.add("nothing", null)

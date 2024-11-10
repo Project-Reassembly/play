@@ -42,20 +42,37 @@ class UIComponent {
   alignLeft() {
     this.ox = this.x; //Save old x
     Object.defineProperty(this, "x", {
-      get: () => this.ox + textWidth(this.text) / 2, //Add width to it
+      get: () => this.ox + Math.max(this.width, textWidth(this.text)) / 2,
     });
     return this;
   }
+  alignRight() {
+    this.ox = this.x; //Save old x
+    Object.defineProperty(this, "x", {
+      get: () => this.ox - Math.max(this.width, textWidth(this.text)) / 2,
+    });
+    return this;
+  }
+
   anchorLeft() {
-    if(this.ox){
-      Object.defineProperty(this, "ox", {
-        get: () => -width/2, //Add width to it
-      });
-    }
-    else{
-      this.alignLeft()
-      this.anchorLeft()
-    }
+    return Object.defineProperty(this, "x", {
+      get: () => -width/2 + this.width/2,
+    });
+  }
+  anchorRight() {
+    return Object.defineProperty(this, "x", {
+      get: () => width/2 - this.width/2,
+    });
+  }
+  anchorBottom(){
+    return Object.defineProperty(this, "y", {
+      get: () => height/2 - this.height/2,
+    });
+  }
+  anchorTop(){
+    return Object.defineProperty(this, "y", {
+      get: () => -height/2 + this.height/2,
+    });
   }
   //Evaluates property:value on game ui: input "slot:1" => if "slot" is "1" (or equivalent, e.g. 1) return true, else false
   static evaluateCondition(condition) {
@@ -180,6 +197,12 @@ class UIComponent {
         vertex(this.x + this.width/2, this.y - this.height/2)
         vertex(this.x - this.width/2 + this.height/2, this.y - this.height/2)
       }
+      else if(this.bevel === "reverse"){
+        vertex(this.x - this.width/2 + this.height/2, this.y + this.height/2)
+        vertex(this.x + this.width/2 + this.height/2, this.y + this.height/2)
+        vertex(this.x + this.width/2 - this.height/2, this.y - this.height/2)
+        vertex(this.x - this.width/2 - this.height/2, this.y - this.height/2)
+      }
       endShape(CLOSE)
     }
     //Draw optional text
@@ -228,14 +251,18 @@ class ImageUIComponent extends UIComponent {
     y = 0,
     width = 1,
     height = 1,
-    shownImage = null,
+    shownImage = "error",
     onpress = () => {},
-    outline = true
+    outline = true,
+    scale = 1,
+    pixelate = true
   ) {
     //Initialise component
     super(x, y, width, height, "none", onpress, "", false, 0);
     this.image = shownImage;
     this.outline = outline;
+    this.scale = scale;
+    this.pixelate = pixelate;
   }
   draw() {
     push();
@@ -244,7 +271,8 @@ class ImageUIComponent extends UIComponent {
     //Draw outline behind background
     if (this.outline) rect(this.x, this.y, this.width + 4, this.height + 4);
     //Draw image
-    drawImg(this.image, this.x, this.y, this.width - 1, this.height - 1);
+    if(this.pixelate) noSmooth()
+    drawImg(this.image, this.x, this.y, this.width * this.scale, this.height * this.scale);
     pop();
   }
 }
@@ -470,7 +498,9 @@ function createUIImageComponent(
   height = 1,
   onpress = null,
   shownImage = null,
-  outline = true
+  outline = true,
+  scale = 1,
+  pixelate = true
 ) {
   //Make component
   const component = new ImageUIComponent(
@@ -480,7 +510,9 @@ function createUIImageComponent(
     height,
     shownImage,
     onpress ?? (() => {}),
-    outline
+    outline,
+    scale,
+    pixelate
   );
   component.conditions = conditions;
   //Set conditional things
@@ -637,9 +669,3 @@ function blendColours(col1, col2, col1Factor) {
   }
   return newCol;
 }
-
-const images = {
-  env: {
-    error: new ImageContainer("assets/textures/error.png")
-  }
-};

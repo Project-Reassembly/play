@@ -2,7 +2,7 @@
 class Component {
   shape = "circle";
   fill = "red";
-  image = images.env.error;
+  image = "error";
   width = 100;
   height = 100;
   rotation = 0;

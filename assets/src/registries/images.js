@@ -1,0 +1,6 @@
+Registry.images.add("error", new ImageContainer("assets/textures/error.png"))
+Registry.images.add("icon.chest", new ImageContainer("assets/textures/icon/chest.png"))
+Registry.images.add("icon.cross", new ImageContainer("assets/textures/icon/cross.png"))
+Registry.images.add("icon.interaction", new ImageContainer("assets/textures/icon/interaction.png"))
+Registry.images.add("icon.question", new ImageContainer("assets/textures/icon/question.png"))
+Registry.images.add("icon.selector", new ImageContainer("assets/textures/icon/selector.png"))

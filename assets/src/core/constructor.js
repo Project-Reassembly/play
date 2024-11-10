@@ -1,7 +1,9 @@
 /** Generic type constructor. Uses `Registry.genericType` as the source for any template.
  * @param {{type: string | undefined}} object Source to construct from. This object is left unchanged. Type must be present in `Registry.genericType`, or else `Object` is used instead.
+ * @param {string} [defaultType="object"] Default fallback type for when the source has no `type` property.
  */
-function construct(object) {
+function construct(object, defaultType = "object") {
+  object.type ??= defaultType
   return constructFromRegistry(object, Registry.type);
 }
 
