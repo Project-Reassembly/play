@@ -1,0 +1,21 @@
+class Equippable extends Item{
+  //Shown offsets
+  posX = 0
+  posY = 0
+  /** @type {Component} */
+  component = null
+  /** (extra) Rotation in degrees */
+  get rotation() {
+    if(!this.component) return 0;
+    return this.component.rotation;
+  }
+  get rotationRadians() {
+    if(!this.component) return 0;
+    return this.component.rotationRadians;
+  }
+  init(){
+    this.component = construct(this.component)
+    this.component.tickListeners.push(this)
+  }
+  tick(){}
+}

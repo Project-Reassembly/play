@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- basic metadata -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Project: Reassembly</title>
+  <link rel="icon" type="image/x-icon" href="./assets/textures/ui/moab.png">
+  <link href="./style.css" rel="stylesheet" type="text/css" />
+  <!-- Import p5 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
+</head>
+
+<body>
+  <script>
+    //Disable p5's errors, they don't really help
+    p5.disableFriendlyErrors = true;
+    //Game info
+    const gameVersion = "0.0.0";
+    const isPreview = true;
+  </script>
+  <!-- Core -->
+  <script src="./assets/src/core/ui.js"></script>
+  <script src="./assets/src/core/constructor.js"></script>
+  <script src="./assets/src/core/number.js"></script>
+  <script src="./assets/src/core/registry.js"></script>
+  <!-- Classes -->
+  <script src="./assets/src/classes/effect/animation.js"></script>
+  <script src="./assets/src/classes/effect/shape-particle.js"></script>
+  <script src="./assets/src/classes/effect/wave-particle.js"></script>
+  <script src="./assets/src/classes/effect/status-effect.js"></script>
+  <script src="./assets/src/classes/projectile/bullet.js"></script>
+  <script src="./assets/src/classes/projectile/point-bullet.js"></script>
+  <script src="./assets/src/classes/projectile/laser-bullet.js"></script>
+  <script src="./assets/src/classes/projectile/critical.js"></script>
+  <script src="./assets/src/classes/projectile/missile.js"></script>
+  <script src="./assets/src/classes/block/block.js"></script>
+  <script src="./assets/src/classes/item/weapon.js"></script>
+  <script src="./assets/src/classes/item/item.js"></script>
+  <script src="./assets/src/classes/entity/component.js"></script>
+  <script src="./assets/src/classes/entity/entity.js"></script>
+  <script src="./assets/src/classes/world/world.js"></script>
+  <!-- Special Effects -->
+  <script src="./assets/src/play/effects.js"></script>
+  <!-- Registries -->
+  <script src="./assets/src/registries/images.js"></script>
+  <script src="./assets/src/registries/type.js"></script>
+  <!-- User interface -->
+  <script src="./assets/src/definitions/screens/title.js"></script>
+  <script src="./assets/src/definitions/screens/in-game.js"></script>
+  <!-- Actual gameplay -->
+  <script src="./assets/src/play/game.js"></script>
+</body>
+
+</html>

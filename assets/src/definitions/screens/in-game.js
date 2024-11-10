@@ -1,0 +1,67 @@
+Object.defineProperty(
+  createUIComponent(
+    ["in-game"],
+    ["paused:true"],
+    0,
+    0,
+    150,
+    30,
+    "both",
+    null,
+    "Paused",
+    true,
+    20
+  ),
+  "y",
+  { get: () => -height / 2 + 50 }
+);
+Object.defineProperties(
+  createUIComponent(
+    ["in-game"],
+    ["paused:true"],
+    0,
+    0,
+    150,
+    15,
+    "left",
+    null,
+    "",
+    true,
+    20
+  ),
+  { y: { get: () => -height / 2 + 50 } , width: {get: () => width/2 - 75}, x: { get: () => width/4 + 37.5}}
+);
+UIComponent.setCondition("paused:false")
+Object.defineProperties(
+  createUIComponent(
+    ["in-game"],
+    ["paused:true"],
+    0,
+    0,
+    150,
+    15,
+    "right",
+    null,
+    "",
+    true,
+    20
+  ),
+  { y: { get: () => -height / 2 + 50 } , width: {get: () => width/2 - 75}, x: { get: () => -(width/4 + 37.5)}}
+);
+UIComponent.setCondition("menu:none")
+Object.defineProperty(createUIComponent(
+  ["in-game"],
+  ["menu:none"],
+  0,
+  0,
+  500,
+  60,
+  "trapezium",
+  () => {
+    pause()
+    UIComponent.setCondition("menu:inventory")
+  },
+  "",
+  true,
+  20
+), "y", {get: () => height/2 - 30})
