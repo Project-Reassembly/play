@@ -1,6 +1,6 @@
 //Get a shorter number e.g. 12850 -> 1.29k
 function shortenedNumber(num = 0) {
-  //Goes up to a decillion (1 000 000 000 000 000 000 000 000 000 000) shards. No-one will ever need that many, so it should be enough.
+  //Goes up to a decillion (1 000 000 000 000 000 000 000 000 000 000). No-one will ever need that much stuff, so it should be enough.
   const sizes = ["", "k", "m", "b", "t", "q", "Q", "s", "S", "o", "n", "d"];
   let exponential = num.toExponential();
   //Split the first bit and the power of 10

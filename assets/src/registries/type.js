@@ -16,4 +16,8 @@ Registry.type.add("item", Item)
 Registry.type.add("itemstack", ItemStack)
 Registry.type.add("equippable", Equippable)
 Registry.type.add("weapon", Weapon)
-
+//World
+Registry.type.add("world", World)
+Registry.type.add("chunk", Chunk)
+//Block
+Registry.type.add("block", Block)

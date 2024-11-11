@@ -14,7 +14,8 @@ const game = {
 };
 const world = new World();
 const contentScale = 1
-const borders = [-2000, -2000, 2000, 2000]
+let worldSize = 2000
+const borders = () => [-worldSize/2, -worldSize/2, worldSize/2, worldSize/2]
 
 let fonts = {};
 
@@ -29,6 +30,7 @@ function setup() {
   rectMode(CENTER);
   imageMode(CENTER);
   textFont(fonts.darktech);
+  world.generateTiles(worldSize / Block.size / Chunk.size + 6)
 }
 //Change the size if the screen size changes
 function windowResized() {
@@ -70,31 +72,33 @@ function gameFrame() {
     ui.camera.y = game.player.y
     world.tickAll();
   }
+  world.drawAll();
+  
   push()
   noFill()
   strokeWeight(10)
   stroke(255, 0, 0)
   rectMode(CORNERS)
-  rect(...borders)
+  rect(...borders())
   pop()
-  world.drawAll();
+  
   pop()
 }
 
 function movePlayer() {
-  if (keyIsDown(87) && game.player.y > borders[1]/* Top */ + game.player.hitSize) {
+  if (keyIsDown(87) && game.player.y > borders()[1]/* Top */ + game.player.hitSize) {
     //If 'W' pressed
     game.player.y -= game.player.speed;
   }
-  if (keyIsDown(83) && game.player.y < borders[3]/* Bottom */ - game.player.hitSize) {
+  if (keyIsDown(83) && game.player.y < borders()[3]/* Bottom */ - game.player.hitSize) {
     //If 'S' pressed
     game.player.y += game.player.speed;
   }
-  if (keyIsDown(65) && game.player.x > borders[0]/* Left */ + game.player.hitSize) {
+  if (keyIsDown(65) && game.player.x > borders()[0]/* Left */ + game.player.hitSize) {
     //If 'A' pressed
     game.player.x -= game.player.speed ;
   }
-  if (keyIsDown(68) && game.player.x < borders[2]/* Right */ - game.player.hitSize) {
+  if (keyIsDown(68) && game.player.x < borders()[2]/* Right */ - game.player.hitSize) {
     //If 'D' pressed
     game.player.x += game.player.speed;
   }
