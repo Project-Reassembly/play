@@ -13,24 +13,30 @@ const game = {
   },
 };
 const world = new World();
-const contentScale = 1
-let worldSize = 2000
-const borders = () => [-worldSize/2, -worldSize/2, worldSize/2, worldSize/2]
+const contentScale = 1;
+let worldSize = 2000;
+const borders = () => [
+  -worldSize / 2,
+  -worldSize / 2,
+  worldSize / 2,
+  worldSize / 2,
+];
 
 let fonts = {};
 
 async function preload() {
-  Registry.images.forEachAsync((name, el) => el.load())
+  Registry.images.forEachAsync((name, el) => el.load());
   fonts.ocr = loadFont("assets/font/ocr_a_extended.ttf");
   fonts.darktech = loadFont("assets/font/darktech_ldr.ttf");
 }
 //Set up the canvas, using the previous function
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  let cnv = createCanvas(windowWidth, windowHeight);
+  cnv.elt.addEventListener("contextmenu", (event) => event.preventDefault());
   rectMode(CENTER);
   imageMode(CENTER);
   textFont(fonts.darktech);
-  world.generateTiles(worldSize / Block.size / Chunk.size + 6)
+  world.generateTiles(worldSize / Block.size / Chunk.size + 6);
 }
 //Change the size if the screen size changes
 function windowResized() {
@@ -39,17 +45,17 @@ function windowResized() {
 
 //p5's draw function - called 60 times per second
 function draw() {
-  push()
-  translate(width/2, height/2)
+  push();
+  translate(width / 2, height / 2);
   //Draw the void
-  background((128 + Math.sin(frameCount/120)*128), 255)
+  background(128 + Math.sin(frameCount / 120) * 128, 255);
   //Draw everything else
   if (ui.menuState === "in-game") {
     gameFrame();
   }
   uiFrame();
   if (!ui.waitingForMouseUp) mouseInteraction();
-  pop()
+  pop();
 }
 
 function uiFrame() {
@@ -63,42 +69,54 @@ function uiFrame() {
 }
 
 function gameFrame() {
-  push()
-  translate(-ui.camera.x, -ui.camera.y)
-  rotate(ui.camera.rotation)
+  push();
+  translate(-ui.camera.x, -ui.camera.y);
+  rotate(ui.camera.rotation);
   if (!game.paused) {
     movePlayer();
-    ui.camera.x = game.player.x
-    ui.camera.y = game.player.y
+    ui.camera.x = game.player.x;
+    ui.camera.y = game.player.y;
     world.tickAll();
   }
   world.drawAll();
-  
-  push()
-  noFill()
-  strokeWeight(10)
-  stroke(255, 0, 0)
-  rectMode(CORNERS)
-  rect(...borders())
-  pop()
-  
-  pop()
+
+  push();
+  noFill();
+  strokeWeight(10);
+  stroke(255, 0, 0);
+  rectMode(CORNERS);
+  rect(...borders());
+  pop();
+
+  pop();
 }
 
 function movePlayer() {
-  if (keyIsDown(87) && game.player.y > borders()[1]/* Top */ + game.player.hitSize) {
+  if (
+    keyIsDown(87) &&
+    game.player.y > borders()[1] /* Top */ + game.player.hitSize
+  ) {
     //If 'W' pressed
     game.player.y -= game.player.speed;
   }
-  if (keyIsDown(83) && game.player.y < borders()[3]/* Bottom */ - game.player.hitSize) {
+  if (
+    keyIsDown(83) &&
+    game.player.y < borders()[3] /* Bottom */ - game.player.hitSize
+  ) {
     //If 'S' pressed
     game.player.y += game.player.speed;
   }
-  if (keyIsDown(65) && game.player.x > borders()[0]/* Left */ + game.player.hitSize) {
+  if (
+    keyIsDown(65) &&
+    game.player.x > borders()[0] /* Left */ + game.player.hitSize
+  ) {
     //If 'A' pressed
-    game.player.x -= game.player.speed ;
+    game.player.x -= game.player.speed;
   }
-  if (keyIsDown(68) && game.player.x < borders()[2]/* Right */ - game.player.hitSize) {
+  if (
+    keyIsDown(68) &&
+    game.player.x < borders()[2] /* Right */ - game.player.hitSize
+  ) {
     //If 'D' pressed
     game.player.x += game.player.speed;
   }
@@ -158,17 +176,15 @@ function createPlayer() {
       {
         type: "component",
         width: 50,
-        height: 50
-      }
+        height: 50,
+      },
     ],
     team: "player",
     hitSize: 25, //Always at least half of the smallest dimension
     speed: 6,
   });
-  player.addItem("scrap")
-  player.addItem("scrap")
-  player.addItem("wire")
-  player.addItem("scrap")
+  player.addItems("scrap", 27);
+  player.addItems("stone-block", 18);
   player.addToWorld(world);
   game.player = player;
   //Change to an accessor property
@@ -193,8 +209,36 @@ function createPlayer() {
 }
 
 function mouseInteraction() {
-  if (ui.menuState === "in-game" && mouseIsPressed) {
-    console.log("player interaction")
+  if (ui.menuState === "in-game" && mouseIsPressed && !ui.waitingForMouseUp) {
+    if (ui.mouseButton === "right") secondaryInteract();
+    else interact();
+  }
+}
+
+function secondaryInteract() {
+  let block = world.getBlock(game.mouse.x, game.mouse.y);
+  if (!block) return;
+  if (InventoryEntity.mouseItemStack.item === "nothing") {
+    world.break(game.mouse.x, game.mouse.y);
+    InventoryEntity.mouseItemStack = new ItemStack(
+      block.dropItem ?? "nothing",
+      block.dropCount ?? 1
+    );
+  } else if (
+    (InventoryEntity.mouseItemStack.item === block.dropItem ?? "nothing") &&
+    (InventoryEntity.mouseItemStack.count <
+      (Registry.items.get(block.dropItem ?? "nothing").stackSize ??
+      99))
+  ) {
+    world.break(game.mouse.x, game.mouse.y);
+    InventoryEntity.mouseItemStack.count++;
+  }
+}
+function interact() {
+  if (InventoryEntity.mouseItemStack.getItem() instanceof PlaceableItem) {
+    InventoryEntity.mouseItemStack
+      .getItem()
+      .place(InventoryEntity.mouseItemStack);
   }
 }
 
@@ -221,34 +265,36 @@ function reset() {
 
 //Triggers on any key press
 function keyPressed() {
-  console.log(key)
+  console.log(key);
   if (key === "p") {
     //Pause / unpause
-    togglePause()
+    togglePause();
   }
-  if(key === "Escape"){
-    if(!UIComponent.evaluateCondition("menu:none")){
-      UIComponent.setCondition("menu:none")
-      unpause()
+  if (key === "Escape") {
+    if (!UIComponent.evaluateCondition("menu:none")) {
+      UIComponent.setCondition("menu:none");
+      unpause();
     }
   }
-  if(key === "F12") return true;
+  if (key === "F12") return true;
   return false; //Prevent any default behaviour
 }
 
-function pause(){
+function pause() {
   game.paused = true;
-  UIComponent.setCondition("paused:true")
+  UIComponent.setCondition("paused:true");
 }
-function unpause(){
+function unpause() {
   game.paused = false;
-  UIComponent.setCondition("paused:false")
+  UIComponent.setCondition("paused:false");
 }
-function togglePause(){
-  if(game.paused){
-    unpause()
+function togglePause() {
+  if (game.paused) {
+    unpause();
+  } else {
+    pause();
   }
-  else{
-    pause()
-  }
+}
+function mousePressed() {
+  return false;
 }

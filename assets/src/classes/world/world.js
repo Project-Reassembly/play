@@ -87,7 +87,13 @@ class World {
   }
   drawAll() {
     for (let chunk of this.chunks) {
-      if (World.isInRenderDistance(chunk, Chunk.size * Block.size, Chunk.size * Block.size)) {
+      if (
+        World.isInRenderDistance(
+          chunk,
+          Chunk.size * Block.size,
+          Chunk.size * Block.size
+        )
+      ) {
         chunk.draw();
       }
     }
@@ -132,13 +138,13 @@ class World {
           for (let y = -Chunk.size / 2; y < Chunk.size / 2 + 1; y++) {
             let nx = roundNum(
               noiseScale *
-                ((size/2 + i) * Chunk.size * Block.size +
+                ((size / 2 + i) * Chunk.size * Block.size +
                   (x * Block.size + Block.size / 2)),
               2
             );
             let ny = roundNum(
               noiseScale *
-                ((size/2 + j) * Chunk.size * Block.size +
+                ((size / 2 + j) * Chunk.size * Block.size +
                   (y * Block.size + Block.size / 2)),
               2
             );
@@ -162,44 +168,67 @@ class World {
       }
     }
   }
-  getNearestChunk(x, y){
+  getNearestChunk(x, y) {
     let tx = x / Block.size / Chunk.size,
-    ty = y / Block.size / Chunk.size
-    let nearest = null
-    let closestDist = Infinity
-    for(let chunk of this.chunks){
-      let dist = ((tx-chunk.x)**2 + (ty-chunk.y)**2)**0.5
-      if(dist < closestDist){
-        closestDist = dist
-        nearest = chunk
+      ty = y / Block.size / Chunk.size;
+    let nearest = null;
+    let closestDist = Infinity;
+    for (let chunk of this.chunks) {
+      let dist = ((tx - chunk.x) ** 2 + (ty - chunk.y) ** 2) ** 0.5;
+      if (dist < closestDist) {
+        closestDist = dist;
+        nearest = chunk;
       }
     }
-    return nearest
+    return nearest;
   }
-  getNearestTile(x, y){
-    let chunk = this.getNearestChunk(x, y)
-    let nearest = null
-    let closestDist = Infinity
-    for(let tile of chunk.tiles){
-      let dist = ((x-tile.x)**2 + (y-tile.y)**2)**0.5
-      if(dist < closestDist){
-        closestDist = dist
-        nearest = tile
+  getNearestTile(x, y) {
+    let chunk = this.getNearestChunk(x, y);
+    let nearest = null;
+    let closestDist = Infinity;
+    for (let tile of chunk.tiles) {
+      let dist = ((x - tile.x) ** 2 + (y - tile.y) ** 2) ** 0.5;
+      if (dist < closestDist) {
+        closestDist = dist;
+        nearest = tile;
       }
     }
-    return nearest
+    return nearest;
   }
-  getNearestBlock(x, y){
-    let chunk = this.getNearestChunk(x, y)
-    let nearest = null
-    let closestDist = Infinity
-    for(let tile of chunk.blocks){
-      let dist = ((x-tile.x)**2 + (y-tile.y)**2)**0.5
-      if(dist < closestDist){
-        closestDist = dist
-        nearest = tile
+  getNearestBlock(x, y) {
+    let chunk = this.getNearestChunk(x, y);
+    let nearest = null;
+    let closestDist = Infinity;
+    for (let tile of chunk.blocks) {
+      let dist = ((x - tile.x) ** 2 + (y - tile.y) ** 2) ** 0.5;
+      if (dist < closestDist) {
+        closestDist = dist;
+        nearest = tile;
       }
     }
-    return nearest
+    return nearest;
+  }
+  isPositionFree(x, y) {
+    let chunk = this.getNearestChunk(x, y);
+    for (let tile of chunk.blocks) {
+      if (Math.round(tile.x/Block.size - chunk.x) === Math.round(x/Block.size) && Math.round(tile.y/Block.size - chunk.y) === Math.round(y/Block.size)) return false;
+    }
+    return true;
+  }
+  placeAt(block, x, y){
+    let chunk = this.getNearestChunk(x, y);
+    chunk.removeBlock(Math.round(x/Block.size) - chunk.x * Chunk.size, Math.round(y/Block.size) - chunk.x * Chunk.size, "blocks")
+    return chunk.addBlock(block, Math.round(x/Block.size) - chunk.x * Chunk.size, Math.round(y/Block.size) - chunk.y * Chunk.size, "blocks")
+  }
+  break(x, y){
+    let chunk = this.getNearestChunk(x, y);
+    let broken = chunk.getBlock(Math.round(x/Block.size) - chunk.x * Chunk.size, Math.round(y/Block.size) - chunk.x * Chunk.size, "blocks")
+    chunk.removeBlock(Math.round(x/Block.size) - chunk.x * Chunk.size, Math.round(y/Block.size) - chunk.x * Chunk.size, "blocks")
+    return broken;
+  }
+  getBlock(x, y){
+    let chunk = this.getNearestChunk(x, y);
+    let block = chunk.getBlock(Math.round(x/Block.size) - chunk.x * Chunk.size, Math.round(y/Block.size) - chunk.x * Chunk.size, "blocks")
+    return block;
   }
 }

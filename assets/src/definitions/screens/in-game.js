@@ -71,6 +71,9 @@ createUIComponent(
   80,
   50,
   "reverse",
+  () => {
+    UIComponent.setCondition("menu:inventory")
+  },
 ).anchorBottom() 
 
 createUIImageComponent(
@@ -80,9 +83,7 @@ createUIImageComponent(
   0,
   50,
   50,
-  () => {
-    UIComponent.setCondition("menu:inventory")
-  },
+  null,
   "icon.chest",
   false,
   0.5
@@ -96,6 +97,9 @@ createUIComponent(
   80,
   50,
   "both",
+  () => {
+    
+  },
 ).anchorBottom() 
 
 createUIImageComponent(
@@ -105,9 +109,7 @@ createUIImageComponent(
   0,
   50,
   50,
-  () => {
-    
-  },
+  null,
   "icon.cross",
   false,
   0.5
@@ -158,6 +160,7 @@ createUIComponent(
   false,
   30
 )
+
 Object.defineProperty(createUIInventoryComponent(
   ["in-game"],
   ["menu:inventory"],
@@ -169,6 +172,56 @@ Object.defineProperty(createUIInventoryComponent(
 ), "entity", {
   get: () => game.player
 })
+
+createUIComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  -375,
+  -20,
+  100,
+  30,
+  "both",
+  () => {
+    game.player.autoStack()
+  },
+  "Stack All",
+  true,
+  15
+)
+
+createUIComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  -240,
+  -20,
+  150,
+  30,
+  "both",
+  () => {
+    game.player.sortByRegistryName()
+  },
+  "Sort By: Name",
+  true,
+  15
+)
+
+createUIComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  -80,
+  -20,
+  150,
+  30,
+  "both",
+  () => {
+    game.player.sortByCount()
+  },
+  "Sort By: Count",
+  true,
+  15
+)
+
+
 Object.defineProperty(createUIInventoryComponent(
   ["in-game"],
   ["menu:inventory"],
@@ -182,6 +235,8 @@ Object.defineProperty(createUIInventoryComponent(
 ), "entity", {
   get: () => game.player
 })
+
+
 Object.defineProperty(createUIInventoryComponent(
   ["in-game"],
   ["menu:none"],

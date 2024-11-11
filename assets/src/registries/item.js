@@ -9,3 +9,9 @@ Registry.items.add("wire", {
   description: "Basic wire,\nused for\ncircuitry and\nlow power\ntransmission.",
   image: "item.wire"
 })
+Registry.items.add("stone-block", {
+  type: "placeable",
+  name: "Stone Block",
+  description: "Block of solid\nstone.\nCould be used\nas defense.",
+  image: "block.stone"
+})

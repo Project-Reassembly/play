@@ -7,6 +7,10 @@ const ui = {
       y: mouseY - height / 2,
     };
   },
+  get mouseButton(){
+    if(!mouseButton) return "awaiting click"
+    return mouseButton===RIGHT?"right":mouseButton===LEFT?"left":mouseButton===MIDDLE?"middle":"unknown"
+  },
   camera: {
     x: 0,
     y: 0,

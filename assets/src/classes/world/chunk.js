@@ -27,6 +27,39 @@ class Chunk {
     this[layer].push(blockToAdd);
     return blockToAdd;
   }
+  /**
+   * Removes a block from the chunk.
+   * @param {number} xOffset X position offset from the chunk
+   * @param {number} yOffset Y position offset from the chunk
+   * @param {"blocks"|"tiles"} [layer="blocks"] Layer that blocks should be removed from.
+   * @returns {Boolean} True if the block was removed, false if not.
+   */
+  removeBlock(xOffset, yOffset, layer = "blocks"){
+    for(let index = 0; index < this[layer].length; index++){
+      let block = this[layer][index]
+      if(block.blockX === xOffset + this.x*Chunk.size && block.blockY === yOffset + this.y*Chunk.size){
+        this[layer].splice(index, 1)
+        return true;
+      }
+    }
+    return false;
+  }
+  /**
+   * Gets a block from the chunk.
+   * @param {number} xOffset X position offset from the chunk
+   * @param {number} yOffset Y position offset from the chunk
+   * @param {"blocks"|"tiles"} [layer="blocks"] Layer that blocks should be looked for in.
+   * @returns {Block} The block.
+   */
+  getBlock(xOffset, yOffset, layer = "blocks"){
+    for(let index = 0; index < this[layer].length; index++){
+      let block = this[layer][index]
+      if(block.blockX === xOffset + this.x*Chunk.size && block.blockY === yOffset + this.y*Chunk.size){
+        return block;
+      }
+    }
+    return null;
+  }
   tick(){
     for(let tile of this.tiles){
       tile.tick()

@@ -13,6 +13,7 @@ Registry.type.add("critical", CriticalBullet);
 Registry.type.add("point-bullet", PointBullet);
 //Items
 Registry.type.add("item", Item)
+Registry.type.add("placeable", PlaceableItem)
 Registry.type.add("itemstack", ItemStack)
 Registry.type.add("equippable", Equippable)
 Registry.type.add("weapon", Weapon)
