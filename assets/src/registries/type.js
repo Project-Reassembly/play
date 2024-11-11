@@ -3,6 +3,8 @@ Registry.type.add("object", Object)
 //Entities and parts
 Registry.type.add("component", Component)
 Registry.type.add("entity", Entity);
+Registry.type.add("inventory-entity", InventoryEntity);
+Registry.type.add("equipped-entity", EquippedEntity);
 //Projectiles
 Registry.type.add("bullet", Bullet);
 Registry.type.add("laser", LaserBullet);

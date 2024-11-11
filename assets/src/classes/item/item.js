@@ -3,6 +3,7 @@ class Item{
   get entity(){
     return this.holder
   }
+  image = "error"
   name = "<unnamed item>"
   description = "<no description>"
   rarity = 0

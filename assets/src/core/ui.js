@@ -3,14 +3,14 @@ const ui = {
   waitingForMouseUp: false,
   get mouse() {
     return {
-      x: mouseX - width/2,
-      y: mouseY - height/2,
+      x: mouseX - width / 2,
+      y: mouseY - height / 2,
     };
   },
   camera: {
     x: 0,
     y: 0,
-    rotation: 0
+    rotation: 0,
   },
   conditions: {},
   components: [],
@@ -34,11 +34,11 @@ class UIComponent {
     this.outlineColour = colour;
     return this;
   }
-  setTextColour(colour = null){
-    this.textColour = colour??[0, 0, 0];
+  setTextColour(colour = null) {
+    this.textColour = colour ?? [0, 0, 0];
     return this;
   }
-  
+
   alignLeft() {
     this.ox = this.x; //Save old x
     Object.defineProperty(this, "x", {
@@ -54,24 +54,24 @@ class UIComponent {
     return this;
   }
 
-  anchorLeft() {
+  anchorLeft(offset = 0) {
     return Object.defineProperty(this, "x", {
-      get: () => -width/2 + this.width/2,
+      get: () => -width / 2 + this.width / 2 + offset,
     });
   }
-  anchorRight() {
+  anchorRight(offset = 0) {
     return Object.defineProperty(this, "x", {
-      get: () => width/2 - this.width/2,
+      get: () => width / 2 - this.width / 2 - offset,
     });
   }
-  anchorBottom(){
+  anchorBottom(offset = 0) {
     return Object.defineProperty(this, "y", {
-      get: () => height/2 - this.height/2,
+      get: () => height / 2 - this.height / 2 - offset,
     });
   }
-  anchorTop(){
+  anchorTop(offset = 0) {
     return Object.defineProperty(this, "y", {
-      get: () => -height/2 + this.height/2,
+      get: () => -height / 2 + this.height / 2 + offset,
     });
   }
   //Evaluates property:value on game ui: input "slot:1" => if "slot" is "1" (or equivalent, e.g. 1) return true, else false
@@ -153,7 +153,7 @@ class UIComponent {
     this.bevel = bevel;
     this.press = onpress;
     this.interactive = !!onpress;
-    this.textColour = [0, 0, 0]
+    this.textColour = [0, 0, 0];
   }
   draw() {
     push();
@@ -162,55 +162,98 @@ class UIComponent {
     if (this.width > 0 && this.height > 0) {
       if (this.outline && this.outlineColour) {
         stroke(...this.outlineColour);
-        strokeWeight(5)
+        strokeWeight(5);
         if (this.emphasised) stroke(...this.emphasisColour);
       }
-      fill(...(this.backgroundColour??[95, 100, 100, 160]))
-      beginShape()
-      if(this.bevel === "none"){
-        vertex(this.x - this.width/2, this.y + this.height/2)
-        vertex(this.x + this.width/2, this.y + this.height/2)
-        vertex(this.x + this.width/2, this.y - this.height/2)
-        vertex(this.x - this.width/2, this.y - this.height/2)
+      fill(...(this.backgroundColour ?? [95, 100, 100, 160]));
+      beginShape();
+      if (this.bevel === "none") {
+        vertex(this.x - this.width / 2, this.y + this.height / 2);
+        vertex(this.x + this.width / 2, this.y + this.height / 2);
+        vertex(this.x + this.width / 2, this.y - this.height / 2);
+        vertex(this.x - this.width / 2, this.y - this.height / 2);
+      } else if (this.bevel === "both") {
+        vertex(
+          this.x - this.width / 2 - this.height / 2,
+          this.y + this.height / 2
+        );
+        vertex(
+          this.x + this.width / 2 - this.height / 2,
+          this.y + this.height / 2
+        );
+        vertex(
+          this.x + this.width / 2 + this.height / 2,
+          this.y - this.height / 2
+        );
+        vertex(
+          this.x - this.width / 2 + this.height / 2,
+          this.y - this.height / 2
+        );
+      } else if (this.bevel === "trapezium") {
+        vertex(
+          this.x - this.width / 2 - this.height / 2,
+          this.y + this.height / 2
+        );
+        vertex(
+          this.x + this.width / 2 + this.height / 2,
+          this.y + this.height / 2
+        );
+        vertex(
+          this.x + this.width / 2 - this.height / 2,
+          this.y - this.height / 2
+        );
+        vertex(
+          this.x - this.width / 2 + this.height / 2,
+          this.y - this.height / 2
+        );
+      } else if (this.bevel === "right") {
+        vertex(this.x - this.width / 2, this.y + this.height / 2);
+        vertex(
+          this.x + this.width / 2 - this.height / 2,
+          this.y + this.height / 2
+        );
+        vertex(
+          this.x + this.width / 2 + this.height / 2,
+          this.y - this.height / 2
+        );
+        vertex(this.x - this.width / 2, this.y - this.height / 2);
+      } else if (this.bevel === "left") {
+        vertex(
+          this.x - this.width / 2 - this.height / 2,
+          this.y + this.height / 2
+        );
+        vertex(this.x + this.width / 2, this.y + this.height / 2);
+        vertex(this.x + this.width / 2, this.y - this.height / 2);
+        vertex(
+          this.x - this.width / 2 + this.height / 2,
+          this.y - this.height / 2
+        );
+      } else if (this.bevel === "reverse") {
+        vertex(
+          this.x - this.width / 2 + this.height / 2,
+          this.y + this.height / 2
+        );
+        vertex(
+          this.x + this.width / 2 + this.height / 2,
+          this.y + this.height / 2
+        );
+        vertex(
+          this.x + this.width / 2 - this.height / 2,
+          this.y - this.height / 2
+        );
+        vertex(
+          this.x - this.width / 2 - this.height / 2,
+          this.y - this.height / 2
+        );
       }
-      else if(this.bevel === "both"){
-        vertex(this.x - this.width/2 - this.height/2, this.y + this.height/2)
-        vertex(this.x + this.width/2 - this.height/2, this.y + this.height/2)
-        vertex(this.x + this.width/2 + this.height/2, this.y - this.height/2)
-        vertex(this.x - this.width/2 + this.height/2, this.y - this.height/2)
-      }
-      else if(this.bevel === "trapezium"){
-        vertex(this.x - this.width/2 - this.height/2, this.y + this.height/2)
-        vertex(this.x + this.width/2 + this.height/2, this.y + this.height/2)
-        vertex(this.x + this.width/2 - this.height/2, this.y - this.height/2)
-        vertex(this.x - this.width/2 + this.height/2, this.y - this.height/2)
-      }
-      else if(this.bevel === "right"){
-        vertex(this.x - this.width/2, this.y + this.height/2)
-        vertex(this.x + this.width/2 - this.height/2, this.y + this.height/2)
-        vertex(this.x + this.width/2 + this.height/2, this.y - this.height/2)
-        vertex(this.x - this.width/2, this.y - this.height/2)
-      }
-      else if(this.bevel === "left"){
-        vertex(this.x - this.width/2 - this.height/2, this.y + this.height/2)
-        vertex(this.x + this.width/2, this.y + this.height/2)
-        vertex(this.x + this.width/2, this.y - this.height/2)
-        vertex(this.x - this.width/2 + this.height/2, this.y - this.height/2)
-      }
-      else if(this.bevel === "reverse"){
-        vertex(this.x - this.width/2 + this.height/2, this.y + this.height/2)
-        vertex(this.x + this.width/2 + this.height/2, this.y + this.height/2)
-        vertex(this.x + this.width/2 - this.height/2, this.y - this.height/2)
-        vertex(this.x - this.width/2 - this.height/2, this.y - this.height/2)
-      }
-      endShape(CLOSE)
+      endShape(CLOSE);
     }
     //Draw optional text
     noStroke();
     textFont(this.ocr ? fonts.ocr : fonts.darktech);
     if (this.ocr) {
       stroke(...this.textColour);
-      strokeWeight(this.textSize/15);
+      strokeWeight(this.textSize / 15);
     }
     fill(...this.textColour);
     textAlign(CENTER, CENTER);
@@ -271,9 +314,48 @@ class ImageUIComponent extends UIComponent {
     //Draw outline behind background
     if (this.outline) rect(this.x, this.y, this.width + 4, this.height + 4);
     //Draw image
-    if(this.pixelate) noSmooth()
-    drawImg(this.image, this.x, this.y, this.width * this.scale, this.height * this.scale);
+    if (this.pixelate) noSmooth();
+    drawImg(
+      this.image,
+      this.x,
+      this.y,
+      this.width * this.scale,
+      this.height * this.scale
+    );
     pop();
+  }
+}
+
+class InventoryUIComponent extends UIComponent {
+  entity = null;
+  rows = 5;
+  cols = null;
+  itemSize = 40;
+  invName = false;
+  constructor(x, y, entity, rows, cols, itemSize, invName = "inventory") {
+    super(x, y, 0, 0, "none", null, "", false, 0)
+    this.x = x;
+    this.y = y;
+    this.entity = entity;
+    this.rows = rows;
+    this.cols = cols;
+    this.itemSize = itemSize;
+    this.invName = invName;
+  }
+  draw() {
+    if (!this.entity) return;
+    if(!(this.entity instanceof InventoryEntity)) return;
+    InventoryEntity.drawInventory(
+      this.x,
+      this.y,
+      this.invName?this.entity[this.invName]:this.entity.inventory,
+      this.invName?this.entity[this.invName+"Size"]:this.entity.inventorySize,
+      this.rows,
+      this.cols,
+      this.itemSize,
+      this.outlineColour ?? [50, 50, 50],
+      this.backgroundColour ?? [95, 100, 100, 160]
+    );
   }
 }
 
@@ -298,7 +380,7 @@ class ImageContainer {
 }
 
 function drawImg(
-  img = images.env.error || "error",
+  img = "error",
   x,
   y,
   width,
@@ -307,6 +389,7 @@ function drawImg(
 ) {
   //Get from registry if it exists
   img = Registry.images.has(img) ? Registry.images.get(img) : img;
+  noSmooth()
   if (img instanceof ImageContainer) {
     if (!img.image) return; //Cancel if no image loaded yet
     image(img.image, x, y, width, height, ...otherParameters);
@@ -518,6 +601,35 @@ function createUIImageComponent(
   //Set conditional things
   component.acceptedScreens = screens;
   component.isInteractive = !!onpress;
+  //Add to game
+  ui.components.push(component);
+  return component;
+}
+
+function createUIInventoryComponent(
+  screens = [],
+  conditions = [],
+  x = 0,
+  y = 0,
+  entity = null,
+  rows = 5,
+  cols = null,
+  itemSize = 40,
+  invName = "inventory"
+) {
+  //Make component
+  const component = new InventoryUIComponent(
+    x,
+    y,
+    entity,
+    rows,
+    cols,
+    itemSize,
+    invName
+  );
+  component.conditions = conditions;
+  //Set conditional things
+  component.acceptedScreens = screens;
   //Add to game
   ui.components.push(component);
   return component;

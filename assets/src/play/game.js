@@ -145,7 +145,7 @@ function showMousePos() {
 
 function createPlayer() {
   let player = construct({
-    type: "Entity",
+    type: "equipped-entity",
     x: 0,
     y: 0,
     name: "player",
@@ -161,6 +161,10 @@ function createPlayer() {
     hitSize: 25, //Always at least half of the smallest dimension
     speed: 6,
   });
+  player.addItem("scrap")
+  player.addItem("scrap")
+  player.addItem("wire")
+  player.addItem("scrap")
   player.addToWorld(world);
   game.player = player;
   //Change to an accessor property

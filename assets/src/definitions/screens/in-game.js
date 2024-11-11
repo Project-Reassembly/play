@@ -158,3 +158,40 @@ createUIComponent(
   false,
   30
 )
+Object.defineProperty(createUIInventoryComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  -420,
+  -160,
+  null,
+  null,
+  10
+), "entity", {
+  get: () => game.player
+})
+Object.defineProperty(createUIInventoryComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  100,
+  -200,
+  null,
+  null,
+  5,
+  undefined,
+  "equipment"
+), "entity", {
+  get: () => game.player
+})
+Object.defineProperty(createUIInventoryComponent(
+  ["in-game"],
+  ["menu:none"],
+  -95,
+  250,
+  null,
+  null,
+  5,
+  undefined,
+  "equipment"
+), "entity", {
+  get: () => game.player
+}).anchorBottom(30)

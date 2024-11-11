@@ -1,4 +1,7 @@
 Registry.images.add("error", new ImageContainer("assets/textures/error.png"))
+Registry.images.add("item.wire", new ImageContainer("assets/textures/item/wire.png"))
+Registry.images.add("item.scrap", new ImageContainer("assets/textures/item/scrap.png"))
+Registry.images.add("item.plate", new ImageContainer("assets/textures/item/plate.png"))
 Registry.images.add("icon.chest", new ImageContainer("assets/textures/icon/chest.png"))
 Registry.images.add("icon.cross", new ImageContainer("assets/textures/icon/cross.png"))
 Registry.images.add("icon.interaction", new ImageContainer("assets/textures/icon/interaction.png"))
