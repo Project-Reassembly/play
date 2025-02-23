@@ -10,7 +10,8 @@ class InventoryEntity extends Entity {
   /**
    * Draws the items of an inventory.
    * @param {Array<ItemStack>} inventory Inventory to draw.
-   * @param {*} rows Number of rows to draw it in.
+   * @param {number} rows Number of rows to draw it in.
+   * @param {number|null} [cols=null] Number of columns to draw it in. Takes precedence over `rows`, if not `null`.
    */
   static drawInventory(
     x,
@@ -59,7 +60,10 @@ class InventoryEntity extends Entity {
               !ui.waitingForMouseUp
             ) {
               ui.waitingForMouseUp = true;
-              if (invitemstack.count + this.mouseItemStack.count <= invitem.stackSize) {
+              if (
+                invitemstack.count + this.mouseItemStack.count <=
+                invitem.stackSize
+              ) {
                 invitemstack.count += this.mouseItemStack.count;
                 this.mouseItemStack = ItemStack.EMPTY;
               } else {
@@ -71,7 +75,7 @@ class InventoryEntity extends Entity {
             this.tooltip = {
               item: invitem,
               count: invitemstack.count,
-              stackSize: invitem.stackSize
+              stackSize: invitem.stackSize,
             };
             noFill();
             stroke(0, 255, 255);
@@ -104,7 +108,7 @@ class InventoryEntity extends Entity {
           }
           drawImg(invitem.image, displayX, displayY, itemSize, itemSize);
           noStroke();
-          fill((invitemstack.count > invitem.stackSize)?"red":255);
+          fill(invitemstack.count > invitem.stackSize ? "red" : 255);
           textFont(fonts.ocr);
           textSize(20);
           push();
@@ -138,11 +142,15 @@ class InventoryEntity extends Entity {
         itemSize,
         itemSize
       );
+      push();
       noStroke();
-      fill(this.mouseItemStack.count > this.mouseItemStack.getItem().stackSize?"red":255);
+      fill(
+        this.mouseItemStack.count > this.mouseItemStack.getItem().stackSize
+          ? "red"
+          : 255
+      );
       textFont(fonts.ocr);
       textSize(20);
-      push();
       textAlign(RIGHT, BASELINE);
       text(
         this.mouseItemStack.count,
@@ -160,7 +168,9 @@ class InventoryEntity extends Entity {
     if (!this?.tooltip?.item) return;
     push();
     textAlign(LEFT);
-    textSize(20);
+    textFont(fonts.ocr);
+    textSize(33);
+    strokeWeight(2);
     let maxWidth = textWidth(
       this.tooltip.item.name + " (" + this.tooltip.count + ")"
     );
@@ -168,26 +178,38 @@ class InventoryEntity extends Entity {
     fill(...backgroundColour);
     strokeWeight(5);
     stroke(...outlineColour);
-    let header = this.tooltip.item.name + " (" + this.tooltip.count + "/" + this.tooltip.stackSize + ")";
+    let header =
+      this.tooltip.item.name +
+      " (" +
+      this.tooltip.count +
+      "/" +
+      this.tooltip.stackSize +
+      ")";
     let body = this.tooltip.item.description.split("\n");
     let descLines = this.tooltip.item.description.split("\n").length + 2;
     let lines = 2 + Math.ceil(descLines);
+    textSize(18);
+    for (let line of body) {
+      let lw = textWidth(line);
+      if (lw > maxWidth) maxWidth = lw + 12;
+    }
     let displayX = ui.mouse.x + maxWidth / 2;
-    textSize(15);
+    textSize(25);
     let displayY = ui.mouse.y + (lines * 12) / 2;
     if (displayY + lines * 6 > height / 2) {
       displayY = height / 2 - lines * 6;
     }
     rect(displayX, displayY, maxWidth, lines * 12);
     fill(Item.getColourFromRarity(this.tooltip.item.rarity, "dark"));
-    noStroke();
+    stroke(Item.getColourFromRarity(this.tooltip.item.rarity, "dark"));
+    strokeWeight(2);
     let textX = ui.mouse.x + 10;
-    let textY = displayY - lines * 6 + 20;
+    let textY = displayY - lines * 6 + 28;
     text(header, textX, textY);
     textSize(18);
+    noStroke();
     let start = 0;
     for (let line = 0; line < lines; line++) {
-      textFont(fonts.ocr);
       text(body[line], textX, textY + 15 + line * 15);
       start = line * (nameWidth / textWidth("a"));
     }
@@ -197,8 +219,8 @@ class InventoryEntity extends Entity {
     let i = 0;
     while (
       this.inventory[i] &&
-      ((this.inventory[i]?.item !== item ||
-        this.inventory[i].count >= this.inventory[i].getItem().stackSize) ||
+      (this.inventory[i]?.item !== item ||
+        this.inventory[i].count >= this.inventory[i].getItem().stackSize ||
         !stack) &&
       this.inventory[i]?.item !== "nothing" &&
       i < this.inventorySize
@@ -213,33 +235,73 @@ class InventoryEntity extends Entity {
       this.inventory[i] = new ItemStack(item, 1);
     }
   }
-  addItems(item, number, stack = true){
-    for(let i = 0; i < number; i++){
-      this.addItem(item, stack)
+  addItems(item, number, stack = true) {
+    for (let i = 0; i < number; i++) {
+      this.addItem(item, stack);
     }
   }
-  autoStack(){
-    let buffer = this.inventory.slice(0)
-    this.inventory.splice(0)
-    for(let item of buffer){
-      if(!item) continue;
-      if(item.item === "nothing") continue;
-      this.addItems(item.item, item.count, true)
+  autoStack() {
+    let buffer = this.inventory.slice(0);
+    this.inventory.splice(0);
+    for (let item of buffer) {
+      if (!item) continue;
+      if (item.item === "nothing") continue;
+      this.addItems(item.item, item.count, true);
     }
   }
-  cleanInventory(){
-    for(let index = 0; index < this.inventory.length; index++){
-      let item = this.inventory[index]
-      if(item && item instanceof ItemStack && item.item === "nothing") delete this.inventory[index]
+  cleanInventory() {
+    for (let index = 0; index < this.inventory.length; index++) {
+      let item = this.inventory[index];
+      if (item && item instanceof ItemStack && item.item === "nothing")
+        delete this.inventory[index];
     }
   }
-  sortByRegistryName(){
-    this.cleanInventory()
-    this.inventory.sort(dynamicSort("item"))
+  sortByRegistryName() {
+    this.cleanInventory();
+    this.inventory.sort(dynamicSort("item"));
   }
-  sortByCount(){
-    this.cleanInventory()
-    this.inventory.sort(dynamicSort("-count"))
+  sortByCount() {
+    this.cleanInventory();
+    this.inventory.sort(dynamicSort("-count"));
+  }
+  /** Picks up an item from an inventory slot, or puts it back. */
+  selectInventorySlot(index, pickup = !!keyIsDown(SHIFT)) {
+    let mIS = InventoryEntity.mouseItemStack ?? ItemStack.EMPTY;
+    let mISItem = mIS.getItem()
+    if(!this.inventory[index]) this.inventory[index] = ItemStack.EMPTY;
+    if (
+      mIS.item !== this.inventory[index].item
+    ) {
+      InventoryEntity.mouseItemStack = this.inventory[index];
+      this.inventory[index] = mIS;
+    } else if (mIS.count + this.inventory[index].count < mISItem.stackSize) {
+      //Transfer stack to correct place
+      if (pickup) {
+        mIS.count += this.inventory[index].count;
+        this.inventory[index] = ItemStack.EMPTY;
+      } else {
+        this.inventory[index].count += mIS.count;
+        InventoryEntity.mouseItemStack = ItemStack.EMPTY;
+      }
+    } else {
+      let transferAmount = 0
+      
+      if (pickup) {
+        transferAmount = mISItem.stackSize - mIS.count;
+
+        mIS.count += transferAmount;
+        this.inventory[index].count -= transferAmount;
+
+        if(this.inventory[index].count === 0) this.inventory[index] = ItemStack.EMPTY
+      } else {
+        transferAmount = mISItem.stackSize - this.inventory[index].count;
+
+        mIS.count -= transferAmount;
+        this.inventory[index].count += transferAmount;
+
+        if(mIS.count === 0) InventoryEntity.mouseItemStack = ItemStack.EMPTY
+      }
+    }
   }
 }
 
@@ -258,6 +320,50 @@ class EquippedEntity extends InventoryEntity {
   draw() {
     for (let component of this.components) {
       component.draw(this.x, this.y, this.direction);
+    }
+  }
+
+  /** Picks up an item from an inventory slot, or puts it back. */
+  selectInventorySlot(
+    index,
+    pickup = !!keyIsDown(SHIFT),
+    inventory = "inventory"
+  ) {
+    let mIS = InventoryEntity.mouseItemStack ?? ItemStack.EMPTY;
+    let mISItem = mIS.getItem()
+    if(!this[inventory][index]) this[inventory][index] = ItemStack.EMPTY;
+    if (
+      mIS.item !== this[inventory][index].item
+    ) {
+      InventoryEntity.mouseItemStack = this[inventory][index];
+      this[inventory][index] = mIS;
+    } else if (mIS.count + this[inventory][index].count < mISItem.stackSize) {
+      //Transfer stack to correct place
+      if (pickup) {
+        mIS.count += this[inventory][index].count;
+        this[inventory][index] = ItemStack.EMPTY;
+      } else {
+        this[inventory][index].count += mIS.count;
+        InventoryEntity.mouseItemStack = ItemStack.EMPTY;
+      }
+    } else {
+      let transferAmount = 0
+      
+      if (pickup) {
+        transferAmount = mISItem.stackSize - mIS.count;
+
+        mIS.count += transferAmount;
+        this[inventory][index].count -= transferAmount;
+
+        if(this[inventory][index].count === 0) this[inventory][index] = ItemStack.EMPTY
+      } else {
+        transferAmount = mISItem.stackSize - this[inventory][index].count;
+
+        mIS.count -= transferAmount;
+        this[inventory][index].count += transferAmount;
+
+        if(mIS.count === 0) InventoryEntity.mouseItemStack = ItemStack.EMPTY
+      }
     }
   }
 }

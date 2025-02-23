@@ -5,15 +5,15 @@ class Entity {
   health = 100;
   maxHealth = 100;
   name = "Entity";
+  /** @type {World} */
   world = null;
   resistances = [];
   //How the entity will be drawn
-  components = [
-
-  ]
+  components = [];
 
   hitSize = 100;
   speed = 10;
+  turnSpeed = 10;
   team = "enemy";
   target = { x: 0, y: 0 };
 
@@ -30,7 +30,8 @@ class Entity {
   }
   init() {
     this.maxHealth = this.health; //Stop part-damaged entities spawning
-    this.components = this.components.map(x => construct(x, "component"))
+    this.components = this.components.map((x) => construct(x, "component"));
+    this.baseSpeed = this.speed;
   }
   addToWorld(world) {
     world.entities.push(this);
@@ -98,7 +99,7 @@ class Entity {
             ); //Pass on collided entities to prevent infinite loop
           }
         }
-        if (hit) break; //If hit, stop moving
+        if (hit) break;
         else {
           //If not hit, move
           this.x += resolution * xmove; //Knock in the direction of impact
@@ -120,15 +121,27 @@ class Entity {
     }
   }
   tick() {
-    if(this.target){
-      this.rotateTowards(this.target.x, this.target.y, this.speed)
-    }
+    this.tickGroundEffects()
+    this.ai()
     this.checkBullets();
     this.tickStatuses();
   }
+  ai(){
+    if (this.target) {
+      this.rotateTowards(this.target.x, this.target.y, this.turnSpeed);
+    }
+  }
+  tickGroundEffects(){
+    let blockOn = this.world.getBlock(
+      Math.floor(this.x / Block.size),
+      Math.floor(this.y / Block.size),
+      "tiles"
+    );
+    if(blockOn instanceof Tile) this.speed = this.baseSpeed * blockOn.speedMultiplier;
+  }
   draw() {
-    for(let component of this.components){
-      component.draw(this.x, this.y, this.direction)
+    for (let component of this.components) {
+      component.draw(this.x, this.y, this.direction);
     }
   }
   collidesWith(obj) {
@@ -169,7 +182,7 @@ class Entity {
             );
           else this.damage(instance.type, instance.amount, bullet.entity);
         }
-        if(bullet.controlledKnockback){
+        if (bullet.controlledKnockback) {
           //Get direction to the target
           let direction = degrees(
             p5.Vector.sub(
@@ -178,9 +191,12 @@ class Entity {
             ).heading() //'A->B' = 'B' - 'A'
           );
           this.knock(bullet.knockback, direction, bullet.kineticKnockback); //Knock with default resolution
-        }
-        else{
-          this.knock(bullet.knockback, bullet.direction, bullet.kineticKnockback); //Knock with default resolution
+        } else {
+          this.knock(
+            bullet.knockback,
+            bullet.direction,
+            bullet.kineticKnockback
+          ); //Knock with default resolution
         }
         if (bullet.status !== "none") {
           this.applyStatus(bullet.status, bullet.statusDuration);

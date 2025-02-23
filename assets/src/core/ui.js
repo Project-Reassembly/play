@@ -18,6 +18,8 @@ const ui = {
   },
   conditions: {},
   components: [],
+  currentFPS: 0,
+  previousFPS: [],
 };
 
 class UIComponent {
@@ -363,6 +365,39 @@ class InventoryUIComponent extends UIComponent {
   }
 }
 
+class BlockInventoryUIComponent extends UIComponent {
+  block = null;
+  rows = 5;
+  cols = null;
+  itemSize = 40;
+  invName = false;
+  constructor(x, y, block, rows, cols, itemSize, invName = "inventory") {
+    super(x, y, 0, 0, "none", null, "", false, 0)
+    this.x = x;
+    this.y = y;
+    this.block = block;
+    this.rows = rows;
+    this.cols = cols;
+    this.itemSize = itemSize;
+    this.invName = invName;
+  }
+  draw() {
+    if (!this.block) return;
+    if(!(this.block instanceof Container)) return;
+    InventoryEntity.drawInventory(
+      this.x,
+      this.y,
+      this.invName?this.block[this.invName]:this.block.inventory,
+      this.invName?this.block[this.invName+"Size"]:this.block.inventorySize,
+      this.rows,
+      this.cols,
+      this.itemSize,
+      this.outlineColour ?? [50, 50, 50],
+      this.backgroundColour ?? [95, 100, 100, 160]
+    );
+  }
+}
+
 class ImageContainer {
   #image;
   #path;
@@ -615,17 +650,17 @@ function createUIInventoryComponent(
   conditions = [],
   x = 0,
   y = 0,
-  entity = null,
+  holder = null,
   rows = 5,
   cols = null,
   itemSize = 40,
   invName = "inventory"
 ) {
   //Make component
-  const component = new InventoryUIComponent(
+  const component = new (holder instanceof Container?BlockInventoryUIComponent:InventoryUIComponent)(
     x,
     y,
-    entity,
+    holder,
     rows,
     cols,
     itemSize,

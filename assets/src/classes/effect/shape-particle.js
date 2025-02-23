@@ -14,8 +14,7 @@ class ShapeParticle {
     sizeXTo,
     sizeYFrom,
     sizeYTo,
-    rotateSpeed,
-    moveWithBackground = false
+    rotateSpeed
   ) {
     this.x = x;
     this.y = y;
@@ -36,7 +35,6 @@ class ShapeParticle {
     this.sizeY = sizeYFrom;
     this.rotateSpeed = rotateSpeed;
     this.#rotOffset = 0;
-    this.moveWithBackground = moveWithBackground;
   }
   step(dt) {
     if (this.lifetime >= dt) {
@@ -49,11 +47,9 @@ class ShapeParticle {
         this.sizeYTo * (1 - this.calcLifeFract());
       //Move
       this.moveTo(
-        this.x + this.speed * p5.Vector.fromAngle(this.direction).x * dt,
-        this.y + this.speed * p5.Vector.fromAngle(this.direction).y * dt
+        this.x + this.speed * Vector.fromAngle(this.direction).x * dt,
+        this.y + this.speed * Vector.fromAngle(this.direction).y * dt
       );
-      //Move with BG
-      if (this.moveWithBackground) this.x -= game.player.speed;
       //Decelerate
       if (this.speed >= this.decel) {
         this.speed -= this.decel * dt;

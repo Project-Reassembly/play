@@ -1,11 +1,12 @@
 class World {
+  static size = 25;
   particles = [];
   /** @type {Array<Entity>} */
   entities = [];
   /** @type {Array<Bullet>} */
   bullets = [];
-  /** @type {Array<Chunk>} */
-  chunks = [];
+  /** @type {Array<Array<Chunk>>} */
+  chunks = null;
   name = "World";
   constructor(name = "World") {
     this.name = name;
@@ -25,11 +26,7 @@ class World {
     for (let entity of this.entities) {
       entity.tick();
     }
-    for (let chunk of this.chunks) {
-      if (World.isInRenderDistance(chunk, Chunk.size * Block.size)) {
-        chunk.tick();
-      }
-    }
+    iterate2DArray(this.chunks, (chunk) => chunk && chunk.tick());
   }
   #removeDead() {
     //THEN remove dead stuff
@@ -86,17 +83,17 @@ class World {
     //No search algorithms => faster
   }
   drawAll() {
-    for (let chunk of this.chunks) {
-      if (
+    iterate2DArray(
+      this.chunks,
+      (chunk) =>
+        chunk &&
         World.isInRenderDistance(
           chunk,
           Chunk.size * Block.size,
           Chunk.size * Block.size
-        )
-      ) {
-        chunk.draw();
-      }
-    }
+        ) &&
+        chunk.draw()
+    );
     for (let entity of this.entities) {
       if (!World.isInRenderDistance(entity)) continue;
       entity.draw();
@@ -123,28 +120,31 @@ class World {
    * @param {number} noiseScale Size of the noise function. Bigger makes more noisy.
    * @param {number} noiseLevel Vertical scale of the noise. Too low, and everything's water.
    */
-  generateTiles(size, noiseScale = 1, noiseLevel = 255) {
-    this.chunks.splice(0);
+  async generateTiles(noiseScale = 1, noiseLevel = 255) {
+    //Create grid
+    this.chunks = create2DArray(World.size);
     //Procedural ground gen
     noiseScale *= 0.001;
-    for (let i = -size / 2; i < size / 2; i++) {
+    for (let i = 0; i < World.size; i++) {
+      //Each row
       //Chunk coords
-      for (let j = -size / 2; j < size / 2; j++) {
+      for (let j = 0; j < World.size; j++) {
         let newChunk = new Chunk();
-        newChunk.x = i;
-        newChunk.y = j;
-        for (let x = -Chunk.size / 2; x < Chunk.size / 2 + 1; x++) {
+        newChunk.world = this;
+        newChunk.x = Math.round(i);
+        newChunk.y = Math.round(j);
+        for (let x = 0; x < Chunk.size; x++) {
           //Block coords
-          for (let y = -Chunk.size / 2; y < Chunk.size / 2 + 1; y++) {
+          for (let y = 0; y < Chunk.size; y++) {
             let nx = roundNum(
               noiseScale *
-                ((size / 2 + i) * Chunk.size * Block.size +
+                ((World.size / 2 + i) * Chunk.size * Block.size +
                   (x * Block.size + Block.size / 2)),
               2
             );
             let ny = roundNum(
               noiseScale *
-                ((size / 2 + j) * Chunk.size * Block.size +
+                ((World.size / 2 + j) * Chunk.size * Block.size +
                   (y * Block.size + Block.size / 2)),
               2
             );
@@ -164,71 +164,51 @@ class World {
             }
           }
         }
-        this.chunks.push(newChunk);
+        this.chunks[j][i] = newChunk;
       }
     }
-  }
-  getNearestChunk(x, y) {
-    let tx = x / Block.size / Chunk.size,
-      ty = y / Block.size / Chunk.size;
-    let nearest = null;
-    let closestDist = Infinity;
-    for (let chunk of this.chunks) {
-      let dist = ((tx - chunk.x) ** 2 + (ty - chunk.y) ** 2) ** 0.5;
-      if (dist < closestDist) {
-        closestDist = dist;
-        nearest = chunk;
-      }
-    }
-    return nearest;
-  }
-  getNearestTile(x, y) {
-    let chunk = this.getNearestChunk(x, y);
-    let nearest = null;
-    let closestDist = Infinity;
-    for (let tile of chunk.tiles) {
-      let dist = ((x - tile.x) ** 2 + (y - tile.y) ** 2) ** 0.5;
-      if (dist < closestDist) {
-        closestDist = dist;
-        nearest = tile;
-      }
-    }
-    return nearest;
-  }
-  getNearestBlock(x, y) {
-    let chunk = this.getNearestChunk(x, y);
-    let nearest = null;
-    let closestDist = Infinity;
-    for (let tile of chunk.blocks) {
-      let dist = ((x - tile.x) ** 2 + (y - tile.y) ** 2) ** 0.5;
-      if (dist < closestDist) {
-        closestDist = dist;
-        nearest = tile;
-      }
-    }
-    return nearest;
   }
   isPositionFree(x, y) {
-    let chunk = this.getNearestChunk(x, y);
-    for (let tile of chunk.blocks) {
-      if (Math.round(tile.x/Block.size - chunk.x) === Math.round(x/Block.size) && Math.round(tile.y/Block.size - chunk.y) === Math.round(y/Block.size)) return false;
-    }
-    return true;
+    let cx = Math.floor(x / Chunk.size),
+      bx = x % Chunk.size;
+    let cy = Math.floor(y / Chunk.size),
+      by = y % Chunk.size;
+    let chunk = this.chunks[cy][cx];
+    if (!chunk)
+      throw new Error("There is no chunk at (chunk) x:" + cx + ", y:" + cy);
+    return chunk.getBlock(bx, by, "blocks") === null;
   }
-  placeAt(block, x, y){
-    let chunk = this.getNearestChunk(x, y);
-    chunk.removeBlock(Math.round(x/Block.size) - chunk.x * Chunk.size, Math.round(y/Block.size) - chunk.x * Chunk.size, "blocks")
-    return chunk.addBlock(block, Math.round(x/Block.size) - chunk.x * Chunk.size, Math.round(y/Block.size) - chunk.y * Chunk.size, "blocks")
+  placeAt(block, x, y) {
+    let cx = Math.floor(x / Chunk.size),
+      bx = x % Chunk.size;
+    let cy = Math.floor(y / Chunk.size),
+      by = y % Chunk.size;
+    let chunk = this.chunks[cy][cx];
+    if (!chunk)
+      throw new Error("There is no chunk at (chunk) x:" + cx + ", y:" + cy);
+    chunk.addBlock(block, bx, by, "blocks");
   }
-  break(x, y){
-    let chunk = this.getNearestChunk(x, y);
-    let broken = chunk.getBlock(Math.round(x/Block.size) - chunk.x * Chunk.size, Math.round(y/Block.size) - chunk.x * Chunk.size, "blocks")
-    chunk.removeBlock(Math.round(x/Block.size) - chunk.x * Chunk.size, Math.round(y/Block.size) - chunk.x * Chunk.size, "blocks")
+  break(x, y) {
+    let cx = Math.floor(x / Chunk.size),
+      bx = x % Chunk.size;
+    let cy = Math.floor(y / Chunk.size),
+      by = y % Chunk.size;
+    let chunk = this.chunks[cy][cx];
+    if (!chunk)
+      throw new Error("There is no chunk at (chunk) x:" + cx + ", y:" + cy);
+    let broken = chunk.getBlock(bx, by, "blocks");
+    chunk.removeBlock(bx, by, "blocks");
     return broken;
   }
-  getBlock(x, y){
-    let chunk = this.getNearestChunk(x, y);
-    let block = chunk.getBlock(Math.round(x/Block.size) - chunk.x * Chunk.size, Math.round(y/Block.size) - chunk.x * Chunk.size, "blocks")
+  getBlock(x, y, layer = "blocks") {
+    let cx = Math.floor(x / Chunk.size),
+      bx = x % Chunk.size;
+    let cy = Math.floor(y / Chunk.size),
+      by = y % Chunk.size;
+    let chunk = this.chunks[cy][cx];
+    if (!chunk)
+      throw new Error("There is no chunk at (chunk) x:" + cx + ", y:" + cy);
+    let block = chunk.getBlock(bx, by, layer);
     return block;
   }
 }

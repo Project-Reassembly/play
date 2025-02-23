@@ -22,3 +22,6 @@ Registry.type.add("world", World)
 Registry.type.add("chunk", Chunk)
 //Block
 Registry.type.add("block", Block)
+Registry.type.add("tile", Tile)
+Registry.type.add("container", Container)
+Registry.type.add("crafter", Crafter)

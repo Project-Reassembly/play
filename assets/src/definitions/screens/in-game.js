@@ -1,3 +1,9 @@
+//##############################################################
+
+//                        INDICATORS
+
+//##############################################################
+UIComponent.setCondition("paused:false");
 Object.defineProperty(
   createUIComponent(
     ["in-game"],
@@ -29,9 +35,8 @@ Object.defineProperties(
     true,
     20
   ).anchorRight(),
-  { y: { get: () => -height / 2 + 50 } , width: {get: () => width/2 - 75}}
+  { y: { get: () => -height / 2 + 50 }, width: { get: () => width / 2 - 75 } }
 );
-UIComponent.setCondition("paused:false")
 Object.defineProperties(
   createUIComponent(
     ["in-game"],
@@ -46,12 +51,38 @@ Object.defineProperties(
     true,
     20
   ).anchorLeft(),
-  { y: { get: () => -height / 2 + 50 } , width: {get: () => width/2 - 75}}
+  { y: { get: () => -height / 2 + 50 }, width: { get: () => width / 2 - 75 } }
 );
-UIComponent.setCondition("menu:none")
+//FPS
+Object.defineProperty(
+  createUIComponent(
+    ["in-game"],
+    [],
+    0,
+    30,
+    150,
+    60,
+    "right",
+    null,
+    "[FPS]",
+    true,
+    30
+  ),
+  "text",
+  { get: () => Math.round(ui.currentFPS) + " fps" }
+)
+  .alignLeft()
+  .anchorLeft()
+  .anchorTop();
+//##############################################################
+
+//                          HOTBAR
+
+//##############################################################
+UIComponent.setCondition("menu:none");
 createUIComponent(
   ["in-game"],
-  ["menu:none"],
+  [],
   0,
   0,
   500,
@@ -61,24 +92,15 @@ createUIComponent(
   "",
   true,
   20
-).anchorBottom()
+).anchorBottom();
 
-createUIComponent(
-  ["in-game"],
-  ["menu:none"],
-  295,
-  0,
-  80,
-  50,
-  "reverse",
-  () => {
-    UIComponent.setCondition("menu:inventory")
-  },
-).anchorBottom() 
+createUIComponent(["in-game"], [], 295, 0, 80, 50, "reverse", () => {
+  UIComponent.setCondition("menu:inventory");
+}).anchorBottom();
 
 createUIImageComponent(
   ["in-game"],
-  ["menu:none"],
+  [],
   295,
   0,
   50,
@@ -87,24 +109,22 @@ createUIImageComponent(
   "icon.chest",
   false,
   0.5
-).anchorBottom()
+).anchorBottom();
 
 createUIComponent(
   ["in-game"],
-  ["menu:none"],
+  [],
   -295,
   0,
   80,
   50,
   "both",
-  () => {
-    
-  },
-).anchorBottom() 
+  () => {}
+).anchorBottom();
 
 createUIImageComponent(
   ["in-game"],
-  ["menu:none"],
+  [],
   -295,
   0,
   50,
@@ -113,25 +133,54 @@ createUIImageComponent(
   "icon.cross",
   false,
   0.5
-).anchorBottom()
+).anchorBottom();
 
-createUIComponent(
-  ["in-game"],
-  ["menu:inventory"],
-  -200,
-  0,
-  500,
-  400
-)
-//Inventory
-createUIComponent(
-  ["in-game"],
-  ["menu:inventory"],
-  200,
-  0,
-  300,
-  500
-)
+Object.defineProperty(
+  createUIInventoryComponent(
+    ["in-game"],
+    [],
+    -95,
+    250,
+    null,
+    null,
+    5,
+    undefined,
+    "equipment"
+  ),
+  "entity",
+  {
+    get: () => game.player,
+  }
+).anchorBottom(30);
+
+Object.defineProperties(
+  createUIInventoryComponent(
+    ["in-game"],
+    [],
+    -35,
+    200,
+    new Container(),
+    null,
+    2,
+    undefined
+  ),
+  {
+    block: {
+      get: () => Container.selectedBlock,
+    },
+    x: {
+      get: () => 24*Container.selectedBlock?.inventorySize ?? 0
+    }
+  }
+).anchorBottom(95);
+
+//##############################################################
+
+//                        INVENTORY
+
+//##############################################################
+createUIComponent(["in-game"], ["menu:inventory"], -200, 0, 500, 400);
+createUIComponent(["in-game"], ["menu:inventory"], 200, 0, 300, 500);
 createUIComponent(
   ["in-game"],
   ["menu:inventory"],
@@ -141,12 +190,12 @@ createUIComponent(
   50,
   "none",
   () => {
-    UIComponent.setCondition("menu:none")
+    UIComponent.setCondition("menu:none");
   },
   "X",
   false,
   40
-)
+);
 createUIComponent(
   ["in-game"],
   ["menu:inventory"],
@@ -159,19 +208,23 @@ createUIComponent(
   "Inventory",
   false,
   30
-)
+);
 
-Object.defineProperty(createUIInventoryComponent(
-  ["in-game"],
-  ["menu:inventory"],
-  -420,
-  -160,
-  null,
-  null,
-  10
-), "entity", {
-  get: () => game.player
-})
+Object.defineProperty(
+  createUIInventoryComponent(
+    ["in-game"],
+    ["menu:inventory"],
+    -420,
+    -160,
+    null,
+    null,
+    10
+  ),
+  "entity",
+  {
+    get: () => game.player,
+  }
+);
 
 createUIComponent(
   ["in-game"],
@@ -182,12 +235,12 @@ createUIComponent(
   30,
   "both",
   () => {
-    game.player.autoStack()
+    game.player.autoStack();
   },
   "Stack All",
   true,
   15
-)
+);
 
 createUIComponent(
   ["in-game"],
@@ -198,12 +251,12 @@ createUIComponent(
   30,
   "both",
   () => {
-    game.player.sortByRegistryName()
+    game.player.sortByRegistryName();
   },
   "Sort By: Name",
   true,
   15
-)
+);
 
 createUIComponent(
   ["in-game"],
@@ -214,39 +267,27 @@ createUIComponent(
   30,
   "both",
   () => {
-    game.player.sortByCount()
+    game.player.sortByCount();
   },
   "Sort By: Count",
   true,
   15
-)
+);
 
-
-Object.defineProperty(createUIInventoryComponent(
-  ["in-game"],
-  ["menu:inventory"],
-  100,
-  -200,
-  null,
-  null,
-  5,
-  undefined,
-  "equipment"
-), "entity", {
-  get: () => game.player
-})
-
-
-Object.defineProperty(createUIInventoryComponent(
-  ["in-game"],
-  ["menu:none"],
-  -95,
-  250,
-  null,
-  null,
-  5,
-  undefined,
-  "equipment"
-), "entity", {
-  get: () => game.player
-}).anchorBottom(30)
+Object.defineProperty(
+  createUIInventoryComponent(
+    ["in-game"],
+    ["menu:inventory"],
+    100,
+    -200,
+    null,
+    null,
+    5,
+    undefined,
+    "equipment"
+  ),
+  "entity",
+  {
+    get: () => game.player,
+  }
+);
