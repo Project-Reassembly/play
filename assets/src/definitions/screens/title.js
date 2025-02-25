@@ -7,7 +7,6 @@ createUIComponent(
   50,
   "none",
   () => {
-    createPlayer()
     ui.menuState = "in-game"
   },
   "Play",

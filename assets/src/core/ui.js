@@ -7,14 +7,21 @@ const ui = {
       y: mouseY - height / 2,
     };
   },
-  get mouseButton(){
-    if(!mouseButton) return "awaiting click"
-    return mouseButton===RIGHT?"right":mouseButton===LEFT?"left":mouseButton===MIDDLE?"middle":"unknown"
+  get mouseButton() {
+    if (!mouseButton) return "awaiting click";
+    return mouseButton === RIGHT
+      ? "right"
+      : mouseButton === LEFT
+      ? "left"
+      : mouseButton === MIDDLE
+      ? "middle"
+      : "unknown";
   },
   camera: {
     x: 0,
     y: 0,
     rotation: 0,
+    zoom: 1,
   },
   conditions: {},
   components: [],
@@ -333,13 +340,14 @@ class ImageUIComponent extends UIComponent {
 }
 
 class InventoryUIComponent extends UIComponent {
+  /** @type {InventoryEntity} */
   entity = null;
   rows = 5;
   cols = null;
   itemSize = 40;
   invName = false;
   constructor(x, y, entity, rows, cols, itemSize, invName = "inventory") {
-    super(x, y, 0, 0, "none", null, "", false, 0)
+    super(x, y, 0, 0, "none", null, "", false, 0);
     this.x = x;
     this.y = y;
     this.entity = entity;
@@ -350,29 +358,32 @@ class InventoryUIComponent extends UIComponent {
   }
   draw() {
     if (!this.entity) return;
-    if(!(this.entity instanceof InventoryEntity)) return;
-    InventoryEntity.drawInventory(
-      this.x,
-      this.y,
-      this.invName?this.entity[this.invName]:this.entity.inventory,
-      this.invName?this.entity[this.invName+"Size"]:this.entity.inventorySize,
-      this.rows,
-      this.cols,
-      this.itemSize,
-      this.outlineColour ?? [50, 50, 50],
-      this.backgroundColour ?? [95, 100, 100, 160]
-    );
+    if (this.entity instanceof InventoryEntity) {
+      this.entity[this.invName].draw(
+        this.x,
+        this.y,
+        this.rows,
+        this.cols,
+        this.itemSize,
+        this.outlineColour ?? [50, 50, 50],
+        this.backgroundColour ?? [95, 100, 100, 160]
+      );
+    }
   }
 }
 
 class BlockInventoryUIComponent extends UIComponent {
+  invert() {
+    this.inverted = !this.inverted;
+  }
+  /**@type {Container} */
   block = null;
   rows = 5;
   cols = null;
   itemSize = 40;
   invName = false;
   constructor(x, y, block, rows, cols, itemSize, invName = "inventory") {
-    super(x, y, 0, 0, "none", null, "", false, 0)
+    super(x, y, 0, 0, "none", null, "", false, 0);
     this.x = x;
     this.y = y;
     this.block = block;
@@ -383,17 +394,16 @@ class BlockInventoryUIComponent extends UIComponent {
   }
   draw() {
     if (!this.block) return;
-    if(!(this.block instanceof Container)) return;
-    InventoryEntity.drawInventory(
+    if (!(this.block instanceof Container)) return;
+    this.block.inventory.draw(
       this.x,
       this.y,
-      this.invName?this.block[this.invName]:this.block.inventory,
-      this.invName?this.block[this.invName+"Size"]:this.block.inventorySize,
       this.rows,
       this.cols,
       this.itemSize,
       this.outlineColour ?? [50, 50, 50],
-      this.backgroundColour ?? [95, 100, 100, 160]
+      this.backgroundColour ?? [95, 100, 100, 160],
+      this.inverted
     );
   }
 }
@@ -428,7 +438,7 @@ function drawImg(
 ) {
   //Get from registry if it exists
   img = Registry.images.has(img) ? Registry.images.get(img) : img;
-  noSmooth()
+  noSmooth();
   if (img instanceof ImageContainer) {
     if (!img.image) return; //Cancel if no image loaded yet
     image(img.image, x, y, width, height, ...otherParameters);
@@ -657,15 +667,11 @@ function createUIInventoryComponent(
   invName = "inventory"
 ) {
   //Make component
-  const component = new (holder instanceof Container?BlockInventoryUIComponent:InventoryUIComponent)(
-    x,
-    y,
-    holder,
-    rows,
-    cols,
-    itemSize,
-    invName
-  );
+  const component = new (
+    holder instanceof Container
+      ? BlockInventoryUIComponent
+      : InventoryUIComponent
+  )(x, y, holder, rows, cols, itemSize, invName);
   component.conditions = conditions;
   //Set conditional things
   component.acceptedScreens = screens;

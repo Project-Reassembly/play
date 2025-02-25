@@ -59,14 +59,14 @@ Object.defineProperty(
     ["in-game"],
     [],
     0,
+    20,
+    75,
     30,
-    150,
-    60,
     "right",
     null,
     "[FPS]",
     true,
-    30
+    15
   ),
   "text",
   { get: () => Math.round(ui.currentFPS) + " fps" }
@@ -161,7 +161,7 @@ Object.defineProperties(
     200,
     new Container(),
     null,
-    2,
+    10,
     undefined
   ),
   {
@@ -169,10 +169,35 @@ Object.defineProperties(
       get: () => Container.selectedBlock,
     },
     x: {
-      get: () => 24*Container.selectedBlock?.inventorySize ?? 0
+      get: () => -width/2 + 75,
+    },
+    cols: {
+      get: () => Math.floor(width/100) - 1
     }
   }
-).anchorBottom(95);
+).anchorBottom(95).invert();
+Object.defineProperties(
+  createUIImageComponent(
+    ["in-game"],
+    [],
+    -35,
+    200,
+    40,
+    40,
+    null,
+    "error",
+    false,
+    1
+  ),
+  {
+    image: {
+      get: () => Container.selectedBlock?.image || "icon.cross",
+    },
+    x: {
+      get: () => -width/2 + 25,
+    },
+  }
+).anchorBottom(75);
 
 //##############################################################
 
@@ -235,7 +260,7 @@ createUIComponent(
   30,
   "both",
   () => {
-    game.player.autoStack();
+    game.player.inventory.autoStack();
   },
   "Stack All",
   true,
@@ -251,7 +276,7 @@ createUIComponent(
   30,
   "both",
   () => {
-    game.player.sortByRegistryName();
+    game.player.inventory.sortByRegistryName();
   },
   "Sort By: Name",
   true,
@@ -267,7 +292,7 @@ createUIComponent(
   30,
   "both",
   () => {
-    game.player.sortByCount();
+    game.player.inventory.sortByCount();
   },
   "Sort By: Count",
   true,

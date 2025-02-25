@@ -1,5 +1,7 @@
 class World {
-  static size = 25;
+  static size = 64;
+  /** The distance in chunks **outside the render distance** that will still tick. */
+  static simulationDistance = 5;
   particles = [];
   /** @type {Array<Entity>} */
   entities = [];
@@ -8,6 +10,11 @@ class World {
   /** @type {Array<Array<Chunk>>} */
   chunks = null;
   name = "World";
+  gen = {
+    started: false,
+    progress: 0,
+    stage: "tiles",
+  };
   constructor(name = "World") {
     this.name = name;
   }
@@ -26,7 +33,20 @@ class World {
     for (let entity of this.entities) {
       entity.tick();
     }
-    iterate2DArray(this.chunks, (chunk) => chunk && chunk.tick());
+    //Only tick simulated chunks
+    iterate2DArray(
+      this.chunks,
+      (chunk) =>
+        chunk &&
+        World.isInRenderDistance(
+          chunk,
+          Chunk.size * Block.size,
+          0.5 + World.simulationDistance,
+          0.5,
+          0.5
+        ) &&
+        chunk.tick()
+    );
   }
   #removeDead() {
     //THEN remove dead stuff
@@ -90,7 +110,9 @@ class World {
         World.isInRenderDistance(
           chunk,
           Chunk.size * Block.size,
-          Chunk.size * Block.size
+          0.5,
+          0.5,
+          0.5
         ) &&
         chunk.draw()
     );
@@ -107,22 +129,48 @@ class World {
       particle.draw();
     }
   }
-  static isInRenderDistance(thing, posScale = 1, padding = 0) {
-    if (thing.x * posScale < ui.camera.x - width / 2 - padding) return false;
-    if (thing.x * posScale > ui.camera.x + width / 2 + padding) return false;
-    if (thing.y * posScale < ui.camera.y - height / 2 - padding) return false;
-    if (thing.y * posScale > ui.camera.y + height / 2 + padding) return false;
+  static isInRenderDistance(
+    thing,
+    posScale = 1,
+    padding = 0,
+    xoffset = 0,
+    yoffset = 0
+  ) {
+    if (
+      (thing.x + xoffset) * posScale <
+      ui.camera.x - width / 2 - padding * posScale
+    )
+      return false;
+    if (
+      (thing.x + xoffset) * posScale >
+      ui.camera.x + width / 2 + padding * posScale
+    )
+      return false;
+    if (
+      (thing.y + yoffset) * posScale <
+      ui.camera.y - height / 2 - padding * posScale
+    )
+      return false;
+    if (
+      (thing.y + yoffset) * posScale >
+      ui.camera.y + height / 2 + padding * posScale
+    )
+      return false;
     return true;
   }
   /**
    * Creates the tiles of the world. Deletes all existing chunks first.
+   * @deprecated
    * @param {number} size Size of the world in chunks.
    * @param {number} noiseScale Size of the noise function. Bigger makes more noisy.
    * @param {number} noiseLevel Vertical scale of the noise. Too low, and everything's water.
    */
-  async generateTiles(noiseScale = 1, noiseLevel = 255) {
+  async generateTiles(noiseScale = 2, noiseLevel = 255) {
+    this.gen.started = true;
+    this.gen.stage = "grid";
     //Create grid
     this.chunks = create2DArray(World.size);
+    this.gen.stage = "tiles";
     //Procedural ground gen
     noiseScale *= 0.001;
     for (let i = 0; i < World.size; i++) {
@@ -165,30 +213,39 @@ class World {
           }
         }
         this.chunks[j][i] = newChunk;
+        this.gen.progress++;
       }
     }
   }
+  prepareForGeneration(){
+    this.chunks = create2DArray(World.size);
+  }
   isPositionFree(x, y) {
+    if (!this.chunks) throw new Error("The world has not been generated!");
     let cx = Math.floor(x / Chunk.size),
       bx = x % Chunk.size;
     let cy = Math.floor(y / Chunk.size),
       by = y % Chunk.size;
-    let chunk = this.chunks[cy][cx];
-    if (!chunk)
-      throw new Error("There is no chunk at (chunk) x:" + cx + ", y:" + cy);
+    let cr = this.chunks[cy];
+    if (!cr) return false;
+    let chunk = cr[cx];
+    if (!chunk) return false;
     return chunk.getBlock(bx, by, "blocks") === null;
   }
   placeAt(block, x, y) {
+    if (!this.chunks) throw new Error("The world has not been generated!");
     let cx = Math.floor(x / Chunk.size),
       bx = x % Chunk.size;
     let cy = Math.floor(y / Chunk.size),
       by = y % Chunk.size;
-    let chunk = this.chunks[cy][cx];
+    let cr = this.chunks[cy];
+    let chunk = cr ? cr[cx] : null;
     if (!chunk)
       throw new Error("There is no chunk at (chunk) x:" + cx + ", y:" + cy);
     chunk.addBlock(block, bx, by, "blocks");
   }
   break(x, y) {
+    if (!this.chunks) throw new Error("The world has not been generated!");
     let cx = Math.floor(x / Chunk.size),
       bx = x % Chunk.size;
     let cy = Math.floor(y / Chunk.size),
@@ -200,15 +257,31 @@ class World {
     chunk.removeBlock(bx, by, "blocks");
     return broken;
   }
+  /**@returns `undefined` if no chunk, `null` if no block, or a `Block` otherwise. */
   getBlock(x, y, layer = "blocks") {
-    let cx = Math.floor(x / Chunk.size),
-      bx = x % Chunk.size;
-    let cy = Math.floor(y / Chunk.size),
-      by = y % Chunk.size;
-    let chunk = this.chunks[cy][cx];
-    if (!chunk)
-      throw new Error("There is no chunk at (chunk) x:" + cx + ", y:" + cy);
-    let block = chunk.getBlock(bx, by, layer);
+    if (!this.chunks) throw new Error("The world has not been generated!");
+    try {
+      let cx = Math.floor(x / Chunk.size),
+        bx = x % Chunk.size;
+      let cy = Math.floor(y / Chunk.size),
+        by = y % Chunk.size;
+      let cr = this.chunks[cy];
+      if (!cr) return;
+      let chunk = cr[cx];
+      if (!chunk) return;
+      let block = chunk.getBlock(bx, by, layer);
+      return block;
+    } catch (error) {
+      return null;
+    }
+  }
+  /** Similar to `getBlock`, but will always return a block, or throw an error otherwise. */
+  getBlockErroring(x, y, layer = "blocks") {
+    let block = this.getBlock(x, y, layer);
+    if (block === undefined)
+      throw new Error("There is no chunk at (block) x:" + x + ", y:" + y);
+    if (block === null)
+      throw new Error("There is no block at x:" + x + ", y:" + y);
     return block;
   }
 }

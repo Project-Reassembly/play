@@ -1,5 +1,12 @@
 /** 16x16 Block group for ticking and rendering.*/
 class Chunk {
+  /**@readonly Holds values for possible chunk layers. */
+  static Layer = {
+    /**@readonly*/
+    blocks: "blocks",
+    /**@readonly*/
+    tiles: "tiles",
+  };
   static size = 16;
   tiles = create2DArray(Chunk.size);
   blocks = create2DArray(Chunk.size);
@@ -13,10 +20,10 @@ class Chunk {
    * @param {string} block Registry name of the block
    * @param {number} x X position offset from the chunk
    * @param {number} y Y position offset from the chunk
-   * @param {"blocks"|"tiles"} [layer="blocks"] Layer that blocks should be placed on.
+   * @param {keyof Chunk.Layer} layer Layer that blocks should be placed on.
    * @returns {Block} Block added.
    */
-  addBlock(block, x = 0, y = 0, layer = "blocks") {
+  addBlock(block, x = 0, y = 0, layer = Chunk.Layer.blocks) {
     if (
       this[layer] === undefined ||
       this[layer][y] === undefined ||
@@ -36,10 +43,10 @@ class Chunk {
    * Removes a block from the chunk.
    * @param {number} x X position offset from the chunk
    * @param {number} y Y position offset from the chunk
-   * @param {"blocks"|"tiles"} [layer="blocks"] Layer that blocks should be removed from.
+   * @param {keyof Chunk.Layer} layer Layer that blocks should be removed from.
    * @returns {Boolean} True if the block was removed, false if not.
    */
-  removeBlock(x, y, layer = "blocks") {
+  removeBlock(x, y, layer = Chunk.Layer.blocks) {
     if (
       this[layer] === undefined ||
       this[layer][y] === undefined ||
@@ -58,10 +65,10 @@ class Chunk {
    * Gets a block from the chunk.
    * @param {number} x X position offset from the chunk
    * @param {number} y Y position offset from the chunk
-   * @param {"blocks"|"tiles"} [layer="blocks"] Layer that blocks should be looked for in.
+   * @param {keyof Chunk.Layer} layer Layer that blocks should be looked for in.
    * @returns {Block | null} The block, or null if no block is present.
    */
-  getBlock(x, y, layer = "blocks") {
+  getBlock(x, y, layer = Chunk.Layer.blocks) {
     if (
       this[layer] === undefined ||
       this[layer][y] === undefined ||

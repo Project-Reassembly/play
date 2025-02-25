@@ -1,15 +1,21 @@
 class ItemStack {
   item = "nothing";
   count = 1;
+  #itemCache = null;
+  /**
+   * @readonly
+   */
   static get EMPTY() {
     return new this("nothing", 0);
   }
   /**
-   * Gets the actual item from the stack.
+   * Gets the actual item from the stack. Will return the same object for the same itemstack.
    * @returns {Item} The item instance of the stack.
    */
   getItem() {
-    return construct(Registry.items.get(this.item), "item");
+    if (this.isEmpty()) return null;
+    this.#itemCache ??= construct(Registry.items.get(this.item), "item");
+    return this.#itemCache;
   }
   /**
    * Checks equality with another ItemStack.
@@ -65,7 +71,15 @@ class ItemStack {
     this.item = item;
     this.count = count;
   }
-  toString() {
-    return this.item + "x" + this.count;
+  init() {
+    this._internalitem = this._inititem;
+  }
+  toString(useDisplay = false) {
+    return (useDisplay ? this.getItem().name : this.item) + " x" + this.count;
+  }
+  clear() {
+    this._internalitem = "nothing";
+    this.count = 0;
+    this.#itemCache = null;
   }
 }
