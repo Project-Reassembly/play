@@ -4,6 +4,7 @@ class Tile extends Block {
   appliedStatusDuration = 0;
   damage = 0;
   damageType = "normal";
+  buildable = true;
   /**
    * Called whenever an entity walks on this tile.
    * @param {Entity} entity Entity that walked on this block.

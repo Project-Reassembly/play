@@ -17,8 +17,18 @@ class Crafter extends Container {
     strokeFrom: 10,
     strokeTo: 0,
   };
+  smoke = {
+    lifetime: 60,
+    speed: 1,
+    decel: 0.015,
+    colourFrom: [50, 50, 50, 100],
+    colourTo: [100, 100, 100, 0],
+    size: 20,
+    cone: 10,
+    amount: 1,
+    chance: 0.1,
+  };
   recipe = 0;
-  outputSlots = [1];
   /*
   Recipes are like
   {
@@ -45,7 +55,6 @@ class Crafter extends Container {
       recipe.inputs = recipe.inputs.map((inp) => construct(inp, "itemstack"));
       recipe.outputs = recipe.outputs.map((inp) => construct(inp, "itemstack"));
     });
-    this.inventory.canPlaceInSlot = (slot) => !this.outputSlots.includes(slot);
   }
   tick() {
     let recipe = this.recipes[this.recipe];
@@ -63,6 +72,7 @@ class Crafter extends Container {
           if (this.onFinish(recipe)) this.#progress = 0;
         } else {
           this.#progress += this.#speed;
+          this.createTickEffect();
         }
     } else {
       this.#progress = 0;
@@ -89,6 +99,29 @@ class Crafter extends Container {
     );
     this.chunk.world.particles.push(particle);
   }
+  createTickEffect() {
+    let particle = () =>
+      new ShapeParticle(
+        this.x + Block.size / 2,
+        this.y + Block.size / 2,
+        -HALF_PI +
+          radians(rnd(-(this.smoke.cone ?? 10), this.smoke.cone ?? 10)),
+        this.smoke.lifetime ?? 60,
+        this.smoke.speed ?? 1,
+        this.smoke.decel ?? 0.015,
+        "circle",
+        this.smoke.colourFrom ?? [50, 50, 50, 100],
+        this.smoke.colourTo ?? [100, 100, 100, 0],
+        this.smoke.size ?? 20,
+        (this.smoke.size ?? 20) * 1.5,
+        this.smoke.size ?? 20,
+        (this.smoke.size ?? 20) * 1.5,
+        0
+      );
+    if (Math.random() < this.smoke.chance ?? 0.5)
+      for (let i = 0; i < this.smoke.amount ?? 3; i++)
+        this.chunk.world.particles.push(particle());
+  }
   /**
    * Converts a recipe to a string representation.
    * **This is not a JSON stringifier, it it for human readability.**
@@ -97,16 +130,24 @@ class Crafter extends Container {
   stringifyRecipe(recipe) {
     return (
       recipe.inputs.map((x) => x.toString(true)).join("\n") +
-      "\n -  - -- \\/ -- -  - \n" +
-      recipe.outputs.map((x) => x.toString(true)).join("\n")
+      "\n -  - -- \\⬇/ -- -  - \n" +
+      recipe.outputs.map((x) => x.toString(true)).join("\n") +
+      "\n" +
+      ""
+        .padEnd((this.#progress / recipe.time) * 20, "■")
+        .padEnd(20, "□")
+        .substring(0, 20) +
+      " "
     );
   }
   drawTooltip(x, y, outlineColour, backgroundColour) {
+    super.drawTooltip(x, y, outlineColour, backgroundColour);
     drawMultilineText(
       x,
       y,
       this.stringifyRecipe(this.recipes[this.recipe]),
-      "Recipe [" + this.recipe + "]"
+      this.title + "   [" + this.recipe + "]",
+      Item.getColourFromRarity(0, "light")
     );
   }
 }

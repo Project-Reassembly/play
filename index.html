@@ -11,13 +11,11 @@
   <!-- Import p5 -->
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script> -->
   <script src="https://q5js.org/q5.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script> -->
 </head>
 
 <body>
   <script>
-    //Disable p5's errors, they don't really help
-    p5.disableFriendlyErrors = true;
     //Game info
     const gameVersion = "0.0.0";
     const isPreview = true;
@@ -26,6 +24,7 @@
   <script src="./assets/src/core/ui.js"></script>
   <script src="./assets/src/core/constructor.js"></script>
   <script src="./assets/src/core/number.js"></script>
+  <script src="./assets/src/core/registered-item.js"></script>
   <script src="./assets/src/core/registry.js"></script>
   <!-- Classes -->
   <script src="./assets/src/classes/effect/animation.js"></script>
@@ -50,11 +49,15 @@
   <script src="./assets/src/classes/block/block.js"></script>
   <script src="./assets/src/classes/block/tile.js"></script>
   <script src="./assets/src/classes/block/container.js"></script>
-  <script src="./assets/src/classes/block/crafter/crafter.js"></script>
+  <script src="./assets/src/classes/block/production/crafter.js"></script>
+  <script src="./assets/src/classes/block/production/tile-producer.js"></script>
+  <script src="./assets/src/classes/block/production/drill.js"></script>
 
   <script src="./assets/src/classes/entity/component.js"></script>
   <script src="./assets/src/classes/entity/entity.js"></script>
   <script src="./assets/src/classes/entity/inventory-entity.js"></script>
+  <script src="./assets/src/classes/entity/player.js"></script>
+  <script src="./assets/src/classes/item/dropped-itemstack.js"></script>
 
   <script src="./assets/src/classes/world/chunk.js"></script>
   <script src="./assets/src/classes/world/world.js"></script>

@@ -6,13 +6,15 @@ console.log("[World Gen] [Setup] Imported q5's noise function");
 importScripts(
   "../core/number.js",
   "../core/constructor.js",
-  "../core/registry.js"
+  "../core/registry.js",
+  "../core/registered-item.js"
 );
 console.log("[World Gen] [Setup] Imported P:R Core");
 importScripts(
   "../classes/entity/entity.js",
   "../classes/entity/component.js",
   "../classes/entity/inventory-entity.js",
+  "../classes/entity/player.js",
 
   "../classes/projectile/bullet.js",
   "../classes/projectile/laser-bullet.js",
@@ -26,13 +28,17 @@ importScripts(
   "../classes/item/equippable.js",
   "../classes/item/weapon.js",
 
+  "../classes/item/dropped-itemstack.js",
+
   "../classes/world/world.js",
   "../classes/world/chunk.js",
 
   "../classes/block/block.js",
   "../classes/block/tile.js",
   "../classes/block/container.js",
-  "../classes/block/crafter/crafter.js"
+  "../classes/block/production/crafter.js",
+  "../classes/block/production/tile-producer.js",
+  "../classes/block/production/drill.js"
 );
 console.log("[World Gen] [Setup] Imported P:R Classes");
 importScripts("../registries/type.js", "../registries/block.js");

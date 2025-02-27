@@ -1,10 +1,20 @@
-class Block {
+class Block extends RegisteredItem {
   static size = 30;
+  disabled = false;
   image = "error";
   blockX = 0;
   blockY = 0;
   /**@type {Chunk} */
-  chunk = null;
+  _chunk = null;
+  set chunk(_) {
+    this._chunk = _;
+    this.world = _.world;
+  }
+  get chunk() {
+    return this._chunk;
+  }
+  /** @type {World} */
+  world = null;
   size = 1;
   init() {}
   tick() {}
@@ -23,18 +33,28 @@ class Block {
    * @param {ItemStack} usedItemStack Itemstack held while interacting.
    */
   interaction(entity, usedItemStack = ItemStack.EMPTY) {}
-  /** Fired when this block is attempted to be broken. Can specify the result of the break attempt.  
+  canBreak(type = BreakType.delete) {
+    return true;
+  }
+  /** Fired when this block is attempted to be broken. Can specify the result of the break attempt.
    * @param {symbol} [type=BreakType.entity] What broke this block. Should be a property of `BreakType`.
    * @returns {Boolean} True if this block should break, false if not.
-  */
-  break(type = BreakType.delete){
+   */
+  break(type = BreakType.delete) {
+    if (type !== BreakType.deconstruct && type !== BreakType.replace)
+      return true;
+    if (!this.dropItem) return true;
+    let created = new DroppedItemStack(new ItemStack(this.dropItem, 1));
+    created.x = this.x + Block.size / 2;
+    created.y = this.y + Block.size / 2;
+    created.addToWorld(this.world);
     return true;
-  };
+  }
   /** Fired when this block is attempted to be placed. Can specify the result of the place attempt. Still respects default placement rules.
    * @param {symbol} [type=BreakType.entity] What placed this block. Should be a property of `PlaceType`.
    * @returns {Boolean} True if this block can be placed, false if not.
-  */
-  place(type = PlaceType.create){
+   */
+  place(type = PlaceType.create) {
     return true;
   }
   drawTooltip(
@@ -49,8 +69,16 @@ class Block {
   get y() {
     return (this.blockY + this.chunk.y * Chunk.size) * Block.size;
   }
+  get gridX() {
+    return this.blockX + this.chunk.x * Chunk.size;
+  }
+  get gridY() {
+    return this.blockY + this.chunk.y * Chunk.size;
+  }
 }
-/** Stores values to describe how blocks are broken. */
+/** Stores values to describe how blocks are broken.
+ * @enum
+ */
 const BreakType = {
   /** The block is deconstructed by the player. */
   deconstruct: Symbol(),
@@ -61,8 +89,8 @@ const BreakType = {
   /** Generic breaking, has no semantics. */
   delete: Symbol(),
   /** The block is being broken by an enemy. */
-  attack: Symbol()
-}
+  attack: Symbol(),
+};
 /** Describes how a block is placed. */
 const PlaceType = {
   /** Type used for blocks built by the player. */
@@ -70,5 +98,34 @@ const PlaceType = {
   /** Type used for blocks placed on world generation. */
   generate: Symbol(),
   /** Generic placement, has no semantics. */
-  create: Symbol()
+  create: Symbol(),
+  /** The block is being changed from another one. */
+  replace: Symbol(),
+};
+
+function createLinkedBlockAndItem(
+  regname,
+  displayname,
+  image,
+  blockprops,
+  itemprops
+) {
+  Registry.blocks.add(
+    regname,
+    Object.assign(blockprops, {
+      name: displayname,
+      image: image,
+      dropItem: regname,
+      health: 100,
+    })
+  );
+  Registry.items.add(
+    regname,
+    Object.assign(itemprops, {
+      type: "placeable",
+      name: displayname,
+      block: regname,
+      image: image,
+    })
+  );
 }

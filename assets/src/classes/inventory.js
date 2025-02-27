@@ -37,6 +37,7 @@ class Inventory {
     this.iterate((content, slot, stop) => {
       if (!content) this.storage[slot] = ItemStack.EMPTY;
       if (content.isEmpty() && this.canPlaceInSlot(slot)) {
+        content.clear();
         content.item = item;
         content.count = Math.min(toAdd, ritem.stackSize);
         toAdd -= content.count;
@@ -372,7 +373,9 @@ class Inventory {
         pop();
       }
     }
-    if (Inventory.mouseItemStack.item !== "nothing") {
+  }
+  static drawMIS(itemSize) {
+    if (!Inventory.mouseItemStack.isEmpty()) {
       drawImg(
         Inventory.mouseItemStack.getItem().image,
         ui.mouse.x,
@@ -398,7 +401,6 @@ class Inventory {
       );
       pop();
     }
-    Inventory.drawTooltip(outlineColour, backgroundColour);
   }
   static drawTooltip(
     outlineColour = [50, 50, 50],
@@ -410,12 +412,6 @@ class Inventory {
     textFont(fonts.ocr);
     textSize(33);
     strokeWeight(2);
-    let maxWidth = textWidth(
-      this.tooltip.item.name + " (" + this.tooltip.count + ")"
-    );
-    fill(...backgroundColour);
-    strokeWeight(5);
-    stroke(...outlineColour);
     let header =
       this.tooltip.item.name +
       " (" +
@@ -423,6 +419,11 @@ class Inventory {
       "/" +
       this.tooltip.stackSize +
       ")";
+    let maxWidth = textWidth(header);
+    fill(...backgroundColour);
+    strokeWeight(5);
+    stroke(outlineColour);
+
     let body = this.tooltip.item.description.split("\n");
     let descLines = this.tooltip.item.description.split("\n").length + 2;
     let lines = 2 + Math.ceil(descLines);
@@ -438,12 +439,12 @@ class Inventory {
       displayY = height / 2 - lines * 6;
     }
     rect(displayX, displayY, maxWidth, lines * 12);
-    fill(Item.getColourFromRarity(this.tooltip.item.rarity, "dark"));
-    stroke(Item.getColourFromRarity(this.tooltip.item.rarity, "dark"));
-    strokeWeight(2);
+    fill(Item.getColourFromRarity(this.tooltip.item.rarity, "light"));
+    stroke(Item.getColourFromRarity(this.tooltip.item.rarity, "light"));
+    strokeWeight(1);
     let textX = ui.mouse.x + 10;
     let textY = displayY - lines * 6 + 28;
-    text(header, textX, textY);
+    text(header, textX, textY - 5);
     textSize(18);
     noStroke();
     for (let line = 0; line < lines; line++) {
@@ -465,9 +466,9 @@ function drawMultilineText(
   push();
   textAlign(LEFT);
   textFont(fonts.ocr);
-  textSize(33);
+  textSize(20);
   strokeWeight(2);
-  let maxWidth = 0;
+  let maxWidth = textWidth(header) * 1.05;
   let body = txt.split("\n");
   let descLines = txt.split("\n").length + 2;
   let lines = 2 + Math.ceil(descLines);
@@ -488,7 +489,7 @@ function drawMultilineText(
   rect(displayX, displayY, maxWidth, lines * 12);
   fill(colour);
   stroke(colour);
-  strokeWeight(2);
+  strokeWeight(1);
   let textX = x + 10;
   let textY = displayY - lines * 6 + 28;
   text(header, textX, textY - 5);

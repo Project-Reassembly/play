@@ -81,13 +81,13 @@ class Chunk {
   }
   tick() {
     iterate2DArray(this.tiles, (tile) => tile && tile.tick());
-    iterate2DArray(this.blocks, (block) => block && block.tick());
+    iterate2DArray(this.blocks, (block) => block && !block.disabled && block.tick());
   }
   draw() {
     push();
     translate(Block.size / 2, Block.size / 2);
     iterate2DArray(this.tiles, (tile) => tile && tile.draw());
-    iterate2DArray(this.blocks, (block) => block && block.draw());
+    iterate2DArray(this.blocks, (block) => block && !block.disabled && block.draw());
     pop();
   }
 }

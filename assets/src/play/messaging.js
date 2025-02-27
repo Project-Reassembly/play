@@ -13,6 +13,7 @@ class InGameMessageBox {
     if (this._messages.length === 0) return;
     let actualY = this.y < 0 ? height + this.y : this.y;
     let actualX = this.x < 0 ? width + this.x : this.x;
+    let w = this.width;
     push();
     textFont(fonts.ocr);
     textAlign(LEFT, TOP);
@@ -20,6 +21,12 @@ class InGameMessageBox {
     rectMode(CORNER);
     noStroke();
     let len = Math.min(this._messages.length, this.maxLines);
+    for (let msg of this._messages) {
+      let text = msg.msg;
+      if ((msg.count ?? 1) > 1) text = "[" + msg.count + "]" + text;
+      let measured = textWidth(text);
+      if (measured > w) w = measured;
+    }
     for (let index = 0; index < len; index++) {
       let message = (
         this.y < 0 ? this._messages.slice(0).reverse() : this._messages
@@ -35,9 +42,11 @@ class InGameMessageBox {
       txtbg[3] *= Math.min(message.timer / 120, 1);
       txtcol[3] *= Math.min(message.timer / 120, 1);
       fill(txtbg);
-      rect(actualX, drawY, this.width, this.textSize);
+      rect(actualX, drawY, w, this.textSize);
       fill(txtcol);
-      text(message.msg, actualX, drawY);
+      let txt = message.msg;
+      if ((message.count ?? 1) > 1) txt = "[" + message.count + "]" + txt;
+      text(txt, actualX, drawY);
     }
     pop();
   }
@@ -53,7 +62,17 @@ class InGameMessageBox {
     }
   }
   send(message, colour = [255, 255, 255, 255]) {
-    this._messages.push({ msg: message, timer: 240, colour: colour });
+    let count = 1;
+    if (this.read() === message) {
+      count = this._messages[0].count + 1;
+      this._messages.splice(0, 1)
+    }
+    this._messages.push({
+      msg: message,
+      timer: 240,
+      colour: colour,
+      count: count,
+    });
   }
   read() {
     return this._messages[0]?.msg;
@@ -62,4 +81,4 @@ class InGameMessageBox {
     this._messages.splice(0);
   }
 }
-const Log = new InGameMessageBox(0, -100);
+const Log = new InGameMessageBox(0, -100, 600, 20);

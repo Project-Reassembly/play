@@ -10,11 +10,6 @@ class World {
   /** @type {Array<Array<Chunk>>} */
   chunks = null;
   name = "World";
-  gen = {
-    started: false,
-    progress: 0,
-    stage: "tiles",
-  };
   constructor(name = "World") {
     this.name = name;
   }
@@ -158,66 +153,7 @@ class World {
       return false;
     return true;
   }
-  /**
-   * Creates the tiles of the world. Deletes all existing chunks first.
-   * @deprecated
-   * @param {number} size Size of the world in chunks.
-   * @param {number} noiseScale Size of the noise function. Bigger makes more noisy.
-   * @param {number} noiseLevel Vertical scale of the noise. Too low, and everything's water.
-   */
-  async generateTiles(noiseScale = 2, noiseLevel = 255) {
-    this.gen.started = true;
-    this.gen.stage = "grid";
-    //Create grid
-    this.chunks = create2DArray(World.size);
-    this.gen.stage = "tiles";
-    //Procedural ground gen
-    noiseScale *= 0.001;
-    for (let i = 0; i < World.size; i++) {
-      //Each row
-      //Chunk coords
-      for (let j = 0; j < World.size; j++) {
-        let newChunk = new Chunk();
-        newChunk.world = this;
-        newChunk.x = Math.round(i);
-        newChunk.y = Math.round(j);
-        for (let x = 0; x < Chunk.size; x++) {
-          //Block coords
-          for (let y = 0; y < Chunk.size; y++) {
-            let nx = roundNum(
-              noiseScale *
-                ((World.size / 2 + i) * Chunk.size * Block.size +
-                  (x * Block.size + Block.size / 2)),
-              2
-            );
-            let ny = roundNum(
-              noiseScale *
-                ((World.size / 2 + j) * Chunk.size * Block.size +
-                  (y * Block.size + Block.size / 2)),
-              2
-            );
-            let c = noiseLevel * noise(nx, ny);
-            if (c > 175) {
-              newChunk.addBlock("stone", x, y, "tiles");
-            } else if (c > 100) {
-              newChunk.addBlock("grass", x, y, "tiles");
-            } else if (c > 75) {
-              newChunk.addBlock("sand", x, y, "tiles");
-            } else if (c > 65) {
-              newChunk.addBlock("sand-water", x, y, "tiles");
-            } else if (c > 50) {
-              newChunk.addBlock("water", x, y, "tiles");
-            } else {
-              newChunk.addBlock("water", x, y, "tiles");
-            }
-          }
-        }
-        this.chunks[j][i] = newChunk;
-        this.gen.progress++;
-      }
-    }
-  }
-  prepareForGeneration(){
+  prepareForGeneration() {
     this.chunks = create2DArray(World.size);
   }
   isPositionFree(x, y) {

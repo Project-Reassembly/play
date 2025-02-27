@@ -2,8 +2,8 @@
  * @param {{type: string | undefined}} object Source to construct from. This object is left unchanged. Type must be present in `Registry.genericType`, or else `Object` is used instead.
  * @param {string} [defaultType="object"] Default fallback type for when the source has no `type` property.
  */
-function construct(object, defaultType = "object") {
-  object.type ??= defaultType
+function construct(object, defaultType = "generic") {
+  object.type ??= defaultType;
   return constructFromRegistry(object, Registry.type);
 }
 
@@ -24,5 +24,6 @@ function constructFromRegistry(object, registry) {
   }
   instantiated = Object.assign(instantiated, cloned);
   instantiated.init ? instantiated.init() : {}; //Initialise if possible.
+  instantiated.typeName = object.type;
   return instantiated;
 }

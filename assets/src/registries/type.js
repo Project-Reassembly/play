@@ -1,10 +1,11 @@
 //Basic
-Registry.type.add("object", Object)
+Registry.type.add("generic", RegisteredItem)
 //Entities and parts
 Registry.type.add("component", Component)
 Registry.type.add("entity", Entity);
 Registry.type.add("inventory-entity", InventoryEntity);
 Registry.type.add("equipped-entity", EquippedEntity);
+Registry.type.add("player", Player);
 //Projectiles
 Registry.type.add("bullet", Bullet);
 Registry.type.add("laser", LaserBullet);
@@ -25,3 +26,5 @@ Registry.type.add("block", Block)
 Registry.type.add("tile", Tile)
 Registry.type.add("container", Container)
 Registry.type.add("crafter", Crafter)
+Registry.type.add("tile-producer", TileProducer)
+Registry.type.add("drill", Drill)

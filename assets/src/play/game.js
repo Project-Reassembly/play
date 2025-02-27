@@ -7,10 +7,10 @@ const game = {
   paused: false,
   get mouse() {
     return {
-      x: ui.mouse.x + ui.camera.x,
-      blockX: Math.floor((ui.mouse.x + ui.camera.x) / Block.size),
-      y: ui.mouse.y + ui.camera.y,
-      blockY: Math.floor((ui.mouse.y + ui.camera.y) / Block.size),
+      x: ui.lastMousePos.x + ui.camera.x,
+      blockX: Math.floor((ui.lastMousePos.x + ui.camera.x) / Block.size),
+      y: ui.lastMousePos.y + ui.camera.y,
+      blockY: Math.floor((ui.lastMousePos.y + ui.camera.y) / Block.size),
     };
   },
 };
@@ -32,7 +32,8 @@ if (!window.Worker) {
   console.error(errmsg);
   Log.send(errmsg, [255, 0, 0]);
 }
-let worldGenWorker;
+/** @type {Worker | null} */
+let worldGenWorker = null;
 try {
   worldGenWorker = new Worker("assets/src/worker/generator.js", {
     name: "[World Gen]",
@@ -48,20 +49,19 @@ let fonts = {};
 
 worldGenWorker.onmessage = (ev) => {
   if (ev.data === "finish") {
+    console.log("Generation finished.")
     genMsg = "Entering World";
     createPlayer();
     ui.camera.x = game.player.x;
     ui.camera.y = game.player.y;
     for (let tick = 0; tick < preloadTicks; tick++) world.tickAll();
     generating = false;
+    worldGenWorker.terminate()
   } else if (typeof ev.data === "object") {
     if (ev.data.type === "progress") {
       genProgress = ev.data.progress;
     }
     if (ev.data.type === "row") {
-      console.log(
-        "Generator returned row of " + ev.data.defs.length + " chunks"
-      );
       for (let def of ev.data.defs) {
         let chunk = new Chunk();
         for (let tile of def.chunk) {
@@ -72,7 +72,6 @@ worldGenWorker.onmessage = (ev) => {
         chunk.y = def.j;
         world.chunks[def.j][def.i] = chunk;
       }
-      console.log("Chunk row loaded.");
     }
   }
 };
@@ -155,17 +154,39 @@ function frameSkippingFunction(func) {
   }
 }
 
+let errored = false;
 function draw() {
+  Log.tick();
   try {
-    frame();
+    //Draw the void
+    background(128 + Math.sin(frameCount / 120) * 128, 255);
+    if (!errored) frame();
   } catch (error) {
-    Log.send("[" + error.constructor.name + "]" + error.message, [255, 0, 0]);
+    errored = true;
+    Log.send("Project: Reassembly has encountered an error:", [255, 50, 50]);
+    Log.send(
+      "   [" + error.constructor.name + "] " + error.message,
+      [255, 0, 0]
+    );
+    error.stack
+      .split("\n")
+      .slice(1)
+      .forEach((el) => Log.send("  " + el, [255, 30, 30]));
+    Log.send("Press [Space] to continue", [255, 50, 50]);
+    addEventListener("keydown", fixError);
+    noLoop();
+    loop();
+  }
+  Log.draw();
+}
+function fixError(ev) {
+  if (ev.key === " ") {
+    errored = false;
+    removeEventListener("keydown", fixError);
   }
 }
 
 function frame() {
-  //Draw the void
-  background(128 + Math.sin(frameCount / 120) * 128, 255);
   if (generating) {
     push();
     fill(0);
@@ -199,7 +220,6 @@ function frame() {
     uiFrame();
     if (!ui.waitingForMouseUp) mouseInteraction();
     pop();
-    Log.draw();
   }
 }
 
@@ -225,13 +245,15 @@ function uiFrame() {
   if (ui.waitingForMouseUp && !mouseIsPressed) ui.waitingForMouseUp = false;
   //Draw UI and mouse pos
   drawUI();
-  showMousePos();
   if (generationStarted && !generating && ui.menuState === "in-game") {
-    let hoveredBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
-    if (hoveredBlock) {
-      hoveredBlock.drawTooltip(ui.mouse.x, ui.mouse.y);
+    ui.hoveredBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
+    if (ui.hoveredBlock) {
+      ui.hoveredBlock.drawTooltip(ui.lastMousePos.x, ui.lastMousePos.y);
     }
   }
+  Inventory.drawMIS(40);
+  Inventory.drawTooltip();
+  showMousePos();
   //Off-screen box, for zooming
   push();
   noFill();
@@ -243,14 +265,14 @@ function uiFrame() {
 
 function gameFrame() {
   push();
-  if (!game.paused) {
-    frameSkippingFunction(() => {
+  frameSkippingFunction(() => {
+    if (!game.paused) {
       movePlayer();
       world.tickAll();
-    });
-    ui.camera.x = game.player.x;
-    ui.camera.y = game.player.y;
-  }
+    }
+  });
+  ui.camera.x = game.player.x;
+  ui.camera.y = game.player.y;
   scale(ui.camera.zoom);
   rotate(radians(ui.camera.rotation));
   translate(-ui.camera.x, -ui.camera.y);
@@ -299,6 +321,11 @@ function movePlayer() {
 }
 
 function updateUIActivity() {
+  if (!keyIsDown(CONTROL))
+    ui.lastMousePos = {
+      x: mouseX - width / 2,
+      y: mouseY - height / 2,
+    };
   //Check each component, but only do it once.
   for (let component of ui.components) {
     component.updateActivity();
@@ -319,7 +346,6 @@ function tickUI() {
       component.checkMouse();
     }
   }
-  Log.tick();
 }
 
 function showMousePos() {
@@ -353,8 +379,21 @@ function showMousePos() {
     );
   }
   const mouseSize = 15;
-  stroke(255);
+  stroke(255, 0, 0);
   strokeWeight(2);
+  line(
+    ui.lastMousePos.x - mouseSize,
+    ui.lastMousePos.y,
+    ui.lastMousePos.x + mouseSize,
+    ui.lastMousePos.y
+  );
+  line(
+    ui.lastMousePos.x,
+    ui.lastMousePos.y - mouseSize,
+    ui.lastMousePos.x,
+    ui.lastMousePos.y + mouseSize
+  );
+  stroke(255);
   line(ui.mouse.x - mouseSize, ui.mouse.y, ui.mouse.x + mouseSize, ui.mouse.y);
   line(ui.mouse.x, ui.mouse.y - mouseSize, ui.mouse.x, ui.mouse.y + mouseSize);
   pop();
@@ -384,12 +423,6 @@ function createPlayer() {
   player.inventory.addItem("scrap-assembler");
   player.addToWorld(world);
   game.player = player;
-
-  world.placeAt(
-    "large-assembler",
-    Math.floor(game.player.x / Block.size),
-    Math.floor(game.player.y / Block.size)
-  );
 
   //Change to an accessor property
   Object.defineProperty(player, "target", {
@@ -432,21 +465,6 @@ function secondaryInteract() {
     if (Inventory.mouseItemStack.item === "nothing") {
       if (!block.break(BreakType.deconstruct)) return;
       world.break(game.mouse.blockX, game.mouse.blockY);
-      Inventory.mouseItemStack = new ItemStack(
-        block.dropItem ?? "nothing",
-        block.dropCount ?? 1
-      );
-      if (block === Container.selectedBlock) {
-        Container.selectedBlock = null;
-      }
-    } else if (
-      (Inventory.mouseItemStack.item === block.dropItem ?? "nothing") &&
-      Inventory.mouseItemStack.count <
-        (Registry.items.get(block.dropItem ?? "nothing").stackSize ?? 99)
-    ) {
-      if (!block.break(BreakType.deconstruct)) return;
-      world.break(game.mouse.blockX, game.mouse.blockY);
-      Inventory.mouseItemStack.count++;
       if (block === Container.selectedBlock) {
         Container.selectedBlock = null;
       }
@@ -456,8 +474,9 @@ function secondaryInteract() {
 function interact() {
   let heldItem = Inventory.mouseItemStack.getItem();
   let clickedBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
-  //If space is free
-  if (!clickedBlock) {
+  let clickedTile = world.getBlock(game.mouse.blockX, game.mouse.blockY, "tiles");
+  //If space is free, and buildable
+  if (!clickedBlock && clickedTile?.buildable) {
     //Place items on free space
     if (heldItem instanceof PlaceableItem) {
       heldItem.place(
@@ -497,32 +516,54 @@ function reset() {
 
 //Triggers on any key press
 function keyPressed() {
+  //CAPS LOCK doesn't matter
   key = key.toString().toLowerCase();
-  if (key === "p") {
+  //hold grave to log keys
+  if (keyIsDown("`")) console.log(key);
+
+  //Hotkeys
+  if (key === " ")
     //Pause / unpause
     togglePause();
-  } else if (key === "escape") {
-    if (!UIComponent.evaluateCondition("menu:none")) {
-      UIComponent.setCondition("menu:none");
-    }
-  } else if (key === "e") {
+  else if (key === "escape" && !UIComponent.evaluateCondition("menu:none"))
+    UIComponent.setCondition("menu:none");
+  else if (key === "e") {
     //Inventory
     if (UIComponent.evaluateCondition("menu:inventory"))
       UIComponent.setCondition("menu:none");
     else UIComponent.setCondition("menu:inventory");
-  } else if (key === "1") {
-    game.player.equipment.hotkeySlot(0, true);
-  } else if (key === "2") {
-    game.player.equipment.hotkeySlot(1, true);
-  } else if (key === "3") {
-    game.player.equipment.hotkeySlot(2, true);
-  } else if (key === "4") {
-    game.player.equipment.hotkeySlot(3, true);
-  } else if (key === "5") {
-    game.player.equipment.hotkeySlot(4, true);
-  } else if (key === "f12" || key === "f11") return true; //allow devtools or fullscreen
+  }
+  //Hotkeys
+  else if (key === "1") game.player.equipment.hotkeySlot(0, true);
+  else if (key === "2") game.player.equipment.hotkeySlot(1, true);
+  else if (key === "3") game.player.equipment.hotkeySlot(2, true);
+  else if (key === "4") game.player.equipment.hotkeySlot(3, true);
+  else if (key === "5") game.player.equipment.hotkeySlot(4, true);
+  //DevTools and fullscreen
+  else if (key === "f12" || key === "f11") return true;
+  //Recipe controls
+  else if (key === "arrowright") nextRecipe();
+  else if (key === "arrowleft") prevRecipe();
+  //Prevent any default behaviour
+  return false;
+}
 
-  return false; //Prevent any default behaviour
+function nextRecipe() {
+  let block = ui.hoveredBlock ?? Container.selectedBlock;
+  if (!block) return;
+  if (block instanceof Crafter) {
+    block.recipe++;
+    if (block.recipe >= block.recipes.length) block.recipe = 0;
+  }
+}
+
+function prevRecipe() {
+  let block = ui.hoveredBlock ?? Container.selectedBlock;
+  if (!block) return;
+  if (block instanceof Crafter) {
+    block.recipe--;
+    if (block.recipe < 0) block.recipe = block.recipes.length - 1;
+  }
 }
 
 function pause() {

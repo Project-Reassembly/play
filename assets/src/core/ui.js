@@ -7,6 +7,12 @@ const ui = {
       y: mouseY - height / 2,
     };
   },
+  lastMousePos: {
+    x: 0,
+    blockX: 0,
+    y: 0,
+    blockY: 0
+  },
   get mouseButton() {
     if (!mouseButton) return "awaiting click";
     return mouseButton === RIGHT
@@ -27,6 +33,7 @@ const ui = {
   components: [],
   currentFPS: 0,
   previousFPS: [],
+  hoveredBlock: null
 };
 
 class UIComponent {

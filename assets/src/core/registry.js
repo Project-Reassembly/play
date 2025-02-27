@@ -57,7 +57,9 @@ class Registry {
           " does not exist in registry! Consider checking your spelling."
       );
     //Return item, if it exists.
-    return this.#content.get(name);
+    let item = this.#content.get(name);
+    item.registryName = name;
+    return item;
   }
   /**
    * Renames a registry item. Neither parameter is case-sensitive.
@@ -105,15 +107,17 @@ class Registry {
    * Performs a function on each item in registry.
    * @param {(name: string, item) => void} callback Function to perform on each item.
    */
-  forEach(callback){
-    this.#content.forEach((value, key) => void callback(key, value))
-    return true
+  forEach(callback) {
+    this.#content.forEach((value, key) => void callback(key, value));
+    return true;
   }
   /**
    * Performs a function on each item in registry asynchronously.
    * @param {(name: string, item) => void} callback Function to perform on each item.
    */
-  async forEachAsync(callback){
-    this.#content.forEach(async (value, key) => await void callback(key, value))
+  async forEachAsync(callback) {
+    this.#content.forEach(
+      async (value, key) => await void callback(key, value)
+    );
   }
 }

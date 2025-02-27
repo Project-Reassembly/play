@@ -15,6 +15,10 @@ class ItemStack {
   getItem() {
     if (this.isEmpty()) return null;
     this.#itemCache ??= construct(Registry.items.get(this.item), "item");
+    if (this.item !== this.#itemCache.registryName) {
+      this.#itemCache = null;
+      return this.getItem();
+    }
     return this.#itemCache;
   }
   /**

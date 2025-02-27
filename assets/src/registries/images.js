@@ -19,6 +19,11 @@ Registry.images.add("block.sandstone-wall", new ImageContainer("assets/textures/
 Registry.images.add("block.scrap-wall", new ImageContainer("assets/textures/block/blocks/defense/scrap-wall.png"))
 //Blocks > Crafters
 Registry.images.add("crafter.scrap-assembler", new ImageContainer("assets/textures/block/blocks/crafter/scrap-assembler.png"))
+//Blocks > Drills
+Registry.images.add("drill.1x1.top", new ImageContainer("assets/textures/block/blocks/drill/drill-1x1-top.png"))
+Registry.images.add("drill.1x1.spinner", new ImageContainer("assets/textures/block/blocks/drill/drill-1x1-spinner.png"))
+Registry.images.add("drill.1x1.base", new ImageContainer("assets/textures/block/blocks/drill/drill-1x1-base.png"))
+Registry.images.add("drill.1x1.ui", new ImageContainer("assets/textures/block/blocks/drill/drill-1x1.png"))
 //Icons
 Registry.images.add("icon.chest", new ImageContainer("assets/textures/icon/chest.png"))
 Registry.images.add("icon.cross", new ImageContainer("assets/textures/icon/cross.png"))
