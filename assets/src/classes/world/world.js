@@ -10,6 +10,7 @@ class World {
   /** @type {Array<Array<Chunk>>} */
   chunks = null;
   name = "World";
+  seed = null;
   constructor(name = "World") {
     this.name = name;
   }
@@ -156,7 +157,7 @@ class World {
   prepareForGeneration() {
     this.chunks = create2DArray(World.size);
   }
-  isPositionFree(x, y) {
+  isPositionFree(x, y, layer = "blocks") {
     if (!this.chunks) throw new Error("The world has not been generated!");
     let cx = Math.floor(x / Chunk.size),
       bx = x % Chunk.size;
@@ -166,9 +167,9 @@ class World {
     if (!cr) return false;
     let chunk = cr[cx];
     if (!chunk) return false;
-    return chunk.getBlock(bx, by, "blocks") === null;
+    return chunk.getBlock(bx, by, layer) === null;
   }
-  placeAt(block, x, y) {
+  placeAt(block, x, y, layer = "blocks") {
     if (!this.chunks) throw new Error("The world has not been generated!");
     let cx = Math.floor(x / Chunk.size),
       bx = x % Chunk.size;
@@ -178,9 +179,9 @@ class World {
     let chunk = cr ? cr[cx] : null;
     if (!chunk)
       throw new Error("There is no chunk at (chunk) x:" + cx + ", y:" + cy);
-    chunk.addBlock(block, bx, by, "blocks");
+    return chunk.addBlock(block, bx, by, layer);
   }
-  break(x, y) {
+  break(x, y, layer = "blocks") {
     if (!this.chunks) throw new Error("The world has not been generated!");
     let cx = Math.floor(x / Chunk.size),
       bx = x % Chunk.size;
@@ -189,8 +190,8 @@ class World {
     let chunk = this.chunks[cy][cx];
     if (!chunk)
       throw new Error("There is no chunk at (chunk) x:" + cx + ", y:" + cy);
-    let broken = chunk.getBlock(bx, by, "blocks");
-    chunk.removeBlock(bx, by, "blocks");
+    let broken = chunk.getBlock(bx, by, layer);
+    chunk.removeBlock(bx, by, layer);
     return broken;
   }
   /**@returns `undefined` if no chunk, `null` if no block, or a `Block` otherwise. */

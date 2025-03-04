@@ -32,16 +32,22 @@ importScripts(
 
   "../classes/world/world.js",
   "../classes/world/chunk.js",
+  "../classes/world/generator.js",
 
   "../classes/block/block.js",
   "../classes/block/tile.js",
   "../classes/block/container.js",
   "../classes/block/production/crafter.js",
   "../classes/block/production/tile-producer.js",
-  "../classes/block/production/drill.js"
+  "../classes/block/production/drill.js",
+  "../classes/block/conveyor.js"
 );
 console.log("[World Gen] [Setup] Imported P:R Classes");
-importScripts("../registries/type.js", "../registries/block.js");
+importScripts(
+  "../registries/type.js",
+  "../registries/block.js",
+  "../registries/worldgen.js"
+);
 console.log("[World Gen] [Setup] Imported P:R Registry");
 
 onmessage = (ev) => {
@@ -50,7 +56,12 @@ onmessage = (ev) => {
   );
   if (ev.data.type === "generate") {
     const data = ev.data;
+    noiseSeed(data.seed);
     generateTiles(data.noiseScale, data.noiseLevel);
+
+    Registry.worldgen.forEach();
+
+    postMessage("finish");
   }
 };
 
@@ -111,7 +122,6 @@ function generateTiles(noiseScale = 2, noiseLevel = 255) {
     }
     postMessage({ type: "row", defs: row });
   }
-  postMessage("finish");
   //postMessage({ type: "return", chunks: chunks });
   return chunks;
 }

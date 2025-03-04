@@ -11,7 +11,7 @@ class DroppedItemStack extends Entity {
   }
   init() {
     this.direction = rnd(0, 360);
-    this.speed = 5;
+    this.speed = 3;
     this.components = [];
     super.init();
     this.hitSize = 7.5;
@@ -23,7 +23,7 @@ class DroppedItemStack extends Entity {
       this.dead = true;
       return;
     }
-    this.speed *= 0.95;
+    this.speed *= 0.9;
     this.x += Math.cos(this.directionRad) * this.speed;
     this.y += Math.sin(this.directionRad) * this.speed;
     for (let ent of this.world.entities) {

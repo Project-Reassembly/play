@@ -20,11 +20,17 @@ class TileProducer extends Container {
   _blockOn = "null";
 
   tick() {
-    this._blockOn = this.chunk.getBlock(
+    let floor = this.chunk.getBlock(
+      this.blockX,
+      this.blockY,
+      "floor"
+    )?.registryName;
+    let tile = this.chunk.getBlock(
       this.blockX,
       this.blockY,
       "tiles"
     )?.registryName;
+    this._blockOn = !floor || floor === "null" ? tile : floor;
     if (!this._blockOn) {
       Log.send("Drill is on air!");
       this.chunk.removeBlock(this.blockX, this.blockY, "blocks");
@@ -86,7 +92,9 @@ class TileProducer extends Container {
         .padEnd((this._progress / this.duration) * 20, "■")
         .padEnd(20, "□")
         .substring(0, 20) +
-      " "
+      " \nSpeed: " +
+      roundNum((60 / this.duration) * this._speed, 2) +
+      "/s"
     );
   }
   drawTooltip(x, y, outlineColour, backgroundColour) {

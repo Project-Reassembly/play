@@ -6,22 +6,27 @@ Registry.blocks.add("grass", {
 Registry.blocks.add("stone", {
   type: "tile",
   image: "tile.stone",
+  drillSpeed: 0.5,
 });
 Registry.blocks.add("water", {
   type: "tile",
   image: "tile.water",
   speedMultiplier: 0.6,
-  buildable: false
+  buildable: false,
 });
 Registry.blocks.add("sand-water", {
   type: "tile",
   image: "tile.sand-water",
   speedMultiplier: 0.8,
+  drillSpeed: 0.8,
 });
 Registry.blocks.add("sand", {
   type: "tile",
   image: "tile.sand",
 });
+//## FLOORS ##
+
+//### BLOCKS ###
 //## DEFENSE ##
 createLinkedBlockAndItem(
   "stone-wall",
@@ -130,6 +135,36 @@ createLinkedBlockAndItem(
         inputs: [
           {
             item: "scrap",
+            count: 1,
+          },
+        ],
+        outputs: [
+          {
+            item: "scrap-conveyor",
+            count: 1,
+          },
+        ],
+        time: 60,
+      },
+      {
+        inputs: [
+          {
+            item: "scrap",
+            count: 2,
+          },
+        ],
+        outputs: [
+          {
+            item: "scrap-unloader",
+            count: 1,
+          },
+        ],
+        time: 90,
+      },
+      {
+        inputs: [
+          {
+            item: "scrap",
             count: 10,
           },
         ],
@@ -156,23 +191,57 @@ createLinkedBlockAndItem(
         ],
         time: 400,
       },
+      {
+        inputs: [
+          {
+            item: "scrap-assembler",
+            count: 1,
+          },
+          {
+            item: "scrap",
+            count: 5,
+          },
+        ],
+        outputs: [
+          {
+            item: "scrap-disassembler",
+            count: 1,
+          },
+        ],
+        time: 400,
+      },
     ],
   },
   {
     description:
-      "A crude construction,\ncapable of crafting\nsimple blocks and items.",
+      "A simple construction,\ncapable of crafting\nitems and some low-quality machines.\n\nCan reproduce.",
+  }
+);
+createLinkedBlockAndItem(
+  "scrap-disassembler",
+  "Scrap Disassembler",
+  "crafter.scrap-disassembler",
+  {
+    type: "uncrafter",
+    title: "Scrap Disassembler",
+    inventorySize: 6,
+    counterpart: "scrap-assembler",
+  },
+  {
+    description:
+      "A machine capable of reversing\nthe work of a Scrap Assembler.",
   }
 );
 //## DRILLS ##
 createLinkedBlockAndItem(
   "scrap-drill",
   "Scrap Drill",
-  "drill.1x1.ui",
+  "drill.scrap-drill.ui",
   {
     type: "drill",
-    topImg: "drill.1x1.top",
-    spinnerImg: "drill.1x1.spinner",
-    baseImg: "drill.1x1.base",
+    topImg: "drill.scrap-drill.top",
+    spinnerImg: "drill.scrap-drill.spinner",
+    baseImg: "drill.scrap-drill.base",
     results: {
       sand: "sand",
       "sand-water": "sand",
@@ -186,5 +255,38 @@ createLinkedBlockAndItem(
   },
   {
     description: "Slowly collects resources from below it.",
+  }
+);
+//## CONVEYOR ##
+createLinkedBlockAndItem(
+  "scrap-conveyor",
+  "Scrap Conveyor",
+  "conveyor.scrap-conveyor.ui",
+  {
+    title: "Scrap Conveyor",
+    type: "conveyor",
+    moveTime: 100,
+    baseImg: "conveyor.scrap-conveyor.base",
+    beltImg: "conveyor.scrap-conveyor.belt",
+  },
+  {
+    description:
+      "A slow-moving belt.\nTransports items from one place to another.",
+  }
+);
+createLinkedBlockAndItem(
+  "scrap-unloader",
+  "Scrap Unloader",
+  "conveyor.scrap-unloader.ui",
+  {
+    title: "Scrap Unloader",
+    type: "unloader",
+    moveTime: 100,
+    baseImg: "conveyor.scrap-conveyor.base",
+    beltImg: "conveyor.scrap-unloader.belt",
+  },
+  {
+    description:
+      "A slow-moving belt.\nTransports items from one place to another.\nPulls selected items from the block behind it.",
   }
 );

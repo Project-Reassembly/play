@@ -111,29 +111,32 @@ createUIImageComponent(
   0.5
 ).anchorBottom();
 
-createUIComponent(
-  ["in-game"],
-  [],
-  -295,
-  0,
-  80,
-  50,
-  "both",
-  () => {}
-).anchorBottom();
+createUIComponent(["in-game"], [], -295, 0, 80, 50, "both", () => {
+  selectedDirection = keyIsDown(SHIFT)
+    ? Block.direction.rotateAntiClockwise(selectedDirection)
+    : Block.direction.rotateClockwise(selectedDirection);
+}).anchorBottom();
 
-createUIImageComponent(
-  ["in-game"],
-  [],
-  -295,
-  0,
-  50,
-  50,
-  null,
-  "icon.cross",
-  false,
-  0.5
-).anchorBottom();
+let selectedDirection = Block.direction.UP;
+Object.defineProperties(
+  createUIImageComponent(
+    ["in-game"],
+    [],
+    -295,
+    0,
+    50,
+    50,
+    null,
+    "icon.arrow",
+    false,
+    0.5
+  ).anchorBottom(),
+  {
+    rotation: {
+      get: () => selectedDirection,
+    },
+  }
+);
 
 Object.defineProperty(
   createUIInventoryComponent(
@@ -169,13 +172,15 @@ Object.defineProperties(
       get: () => Container.selectedBlock,
     },
     x: {
-      get: () => -width/2 + 75,
+      get: () => -width / 2 + 75,
     },
     cols: {
-      get: () => Math.floor(width/100) - 1
-    }
+      get: () => Math.floor(width / 100) - 1,
+    },
   }
-).anchorBottom(95).invert();
+)
+  .anchorBottom(95)
+  .invert();
 Object.defineProperties(
   createUIImageComponent(
     ["in-game"],
@@ -194,7 +199,7 @@ Object.defineProperties(
       get: () => Container.selectedBlock?.image || "icon.cross",
     },
     x: {
-      get: () => -width/2 + 25,
+      get: () => -width / 2 + 25,
     },
   }
 ).anchorBottom(75);

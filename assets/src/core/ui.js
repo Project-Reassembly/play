@@ -11,7 +11,7 @@ const ui = {
     x: 0,
     blockX: 0,
     y: 0,
-    blockY: 0
+    blockY: 0,
   },
   get mouseButton() {
     if (!mouseButton) return "awaiting click";
@@ -33,7 +33,7 @@ const ui = {
   components: [],
   currentFPS: 0,
   previousFPS: [],
-  hoveredBlock: null
+  hoveredBlock: null,
 };
 
 class UIComponent {
@@ -125,6 +125,7 @@ class UIComponent {
   inverted = false;
   outline = true;
   backgroundColour = null;
+  rotation = Block.direction.RIGHT;
   updateActivity() {
     //It's active if it should show *and* all the conditions are met
     this.active =
@@ -177,6 +178,9 @@ class UIComponent {
   }
   draw() {
     push();
+    translate(this.x, this.y);
+    rotate(this.rotation);
+    translate(-this.x, -this.y);
     noStroke();
     if (this.inverted) scale(1, -1);
     if (this.width > 0 && this.height > 0) {
@@ -329,6 +333,9 @@ class ImageUIComponent extends UIComponent {
   }
   draw() {
     push();
+    translate(this.x, this.y);
+    rotate(this.rotation);
+    translate(-this.x, -this.y);
     fill(...this.outlineColour);
     if (this.emphasised) fill(...this.emphasisColour);
     //Draw outline behind background
@@ -457,12 +464,12 @@ function drawImg(
       //Say the problem
       console.error("Could not draw image: ", img);
       //Replace with a working image
-      drawImg(images.env.error, x, y, width, height, ...otherParameters);
+      drawImg("error", x, y, width, height, ...otherParameters);
     }
   }
 }
 
-function rotatedImg(img = images.env.error, x, y, width, height, angle) {
+function rotatedImg(img = "error", x, y, width, height, angle) {
   push(); //Save current position, rotation, etc
   translate(x, y); //Move middle to 0,0
   rotate(angle);

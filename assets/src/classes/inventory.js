@@ -79,20 +79,24 @@ class Inventory {
     return didntremove;
   }
 
+  clear() {
+    this.storage.splice(0);
+  }
+
   //Management
   autoStack() {
     let buffer = this.storage.slice(0);
     this.storage.splice(0);
     for (let item of buffer) {
       if (!item) continue;
-      if (item.item === "nothing") continue;
+      if (item.isEmpty()) continue;
       this.addItems(item.item, item.count, true);
     }
   }
   cleanInventory() {
     for (let index = 0; index < this.storage.length; index++) {
       let item = this.storage[index];
-      if (item && item instanceof ItemStack && item.isEmpty())
+      if (!item || !item instanceof ItemStack || item.isEmpty())
         this.storage[index] = ItemStack.EMPTY;
     }
   }
@@ -103,6 +107,20 @@ class Inventory {
   sortByCount() {
     this.cleanInventory();
     this.storage.sort(dynamicSort("-count"));
+  }
+  /**
+   * Tries to transfer all the items in this inventory to another one.
+   * @param {Inventory} to Inventory to transfer items to.
+   * @param {boolean} stack If false, does not attempt to stack the items transferred.
+   */
+  transfer(to, stack) {
+    this.iterate((item, slot, sotp) => {
+      let left = to.addItem(item.item, item.count, stack);
+      item.count = left;
+      if (item.isEmpty()) {
+        this.storage[slot] = ItemStack.EMPTY;
+      }
+    });
   }
 
   //Interaction
@@ -218,7 +236,7 @@ class Inventory {
 
   /**
    * Does something for each inventory slot. Ignores empty slots.
-   * @param {(item: ItemStack, slot: int, stop: func) => void} func What to do to each itemstack. Call `stop()` to break out of the loop.
+   * @param {(item: ItemStack, slot: int, stop: () => void) => void} func What to do to each itemstack. Call `stop()` to break out of the loop.
    * @param {int} from Slot to start counting from.
    * @param {boolean} [ignoreEmpty=false] Whether or not to ignore empty slots.
    */
@@ -253,7 +271,6 @@ class Inventory {
     backgroundColour = [95, 100, 100, 160],
     reverseVertical = false
   ) {
-    Inventory.tooltip = null;
     let itemsPerRow = cols ? cols : Math.ceil(this.size / rows);
     let itemRows = cols ? Math.ceil(this.size / cols) : rows;
     let displayX, displayY;

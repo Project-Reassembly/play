@@ -33,9 +33,11 @@ class Entity {
     this.components = this.components.map((x) => construct(x, "component"));
     this.baseSpeed = this.speed;
   }
-  addToWorld(world) {
+  addToWorld(world, x, y) {
     world.entities.push(this);
     this.world = world;
+    if (x != null) this.x = x;
+    if (y != null) this.y = y;
   }
   damage(type = "normal", amount = 0, source = null) {
     let calcAmount =
@@ -121,23 +123,24 @@ class Entity {
     }
   }
   tick() {
-    this.tickGroundEffects()
-    this.ai()
+    this.tickGroundEffects();
+    this.ai();
     this.checkBullets();
     this.tickStatuses();
   }
-  ai(){
+  ai() {
     if (this.target) {
       this.rotateTowards(this.target.x, this.target.y, this.turnSpeed);
     }
   }
-  tickGroundEffects(){
+  tickGroundEffects() {
     let blockOn = this.world.getBlock(
       Math.floor(this.x / Block.size),
       Math.floor(this.y / Block.size),
       "tiles"
     );
-    if(blockOn instanceof Tile) this.speed = this.baseSpeed * blockOn.speedMultiplier;
+    if (blockOn instanceof Tile)
+      this.speed = this.baseSpeed * blockOn.speedMultiplier;
   }
   draw() {
     for (let component of this.components) {

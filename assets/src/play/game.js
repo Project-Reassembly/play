@@ -26,6 +26,7 @@ let generationStarted = false;
 let generating = false;
 let genMsg = "Generating World...";
 let genProgress = 0;
+
 if (!window.Worker) {
   const errmsg =
     "This browser does not support Web Workers; World generation cannot proceed.";
@@ -49,14 +50,14 @@ let fonts = {};
 
 worldGenWorker.onmessage = (ev) => {
   if (ev.data === "finish") {
-    console.log("Generation finished.")
+    console.log("Generation finished.");
     genMsg = "Entering World";
     createPlayer();
     ui.camera.x = game.player.x;
     ui.camera.y = game.player.y;
     for (let tick = 0; tick < preloadTicks; tick++) world.tickAll();
     generating = false;
-    worldGenWorker.terminate()
+    worldGenWorker.terminate();
   } else if (typeof ev.data === "object") {
     if (ev.data.type === "progress") {
       genProgress = ev.data.progress;
@@ -116,14 +117,14 @@ async function delay(ms) {
   });
 }
 
-async function generateWorld() {
+async function generateWorld(seed) {
   generationStarted = true;
   generating = true;
   genProgress = 0;
   genMsg = "Generating World...";
   world.prepareForGeneration();
   console.log("Generation started");
-  worldGenWorker.postMessage({ type: "generate" });
+  worldGenWorker.postMessage({ type: "generate", seed: seed });
   // await delay(100);
   // world.generateTiles().then(async () => {
   //   genMsg = "Entering World";
@@ -211,7 +212,7 @@ function frame() {
     //Draw everything else
     if (ui.menuState === "in-game") {
       if (!generationStarted) {
-        generateWorld();
+        generateWorld(2147483647);
         return;
       }
       gameFrame();
@@ -238,6 +239,7 @@ function fpsUpdate() {
 }
 
 function uiFrame() {
+  Inventory.tooltip = null;
   //Tick UI
   updateUIActivity();
   tickUI();
@@ -418,7 +420,7 @@ function createPlayer() {
     hitSize: 25, //Always at least half of the smallest dimension
     speed: 3,
   });
-  player.inventory.addItem("scrap", 27);
+  player.inventory.addItem("scrap", 35);
   player.inventory.addItem("stone", 99);
   player.inventory.addItem("scrap-assembler");
   player.addToWorld(world);
@@ -474,22 +476,30 @@ function secondaryInteract() {
 function interact() {
   let heldItem = Inventory.mouseItemStack.getItem();
   let clickedBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
-  let clickedTile = world.getBlock(game.mouse.blockX, game.mouse.blockY, "tiles");
+  if (
+    clickedBlock &&
+    clickedBlock.interaction(game.player, Inventory.mouseItemStack)
+  )
+    return;
+  let clickedTile =
+    world.getBlock(game.mouse.blockX, game.mouse.blockY, "floor") ??
+    world.getBlock(game.mouse.blockX, game.mouse.blockY, "tiles");
   //If space is free, and buildable
-  if (!clickedBlock && clickedTile?.buildable) {
+  if (heldItem !== null && clickedTile?.buildable) {
     //Place items on free space
-    if (heldItem instanceof PlaceableItem) {
+    if (heldItem instanceof PlaceableItem)
       heldItem.place(
         Inventory.mouseItemStack,
         game.mouse.blockX,
-        game.mouse.blockY
+        game.mouse.blockY,
+        selectedDirection
       );
-    } else {
-      Container.selectedBlock = null;
-    }
+    else Container.selectedBlock = null;
   } else {
-    //If block is interacted with
-    Container.selectedBlock = clickedBlock;
+    //If block is (not) interacted with
+    if (clickedBlock && clickedBlock.selectable)
+      Container.selectedBlock = clickedBlock;
+    else Container.selectedBlock = null;
   }
 }
 
@@ -552,8 +562,8 @@ function nextRecipe() {
   let block = ui.hoveredBlock ?? Container.selectedBlock;
   if (!block) return;
   if (block instanceof Crafter) {
-    block.recipe++;
-    if (block.recipe >= block.recipes.length) block.recipe = 0;
+    block._recipe++;
+    if (block._recipe >= block.recipes.length) block._recipe = 0;
   }
 }
 
@@ -561,8 +571,8 @@ function prevRecipe() {
   let block = ui.hoveredBlock ?? Container.selectedBlock;
   if (!block) return;
   if (block instanceof Crafter) {
-    block.recipe--;
-    if (block.recipe < 0) block.recipe = block.recipes.length - 1;
+    block._recipe--;
+    if (block._recipe < 0) block._recipe = block.recipes.length - 1;
   }
 }
 

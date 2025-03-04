@@ -1,9 +1,46 @@
 class Block extends RegisteredItem {
   static size = 30;
+  selectable = false;
+  /**@readonly */
+  static dir = this.direction;
+  /**@readonly @enum*/
+  static direction = {
+    /**@readonly */
+    UP: -Math.PI / 2,
+    /**@readonly */
+    DOWN: Math.PI / 2,
+    /**@readonly */
+    LEFT: Math.PI,
+    /**@readonly */
+    RIGHT: 0,
+    rotateClockwise(dir) {
+      if (dir === Block.direction.UP) return Block.direction.RIGHT;
+      if (dir === Block.direction.RIGHT) return Block.direction.DOWN;
+      if (dir === Block.direction.DOWN) return Block.direction.LEFT;
+      return Block.direction.UP;
+    },
+    rotateAntiClockwise(dir) {
+      if (dir === Block.direction.UP) return Block.direction.LEFT;
+      if (dir === Block.direction.LEFT) return Block.direction.DOWN;
+      if (dir === Block.direction.DOWN) return Block.direction.RIGHT;
+      return Block.direction.UP;
+    },
+    oppositeOf(dir) {
+      if (dir === Block.direction.UP) return Block.direction.DOWN;
+      if (dir === Block.direction.LEFT) return Block.direction.RIGHT;
+      if (dir === Block.direction.RIGHT) return Block.direction.LEFT;
+      return Block.direction.UP;
+    },
+    vectorOf(direction) {
+      return { x: Math.cos(direction), y: Math.sin(direction) };
+    }
+  };
   disabled = false;
   image = "error";
   blockX = 0;
   blockY = 0;
+  rotatable = false;
+  direction = Block.direction.UP;
   /**@type {Chunk} */
   _chunk = null;
   set chunk(_) {
@@ -27,12 +64,16 @@ class Block extends RegisteredItem {
       this.size * Block.size
     );
   }
+  postDraw() {}
   /**
    * Fired when an entity interacts with this block.
    * @param {Entity} entity Interacting entity.
    * @param {ItemStack} usedItemStack Itemstack held while interacting.
+   * @returns {Boolean} True, if the block has been interacted with and should not be selected. False otherwise.
    */
-  interaction(entity, usedItemStack = ItemStack.EMPTY) {}
+  interaction(entity, usedItemStack = ItemStack.EMPTY) {
+    return false;
+  }
   canBreak(type = BreakType.delete) {
     return true;
   }

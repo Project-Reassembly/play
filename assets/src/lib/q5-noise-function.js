@@ -9,6 +9,26 @@ let scaled_cosine = function (i) {
   return 0.5 * (1.0 - Math.cos(i * Math.PI));
 };
 let p_perlin;
+function setNoiseParams(scale = 1, octaves = 4, falloff = 0.5) {
+  PERLIN_SIZE = scale * 4095;
+  perlin_amp_falloff = falloff;
+  perlin_octaves = octaves;
+}
+
+const noiseSeed = function (seed) {
+  let iseed = seed == undefined ? Math.random() * 4294967295 : seed;
+  let jsr = iseed;
+  if (!p_perlin) {
+    p_perlin = new Float32Array(PERLIN_SIZE + 1);
+  }
+  for (var i = 0; i < PERLIN_SIZE + 1; i++) {
+    jsr ^= jsr << 17;
+    jsr ^= jsr >> 13;
+    jsr ^= jsr << 5;
+    p_perlin[i] = (jsr >>> 0) / 4294967295;
+  }
+  return iseed;
+};
 
 const noise = function (x, y, z) {
   y = y || 0;

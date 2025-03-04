@@ -19,14 +19,23 @@ Registry.images.add("block.sandstone-wall", new ImageContainer("assets/textures/
 Registry.images.add("block.scrap-wall", new ImageContainer("assets/textures/block/blocks/defense/scrap-wall.png"))
 //Blocks > Crafters
 Registry.images.add("crafter.scrap-assembler", new ImageContainer("assets/textures/block/blocks/crafter/scrap-assembler.png"))
+Registry.images.add("crafter.scrap-disassembler", new ImageContainer("assets/textures/block/blocks/crafter/scrap-disassembler.png"))
 //Blocks > Drills
-Registry.images.add("drill.1x1.top", new ImageContainer("assets/textures/block/blocks/drill/drill-1x1-top.png"))
-Registry.images.add("drill.1x1.spinner", new ImageContainer("assets/textures/block/blocks/drill/drill-1x1-spinner.png"))
-Registry.images.add("drill.1x1.base", new ImageContainer("assets/textures/block/blocks/drill/drill-1x1-base.png"))
-Registry.images.add("drill.1x1.ui", new ImageContainer("assets/textures/block/blocks/drill/drill-1x1.png"))
+Registry.images.add("drill.scrap-drill.top", new ImageContainer("assets/textures/block/blocks/drill/scrap-drill-top.png"))
+Registry.images.add("drill.scrap-drill.spinner", new ImageContainer("assets/textures/block/blocks/drill/scrap-drill-spinner.png"))
+Registry.images.add("drill.scrap-drill.base", new ImageContainer("assets/textures/block/blocks/drill/scrap-drill-base.png"))
+Registry.images.add("drill.scrap-drill.ui", new ImageContainer("assets/textures/block/blocks/drill/scrap-drill.png"))
+//Blocks > Conveyors
+Registry.images.add("conveyor.scrap-conveyor.belt", new ImageContainer("assets/textures/block/blocks/conveyor/scrap-conveyor-belt.png"))
+Registry.images.add("conveyor.scrap-conveyor.base", new ImageContainer("assets/textures/block/blocks/conveyor/scrap-conveyor-base.png"))
+Registry.images.add("conveyor.scrap-conveyor.ui", new ImageContainer("assets/textures/block/blocks/conveyor/scrap-conveyor.png"))
+Registry.images.add("conveyor.scrap-unloader.belt", new ImageContainer("assets/textures/block/blocks/conveyor/scrap-unloader-belt.png"))
+Registry.images.add("conveyor.scrap-unloader.ui", new ImageContainer("assets/textures/block/blocks/conveyor/scrap-unloader.png"))
 //Icons
 Registry.images.add("icon.chest", new ImageContainer("assets/textures/icon/chest.png"))
 Registry.images.add("icon.cross", new ImageContainer("assets/textures/icon/cross.png"))
 Registry.images.add("icon.interaction", new ImageContainer("assets/textures/icon/interaction.png"))
 Registry.images.add("icon.question", new ImageContainer("assets/textures/icon/question.png"))
 Registry.images.add("icon.selector", new ImageContainer("assets/textures/icon/selector.png"))
+Registry.images.add("icon.arrow", new ImageContainer("assets/textures/icon/arrow.png"))
+Registry.images.add("icon.home", new ImageContainer("assets/textures/icon/home.png"))

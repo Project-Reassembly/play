@@ -2,6 +2,7 @@ class Container extends Block {
   /** @type {Inventory} */
   inventory = null;
   inventorySize = 30;
+  selectable = true;
   title = "Container";
   /**@type {Block | null} */
   static selectedBlock = null;

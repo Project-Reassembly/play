@@ -28,7 +28,7 @@ class Crafter extends Container {
     amount: 1,
     chance: 0.1,
   };
-  recipe = 0;
+  _recipe = 0;
   /*
   Recipes are like
   {
@@ -49,6 +49,11 @@ class Crafter extends Container {
     */
   #progress = 0;
   #speed = 1;
+  changeRecipe(index) {
+    this._recipe = index;
+    //Reset progress
+    this.#progress = 0;
+  }
   init() {
     super.init();
     this.recipes.forEach((recipe) => {
@@ -57,7 +62,7 @@ class Crafter extends Container {
     });
   }
   tick() {
-    let recipe = this.recipes[this.recipe];
+    let recipe = this.recipes[this._recipe];
     if (!this.inventory.hasItems(recipe.inputs, this.outputSlots)) return;
     this.tickRecipe(recipe, recipe.time);
   }
@@ -145,9 +150,32 @@ class Crafter extends Container {
     drawMultilineText(
       x,
       y,
-      this.stringifyRecipe(this.recipes[this.recipe]),
-      this.title + "   [" + this.recipe + "]",
+      this.stringifyRecipe(this.recipes[this._recipe]),
+      this.title + "   [" + this._recipe + "]",
       Item.getColourFromRarity(0, "light")
     );
+  }
+}
+
+class Uncrafter extends Crafter {
+  counterpart = "nothing";
+  craftWave = {
+    lifetime: 30,
+    fromRadius: 100,
+    toRadius: 0,
+    colourFrom: [255, 150, 0, 0],
+    colourTo: [255, 200, 0, 255],
+    strokeFrom: 10,
+    strokeTo: 0,
+  };
+  init() {
+    this.recipes = (Registry.blocks.get(this.counterpart).recipes ?? []).map(
+      (recipe) => ({
+        outputs: recipe.inputs,
+        inputs: recipe.outputs,
+        time: recipe.time * 1.5,
+      })
+    );
+    super.init();
   }
 }
