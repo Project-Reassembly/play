@@ -156,6 +156,48 @@ Object.defineProperty(
   }
 ).anchorBottom(30);
 
+//Weapon info, if any
+
+Object.defineProperty(
+  createMultilineUIComponent(
+    ["in-game"],
+    [],
+    -235,
+    230,
+    0,
+    0,
+    "none",
+    null,
+    "NOTHING",
+    true,
+    13
+  ),
+  "text",
+  {
+    get: () => game.player.leftHand.get(0)?.getItem()?.getContextualisedInfo(game.player) ?? "",
+  }
+).anchorBottom(45);
+Object.defineProperty(
+  createMultilineUIComponent(
+    ["in-game"],
+    [],
+    125,
+    230,
+    0,
+    0,
+    "none",
+    null,
+    "NOTHING",
+    true,
+    13
+  ),
+  "text",
+  {
+    get: () => game.player.rightHand.get(0)?.getItem()?.getContextualisedInfo(game.player) ?? "",
+  }
+).anchorBottom(45);
+
+//Selected block
 Object.defineProperties(
   createUIInventoryComponent(
     ["in-game"],
@@ -304,6 +346,57 @@ createUIComponent(
   15
 );
 
+createUIComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  -80,
+  20,
+  150,
+  30,
+  "both",
+  () => {
+    game.player.equipment.transfer(game.player.inventory, true);
+  },
+  "Store Equipment",
+  true,
+  15
+);
+createUIComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  -240,
+  20,
+  150,
+  30,
+  "both",
+  () => {
+    game.player.inventory.transfer(game.player.equipment, true);
+  },
+  "Equip First",
+  true,
+  15
+);
+createUIComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  -375,
+  20,
+  100,
+  30,
+  "both",
+  () => {
+    game.player.inventory.iterate(
+      (stack) =>
+        DroppedItemStack.create(stack, world, game.player.x, game.player.y, 5),
+      true
+    );
+    game.player.inventory.clear();
+  },
+  "Dump",
+  true,
+  15
+);
+
 Object.defineProperty(
   createUIInventoryComponent(
     ["in-game"],
@@ -319,5 +412,59 @@ Object.defineProperty(
   "entity",
   {
     get: () => game.player,
+  }
+);
+
+//90, 25
+Object.defineProperty(
+  createUIInventoryComponent(
+    ["in-game"],
+    ["menu:inventory"],
+    90,
+    25,
+    null,
+    null,
+    2,
+    undefined,
+    "rightHand"
+  ),
+  "entity",
+  {
+    get: () => game.player,
+  }
+);
+Object.defineProperty(
+  createUIInventoryComponent(
+    ["in-game"],
+    ["menu:inventory"],
+    300,
+    25,
+    null,
+    null,
+    2,
+    undefined,
+    "leftHand"
+  ),
+  "entity",
+  {
+    get: () => game.player,
+  }
+);
+
+Object.defineProperty(
+  createUIImageComponent(
+    ["in-game"],
+    ["menu:inventory"],
+    195,
+    25,
+    100,
+    100,
+    null,
+    "error",
+    false
+  ),
+  "image",
+  {
+    get: () => game.player?.components[1]?.image ?? "error",
   }
 );

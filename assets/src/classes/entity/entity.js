@@ -1,20 +1,12 @@
-class Entity {
-  x = 0;
-  y = 0;
-  direction = 0;
-  health = 100;
-  maxHealth = 100;
+class Entity extends ShootableObject {
   name = "Entity";
-  /** @type {World} */
-  world = null;
   resistances = [];
   //How the entity will be drawn
   components = [];
 
-  hitSize = 100;
+  hitSize = 20;
   speed = 10;
   turnSpeed = 10;
-  team = "enemy";
   target = { x: 0, y: 0 };
 
   //Status effects
@@ -24,37 +16,30 @@ class Entity {
   effectiveSpeedMult = 1;
   statuses = [];
 
-  constructor() {} //Because universal
+  //Physics
+  flying = false;
+  explosiveness = 0.1;
+
   get directionRad() {
     return (this.direction / 180) * Math.PI;
   }
   init() {
-    this.maxHealth = this.health; //Stop part-damaged entities spawning
+    super.init();
     this.components = this.components.map((x) => construct(x, "component"));
     this.baseSpeed = this.speed;
   }
+
+  moveTowards(x, y, rotate = true) {
+    super.moveTowards(x, y, this.speed, this.turnSpeed, rotate);
+  }
+
   addToWorld(world, x, y) {
     world.entities.push(this);
     this.world = world;
     if (x != null) this.x = x;
     if (y != null) this.y = y;
   }
-  damage(type = "normal", amount = 0, source = null) {
-    let calcAmount =
-      (amount / this.effectiveHealthMult) * (source?.effectiveDamageMult ?? 1); //Get damage multiplier of source, if there is one
-    for (let resistance of this.resistances) {
-      if (resistance.type === type) {
-        calcAmount -= amount * resistance.amount; //Negative resistance would actually make it do more damage
-      }
-    }
-    this.takeDamage(Math.max(calcAmount, 0), source); //Take the damage, but never take negative damage
-  }
-  heal(amount) {
-    this.health += amount;
-    if (this.health > this.maxHealth) {
-      this.health = this.maxHealth;
-    }
-  }
+
   knock(
     amount = 0,
     direction = -this.direction,
@@ -68,8 +53,7 @@ class Entity {
     let ymove = Math.sin(radians(direction));
     let xmove = Math.cos(radians(direction));
     if (!kineticKnockback) {
-      this.x += amount * xmove; //Knock in the direction of impact
-      this.y += amount * ymove;
+      this.move(amount * xmove, amount * ymove, this.flying);
     } else {
       let hit = false; //Has the entity hit anything?
       for (let iteration = 0; iteration < amount; iteration += resolution) {
@@ -88,8 +72,7 @@ class Entity {
             collided.push(entity);
 
             //Move back to stop infinite loop
-            this.x -= resolution * xmove; //Knock in the direction of impact
-            this.y -= resolution * ymove;
+            this.move(-resolution * xmove, -resolution * ymove, this.flying);
 
             //Propagate knockback
             entity.knock(
@@ -103,42 +86,55 @@ class Entity {
         }
         if (hit) break;
         else {
-          //If not hit, move
-          this.x += resolution * xmove; //Knock in the direction of impact
-          this.y += resolution * ymove;
+          this.move(resolution * xmove, resolution * ymove, this.flying);
         }
       }
     }
   }
-  takeDamage(amount = 0, source = null) {
-    this.damageTaken +=
-      Math.min(amount, this.health) * this.effectiveHealthMult;
-    if (source)
-      source.damageDealt +=
-        Math.min(amount, this.health) * this.effectiveHealthMult; //Stats pretend health was higher
-    this.health -= amount;
-    if (this.health <= 0) {
-      this.health = 0;
-      this.dead = true;
+
+  hitByBullet(bullet) {
+    if (bullet.controlledKnockback) {
+      //Get direction to the target
+      let direction = degrees(
+        p5.Vector.sub(
+          createVector(bullet.entity.target.x, bullet.entity.target.y), //Target pos 'B'
+          createVector(bullet.x, bullet.y) //Bullet pos 'A'
+        ).heading() //'A->B' = 'B' - 'A'
+      );
+      this.knock(bullet.knockback, direction, bullet.kineticKnockback); //Knock with default resolution
+    } else {
+      this.knock(bullet.knockback, bullet.direction, bullet.kineticKnockback); //Knock with default resolution
+    }
+    if (bullet.status !== "none") {
+      this.applyStatus(bullet.status, bullet.statusDuration);
     }
   }
+
   tick() {
     this.tickGroundEffects();
     this.ai();
-    this.checkBullets();
+    super.tick();
     this.tickStatuses();
   }
+
   ai() {
     if (this.target) {
       this.rotateTowards(this.target.x, this.target.y, this.turnSpeed);
     }
   }
+
   tickGroundEffects() {
-    let blockOn = this.world.getBlock(
-      Math.floor(this.x / Block.size),
-      Math.floor(this.y / Block.size),
-      "tiles"
-    );
+    let blockOn =
+      this.world.getBlock(
+        Math.floor(this.x / Block.size),
+        Math.floor(this.y / Block.size),
+        "floor"
+      ) ??
+      this.world.getBlock(
+        Math.floor(this.x / Block.size),
+        Math.floor(this.y / Block.size),
+        "tiles"
+      );
     if (blockOn instanceof Tile)
       this.speed = this.baseSpeed * blockOn.speedMultiplier;
   }
@@ -146,76 +142,9 @@ class Entity {
     for (let component of this.components) {
       component.draw(this.x, this.y, this.direction);
     }
+    super.draw();
   }
-  collidesWith(obj) {
-    //No collisions if dead
-    return (
-      !this.dead &&
-      dist(this.x, this.y, obj.x, obj.y) <= this.hitSize + obj.hitSize
-    );
-  }
-  checkBullets() {
-    for (let bullet of this.world.bullets) {
-      //If colliding with a bullet on different team, that it hasn't already been hit by and that still exists
-      if (
-        !bullet.remove &&
-        this.team !== bullet.entity.team &&
-        !bullet.damaged.includes(this) &&
-        bullet.collidesWith(this) //check collisions last for performance reasons
-      ) {
-        //Take all damage instances
-        for (let instance of bullet.damage) {
-          if (instance.area)
-            //If it explodes
-            splashDamageInstance(
-              bullet.x,
-              bullet.y,
-              instance.amount,
-              instance.type,
-              instance.area,
-              bullet.entity,
-              instance.visual, //        \
-              instance.sparkColour, //   |
-              instance.sparkColourTo, // |
-              instance.smokeColour, //   |- These are optional, but can be set per instance
-              instance.smokeColourTo, // |
-              instance.waveColour, //     /
-              bullet.status,
-              bullet.statusDuration
-            );
-          else this.damage(instance.type, instance.amount, bullet.entity);
-        }
-        if (bullet.controlledKnockback) {
-          //Get direction to the target
-          let direction = degrees(
-            p5.Vector.sub(
-              createVector(bullet.entity.target.x, bullet.entity.target.y), //Target pos 'B'
-              createVector(bullet.x, bullet.y) //Bullet pos 'A'
-            ).heading() //'A->B' = 'B' - 'A'
-          );
-          this.knock(bullet.knockback, direction, bullet.kineticKnockback); //Knock with default resolution
-        } else {
-          this.knock(
-            bullet.knockback,
-            bullet.direction,
-            bullet.kineticKnockback
-          ); //Knock with default resolution
-        }
-        if (bullet.status !== "none") {
-          this.applyStatus(bullet.status, bullet.statusDuration);
-        }
-        //Make the bullet know
-        bullet.damaged.push(this);
-        //Reduce pierce
-        bullet.pierce--;
-        //If exhausted
-        if (bullet.pierce < 0) {
-          //Delete
-          bullet.remove = true;
-        }
-      }
-    }
-  }
+
   tickStatuses() {
     this.effectiveSpeedMult =
       this.effectiveDamageMult =
@@ -235,31 +164,26 @@ class Entity {
     }
   }
   applyStatus(effect, time) {
-    this.statuses.push({ effect: effect, time: time, timeLeft: time });
+    if (time > 0)
+      this.statuses.push({ effect: effect, time: time, timeLeft: time });
   }
-  rotateTowards(x, y, amount) {
-    let maxRotateAmount = radians(amount); //use p5 to get radians
-    let delta = { x: x - this.x, y: y - this.y };
-    //Define variables
-    let currentDirection = p5.Vector.fromAngle(this.directionRad).heading(); //Find current angle, standardised
-    let targetDirection = Math.atan2(delta.y, delta.x); //Find target angle, standardised
-    if (targetDirection === currentDirection) return; //Do nothing if facing the right way
-    let deltaRot = targetDirection - currentDirection;
-    //Rotation correction
-    if (deltaRot < -PI) {
-      deltaRot += TWO_PI;
-    } else if (deltaRot > PI) {
-      deltaRot -= TWO_PI;
+
+  damage(type = "normal", amount = 0, source = null) {
+    let calcAmount =
+      (amount / this.effectiveHealthMult) * (source?.effectiveDamageMult ?? 1); //Get damage multiplier of source, if there is one
+    for (let resistance of this.resistances) {
+      if (resistance.type === type) {
+        calcAmount -= amount * resistance.amount; //Negative resistance would actually make it do more damage
+      }
     }
-    let sign = deltaRot < 0 ? -1 : 1; //Get sign: -1 if negative, 1 if positive
-    let deltaD = 0;
-    //Choose smaller turn
-    if (Math.abs(deltaRot) > maxRotateAmount) {
-      deltaD = maxRotateAmount * sign;
-    } else {
-      deltaD = deltaRot;
-    }
-    //Turn
-    this.direction += degrees(deltaD);
+    super.damage(type, calcAmount, source);
+  }
+
+  move(x, y) {
+    super.move(x, y, this.flying);
+  }
+  onHealthZeroed() {
+    super.onHealthZeroed();
+    createDestructionExplosion(this.x, this.y, this);
   }
 }

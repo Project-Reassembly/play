@@ -11,6 +11,8 @@ importScripts(
 );
 console.log("[World Gen] [Setup] Imported P:R Core");
 importScripts(
+  "../classes/physical.js",
+  "../classes/timer.js",
   "../classes/entity/entity.js",
   "../classes/entity/component.js",
   "../classes/entity/inventory-entity.js",
@@ -18,6 +20,7 @@ importScripts(
 
   "../classes/projectile/bullet.js",
   "../classes/projectile/laser-bullet.js",
+  "../classes/projectile/continuous-laser-bullet.js",
   "../classes/projectile/missile.js",
   "../classes/projectile/point-bullet.js",
   "../classes/projectile/critical.js",
@@ -49,6 +52,18 @@ importScripts(
   "../registries/worldgen.js"
 );
 console.log("[World Gen] [Setup] Imported P:R Registry");
+console.log(
+  "[World Gen] [Setup] Imported " + Registry.worldgen.size + " generators"
+);
+
+const generators = new Registry();
+Registry.worldgen.forEach((name, gen) =>
+  generators.add(name, construct(gen, "generator"))
+);
+
+console.log(
+  "[World Gen] [Setup] Constructed " + generators.size + " generators"
+);
 
 onmessage = (ev) => {
   console.log(
@@ -57,71 +72,20 @@ onmessage = (ev) => {
   if (ev.data.type === "generate") {
     const data = ev.data;
     noiseSeed(data.seed);
-    generateTiles(data.noiseScale, data.noiseLevel);
-
-    Registry.worldgen.forEach();
+    //generateTiles(data.noiseScale, data.noiseLevel);
+    let stage = 1;
+    generators.forEach((name, gen) => {
+      postMessage({
+        type: "progress-stage",
+        progress: stage / generators.size,
+      });
+      postMessage({ type: "progress", progress: 0 });
+      console.log("[World Gen] Stage '" + name + "'");
+      postMessage({ type: "genstage", stage: gen.stageTitle });
+      gen.generate();
+      stage++;
+    });
 
     postMessage("finish");
   }
 };
-
-/**
- * Creates the tiles for a world.
- * @param {number} size Size of the world in chunks.
- * @param {number} noiseScale Size of the noise function. Bigger makes more noisy.
- * @param {number} noiseLevel Vertical scale of the noise. Too low, and everything's water.
- */
-function generateTiles(noiseScale = 2, noiseLevel = 255) {
-  //Create grid
-  let maxProgress = World.size ** 2;
-  let progress = 0;
-  let chunks = create2DArray(World.size);
-  //Procedural ground gen
-  noiseScale *= 0.001;
-  for (let i = 0; i < World.size; i++) {
-    //Each row
-    let row = [];
-    //Chunk coords
-    for (let j = 0; j < World.size; j++) {
-      let newChunk = [];
-      for (let x = 0; x < Chunk.size; x++) {
-        //Block coords
-        for (let y = 0; y < Chunk.size; y++) {
-          let nx = roundNum(
-            noiseScale *
-              ((World.size / 2 + i) * Chunk.size * Block.size +
-                (x * Block.size + Block.size / 2)),
-            2
-          );
-          let ny = roundNum(
-            noiseScale *
-              ((World.size / 2 + j) * Chunk.size * Block.size +
-                (y * Block.size + Block.size / 2)),
-            2
-          );
-          let c = noiseLevel * noise(nx, ny);
-          if (c > 175) {
-            newChunk.push({ block: "stone", x: x, y: y });
-          } else if (c > 100) {
-            newChunk.push({ block: "grass", x: x, y: y });
-          } else if (c > 75) {
-            newChunk.push({ block: "sand", x: x, y: y });
-          } else if (c > 65) {
-            newChunk.push({ block: "sand-water", x: x, y: y });
-          } else if (c > 50) {
-            newChunk.push({ block: "water", x: x, y: y });
-          } else {
-            newChunk.push({ block: "water", x: x, y: y });
-          }
-        }
-      }
-      //chunks[j][i] = newChunk;
-      row.push({ chunk: newChunk, i: i, j: j });
-      progress++;
-      postMessage({ type: "progress", progress: progress / maxProgress });
-    }
-    postMessage({ type: "row", defs: row });
-  }
-  //postMessage({ type: "return", chunks: chunks });
-  return chunks;
-}

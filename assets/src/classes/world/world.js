@@ -1,5 +1,5 @@
 class World {
-  static size = 64;
+  static size = 6;
   /** The distance in chunks **outside the render distance** that will still tick. */
   static simulationDistance = 5;
   particles = [];
@@ -28,6 +28,18 @@ class World {
     }
     for (let entity of this.entities) {
       entity.tick();
+      if (entity instanceof InventoryEntity) {
+        entity.inventory.iterate((stack) => {
+          stack.getItem().tick(entity);
+        }, true);
+      }
+      if (entity instanceof EquippedEntity) {
+        for (let key of ["leftHand", "rightHand"]) {
+          entity[key].iterate((stack) => {
+            stack.getItem().tick(entity);
+          }, true);
+        }
+      }
     }
     //Only tick simulated chunks
     iterate2DArray(
@@ -116,6 +128,10 @@ class World {
       if (!World.isInRenderDistance(entity)) continue;
       entity.draw();
     }
+    for (let entity of this.entities) {
+      if (!World.isInRenderDistance(entity)) continue;
+      entity.postDraw();
+    }
     for (let bullet of this.bullets) {
       if (!World.isInRenderDistance(bullet)) continue;
       bullet.draw();
@@ -132,6 +148,13 @@ class World {
     xoffset = 0,
     yoffset = 0
   ) {
+    if (thing.size) padding += thing.size;
+    else if (thing.sizeX && thing.sizeY)
+      padding += Math.max(thing.sizeX, thing.sizeY);
+    if (thing.hitSize) padding += thing.hitSize;
+    else if (thing.width && thing.height)
+      padding += Math.max(thing.width, thing.height);
+
     if (
       (thing.x + xoffset) * posScale <
       ui.camera.x - width / 2 - padding * posScale

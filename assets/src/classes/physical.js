@@ -1,0 +1,297 @@
+class PhysicalObject extends RegisteredItem {
+  static debug = false;
+  x = 0;
+  y = 0;
+  /**@type {number} */
+  width = null;
+  /**@type {number} */
+  height = null;
+  direction = 0;
+  _previousRot = 0;
+  hitSize = 30;
+  /** @type {World} */
+  world = null;
+  init() {
+    this.width ??= this.hitSize;
+    this.height ??= this.hitSize;
+  }
+  /**
+   * @param {PhysicalObject} other
+   */
+  collidesWith(other) {
+    if (!other) return false;
+    return hitboxesIntersect(
+      this,
+      other,
+      this instanceof Block,
+      other instanceof Block
+    );
+  }
+
+  move(dx, dy, ignoresBlocks = false) {
+    this.x += dx;
+    this.y += dy;
+    if (ignoresBlocks) return;
+    let hx = Math.floor(this.x / Block.size);
+    let hy = Math.floor(this.y / Block.size);
+    let up = this.world.getBlock(hx, hy - 1, "blocks");
+    let down = this.world.getBlock(hx, hy + 1, "blocks");
+    let left = this.world.getBlock(hx - 1, hy, "blocks");
+    let right = this.world.getBlock(hx + 1, hy, "blocks");
+    if (
+      this.collidesWith(this.world.getBlock(hx, hy, "blocks")) ||
+      (right && !right.walkable && this.x + this.width / 2 > right.x) ||
+      (down && !down.walkable && this.y + this.height / 2 > down.y) ||
+      (left &&
+        !left.walkable &&
+        this.x - this.width / 2 < left.x + Block.size) ||
+      (up && !up.walkable && this.y - this.height / 2 < up.y + Block.size)
+    ) {
+      this.x -= dx;
+      this.y -= dy;
+    }
+  }
+
+  rotateTowards(x, y, amount) {
+    let maxRotateAmount = radians(amount); //use p5 to get radians
+    let delta = { x: x - this.x, y: y - this.y };
+    //Define variables
+    let currentDirection = p5.Vector.fromAngle(this.directionRad).heading(); //Find current angle, standardised
+    let targetDirection = Math.atan2(delta.y, delta.x); //Find target angle, standardised
+    if (targetDirection === currentDirection) return; //Do nothing if facing the right way
+    let deltaRot = targetDirection - currentDirection;
+    //Rotation correction
+    if (deltaRot < -PI) {
+      deltaRot += TWO_PI;
+    } else if (deltaRot > PI) {
+      deltaRot -= TWO_PI;
+    }
+    let sign = deltaRot < 0 ? -1 : 1; //Get sign: -1 if negative, 1 if positive
+    let deltaD = 0;
+    let done = false;
+    //Choose smaller turn
+    if (Math.abs(deltaRot) > maxRotateAmount) {
+      deltaD = maxRotateAmount * sign;
+      done = true;
+    } else {
+      deltaD = deltaRot;
+      done = false;
+    }
+    //Turn
+    this.direction += degrees(deltaD);
+    return done;
+  }
+
+  moveTowards(x, y, speed, turnSpeed, rotate = false) {
+    if (!rotate) {
+      let oldRot = this.direction;
+      this.direction = this._previousRot;
+      this.rotateTowards(x, y, turnSpeed);
+      this.x += speed * Math.cos(radians(this.direction)); //Move in x-direction
+      this.y += speed * Math.sin(radians(this.direction)); // Move in y-direction
+      this._previousRot = this.direction;
+      this.direction = oldRot;
+      return true;
+    } else {
+      let done = this.rotateTowards(x, y, turnSpeed);
+      this.x += speed * Math.cos(radians(this.direction)); //Move in x-direction
+      this.y += speed * Math.sin(radians(this.direction)); // Move in y-direction
+      return done;
+    }
+  }
+
+  draw() {
+    if (PhysicalObject.debug) {
+      push();
+      noFill();
+      stroke(0, 255, 0);
+      strokeWeight(2);
+      rect(this.x, this.y, this.width, this.height);
+      pop();
+    }
+  }
+  tick() {}
+}
+
+class ShootableObject extends PhysicalObject {
+  health = 0;
+  maxHealth = 0;
+  team = "enemy";
+  dead = false;
+  hasHealthbar = true;
+  _healthbarShowTime = 0;
+  init() {
+    super.init();
+    this.maxHealth = this.health;
+    console.log(
+      "Shootable with health " + this.health + " (" + this.maxHealth + ")"
+    );
+  }
+  tick() {
+    this.checkBullets();
+  }
+  takeDamage(amount = 0, source = null) {
+    if (amount === 0) return;
+    this.damageTaken +=
+      Math.min(amount, this.health) * this.effectiveHealthMult;
+    if (source)
+      source.damageDealt +=
+        Math.min(amount, this.health) * this.effectiveHealthMult; //Stats pretend health was higher
+    this.health -= amount;
+    this.world.particles.push(
+      new TextParticle(
+        this.x,
+        this.y,
+        rnd(0, Math.PI * 2),
+        60,
+        2,
+        0.1,
+        roundNum(amount, 1),
+        [255, (10 * this.maxHealth) / amount, 0],
+        [255, (10 * this.maxHealth) / amount, 0],
+        20,
+        10,
+        0,
+        true
+      )
+    );
+    if (this.health <= 0) {
+      this.health = 0;
+      this.dead = true;
+      this.onHealthZeroed();
+    }
+  }
+  onHealthZeroed() {}
+  checkBullets() {
+    if (!this.world) return;
+    for (let bullet of this.world.bullets) {
+      //If colliding with a bullet on different team, that it hasn't already been hit by and that still exists
+      if (
+        !bullet.remove &&
+        this.team !== bullet.entity.team &&
+        !bullet.damaged.includes(this) &&
+        (this.collidesWith(bullet) || bullet.collidesWith(this)) //check collisions last for performance reasons
+      ) {
+        //Take all damage instances
+        for (let instance of bullet.damage) {
+          if (!instance.spread) instance.spread = 0;
+          if (instance.area)
+            //If it explodes
+            splashDamageInstance(
+              bullet.x,
+              bullet.y,
+              instance.amount + rnd(instance.spread, -instance.spread),
+              instance.type,
+              instance.area,
+              bullet.entity,
+              instance.visual, //        \
+              instance.sparkColour, //   |
+              instance.sparkColourTo, // |
+              instance.smokeColour, //   |- These are optional, but can be set per instance
+              instance.smokeColourTo, // |
+              instance.waveColour, //     /
+              bullet.status,
+              bullet.statusDuration
+            );
+          else
+            this.damage(
+              instance.type,
+              instance.amount + rnd(instance.spread, -instance.spread),
+              bullet.entity
+            );
+        }
+        this.hitByBullet(bullet);
+        //Make the bullet know
+        bullet.damaged.push(this);
+        //Reduce pierce
+        bullet.pierce--;
+        //If exhausted
+        if (bullet.pierce < 0) {
+          //Delete
+          bullet.remove = true;
+        }
+      }
+    }
+  }
+  hitByBullet(bullet) {}
+  damage(type = "normal", amount = 0, source = null) {
+    this._healthbarShowTime = 180;
+    this.takeDamage(Math.max(amount, 0), source);
+  }
+  heal(amount) {
+    this.health += amount;
+    if (this.health > this.maxHealth) {
+      this.health = this.maxHealth;
+    }
+  }
+  collidesWith(obj) {
+    //No collisions if dead
+    return !this.dead && super.collidesWith(obj);
+  }
+  postDraw() {
+    if (this._healthbarShowTime > 0) {
+      push();
+      rectMode(CORNER);
+      stroke(0);
+      strokeWeight(1);
+      fill(0);
+      rect(
+        this.x - this.width / 2,
+        this.y + this.height / 2 - 5,
+        this.width,
+        5
+      );
+      fill(
+        ...blendColours([0, 255, 0], [255, 0, 0], this.health / this.maxHealth)
+      );
+      noStroke();
+      rect(
+        this.x - this.width / 2,
+        this.y + this.height / 2 - 5,
+        (this.width * this.health) / this.maxHealth,
+        5
+      );
+      pop();
+      if (!game.paused) this._healthbarShowTime--;
+    }
+  }
+}
+
+/**
+ * Checks collisions between 2 actual objects.
+ * @param {PhysicalObject} hb1 First object to check
+ * @param {PhysicalObject} hb2 Second object to check.
+ * @returns True if the objects collide.
+ */
+function hitboxesIntersect(hb1, hb2, isHB1Block, isHB2Block) {
+  return rectanglesIntersect(
+    hb1.x + (isHB1Block ? Block.size / 2 : 0),
+    hb1.y + (isHB1Block ? Block.size / 2 : 0),
+    hb1.width / 2,
+    hb1.height / 2,
+    hb2.x + (isHB2Block ? Block.size / 2 : 0),
+    hb2.y + (isHB2Block ? Block.size / 2 : 0),
+    hb2.width / 2,
+    hb2.height / 2
+  );
+}
+/**
+ * Checks for collision between 2 rectangular objects/hitboxes.
+ * @param {number} ox Object X position
+ * @param {number} oy Object Y position
+ * @param {number} odx Object width
+ * @param {number} ody Object height
+ * @param {number} cx Collider X
+ * @param {number} cy Collider Y
+ * @param {number} dx Collider width
+ * @param {number} dy Collider height
+ * @returns True if the rectangles are colliding or not.
+ */
+function rectanglesIntersect(ox, oy, odx, ody, cx, cy, dx, dy) {
+  return (
+    ox + odx >= cx - dx &&
+    ox - odx <= cx + dx &&
+    oy + ody >= cy - dy &&
+    oy - ody <= cy + dy
+  );
+}

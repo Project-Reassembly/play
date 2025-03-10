@@ -75,14 +75,11 @@ class ItemStack {
     this.item = item;
     this.count = count;
   }
-  init() {
-    this._internalitem = this._inititem;
-  }
   toString(useDisplay = false) {
     return (useDisplay ? this.getItem().name : this.item) + " x" + this.count;
   }
   clear() {
-    this._internalitem = "nothing";
+    this.item = "nothing";
     this.count = 0;
     this.#itemCache = null;
   }

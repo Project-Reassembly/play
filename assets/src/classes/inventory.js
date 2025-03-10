@@ -90,7 +90,7 @@ class Inventory {
     for (let item of buffer) {
       if (!item) continue;
       if (item.isEmpty()) continue;
-      this.addItems(item.item, item.count, true);
+      this.addItem(item.item, item.count, true);
     }
   }
   cleanInventory() {
@@ -187,12 +187,20 @@ class Inventory {
    * @param {int[]} [excludedSlots=[]] The slots to ignore while searching.
    */
   hasItem(item, count = 1, excludedSlots = []) {
+    return this.count(item, excludedSlots) >= count;
+  }
+  /**
+   * Counts the number of a type of item in this inventory.
+   * @param {string} item The item to look for.
+   * @param {int[]} [excludedSlots=[]] The slots to ignore while searching.
+   */
+  count(item, excludedSlots = []) {
     let found = 0;
     this.iterate((slotContent, slot) => {
       if (excludedSlots.includes(slot)) return;
       if (slotContent.item === item) found += slotContent.count;
     }, true);
-    return found >= count;
+    return found;
   }
   /**
    * Checks if an inventory has the equivalent of all of the passed itemstacks. Do not pass multiple stacks of the same item. Instead, increase the passed stack size over the maximum.
@@ -271,6 +279,7 @@ class Inventory {
     backgroundColour = [95, 100, 100, 160],
     reverseVertical = false
   ) {
+    push();
     let itemsPerRow = cols ? cols : Math.ceil(this.size / rows);
     let itemRows = cols ? Math.ceil(this.size / cols) : rows;
     let displayX, displayY;
@@ -365,14 +374,17 @@ class Inventory {
           noStroke();
           fill(invitemstack.count > invitem.stackSize ? "red" : 255);
           textFont(fonts.ocr);
-          textSize(20);
+          textSize(itemSize / 2);
           push();
           textAlign(RIGHT, BASELINE);
-          text(
-            invitemstack.count,
-            displayX + itemSize / 2,
-            displayY + itemSize / 2
-          );
+          if (invitemstack.count > 1)
+            text(
+              invitemstack.count > 999
+                ? shortenedNumber(invitemstack.count, 0)
+                : invitemstack.count,
+              displayX + itemSize / 2,
+              displayY + itemSize / 2
+            );
           pop();
         } else {
           if (
@@ -390,6 +402,7 @@ class Inventory {
         pop();
       }
     }
+    pop();
   }
   static drawMIS(itemSize) {
     if (!Inventory.mouseItemStack.isEmpty()) {
@@ -411,11 +424,14 @@ class Inventory {
       textFont(fonts.ocr);
       textSize(20);
       textAlign(RIGHT, BASELINE);
-      text(
-        Inventory.mouseItemStack.count,
-        ui.mouse.x + itemSize / 2,
-        ui.mouse.y + itemSize / 2
-      );
+      if (Inventory.mouseItemStack.count > 1)
+        text(
+          Inventory.mouseItemStack.count > 999
+            ? shortenedNumber(Inventory.mouseItemStack.count, 0)
+            : Inventory.mouseItemStack.count,
+          ui.mouse.x + itemSize / 2,
+          ui.mouse.y + itemSize / 2
+        );
       pop();
     }
   }
@@ -462,6 +478,7 @@ class Inventory {
     let textX = ui.mouse.x + 10;
     let textY = displayY - lines * 6 + 28;
     text(header, textX, textY - 5);
+    fill(Item.getColourFromRarity(0, "light"));
     textSize(18);
     noStroke();
     for (let line = 0; line < lines; line++) {
@@ -478,42 +495,43 @@ function drawMultilineText(
   header,
   colour = [0],
   outlineColour = [50, 50, 50],
-  backgroundColour = [95, 100, 100, 160]
+  backgroundColour = [95, 100, 100, 160],
+  txtSize = 20
 ) {
   push();
   textAlign(LEFT);
   textFont(fonts.ocr);
-  textSize(20);
-  strokeWeight(2);
+  textSize(txtSize);
+  strokeWeight(txtSize / 10);
   let maxWidth = textWidth(header) * 1.05;
   let body = txt.split("\n");
   let descLines = txt.split("\n").length + 2;
   let lines = 2 + Math.ceil(descLines);
-  textSize(18);
+  textSize(txtSize * 0.9);
   for (let line of body) {
     let lw = textWidth(line);
-    if (lw > maxWidth) maxWidth = lw + 12;
+    if (lw > maxWidth) maxWidth = lw + txtSize * 0.6;
   }
   let displayX = x + maxWidth / 2;
-  textSize(20);
-  let displayY = y + (lines * 12) / 2;
-  if (displayY + lines * 6 > height / 2) {
-    displayY = height / 2 - lines * 6;
+  textSize(txtSize);
+  let displayY = y + (lines * txtSize * 0.6) / 2;
+  if (displayY + lines * txtSize * 0.3 > height / 2) {
+    displayY = height / 2 - lines * txtSize * 0.3;
   }
   fill(backgroundColour);
   strokeWeight(5);
   stroke(outlineColour);
-  rect(displayX, displayY, maxWidth, lines * 12);
+  rect(displayX, displayY, maxWidth, lines * txtSize * 0.6);
   fill(colour);
   stroke(colour);
   strokeWeight(1);
   let textX = x + 10;
   let textY = displayY - lines * 6 + 28;
   text(header, textX, textY - 5);
-  textSize(18);
+  textSize(txtSize * 0.9);
   noStroke();
   for (let line = 0; line < lines; line++) {
-    text(body[line], textX, textY + 15 + line * 15);
+    text(body[line], textX, textY + txtSize * 0.75 + line * txtSize * 0.75);
   }
   pop();
 }

@@ -25,7 +25,7 @@ class Missile extends Bullet {
               this.flameLength / this.speed, //Fixed life
               0,
               0,
-              "circle", //flames
+              this.trailShape, //flames
               this.trailColour,
               this.trailColourTo, //Lerp colour thing
               this.hitSize * 1.9,
@@ -102,7 +102,7 @@ class Missile extends Bullet {
           if (entity.team !== this.entity.team && !entity.dead) {
             //Only select living entities
             let dist = Math.sqrt(
-              (ui.mouse.x - entity.x) ** 2 + (ui.mouse.y - entity.y) ** 2
+              (game.mouse.x - entity.x) ** 2 + (game.mouse.y - entity.y) ** 2
             ); //Pythagorean Theorem to find distance
             if (dist < minDist) {
               //If closer
@@ -114,7 +114,7 @@ class Missile extends Bullet {
       }
     } else if (this.targetType === "mouse") {
       //Closest to mouse pointer
-      selected = ui.mouse;
+      selected = game.mouse;
     }
     this.target = selected;
   }

@@ -1,5 +1,7 @@
-class Weapon extends Equippable{
+class Weapon extends Equippable {
   reload = 30;
+  ammoType = "none";
+  ammoUse = 1;
   shoot = {
     bullet: null,
     pattern: {
@@ -19,62 +21,96 @@ class Weapon extends Equippable{
   maxAccel = 2;
   #acceleration = 0;
   #accelerated = 0;
-  constructor() {}
-  tick() {
-    super.tick();
-    this.decelerate()
+  /**@param {EquippedEntity} holder  */
+  tick(holder) {
+    super.tick(holder);
+    this.decelerate();
     if (this.#cooldown > 0) {
       this.#cooldown--;
     }
   }
-  getAcceleratedReloadRate(){
-    if(this.#acceleration <= -1 || this.#acceleration > this.maxAccel) return this.reload; //If bad acceleration then ignore it
+  getAcceleratedReloadRate() {
+    if (this.#acceleration <= -1 || this.#acceleration > this.maxAccel)
+      return this.reload; //If bad acceleration then ignore it
     return this.reload / (1 + this.#acceleration); //2 acceleration = 200% fire rate increase = 3x fire rate
   }
   accelerate() {
     this.#accelerated = this.getAcceleratedReloadRate() * 1.1; //Always wait for at least the reload time before deceling
-    if(this.#acceleration < this.maxAccel){
+    if (this.#acceleration < this.maxAccel) {
       this.#acceleration += this.accel;
     }
-    if(this.#acceleration > this.maxAccel){
+    if (this.#acceleration > this.maxAccel) {
       this.#acceleration = this.maxAccel;
     }
   }
-  decelerate(){
+  decelerate() {
     //If accelerated this frame, don't slow down
-    if(this.#accelerated > 0){
+    if (this.#accelerated > 0) {
       this.#accelerated--;
       return;
     }
     //Else do
-    if(this.#acceleration > 0){
+    if (this.#acceleration > 0) {
       this.#acceleration -= this.accelDecay;
     }
-    if(this.#acceleration < 0){
+    if (this.#acceleration < 0) {
       this.#acceleration = 0;
     }
   }
-  fire() {
+  /**
+   * @param {EquippedEntity} holder
+   */
+  fire(holder) {
     if (this.#cooldown <= 0) {
+      if (this.ammoType !== "none") {
+        if (holder.inventory.hasItem(this.ammoType, this.ammoUse))
+          holder.inventory.removeItem(this.ammoType, this.ammoUse);
+        else return;
+      }
+      let pos = this.component.getPosOn(holder);
       this.#cooldown = this.getAcceleratedReloadRate();
-      this.accelerate() //Apply acceleration effects
+      this.accelerate(); //Apply acceleration effects
       //Resolve nonexistent properties
       this.shoot.pattern.spread ??= 0;
       this.shoot.pattern.amount ??= 1;
       this.shoot.pattern.spacing ??= 0;
 
       patternedBulletExpulsion(
-        this.x,
-        this.y,
+        pos.x,
+        pos.y,
         this.shoot.bullet,
         this.shoot.pattern.amount,
-        this.rotation,
+        degrees(pos.direction),
         this.shoot.pattern.spread,
         this.shoot.pattern.spacing,
-        this.holder.world,
-        this.holder
+        holder.world,
+        holder
       );
     }
+  }
+  /**@param {EquippedEntity} holder  */
+  use(holder, isSecondary = false) {
+    if (isSecondary) {
+    } else {
+      this.fire(holder);
+    }
+    super.use(holder, isSecondary);
+  }
+  /**@param {EquippedEntity} holder  */
+  getContextualisedInfo(holder) {
+    return (
+      this.name +
+      "\nAmmo: " +
+      (this.ammoType !== "none" ? holder.inventory.count(this.ammoType) : "∞") +
+      "\n" +
+      this.ammoType +
+      "\n" +
+      ""
+        .padEnd((this.#cooldown / this.reload) * 15, "■")
+        .padEnd(15, "□")
+        .substring(0, 15) +
+      " "
+    );
   }
 }
 
@@ -89,8 +125,6 @@ function patternedBulletExpulsion(
   world,
   entity
 ) {
-  //Derives most of its code from `Weapon.fire()`
-  //universal mode: a c t i v a t e
   //Max difference in direction
   let diff = (spacing * (amount - 1)) / 2;
   //Current angle

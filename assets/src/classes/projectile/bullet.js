@@ -1,6 +1,4 @@
-class Bullet {
-  x = 0;
-  y = 0;
+class Bullet extends PhysicalObject {
   direction = 0;
   damage = [];
   speed = 20;
@@ -8,16 +6,16 @@ class Bullet {
   hitSize = 5;
   trail = true;
   trailColour = [255, 255, 255, 200];
+  trailShape = "rhombus";
   remove = false;
   pierce = 0;
   drawer = {
     shape: "circle",
     fill: "red",
-    image: images.env.error,
+    image: "error",
     width: 10,
     height: 10,
   };
-  world = null;
   entity = null;
   knockback = 0;
   kineticKnockback = false;
@@ -47,6 +45,7 @@ class Bullet {
     return (this.direction / 180) * Math.PI;
   }
   init() {
+    super.init();
     this.maxLife = this.lifetime;
     this._trailInterval = this.hitSize * 4;
   }
@@ -60,8 +59,7 @@ class Bullet {
       //Scale to speed
       moveVector.mult(this.speed * dt);
       //Move
-      this.x += moveVector.x;
-      this.y += moveVector.y;
+      this.move(moveVector.x, moveVector.y);
       //Tick lifetime
       if (this.lifetime <= 0) {
         this.remove = true;
@@ -70,9 +68,13 @@ class Bullet {
       }
     }
   }
+  move(x, y) {
+    super.move(x, y, true);
+  }
   spawnTrail(dt) {
     //This got too long
     for (let e = 0; e < this.speed * dt; e++) {
+      this._trailCounter--;
       if (this._trailCounter <= 0) {
         if (this.world?.particles != null && this.trail) {
           this.world.particles.push(
@@ -80,10 +82,10 @@ class Bullet {
               this.x - e * p5.Vector.fromAngle(this.directionRad).x,
               this.y - e * p5.Vector.fromAngle(this.directionRad).y,
               this.directionRad,
-              this.maxLife * 1.2,
+              (this.maxLife * 1.2) ** 0.4,
               0,
               0,
-              "rhombus",
+              this.trailShape,
               this.trailColour,
               this.trailColour,
               this.hitSize * 1.9,
@@ -95,8 +97,6 @@ class Bullet {
           );
         }
         this._trailCounter = this._trailInterval;
-      } else {
-        this._trailCounter--;
       }
     }
   }
@@ -122,9 +122,7 @@ class Bullet {
         this.directionRad
       );
     }
-  }
-  collidesWith(obj) {
-    return dist(this.x, this.y, obj.x, obj.y) <= this.hitSize + obj.hitSize;
+    super.draw();
   }
   frag() {
     patternedBulletExpulsion(

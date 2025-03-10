@@ -2,7 +2,7 @@ const game = {
   saveslot: 1,
   //Control type
   control: "keyboard",
-  /** @type {EquippedEntity | null} Player entity */
+  /** @type {Player | null} Player entity */
   player: null,
   paused: false,
   get mouse() {
@@ -26,6 +26,8 @@ let generationStarted = false;
 let generating = false;
 let genMsg = "Generating World...";
 let genProgress = 0;
+let genStageProgress = 0;
+//
 
 if (!window.Worker) {
   const errmsg =
@@ -48,6 +50,10 @@ let waitingForWorker = false;
 //
 let fonts = {};
 
+//Worldgen analysis
+let stats = {};
+let failed = 0;
+
 worldGenWorker.onmessage = (ev) => {
   if (ev.data === "finish") {
     console.log("Generation finished.");
@@ -58,20 +64,81 @@ worldGenWorker.onmessage = (ev) => {
     for (let tick = 0; tick < preloadTicks; tick++) world.tickAll();
     generating = false;
     worldGenWorker.terminate();
+    //Worldgen stats
+    let log = "\n";
+    let total = Object.values(stats).reduce((a, b) => a + b);
+    log += "\n#### WORLD GENERATED ####";
+    log += "\nWorld Breakdown:";
+    for (let key of Object.getOwnPropertyNames(stats)) {
+      let val = stats[key];
+      log +=
+        "\n| " +
+        key +
+        ": " +
+        val +
+        " (" +
+        roundNum((val / total) * 100, 2) +
+        "%)";
+    }
+    log += "\n" + total + " total blocks";
+    log +=
+      "\n" +
+      failed +
+      " failed placements (" +
+      roundNum((failed / total) * 100, 2) +
+      "%)";
+    log += "\n#########################";
+    console.log(log);
   } else if (typeof ev.data === "object") {
+    if (ev.data.type === "genstage") {
+      genMsg = ev.data.stage;
+    }
     if (ev.data.type === "progress") {
       genProgress = ev.data.progress;
     }
-    if (ev.data.type === "row") {
-      for (let def of ev.data.defs) {
-        let chunk = new Chunk();
-        for (let tile of def.chunk) {
-          chunk.addBlock(tile.block, tile.x, tile.y, "tiles");
+    if (ev.data.type === "progress-stage") {
+      genStageProgress = ev.data.progress;
+    }
+    if (ev.data.type === "chunk") {
+      let def = ev.data.def;
+      let chunk = new Chunk();
+      for (let tile of def.chunk) {
+        //Create block, and overwrite properties
+        try {
+          Object.assign(
+            chunk.addBlock(tile.block, tile.x, tile.y, "tiles"),
+            def.construction ?? {}
+          );
+
+          stats[tile.block] ??= 0;
+          stats[tile.block]++;
+        } catch (e) {
+          console.warn("Worldgen Error:\n" + e);
+          failed++;
+
+          stats["(" + tile.block + ")"] ??= 0;
+          stats["(" + tile.block + ")"]++;
         }
-        chunk.world = world;
-        chunk.x = def.i;
-        chunk.y = def.j;
-        world.chunks[def.j][def.i] = chunk;
+      }
+      chunk.world = world;
+      chunk.x = def.i;
+      chunk.y = def.j;
+      world.chunks[def.j][def.i] = chunk;
+    }
+    if (ev.data.type === "build") {
+      let def = ev.data.def;
+      for (let block of def.blocks) {
+        //Create block, and overwrite properties
+        if (world.isPositionFree(ev.data.x + block.x, ev.data.y + block.y))
+          Object.assign(
+            world.placeAt(
+              block.block,
+              ev.data.x + block.x,
+              ev.data.y + block.y,
+              "blocks"
+            ),
+            def.construction ?? {}
+          );
       }
     }
   }
@@ -125,16 +192,6 @@ async function generateWorld(seed) {
   world.prepareForGeneration();
   console.log("Generation started");
   worldGenWorker.postMessage({ type: "generate", seed: seed });
-  // await delay(100);
-  // world.generateTiles().then(async () => {
-  //   genMsg = "Entering World";
-  //   createPlayer();
-  //   ui.camera.x = game.player.x;
-  //   ui.camera.y = game.player.y;
-  //   for (let tick = 0; tick < preloadTicks; tick++) world.tickAll();
-  //   await delay(100);
-  //   generating = false;
-  // });
   framesToDraw = 0;
 }
 
@@ -190,6 +247,7 @@ function fixError(ev) {
 function frame() {
   if (generating) {
     push();
+    textFont(fonts.darktech);
     fill(0);
     stroke(255);
     strokeWeight(3);
@@ -199,10 +257,28 @@ function frame() {
     fill(0);
     rectMode(CENTER);
     rect(width / 2, height / 2 + 60, width * 0.6, 30);
+    rect(width / 2, height / 2 + 120, width * 0.4, 20);
     fill(255, 0, 0);
     let w = width * 0.6 * genProgress;
+    let w2 = width * 0.4 * genStageProgress;
     rectMode(CORNER);
     rect(width * 0.2, height / 2 + 45, w, 30);
+    rect(width * 0.3, height / 2 + 110, w2, 20);
+    textFont(fonts.ocr);
+    textAlign(CENTER, CENTER);
+    fill(255);
+    noStroke();
+    textSize(18);
+    text((genProgress * 100).toFixed(2) + "%", width / 2, height / 2 + 60);
+    textSize(12);
+    text(
+      "Stage " +
+        Registry.worldgen.size * genStageProgress +
+        "/" +
+        Registry.worldgen.size,
+      width / 2,
+      height / 2 + 120
+    );
     pop();
   } else {
     //Frameskip stuff
@@ -212,7 +288,7 @@ function frame() {
     //Draw everything else
     if (ui.menuState === "in-game") {
       if (!generationStarted) {
-        generateWorld(2147483647);
+        generateWorld(64927391); //2147483647
         return;
       }
       gameFrame();
@@ -269,6 +345,7 @@ function gameFrame() {
   push();
   frameSkippingFunction(() => {
     if (!game.paused) {
+      respawnTimer.tick();
       movePlayer();
       world.tickAll();
     }
@@ -297,28 +374,28 @@ function movePlayer() {
     game.player.y > borders()[1] /* Top */ + game.player.hitSize
   ) {
     //If 'W' pressed
-    game.player.y -= game.player.speed;
+    game.player.move(0, -game.player.speed);
   }
   if (
     keyIsDown(83) &&
     game.player.y < borders()[3] /* Bottom */ - game.player.hitSize
   ) {
     //If 'S' pressed
-    game.player.y += game.player.speed;
+    game.player.move(0, game.player.speed);
   }
   if (
     keyIsDown(65) &&
     game.player.x > borders()[0] /* Left */ + game.player.hitSize
   ) {
     //If 'A' pressed
-    game.player.x -= game.player.speed;
+    game.player.move(-game.player.speed, 0);
   }
   if (
     keyIsDown(68) &&
     game.player.x < borders()[2] /* Right */ - game.player.hitSize
   ) {
     //If 'D' pressed
-    game.player.x += game.player.speed;
+    game.player.move(game.player.speed, 0);
   }
 }
 
@@ -402,28 +479,30 @@ function showMousePos() {
 }
 
 function createPlayer() {
-  /** @type {EquippedEntity} */
+  /** @type {Player} */
   let player = construct({
-    type: "equipped-entity",
+    type: "player",
     x: worldSize / 2,
     y: worldSize / 2,
-    name: "player",
-    health: 200,
+    name: "Player",
+    health: 100,
     components: [
       {
         type: "component",
-        width: 50,
-        height: 50,
+        width: 30,
+        height: 30,
       },
     ],
     team: "player",
-    hitSize: 25, //Always at least half of the smallest dimension
+    width: 25,
+    height: 25,
     speed: 3,
   });
   player.inventory.addItem("scrap", 35);
   player.inventory.addItem("stone", 99);
   player.inventory.addItem("scrap-assembler");
   player.addToWorld(world);
+  player.setSpawn()
   game.player = player;
 
   //Change to an accessor property
@@ -460,19 +539,42 @@ function mouseInteraction() {
 }
 
 function secondaryInteract() {
-  let block = world.getBlock(game.mouse.blockX, game.mouse.blockY);
-  if (!block) return;
-  //Break breakables
-  if (block.dropItem) {
-    if (Inventory.mouseItemStack.item === "nothing") {
-      if (!block.break(BreakType.deconstruct)) return;
-      world.break(game.mouse.blockX, game.mouse.blockY);
-      if (block === Container.selectedBlock) {
-        Container.selectedBlock = null;
+  if (Inventory.mouseItemStack.item === "nothing") {
+    let block = world.getBlock(game.mouse.blockX, game.mouse.blockY);
+    if (block)
+      if (block.dropItem) {
+        //Break breakables
+
+        if (!block.break(BreakType.deconstruct)) return;
+        world.break(game.mouse.blockX, game.mouse.blockY);
+        if (block === Container.selectedBlock) {
+          Container.selectedBlock = null;
+        }
+        return;
       }
-    }
+    if (
+      game.player.rightHand.get(0) instanceof ItemStack &&
+      game.player.rightHand.get(0).getItem() instanceof Equippable
+    )
+      game.player.rightHand.get(0).getItem().use(game.player, true);
+    if (
+      game.player.leftHand.get(0) instanceof ItemStack &&
+      game.player.leftHand.get(0).getItem() instanceof Equippable
+    )
+      game.player.leftHand.get(0).getItem().use(game.player, true);
+  } else {
+    DroppedItemStack.create(
+      Inventory.mouseItemStack,
+      world,
+      game.player.x,
+      game.player.y,
+      10,
+      game.player.direction + rnd(-10, 10)
+    );
+    Inventory.mouseItemStack.clear();
   }
 }
+
 function interact() {
   let heldItem = Inventory.mouseItemStack.getItem();
   let clickedBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
@@ -495,12 +597,29 @@ function interact() {
         selectedDirection
       );
     else Container.selectedBlock = null;
+    return;
   } else {
     //If block is (not) interacted with
-    if (clickedBlock && clickedBlock.selectable)
+    if (clickedBlock && clickedBlock.selectable) {
       Container.selectedBlock = clickedBlock;
-    else Container.selectedBlock = null;
+      return;
+    } else {
+      if (Container.selectedBlock) {
+        Container.selectedBlock = null;
+        return;
+      }
+    }
   }
+  if (
+    game.player.rightHand.get(0) instanceof ItemStack &&
+    game.player.rightHand.get(0).getItem() instanceof Equippable
+  )
+    game.player.rightHand.get(0).getItem().use(game.player);
+  if (
+    game.player.leftHand.get(0) instanceof ItemStack &&
+    game.player.leftHand.get(0).getItem() instanceof Equippable
+  )
+    game.player.leftHand.get(0).getItem().use(game.player);
 }
 
 function playerDies() {

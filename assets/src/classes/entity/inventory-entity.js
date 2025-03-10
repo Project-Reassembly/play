@@ -8,6 +8,14 @@ class InventoryEntity extends Entity {
       construct(x, "itemstack")
     );
   }
+  onHealthZeroed() {
+    //Drop items
+    this.inventory.iterate((stack) => {
+      DroppedItemStack.create(stack, this.world, this.x, this.y);
+    }, true);
+    this.inventory.clear();
+    super.onHealthZeroed();
+  }
 }
 
 class EquippedEntity extends InventoryEntity {
@@ -17,10 +25,55 @@ class EquippedEntity extends InventoryEntity {
   leftHand = new Inventory(1);
   body = new Inventory(1);
 
-  draw() {
-    for (let component of this.components) {
-      component.draw(this.x, this.y, this.direction);
+  inventories = [
+    this.inventory,
+    this.equipment,
+    this.head,
+    this.rightHand,
+    this.leftHand,
+    this.body,
+  ];
+
+  onHealthZeroed() {
+    for (let inv of this.inventories) {
+      inv.iterate((stack) => {
+        DroppedItemStack.create(stack, this.world, this.x, this.y);
+      }, true);
+      inv.clear();
     }
+    super.onHealthZeroed();
   }
 
+  draw() {
+    super.draw();
+    for (let inv of this.inventories) {
+      inv.iterate((x) => {
+        let item = x.getItem();
+        if (item instanceof Equippable) {
+          item.component.draw(
+            this.x,
+            this.y,
+            this.direction,
+            inv == this.leftHand
+          );
+        }
+      });
+    }
+
+    // for (let key of ["head", "rightHand", "leftHand", "body"]) {
+    //   if (this[key] instanceof Inventory) {
+    //     this[key].iterate((x) => {
+    //       let item = x.getItem();
+    //       if (item instanceof Equippable) {
+    //         item.component.draw(
+    //           this.x,
+    //           this.y,
+    //           this.direction,
+    //           key === "leftHand"
+    //         );
+    //       }
+    //     });
+    //   }
+    // }
+  }
 }

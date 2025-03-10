@@ -135,6 +135,78 @@ createLinkedBlockAndItem(
         inputs: [
           {
             item: "scrap",
+            count: 2,
+          },
+        ],
+        outputs: [
+          {
+            item: "plate",
+            count: 1,
+          },
+        ],
+        time: 180,
+      },
+      {
+        inputs: [
+          {
+            item: "scrap",
+            count: 4,
+          },
+        ],
+        outputs: [
+          {
+            item: "wire",
+            count: 1,
+          },
+          {
+            item: "sand",
+            count: 6,
+          },
+        ],
+        time: 180,
+      },
+      {
+        inputs: [
+          {
+            item: "scrap",
+            count: 1,
+          },
+        ],
+        outputs: [
+          {
+            item: "scrap-bullet",
+            count: 100,
+          },
+        ],
+        time: 300,
+      },
+      {
+        inputs: [
+          {
+            item: "scrap",
+            count: 10,
+          },
+          {
+            item: "plate",
+            count: 4,
+          },
+          {
+            item: "wire",
+            count: 6,
+          },
+        ],
+        outputs: [
+          {
+            item: "scrap-shooter",
+            count: 1,
+          },
+        ],
+        time: 600,
+      },
+      {
+        inputs: [
+          {
+            item: "scrap",
             count: 1,
           },
         ],

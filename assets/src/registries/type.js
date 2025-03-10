@@ -9,6 +9,7 @@ Registry.type.add("player", Player);
 //Projectiles
 Registry.type.add("bullet", Bullet);
 Registry.type.add("laser", LaserBullet);
+Registry.type.add("continuous-laser", ContinuousLaserBullet);
 Registry.type.add("missile", Missile);
 Registry.type.add("critical", CriticalBullet);
 Registry.type.add("point-bullet", PointBullet);
@@ -22,6 +23,10 @@ Registry.type.add("weapon", Weapon)
 Registry.type.add("world", World)
 Registry.type.add("chunk", Chunk)
 Registry.type.add("generator", Generator)
+Registry.type.add("tile-generator", TileGenerator)
+
+Registry.type.add("gen-options", TileGenerationOptions)
+Registry.type.add("tile-gen-options", TileGenerationOptions)
 //Block
 Registry.type.add("block", Block)
 Registry.type.add("tile", Tile)

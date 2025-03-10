@@ -7,6 +7,7 @@ class Conveyor extends Container {
   shape = "straight";
   baseImg = "error";
   beltImg = "error";
+  walkable = true;
   tick() {
     super.tick();
     if (!this.inventory.get(0) || this.inventory.get(0).isEmpty()) return;
@@ -18,10 +19,13 @@ class Conveyor extends Container {
     if (this._progress < this.moveTime) this._progress++;
     if (this._progress >= this.moveTime) {
       if (!target) {
-        new DroppedItemStack(this.inventory.get(0)).addToWorld(
+        DroppedItemStack.create(
+          this.inventory.get(0),
           this.world,
           (posX + 0.5) * Block.size,
-          (posY + 0.5) * Block.size
+          (posY + 0.5) * Block.size,
+          1 / this.moveTime,
+          degrees(this.direction)
         );
         this.inventory.clear();
         this._progress = 0;
@@ -82,6 +86,14 @@ class Conveyor extends Container {
       this.title,
       Item.getColourFromRarity(0, "light")
     );
+  }
+  /**
+   * @param {Entity} entity
+   */
+  steppedOnBy(entity) {
+    let vct = Block.direction.vectorOf(this.direction);
+    let speed = Block.size / this.moveTime;
+    entity.move(vct.x * speed, vct.y * speed);
   }
 }
 

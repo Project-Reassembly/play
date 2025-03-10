@@ -1,4 +1,7 @@
 Registry.images.add("error", new ImageContainer("assets/textures/error.png"))
+//Components
+//Components > Weapons
+Registry.images.add("weapon.scrap-shooter.component", new ImageContainer("assets/textures/entity/weapon/scrap-shooter.png"))
 //Items
 Registry.images.add("item.wire", new ImageContainer("assets/textures/item/wire.png"))
 Registry.images.add("item.scrap", new ImageContainer("assets/textures/item/scrap.png"))
@@ -7,6 +10,10 @@ Registry.images.add("item.plate", new ImageContainer("assets/textures/item/plate
 Registry.images.add("item.stone", new ImageContainer("assets/textures/item/stone.png"))
 Registry.images.add("item.sand", new ImageContainer("assets/textures/item/sand.png"))
 Registry.images.add("item.sandstone", new ImageContainer("assets/textures/item/sandstone.png"))
+//Items > Ammo
+Registry.images.add("item.scrap-bullet", new ImageContainer("assets/textures/item/scrap-bullet.png"))
+//Items > Weapons
+Registry.images.add("weapon.scrap-shooter.item", new ImageContainer("assets/textures/item/scrap-shooter.png"))
 //Tiles
 Registry.images.add("tile.grass", new ImageContainer("assets/textures/block/tile/grass.png"))
 Registry.images.add("tile.sand", new ImageContainer("assets/textures/block/tile/sand.png"))

@@ -95,14 +95,8 @@ class Chunk {
     translate(Block.size / 2, Block.size / 2);
     iterate2DArray(this.tiles, (tile) => tile && tile.draw());
     iterate2DArray(this.floor, (floor) => floor && floor.draw());
-    iterate2DArray(
-      this.blocks,
-      (block) => block && !block.disabled && block.draw()
-    );
-    iterate2DArray(
-      this.blocks,
-      (block) => block && !block.disabled && block.postDraw()
-    );
+    iterate2DArray(this.blocks, (block) => block && block.draw());
+    iterate2DArray(this.blocks, (block) => block && block.postDraw());
     pop();
   }
 }

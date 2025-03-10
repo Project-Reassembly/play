@@ -26,13 +26,13 @@ class Container extends Block {
   break(type) {
     if (super.break(type))
       this.inventory.iterate((stack) => {
-        if (stack && !stack.isEmpty()) {
-          let created = new DroppedItemStack(stack);
-          created.x = this.x + Block.size / 2;
-          created.y = this.y + Block.size / 2;
-          created.addToWorld(this.world);
-        }
-      });
+        DroppedItemStack.create(
+          stack,
+          this.world,
+          this.x + Block.size / 2,
+          this.y + Block.size / 2
+        );
+      }, true);
     return true;
   }
 }

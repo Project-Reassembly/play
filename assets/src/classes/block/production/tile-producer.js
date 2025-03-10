@@ -20,6 +20,7 @@ class TileProducer extends Container {
   _blockOn = "null";
 
   tick() {
+    super.tick();
     let floor = this.chunk.getBlock(
       this.blockX,
       this.blockY,

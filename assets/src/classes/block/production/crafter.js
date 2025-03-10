@@ -62,6 +62,7 @@ class Crafter extends Container {
     });
   }
   tick() {
+    super.tick();
     let recipe = this.recipes[this._recipe];
     if (!this.inventory.hasItems(recipe.inputs, this.outputSlots)) return;
     this.tickRecipe(recipe, recipe.time);
@@ -85,8 +86,8 @@ class Crafter extends Container {
   }
   /**@param {Recipe} recipe  */
   onFinish(recipe) {
-    this.inventory.addItems(recipe.outputs);
     this.inventory.removeItems(recipe.inputs);
+    this.inventory.addItems(recipe.outputs);
     this.createCraftEffect();
     return true;
   }

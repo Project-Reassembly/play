@@ -312,6 +312,118 @@ class UIComponent {
   }
 }
 
+class MultilineUIComponent extends UIComponent {
+  header = ""
+  draw() {
+    push();
+    translate(this.x, this.y);
+    rotate(this.rotation);
+    translate(-this.x, -this.y);
+    noStroke();
+    if (this.inverted) scale(1, -1);
+    if (this.width > 0 && this.height > 0) {
+      if (this.outline && this.outlineColour) {
+        stroke(...this.outlineColour);
+        strokeWeight(5);
+        if (this.emphasised) stroke(...this.emphasisColour);
+      }
+      fill(...(this.backgroundColour ?? [95, 100, 100, 160]));
+      beginShape();
+      if (this.bevel === "none") {
+        vertex(this.x - this.width / 2, this.y + this.height / 2);
+        vertex(this.x + this.width / 2, this.y + this.height / 2);
+        vertex(this.x + this.width / 2, this.y - this.height / 2);
+        vertex(this.x - this.width / 2, this.y - this.height / 2);
+      } else if (this.bevel === "both") {
+        vertex(
+          this.x - this.width / 2 - this.height / 2,
+          this.y + this.height / 2
+        );
+        vertex(
+          this.x + this.width / 2 - this.height / 2,
+          this.y + this.height / 2
+        );
+        vertex(
+          this.x + this.width / 2 + this.height / 2,
+          this.y - this.height / 2
+        );
+        vertex(
+          this.x - this.width / 2 + this.height / 2,
+          this.y - this.height / 2
+        );
+      } else if (this.bevel === "trapezium") {
+        vertex(
+          this.x - this.width / 2 - this.height / 2,
+          this.y + this.height / 2
+        );
+        vertex(
+          this.x + this.width / 2 + this.height / 2,
+          this.y + this.height / 2
+        );
+        vertex(
+          this.x + this.width / 2 - this.height / 2,
+          this.y - this.height / 2
+        );
+        vertex(
+          this.x - this.width / 2 + this.height / 2,
+          this.y - this.height / 2
+        );
+      } else if (this.bevel === "right") {
+        vertex(this.x - this.width / 2, this.y + this.height / 2);
+        vertex(
+          this.x + this.width / 2 - this.height / 2,
+          this.y + this.height / 2
+        );
+        vertex(
+          this.x + this.width / 2 + this.height / 2,
+          this.y - this.height / 2
+        );
+        vertex(this.x - this.width / 2, this.y - this.height / 2);
+      } else if (this.bevel === "left") {
+        vertex(
+          this.x - this.width / 2 - this.height / 2,
+          this.y + this.height / 2
+        );
+        vertex(this.x + this.width / 2, this.y + this.height / 2);
+        vertex(this.x + this.width / 2, this.y - this.height / 2);
+        vertex(
+          this.x - this.width / 2 + this.height / 2,
+          this.y - this.height / 2
+        );
+      } else if (this.bevel === "reverse") {
+        vertex(
+          this.x - this.width / 2 + this.height / 2,
+          this.y + this.height / 2
+        );
+        vertex(
+          this.x + this.width / 2 + this.height / 2,
+          this.y + this.height / 2
+        );
+        vertex(
+          this.x + this.width / 2 - this.height / 2,
+          this.y - this.height / 2
+        );
+        vertex(
+          this.x - this.width / 2 - this.height / 2,
+          this.y - this.height / 2
+        );
+      }
+      endShape(CLOSE);
+    }
+    drawMultilineText(
+      this.x,
+      this.y,
+      this.text,
+      this.header,
+      [0, 0, 0],
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+      this.textSize
+    );
+    pop();
+  }
+}
+
 class ImageUIComponent extends UIComponent {
   constructor(
     x = 0,
@@ -469,18 +581,28 @@ function drawImg(
   }
 }
 
-function rotatedImg(img = "error", x, y, width, height, angle) {
+function rotatedImg(img = "error", x, y, width, height, angle, flipV = false) {
   push(); //Save current position, rotation, etc
   translate(x, y); //Move middle to 0,0
   rotate(angle);
+  if (flipV) scale(1, -1);
   drawImg(img, 0, 0, width, height);
   pop(); //Return to old state
 }
 
-function rotatedShape(shape = "circle", x, y, width, height, angle) {
+function rotatedShape(
+  shape = "circle",
+  x,
+  y,
+  width,
+  height,
+  angle,
+  flipV = false
+) {
   push(); //Save current position, rotation, etc
   translate(x, y); //Move middle to 0,0
   rotate(angle);
+  if (flipV) scale(1, -1);
   switch (shape) {
     case "circle":
       circle(0, 0, (width + height) / 2);
@@ -616,6 +738,40 @@ function createUIComponent(
 ) {
   //Make component
   const component = new UIComponent(
+    x,
+    y,
+    width,
+    height,
+    bevel,
+    onpress ?? (() => {}),
+    shownText,
+    useOCR,
+    shownTextSize
+  );
+  component.conditions = conditions;
+  //Set conditional things
+  component.acceptedScreens = screens;
+  component.isInteractive = !!onpress;
+  //Add to game
+  ui.components.push(component);
+  return component;
+}
+
+function createMultilineUIComponent(
+  screens = [],
+  conditions = [],
+  x = 0,
+  y = 0,
+  width = 1,
+  height = 1,
+  bevel = "none",
+  onpress = null,
+  shownText = "",
+  useOCR = false,
+  shownTextSize = 20
+) {
+  //Make component
+  const component = new MultilineUIComponent(
     x,
     y,
     width,

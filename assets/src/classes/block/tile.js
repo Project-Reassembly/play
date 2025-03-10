@@ -5,6 +5,21 @@ class Tile extends Block {
   damage = 0;
   damageType = "normal";
   buildable = true;
+  tick() {}
+  init() {
+    PhysicalObject.prototype.init.call(this);
+    delete this.x;
+    delete this.y;
+  }
+  draw() {
+    drawImg(
+      this.image,
+      this.x,
+      this.y,
+      this.size * Block.size,
+      this.size * Block.size
+    );
+  }
   /**
    * Called whenever an entity walks on this tile.
    * @param {Entity} entity Entity that walked on this block.

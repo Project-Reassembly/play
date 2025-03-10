@@ -1,4 +1,4 @@
-class Block extends RegisteredItem {
+class Block extends ShootableObject {
   static size = 30;
   selectable = false;
   /**@readonly */
@@ -33,14 +33,16 @@ class Block extends RegisteredItem {
     },
     vectorOf(direction) {
       return { x: Math.cos(direction), y: Math.sin(direction) };
-    }
+    },
   };
   disabled = false;
+  walkable = false;
   image = "error";
   blockX = 0;
   blockY = 0;
   rotatable = false;
   direction = Block.direction.UP;
+  explosiveness = 0.1;
   /**@type {Chunk} */
   _chunk = null;
   set chunk(_) {
@@ -50,11 +52,12 @@ class Block extends RegisteredItem {
   get chunk() {
     return this._chunk;
   }
-  /** @type {World} */
-  world = null;
   size = 1;
-  init() {}
-  tick() {}
+  init() {
+    super.init();
+    delete this.x;
+    delete this.y;
+  }
   draw() {
     drawImg(
       this.image,
@@ -63,8 +66,8 @@ class Block extends RegisteredItem {
       this.size * Block.size,
       this.size * Block.size
     );
+    super.draw();
   }
-  postDraw() {}
   /**
    * Fired when an entity interacts with this block.
    * @param {Entity} entity Interacting entity.
@@ -77,6 +80,17 @@ class Block extends RegisteredItem {
   canBreak(type = BreakType.delete) {
     return true;
   }
+  onHealthZeroed() {
+    if (this.break(BreakType.attack)) {
+      this.world.break(this.gridX, this.gridY, "blocks");
+      //Block go boom
+      createDestructionExplosion(
+        this.x + Block.size / 2,
+        this.y + Block.size / 2,
+        this
+      );
+    }
+  }
   /** Fired when this block is attempted to be broken. Can specify the result of the break attempt.
    * @param {symbol} [type=BreakType.entity] What broke this block. Should be a property of `BreakType`.
    * @returns {Boolean} True if this block should break, false if not.
@@ -85,10 +99,12 @@ class Block extends RegisteredItem {
     if (type !== BreakType.deconstruct && type !== BreakType.replace)
       return true;
     if (!this.dropItem) return true;
-    let created = new DroppedItemStack(new ItemStack(this.dropItem, 1));
-    created.x = this.x + Block.size / 2;
-    created.y = this.y + Block.size / 2;
-    created.addToWorld(this.world);
+    DroppedItemStack.create(
+      new ItemStack(this.dropItem, 1),
+      this.world,
+      this.x + Block.size / 2,
+      this.y + Block.size / 2
+    );
     return true;
   }
   /** Fired when this block is attempted to be placed. Can specify the result of the place attempt. Still respects default placement rules.
