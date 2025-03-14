@@ -82,20 +82,26 @@ class PhysicalObject extends RegisteredItem {
     return done;
   }
 
-  moveTowards(x, y, speed, turnSpeed, rotate = false) {
+  moveTowards(x, y, speed, turnSpeed, rotate = false, ignoreBlocks = false) {
     if (!rotate) {
       let oldRot = this.direction;
       this.direction = this._previousRot;
       this.rotateTowards(x, y, turnSpeed);
-      this.x += speed * Math.cos(radians(this.direction)); //Move in x-direction
-      this.y += speed * Math.sin(radians(this.direction)); // Move in y-direction
+      this.move(
+        speed * Math.cos(radians(this.direction)), //Move in x-direction
+        speed * Math.sin(radians(this.direction)), // Move in y-direction
+        ignoreBlocks
+      );
       this._previousRot = this.direction;
       this.direction = oldRot;
       return true;
     } else {
       let done = this.rotateTowards(x, y, turnSpeed);
-      this.x += speed * Math.cos(radians(this.direction)); //Move in x-direction
-      this.y += speed * Math.sin(radians(this.direction)); // Move in y-direction
+      this.move(
+        speed * Math.cos(radians(this.direction)), //Move in x-direction
+        speed * Math.sin(radians(this.direction)), // Move in y-direction
+        ignoreBlocks
+      );
       return done;
     }
   }
@@ -111,6 +117,9 @@ class PhysicalObject extends RegisteredItem {
     }
   }
   tick() {}
+  get size() {
+    return (this.width + this.height) / 2;
+  }
 }
 
 class ShootableObject extends PhysicalObject {
@@ -130,7 +139,7 @@ class ShootableObject extends PhysicalObject {
   tick() {
     this.checkBullets();
   }
-  takeDamage(amount = 0, source = null) {
+  takeDamage(type, amount = 0, source = null) {
     if (amount === 0) return;
     this.damageTaken +=
       Math.min(amount, this.health) * this.effectiveHealthMult;
@@ -144,7 +153,7 @@ class ShootableObject extends PhysicalObject {
         this.y,
         rnd(0, Math.PI * 2),
         60,
-        2,
+        this.size / 30,
         0.1,
         roundNum(amount, 1),
         [255, (10 * this.maxHealth) / amount, 0],
@@ -158,7 +167,7 @@ class ShootableObject extends PhysicalObject {
     if (this.health <= 0) {
       this.health = 0;
       this.dead = true;
-      this.onHealthZeroed();
+      this.onHealthZeroed(type, source);
     }
   }
   onHealthZeroed() {}
@@ -175,25 +184,26 @@ class ShootableObject extends PhysicalObject {
         //Take all damage instances
         for (let instance of bullet.damage) {
           if (!instance.spread) instance.spread = 0;
-          if (instance.area)
-            //If it explodes
-            splashDamageInstance(
-              bullet.x,
-              bullet.y,
-              instance.amount + rnd(instance.spread, -instance.spread),
-              instance.type,
-              instance.area,
-              bullet.entity,
-              instance.visual, //        \
-              instance.sparkColour, //   |
-              instance.sparkColourTo, // |
-              instance.smokeColour, //   |- These are optional, but can be set per instance
-              instance.smokeColourTo, // |
-              instance.waveColour, //     /
-              bullet.status,
-              bullet.statusDuration
-            );
-          else
+          // if (instance.area)
+          //   //If it explodes
+          //   splashDamageInstance(
+          //     bullet.x,
+          //     bullet.y,
+          //     instance.amount + rnd(instance.spread, -instance.spread),
+          //     instance.type,
+          //     instance.area,
+          //     bullet.entity,
+          //     instance.visual, //        \
+          //     instance.sparkColour, //   |
+          //     instance.sparkColourTo, // |
+          //     instance.smokeColour, //   |- These are optional, but can be set per instance
+          //     instance.smokeColourTo, // |
+          //     instance.waveColour, //     /
+          //     bullet.status,
+          //     bullet.statusDuration
+          //   );
+          // else
+          if (!instance.area)
             this.damage(
               instance.type,
               instance.amount + rnd(instance.spread, -instance.spread),
@@ -216,7 +226,7 @@ class ShootableObject extends PhysicalObject {
   hitByBullet(bullet) {}
   damage(type = "normal", amount = 0, source = null) {
     this._healthbarShowTime = 180;
-    this.takeDamage(Math.max(amount, 0), source);
+    this.takeDamage(type, Math.max(amount, 0), source);
   }
   heal(amount) {
     this.health += amount;

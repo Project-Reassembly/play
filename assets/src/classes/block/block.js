@@ -1,9 +1,7 @@
 class Block extends ShootableObject {
   static size = 30;
   selectable = false;
-  /**@readonly */
-  static dir = this.direction;
-  /**@readonly @enum*/
+  /**@readonly*/
   static direction = {
     /**@readonly */
     UP: -Math.PI / 2,
@@ -35,6 +33,8 @@ class Block extends ShootableObject {
       return { x: Math.cos(direction), y: Math.sin(direction) };
     },
   };
+  /**@readonly */
+  static dir = this.direction;
   disabled = false;
   walkable = false;
   image = "error";
@@ -119,7 +119,24 @@ class Block extends ShootableObject {
     y,
     outlineColour = [50, 50, 50],
     backgroundColour = [95, 100, 100, 160]
-  ) {}
+  ) {
+    return true;
+  }
+  highlight(emphasised = false) {
+    push();
+    noFill();
+    let othercol = (emphasised ? 50 : 200) + 55 * Math.sin(frameCount / 30);
+    stroke(emphasised ? 255 : othercol, othercol, othercol);
+    strokeWeight((emphasised ? 2 : 1) * ui.camera.zoom);
+    rectMode(CORNER);
+    rect(
+      this.uiX,
+      this.uiY,
+      Block.size * ui.camera.zoom,
+      Block.size * ui.camera.zoom
+    );
+    pop();
+  }
   get x() {
     return (this.blockX + this.chunk.x * Chunk.size) * Block.size;
   }
@@ -131,6 +148,12 @@ class Block extends ShootableObject {
   }
   get gridY() {
     return this.blockY + this.chunk.y * Chunk.size;
+  }
+  get uiX() {
+    return (this.x - ui.camera.x) * ui.camera.zoom;
+  }
+  get uiY() {
+    return (this.y - ui.camera.y) * ui.camera.zoom;
   }
 }
 /** Stores values to describe how blocks are broken.

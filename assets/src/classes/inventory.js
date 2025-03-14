@@ -7,8 +7,20 @@ class Inventory {
     this.storage.length = this.size;
   }
   init() {
-    super.init();
     this.storage = this.storage.map((x) => construct(x, "itemstack"));
+  }
+  serialise() {
+    return {
+      size: this.size,
+      storage: this.storage.map((x) => x.serialise()),
+    };
+  }
+  static deserialise(created) {
+    let inv = new this(0);
+    inv.storage = created.storage ?? [];
+    inv.storage.length = created.size ?? inv.size;
+    inv.init();
+    return inv;
   }
 
   //Manipulation
@@ -102,23 +114,26 @@ class Inventory {
   }
   sortByRegistryName() {
     this.cleanInventory();
-    this.storage.sort(dynamicSort("item"));
+    this.storage.sort(dynamicSort("item", ["nothing"]));
   }
   sortByCount() {
     this.cleanInventory();
-    this.storage.sort(dynamicSort("-count"));
+    this.storage.sort(dynamicSort("-count", ["nothing"]));
   }
   /**
    * Tries to transfer all the items in this inventory to another one.
    * @param {Inventory} to Inventory to transfer items to.
    * @param {boolean} stack If false, does not attempt to stack the items transferred.
+   * @param {(stack: ItemStack, slot: int) => boolean} filter A function to determine whether a slot is transferred or not. Return `true` to make a stack transferred, `false` to prevent transfer.
    */
-  transfer(to, stack) {
+  transfer(to, stack, filter = () => true) {
     this.iterate((item, slot, sotp) => {
-      let left = to.addItem(item.item, item.count, stack);
-      item.count = left;
-      if (item.isEmpty()) {
-        this.storage[slot] = ItemStack.EMPTY;
+      if (filter(item, slot)) {
+        let left = to.addItem(item.item, item.count, stack);
+        item.count = left;
+        if (item.isEmpty()) {
+          this.storage[slot] = ItemStack.EMPTY;
+        }
       }
     });
   }
@@ -272,7 +287,7 @@ class Inventory {
   draw(
     x,
     y,
-    rows = 5,
+    rows = null,
     cols = null,
     itemSize = 40,
     outlineColour = [50, 50, 50],
@@ -280,6 +295,7 @@ class Inventory {
     reverseVertical = false
   ) {
     push();
+    if (!rows && !cols) return;
     let itemsPerRow = cols ? cols : Math.ceil(this.size / rows);
     let itemRows = cols ? Math.ceil(this.size / cols) : rows;
     let displayX, displayY;
@@ -468,14 +484,19 @@ class Inventory {
     let displayX = ui.mouse.x + maxWidth / 2;
     textSize(25);
     let displayY = ui.mouse.y + (lines * 12) / 2;
+    //Stop vertical overflow
     if (displayY + lines * 6 > height / 2) {
       displayY = height / 2 - lines * 6;
+    }
+    //Stop horizontal overflow
+    if (displayX + maxWidth / 2 > width / 2) {
+      displayX = width / 2 - maxWidth / 2;
     }
     rect(displayX, displayY, maxWidth, lines * 12);
     fill(Item.getColourFromRarity(this.tooltip.item.rarity, "light"));
     stroke(Item.getColourFromRarity(this.tooltip.item.rarity, "light"));
     strokeWeight(1);
-    let textX = ui.mouse.x + 10;
+    let textX = displayX - maxWidth / 2 + 10;
     let textY = displayY - lines * 6 + 28;
     text(header, textX, textY - 5);
     fill(Item.getColourFromRarity(0, "light"));

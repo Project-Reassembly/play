@@ -20,12 +20,22 @@ Registry.blocks.add("sand-water", {
   speedMultiplier: 0.8,
   drillSpeed: 0.8,
 });
+Registry.blocks.add("sand-grass", {
+  type: "tile",
+  image: "tile.sand-grass",
+});
 Registry.blocks.add("sand", {
   type: "tile",
   image: "tile.sand",
 });
 //## FLOORS ##
-
+//Ores
+Registry.blocks.add("copper-ore", {
+  type: "ore",
+  image: "ore.copper",
+  stages: ["", ".exposed", ".weathered", ".oxidised"],
+  drillSpeed: 0.75,
+});
 //### BLOCKS ###
 //## DEFENSE ##
 createLinkedBlockAndItem(
@@ -149,21 +159,32 @@ createLinkedBlockAndItem(
       {
         inputs: [
           {
-            item: "scrap",
-            count: 4,
+            item: "raw-copper",
+            count: 2,
+          },
+        ],
+        outputs: [
+          {
+            item: "copper-ingot",
+            count: 1,
+          },
+        ],
+        time: 60,
+      },
+      {
+        inputs: [
+          {
+            item: "copper-ingot",
+            count: 1,
           },
         ],
         outputs: [
           {
             item: "wire",
-            count: 1,
-          },
-          {
-            item: "sand",
             count: 6,
           },
         ],
-        time: 180,
+        time: 240,
       },
       {
         inputs: [
@@ -318,6 +339,7 @@ createLinkedBlockAndItem(
       sand: "sand",
       "sand-water": "sand",
       stone: "stone",
+      "copper-ore": "raw-copper"
     },
     amount: 1,
     spinSpeed: 1,
@@ -360,5 +382,19 @@ createLinkedBlockAndItem(
   {
     description:
       "A slow-moving belt.\nTransports items from one place to another.\nPulls selected items from the block behind it.",
+  }
+);
+//## CONTAINERS ##
+createLinkedBlockAndItem(
+  "scrap-storage",
+  "Scrap Storage",
+  "block.scrap-wall",
+  {
+    title: "Scrap Storage",
+    type: "container",
+    inventorySize: 12,
+  },
+  {
+    description: "A small box for item storage.",
   }
 );

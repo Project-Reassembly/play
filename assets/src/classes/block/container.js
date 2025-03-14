@@ -11,7 +11,7 @@ class Container extends Block {
     this.inventory = new Inventory(this.inventorySize);
     // this.inventory = this.inventory.map((x) => construct(x, "itemstack"));
   }
-  drawTooltip(x, y, outlineColour, backgroundColour) {
+  drawTooltip(x, y, outlineColour, backgroundColour, forceVReverse = false) {
     this.inventory.draw(
       x + 17,
       y - 17,
@@ -20,7 +20,7 @@ class Container extends Block {
       30,
       outlineColour,
       backgroundColour,
-      true
+      forceVReverse
     );
   }
   break(type) {

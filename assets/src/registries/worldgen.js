@@ -13,6 +13,10 @@ Registry.worldgen.add("base-generator", {
       tile: "grass",
     },
     {
+      min: 98,
+      tile: "sand-grass",
+    },
+    {
       min: 75,
       tile: "sand",
     },
@@ -26,6 +30,17 @@ Registry.worldgen.add("base-generator", {
     },
     {
       tile: "deep-water",
+    },
+  ],
+});
+Registry.worldgen.add("ore-generator", {
+  type: "ore-generator",
+  stageTitle: "Generating Ores...",
+  ores: [
+    {
+      threshold: 75,
+      scale: 4,
+      tile: "copper-ore",
     },
   ],
 });

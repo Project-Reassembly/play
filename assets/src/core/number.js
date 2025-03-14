@@ -13,6 +13,9 @@ function shortenedNumber(num = 0, digits = 3) {
   //Assemble
   return `${roundNum(shownNum * 10 ** shownNumSize, 2)}${sizes[sizeIndex]}`;
 }
+function clamp(x, min, max) {
+  return Math.max(min, Math.min(max, x));
+}
 
 function roundNum(number, dp = 0) {
   return Math.round(number * 10 ** dp) / 10 ** dp;

@@ -99,7 +99,7 @@ class TileProducer extends Container {
     );
   }
   drawTooltip(x, y, outlineColour, backgroundColour) {
-    super.drawTooltip(x, y, outlineColour, backgroundColour);
+    super.drawTooltip(x, y, outlineColour, backgroundColour, true);
     drawMultilineText(
       x,
       y,

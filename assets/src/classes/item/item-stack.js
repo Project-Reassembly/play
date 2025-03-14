@@ -4,6 +4,8 @@ class ItemStack {
   #itemCache = null;
   /**
    * @readonly
+   * Contains an empty itemstack.\
+   * Each instance is different, i.e. `ItemStack.EMPTY !== ItemStack.EMPTY`.
    */
   static get EMPTY() {
     return new this("nothing", 0);
@@ -82,5 +84,8 @@ class ItemStack {
     this.item = "nothing";
     this.count = 0;
     this.#itemCache = null;
+  }
+  serialise() {
+    return { item: this.item, count: this.count };
   }
 }

@@ -32,3 +32,24 @@ class Tile extends Block {
     entity.damage(this.damageType, this.damage);
   }
 }
+
+class Ore extends Tile {
+  stages = [""];
+  stageChance = 0.01;
+  _stage = 0;
+  tick() {
+    if (this._stage < this.stages.length - 1)
+      if (rnd(0, 100) < this.stageChance) {
+        this._stage++;
+      }
+  }
+  draw() {
+    drawImg(
+      this.image + this.stages[this._stage],
+      this.x,
+      this.y,
+      this.size * Block.size,
+      this.size * Block.size
+    );
+  }
+}

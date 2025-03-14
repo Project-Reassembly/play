@@ -20,6 +20,22 @@ function splashDamageInstance(
   //They are tested repeatedly to make sure they look good
   let radius = damageRadius ** 1.05;
   if (showExplosion) {
+    // world.particles.push(
+    //   new TextParticle(
+    //     centreX,
+    //     centreY,
+    //     radians(rnd(0, 360)),
+    //     rnd(radius ** 0.65, radius ** 0.8 * 2),
+    //     rnd(radius ** 0.25 * 0.3, radius ** 0.25 * 0.5),
+    //     0.01,
+    //     "BOOM",
+    //     [255, 0, 0],
+    //     [255, 0, 0, 0],
+    //     radius ** 0.85,
+    //     0,
+    //     true
+    //   )
+    // );
     //Spawn smoke
     for (let i = 0; i < radius ** 0.6; i++) {
       world.particles.push(
@@ -82,8 +98,9 @@ function splashDamageInstance(
   for (let e of world.entities) {
     if (
       ((centreX - e.x) ** 2 + (centreY - e.y) ** 2) ** 0.5 <=
-        damageRadius + e.hitSize &&
-      e.team !== (sourceEntity?.team ?? team)
+        damageRadius + e.size &&
+      e.team !== (sourceEntity?.team ?? team) &&
+      !e.dead
     ) {
       e.damage(damageType, amount, sourceEntity);
       if (status !== "none") e.applyStatus(status, statusDuration);
@@ -241,4 +258,81 @@ function createDestructionExplosion(x, y, source) {
     undefined,
     source.team
   );
+}
+function liquidDestructionBlast(
+  x,
+  y,
+  scalar,
+  colour = [0, 0, 0],
+  colourTo = [0, 0, 0],
+  variation = [0, 0, 0],
+  fragments = [],
+  world
+) {
+  let rootMHP = scalar ** 0.48;
+  let smallerRootMHP = scalar ** 0.23;
+  let blotSize = 20 + 2 * smallerRootMHP;
+  for (let i = 0; i < rootMHP; i++) {
+    let delta = variation.map((x) => rnd(-x, x));
+    world.floorParticles.push(
+      new LiquidParticle(
+        x,
+        y,
+        rnd(0, 360),
+        rnd(1800, 3600),
+        rnd(0.02, 0.2) * (3 + smallerRootMHP * 4 ** 1.1),
+        0.5,
+        "circle",
+        colour.map((v, i) => v + delta[i]).concat([600]),
+        colourTo.map((v, i) => v + delta[i]).concat([0]),
+        blotSize,
+        blotSize / 2,
+        blotSize,
+        blotSize / 2
+      )
+    );
+  }
+  for (let component of fragments) {
+    let componentSize = (component.width + component.height) / 2;
+    world.particles.push(
+      new ExecutorParticle(
+        new ImageParticle(
+          x,
+          y,
+          rnd(0, 360),
+          rnd(2400, 5400),
+          rnd(0.5, 0.7) * (3 + smallerRootMHP * 3),
+          0.5,
+          component.image,
+          component.width,
+          component.width,
+          component.height,
+          component.height
+        ),
+        (ix, iy, speed) => {
+          if (speed > 0.1) {
+            let delta = variation.map((x) => rnd(-x, x));
+            world.floorParticles.push(
+              new LiquidParticle(
+                ix,
+                iy,
+                rnd(0, 360),
+                rnd(1800, 3600),
+                rnd(0.5, 1),
+                0.1,
+                "circle",
+                colour.map((v, i) => v + delta[i]).concat([600]),
+                colourTo.map((v, i) => v + delta[i]).concat([0]),
+                componentSize / 2,
+                componentSize / 4,
+                componentSize / 2,
+                componentSize / 4
+              )
+            );
+          }
+        },
+        1
+      )
+    );
+  }
 }

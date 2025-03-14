@@ -71,7 +71,6 @@ onmessage = (ev) => {
   );
   if (ev.data.type === "generate") {
     const data = ev.data;
-    noiseSeed(data.seed);
     //generateTiles(data.noiseScale, data.noiseLevel);
     let stage = 1;
     generators.forEach((name, gen) => {
@@ -82,7 +81,7 @@ onmessage = (ev) => {
       postMessage({ type: "progress", progress: 0 });
       console.log("[World Gen] Stage '" + name + "'");
       postMessage({ type: "genstage", stage: gen.stageTitle });
-      gen.generate();
+      gen.generate(data.seed);
       stage++;
     });
 

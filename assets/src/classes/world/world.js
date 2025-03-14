@@ -1,7 +1,10 @@
 class World {
-  static size = 6;
+  static size = 64;
   /** The distance in chunks **outside the render distance** that will still tick. */
   static simulationDistance = 5;
+  /** @type {Array<ImageParticle|ShapeParticle|TextParticle|WaveParticle>} */
+  floorParticles = [];
+  /** @type {Array<ImageParticle|ShapeParticle|TextParticle|WaveParticle>} */
   particles = [];
   /** @type {Array<Entity>} */
   entities = [];
@@ -20,6 +23,9 @@ class World {
   }
   #actualTick() {
     //Tick *everything*
+    for (let particle of this.floorParticles) {
+      particle.step(1);
+    }
     for (let bullet of this.bullets) {
       bullet.step(1);
     }
@@ -60,15 +66,17 @@ class World {
     //THEN remove dead stuff
     let len = this.bullets.length;
     for (let b = 0; b < len; b++) {
-      if (this.bullets[b]?.remove) {
+      if (this.bullets[b]?.remove && !this.bullets[b].exploded) {
         let bullet = this.bullets[b];
+        bullet.exploded = true;
         for (let instance of bullet.damage) {
+          if (!instance.spread) instance.spread = 0;
           if (instance.area)
             //If it explodes
             splashDamageInstance(
               bullet.x,
               bullet.y,
-              instance.amount,
+              instance.amount + rnd(instance.spread, -instance.spread),
               instance.type,
               instance.area,
               bullet.entity,
@@ -102,6 +110,12 @@ class World {
         this.particles.splice(p, 1);
       }
     }
+    len = this.floorParticles.length;
+    for (let p = 0; p < len; p++) {
+      if (this.floorParticles[p]?.remove) {
+        this.floorParticles.splice(p, 1);
+      }
+    }
     len = this.entities.length;
     for (let e = 0; e < len; e++) {
       if (this.entities[e]?.dead) {
@@ -122,7 +136,24 @@ class World {
           0.5,
           0.5
         ) &&
-        chunk.draw()
+        chunk.drawFloorsOnly()
+    );
+    for (let particle of this.floorParticles) {
+      if (!World.isInRenderDistance(particle)) continue;
+      particle.draw();
+    }
+    iterate2DArray(
+      this.chunks,
+      (chunk) =>
+        chunk &&
+        World.isInRenderDistance(
+          chunk,
+          Chunk.size * Block.size,
+          0.5,
+          0.5,
+          0.5
+        ) &&
+        chunk.drawBlocksOnly()
     );
     for (let entity of this.entities) {
       if (!World.isInRenderDistance(entity)) continue;

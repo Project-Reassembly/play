@@ -16,10 +16,12 @@ class Equippable extends Item {
   }
   init() {
     this.component = construct(this.component, "component");
-    this.component.tickListeners.push(this);
+    //this.component.tickListeners.push(this);
   }
   /** @param {Entity} holder The entity holding this item */
-  tick(holder) {}
+  tick(holder) {
+    this.component?.tick(holder);
+  }
   /** @param {Entity} holder The entity using this item */
   use(holder, isSecondary = false) {}
 }

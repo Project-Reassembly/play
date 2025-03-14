@@ -174,7 +174,11 @@ Object.defineProperty(
   ),
   "text",
   {
-    get: () => game.player.leftHand.get(0)?.getItem()?.getContextualisedInfo(game.player) ?? "",
+    get: () =>
+      game.player.leftHand
+        .get(0)
+        ?.getItem()
+        ?.getContextualisedInfo(game.player) ?? "",
   }
 ).anchorBottom(45);
 Object.defineProperty(
@@ -193,59 +197,100 @@ Object.defineProperty(
   ),
   "text",
   {
-    get: () => game.player.rightHand.get(0)?.getItem()?.getContextualisedInfo(game.player) ?? "",
+    get: () =>
+      game.player.rightHand
+        .get(0)
+        ?.getItem()
+        ?.getContextualisedInfo(game.player) ?? "",
   }
 ).anchorBottom(45);
-
-//Selected block
+UIComponent.setCondition("containerselected:false");
+// Selected block inventory controls
+//Yoink all
 Object.defineProperties(
-  createUIInventoryComponent(
+  createUIComponent(
     ["in-game"],
-    [],
-    -35,
-    200,
-    new Container(),
-    null,
-    10,
-    undefined
+    ["containerselected:true"],
+    0,
+    0,
+    60,
+    20,
+    "left",
+    () => {
+      if (Container.selectedBlock instanceof Container) {
+        Container.selectedBlock.inventory.transfer(game.player.equipment);
+        Container.selectedBlock.inventory.transfer(game.player.inventory);
+      }
+    },
+    "Loot",
+    true,
+    15
   ),
   {
-    block: {
-      get: () => Container.selectedBlock,
-    },
-    x: {
-      get: () => -width / 2 + 75,
-    },
-    cols: {
-      get: () => Math.floor(width / 100) - 1,
-    },
+    x: { get: () => (Container.selectedBlock?.uiX ?? 0) - 30 },
+    y: { get: () => (Container.selectedBlock?.uiY ?? 0) + 40 },
   }
-)
-  .anchorBottom(95)
-  .invert();
+);
+//Unyoink all
 Object.defineProperties(
-  createUIImageComponent(
+  createUIComponent(
     ["in-game"],
-    [],
-    -35,
-    200,
-    40,
-    40,
-    null,
-    "error",
-    false,
-    1
+    ["containerselected:true"],
+    0,
+    0,
+    60,
+    20,
+    "left",
+    () => {
+      if (Container.selectedBlock instanceof Container) {
+        game.player.equipment.transfer(Container.selectedBlock.inventory);
+        game.player.inventory.transfer(Container.selectedBlock.inventory);
+      }
+    },
+    "Store",
+    true,
+    15
   ),
   {
-    image: {
-      get: () => Container.selectedBlock?.image || "icon.cross",
-    },
-    x: {
-      get: () => -width / 2 + 25,
-    },
+    x: { get: () => (Container.selectedBlock?.uiX ?? 0) - 30 },
+    y: { get: () => (Container.selectedBlock?.uiY ?? 0) + 15 },
   }
-).anchorBottom(75);
-
+);
+//Unyoink present
+Object.defineProperties(
+  createUIComponent(
+    ["in-game"],
+    ["containerselected:true"],
+    0,
+    0,
+    70,
+    20,
+    "left",
+    () => {
+      if (Container.selectedBlock instanceof Container) {
+        game.player.equipment.transfer(
+          Container.selectedBlock.inventory,
+          true,
+          (itemstack) =>
+            Container.selectedBlock.inventory.hasItem(itemstack.item)
+        );
+        game.player.inventory.transfer(
+          Container.selectedBlock.inventory,
+          true,
+          (itemstack) =>
+            Container.selectedBlock.inventory.hasItem(itemstack.item)
+        );
+      }
+    },
+    "Restock",
+    true,
+    15
+  ),
+  {
+    x: { get: () => (Container.selectedBlock?.uiX ?? 0) - 35 },
+    y: { get: () => (Container.selectedBlock?.uiY ?? 0) + 65 },
+  }
+);
 //##############################################################
 
 //                        INVENTORY
@@ -450,7 +495,26 @@ Object.defineProperty(
     get: () => game.player,
   }
 );
-
+//Body parts
+Object.defineProperty(
+  createUIImageComponent(
+    ["in-game"],
+    ["menu:inventory"],
+    195,
+    -75,
+    100,
+    100,
+    null,
+    "error",
+    false,
+    1,
+    true
+  ).rotate(Block.dir.DOWN),
+  "image",
+  {
+    get: () => game.player?.headPart?.image ?? "error",
+  }
+);
 Object.defineProperty(
   createUIImageComponent(
     ["in-game"],
@@ -461,10 +525,125 @@ Object.defineProperty(
     100,
     null,
     "error",
-    false
-  ),
+    false,
+    1,
+    true
+  ).rotate(Block.dir.DOWN),
   "image",
   {
-    get: () => game.player?.components[1]?.image ?? "error",
+    get: () => game.player?.bodyPart?.image ?? "error",
+  }
+);
+Object.defineProperty(
+  createUIImageComponent(
+    ["in-game"],
+    ["menu:inventory"],
+    195,
+    125,
+    100,
+    100,
+    null,
+    "error",
+    false,
+    1,
+    true
+  ).rotate(Block.dir.DOWN),
+  "image",
+  {
+    get: () => game.player?.legsPart?.image ?? "error",
+  }
+);
+Object.defineProperty(
+  createUIImageComponent(
+    ["in-game"],
+    ["menu:inventory"],
+    195,
+    125,
+    100,
+    100,
+    null,
+    "error",
+    false,
+    1,
+    true
+  )
+    .rotate(Block.dir.DOWN)
+    .invert(),
+  "image",
+  {
+    get: () => game.player?.legsPart?.image ?? "error",
+  }
+);
+//Held stuff
+Object.defineProperties(
+  createUIImageComponent(
+    ["in-game"],
+    ["menu:inventory"],
+    255,
+    25,
+    100,
+    100,
+    null,
+    "error",
+    false,
+    1,
+    true
+  )
+    .rotate(Block.dir.DOWN)
+    .invert(),
+  {
+    image: {
+      get: () =>
+        game.player
+          ? game.player.leftHand.get(0)?.getItem()?.component?.image
+          : "error",
+    },
+    width: {
+      get: () =>
+        game.player
+          ? game.player.leftHand.get(0)?.getItem()?.component?.width * 3.33
+          : 0,
+    },
+    height: {
+      get: () =>
+        game.player
+          ? game.player.leftHand.get(0)?.getItem()?.component?.height * 3.33
+          : 0,
+    },
+  }
+);
+Object.defineProperties(
+  createUIImageComponent(
+    ["in-game"],
+    ["menu:inventory"],
+    135,
+    25,
+    100,
+    100,
+    null,
+    "error",
+    false,
+    1,
+    true
+  ).rotate(Block.dir.DOWN),
+  {
+    image: {
+      get: () =>
+        game.player
+          ? game.player.rightHand.get(0)?.getItem()?.component?.image
+          : "error",
+    },
+    width: {
+      get: () =>
+        game.player
+          ? game.player.rightHand.get(0)?.getItem()?.component?.width * 3.33
+          : 0,
+    },
+    height: {
+      get: () =>
+        game.player
+          ? game.player.rightHand.get(0)?.getItem()?.component?.height * 3.33
+          : 0,
+    },
   }
 );

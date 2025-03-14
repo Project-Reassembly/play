@@ -12,6 +12,8 @@ class Registry {
   static blocks = new this();
   static statuses = new this();
   static worldgen = new this();
+  //Slightly odd registries
+  static deathmsg = new this();
   /** Adds an item to registry.
    * @param {string} name Registry name of item. This is not case sensitive.
    * @param {*} item Item to add to registry.
@@ -37,6 +39,7 @@ class Registry {
    * @returns Whether or not the name exists.
    */
   has(name) {
+    if (!name) return false;
     if (typeof name !== "string") name = name.toString(); //Stringify name
     name = name.toLowerCase(); //Remove case sensitivity.
     //Return presence
@@ -48,6 +51,7 @@ class Registry {
    * @returns The item, if present.
    */
   get(name) {
+    if (!name) throw new ReferenceError("No registry contains null!");
     if (typeof name !== "string") name = name.toString(); //Stringify name
     name = name.toLowerCase(); //Remove case sensitivity.
     //Throw an error if the item doesn't exist.
@@ -59,7 +63,7 @@ class Registry {
       );
     //Return item, if it exists.
     let item = this.#content.get(name);
-    item.registryName = name;
+    try{item.registryName = name}catch(e){console.warn("Non-object entries do not have full feature support.")}
     return item;
   }
   /**

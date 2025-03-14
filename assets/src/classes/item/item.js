@@ -39,6 +39,7 @@ class Item {
         );
       }
   }
+  getContextualisedInfo(entity) {}
   /**
    *
    * @param {number} rarity Item rarity. Must be between 0 and 5 inclusive. Use of `Item.rarity` is recommended.
@@ -48,34 +49,38 @@ class Item {
     switch (scheme) {
       case "light": {
         switch (rarity) {
-          case 0:
+          case this.rarity.COMMON:
             return [255, 255, 255];
-          case 1:
+          case this.rarity.CCC:
             return [150, 255, 150];
-          case 2:
+          case this.rarity.BLUE:
             return [150, 150, 255];
-          case 3:
+          case this.rarity.RARE:
             return [200, 150, 255];
-          case 4:
+          case this.rarity.SPECIAL:
             return [255, 240, 150];
-          case 5:
+          case this.rarity.PETI:
             return [255, 150, 150];
+          case this.rarity.ITI:
+            return [0, 190, 230];
         }
       }
       case "dark": {
         switch (rarity) {
-          case 0:
+          case this.rarity.COMMON:
             return [0, 0, 0];
-          case 1:
+          case this.rarity.CCC:
             return [0, 150, 0];
-          case 2:
+          case this.rarity.BLUE:
             return [0, 0, 150];
-          case 3:
+          case this.rarity.RARE:
             return [100, 0, 150];
-          case 4:
+          case this.rarity.SPECIAL:
             return [150, 145, 0];
-          case 5:
+          case this.rarity.PETI:
             return [150, 0, 0];
+          case this.rarity.ITI:
+            return [0, 50, 100];
         }
       }
     }
@@ -86,14 +91,16 @@ class Item {
     /**@readonly */
     COMMON: 0,
     /**@readonly */
-    ITI: 2,
+    ITI: 1,
     /**@readonly */
-    CCC: 1,
+    CCC: 2,
     /**@readonly */
-    PETI: 5,
+    PETI: 3,
     /**@readonly */
-    SPECIAL: 4,
+    RARE: 4,
     /**@readonly */
-    RARE: 3,
+    SPECIAL: 5,
+    /**@readonly */
+    BLUE: 6, //What?
   };
 }

@@ -12,7 +12,12 @@ class Conveyor extends Container {
     super.tick();
     if (!this.inventory.get(0) || this.inventory.get(0).isEmpty()) return;
     let vct = Block.direction.vectorOf(this.direction);
-    let target = this.world.getBlock(this.gridX + vct.x, this.gridY + vct.y);
+    let target =
+      this.world.getBlock(this.gridX + vct.x, this.gridY + vct.y) ??
+      this.world.getBlock(
+        this.gridX + vct.x * 2 ** 0.5,
+        this.gridY + vct.y * 2 ** 0.5
+      );
     this.convey(target, this.gridX + vct.x, this.gridY + vct.y);
   }
   convey(target, posX, posY) {
@@ -24,7 +29,7 @@ class Conveyor extends Container {
           this.world,
           (posX + 0.5) * Block.size,
           (posY + 0.5) * Block.size,
-          1 / this.moveTime,
+          100 / this.moveTime,
           degrees(this.direction)
         );
         this.inventory.clear();
@@ -74,19 +79,6 @@ class Conveyor extends Container {
         );
     }
   }
-  drawTooltip(x, y, outlineColour, backgroundColour) {
-    super.drawTooltip(x, y, outlineColour, backgroundColour);
-    drawMultilineText(
-      x,
-      y,
-      ""
-        .padEnd((this._progress / this.moveTime) * 10, "■")
-        .padEnd(10, "□")
-        .substring(0, 10) + " ",
-      this.title,
-      Item.getColourFromRarity(0, "light")
-    );
-  }
   /**
    * @param {Entity} entity
    */
@@ -128,5 +120,18 @@ class Unloader extends Conveyor {
     else Log.send("Cleared filter.");
     ui.waitingForMouseUp = true;
     return true;
+  }
+  highlight(emphasised) {
+    super.highlight(emphasised);
+    if (this.filter && this.filter !== "nothing") {
+      let img = Registry.items.get(this.filter).image;
+      drawImg(
+        img ?? "error",
+        this.uiX + 9,
+        this.uiY + 9,
+        15 * ui.camera.zoom,
+        15 * ui.camera.zoom
+      );
+    }
   }
 }

@@ -112,6 +112,7 @@ class Bullet extends PhysicalObject {
       );
     } else {
       //If no image, draw shape instead
+      noStroke();
       fill(this.drawer.fill);
       rotatedShape(
         this.drawer.shape,

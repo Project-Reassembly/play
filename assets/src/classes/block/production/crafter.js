@@ -50,7 +50,7 @@ class Crafter extends Container {
   #progress = 0;
   #speed = 1;
   changeRecipe(index) {
-    this._recipe = index;
+    if (index != null) this._recipe = index;
     //Reset progress
     this.#progress = 0;
   }
@@ -147,7 +147,7 @@ class Crafter extends Container {
     );
   }
   drawTooltip(x, y, outlineColour, backgroundColour) {
-    super.drawTooltip(x, y, outlineColour, backgroundColour);
+    super.drawTooltip(x, y, outlineColour, backgroundColour, true);
     drawMultilineText(
       x,
       y,

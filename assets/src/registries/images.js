@@ -1,9 +1,15 @@
 Registry.images.add("error", new ImageContainer("assets/textures/error.png"))
 //Components
+Registry.images.add("entity.scrap-sentinel.head", new ImageContainer("assets/textures/entity/component/scrap-sentinel-head.png"))
+Registry.images.add("entity.scrap-sentinel.body", new ImageContainer("assets/textures/entity/component/scrap-sentinel-body.png"))
+Registry.images.add("entity.scrap-sentinel.legs", new ImageContainer("assets/textures/entity/component/scrap-sentinel-foot.png"))
 //Components > Weapons
 Registry.images.add("weapon.scrap-shooter.component", new ImageContainer("assets/textures/entity/weapon/scrap-shooter.png"))
 //Items
+Registry.images.add("item.raw-copper", new ImageContainer("assets/textures/item/raw-copper.png"))
+Registry.images.add("item.copper-ingot", new ImageContainer("assets/textures/item/copper-ingot.png"))
 Registry.images.add("item.wire", new ImageContainer("assets/textures/item/wire.png"))
+
 Registry.images.add("item.scrap", new ImageContainer("assets/textures/item/scrap.png"))
 Registry.images.add("item.plate", new ImageContainer("assets/textures/item/plate.png"))
 
@@ -14,12 +20,19 @@ Registry.images.add("item.sandstone", new ImageContainer("assets/textures/item/s
 Registry.images.add("item.scrap-bullet", new ImageContainer("assets/textures/item/scrap-bullet.png"))
 //Items > Weapons
 Registry.images.add("weapon.scrap-shooter.item", new ImageContainer("assets/textures/item/scrap-shooter.png"))
+Registry.images.add("weapon.iti-laser-caster.component", new ImageContainer("assets/textures/entity/weapon/iti-laser-caster.png"))
 //Tiles
 Registry.images.add("tile.grass", new ImageContainer("assets/textures/block/tile/grass.png"))
 Registry.images.add("tile.sand", new ImageContainer("assets/textures/block/tile/sand.png"))
 Registry.images.add("tile.stone", new ImageContainer("assets/textures/block/tile/stone.png"))
 Registry.images.add("tile.water", new ImageContainer("assets/textures/block/tile/water.png"))
-Registry.images.add("tile.sand-water", new ImageContainer("assets/textures/block/tile/sand_water.png"))
+Registry.images.add("tile.sand-water", new ImageContainer("assets/textures/block/tile/sand-water.png"))
+Registry.images.add("tile.sand-grass", new ImageContainer("assets/textures/block/tile/sandy-grass.png"))
+//Ores
+Registry.images.add("ore.copper", new ImageContainer("assets/textures/block/ore/copper-ore.png"))
+Registry.images.add("ore.copper.exposed", new ImageContainer("assets/textures/block/ore/copper-ore-exposed.png"))
+Registry.images.add("ore.copper.weathered", new ImageContainer("assets/textures/block/ore/copper-ore-weathered.png"))
+Registry.images.add("ore.copper.oxidised", new ImageContainer("assets/textures/block/ore/copper-ore-oxidised.png"))
 //Blocks > Defense
 Registry.images.add("block.stone-wall", new ImageContainer("assets/textures/block/blocks/defense/stone-wall.png"))
 Registry.images.add("block.sandstone-wall", new ImageContainer("assets/textures/block/blocks/defense/sandstone-wall.png"))

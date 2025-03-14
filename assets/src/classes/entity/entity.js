@@ -2,8 +2,10 @@ class Entity extends ShootableObject {
   name = "Entity";
   resistances = [];
   //How the entity will be drawn
+  /**@type {Component[]} */
   components = [];
 
+  moving = false;
   hitSize = 20;
   speed = 10;
   turnSpeed = 10;
@@ -19,6 +21,12 @@ class Entity extends ShootableObject {
   //Physics
   flying = false;
   explosiveness = 0.1;
+  _lastPos = { x: 0, y: 0 };
+  get computedSpeed() {
+    return (
+      ((this.x - this._lastPos.x) ** 2 + (this.y - this._lastPos.y) ** 2) ** 0.5
+    );
+  }
 
   get directionRad() {
     return (this.direction / 180) * Math.PI;
@@ -111,10 +119,12 @@ class Entity extends ShootableObject {
   }
 
   tick() {
+    this.components.forEach((c) => c.tick(this));
     this.tickGroundEffects();
     this.ai();
     super.tick();
     this.tickStatuses();
+    this._lastPos = { x: this.x, y: this.y };
   }
 
   ai() {
@@ -184,6 +194,16 @@ class Entity extends ShootableObject {
   }
   onHealthZeroed() {
     super.onHealthZeroed();
+    liquidDestructionBlast(
+      this.x,
+      this.y,
+      this.width * this.height, //this.maxHealth,
+      [0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0],
+      this.components,
+      this.world
+    );
     createDestructionExplosion(this.x, this.y, this);
   }
 }

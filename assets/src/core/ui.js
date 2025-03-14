@@ -39,7 +39,12 @@ const ui = {
 class UIComponent {
   invert() {
     this.inverted = !this.inverted;
-    this.y *= -1;
+    //this.y *= -1;
+    return this;
+  }
+  invertX() {
+    this.invertedX = !this.invertedX;
+    //this.y *= -1;
     return this;
   }
   setBackgroundColour(colour = null) {
@@ -94,6 +99,11 @@ class UIComponent {
       get: () => -height / 2 + this.height / 2 + offset,
     });
   }
+
+  rotate(rotation) {
+    this.rotation += rotation;
+    return this;
+  }
   //Evaluates property:value on game ui: input "slot:1" => if "slot" is "1" (or equivalent, e.g. 1) return true, else false
   static evaluateCondition(condition) {
     const parts = condition.split(":"); //Separate property <- : -> value
@@ -123,6 +133,7 @@ class UIComponent {
   interactive = false;
   active = false;
   inverted = false;
+  invertedX = false;
   outline = true;
   backgroundColour = null;
   rotation = Block.direction.RIGHT;
@@ -183,6 +194,7 @@ class UIComponent {
     translate(-this.x, -this.y);
     noStroke();
     if (this.inverted) scale(1, -1);
+    if (this.invertedX) scale(-1, 1);
     if (this.width > 0 && this.height > 0) {
       if (this.outline && this.outlineColour) {
         stroke(...this.outlineColour);
@@ -313,7 +325,7 @@ class UIComponent {
 }
 
 class MultilineUIComponent extends UIComponent {
-  header = ""
+  header = "";
   draw() {
     push();
     translate(this.x, this.y);
@@ -321,6 +333,7 @@ class MultilineUIComponent extends UIComponent {
     translate(-this.x, -this.y);
     noStroke();
     if (this.inverted) scale(1, -1);
+    if (this.invertedX) scale(-1, 1);
     if (this.width > 0 && this.height > 0) {
       if (this.outline && this.outlineColour) {
         stroke(...this.outlineColour);
@@ -447,17 +460,18 @@ class ImageUIComponent extends UIComponent {
     push();
     translate(this.x, this.y);
     rotate(this.rotation);
-    translate(-this.x, -this.y);
+    if (this.inverted) scale(1, -1);
+    if (this.invertedX) scale(-1, 1);
     fill(...this.outlineColour);
     if (this.emphasised) fill(...this.emphasisColour);
     //Draw outline behind background
-    if (this.outline) rect(this.x, this.y, this.width + 4, this.height + 4);
+    if (this.outline) rect(0, 0, this.width + 4, this.height + 4);
     //Draw image
     if (this.pixelate) noSmooth();
     drawImg(
       this.image,
-      this.x,
-      this.y,
+      0,
+      0,
       this.width * this.scale,
       this.height * this.scale
     );
@@ -499,12 +513,9 @@ class InventoryUIComponent extends UIComponent {
 }
 
 class BlockInventoryUIComponent extends UIComponent {
-  invert() {
-    this.inverted = !this.inverted;
-  }
   /**@type {Container} */
   block = null;
-  rows = 5;
+  rows = null;
   cols = null;
   itemSize = 40;
   invName = false;
@@ -831,7 +842,7 @@ function createUIInventoryComponent(
   x = 0,
   y = 0,
   holder = null,
-  rows = 5,
+  rows = null,
   cols = null,
   itemSize = 40,
   invName = "inventory"

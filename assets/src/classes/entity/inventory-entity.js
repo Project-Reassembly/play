@@ -3,10 +3,8 @@ class InventoryEntity extends Entity {
   inventorySize = 30;
   init() {
     super.init();
-    this.inventory = new Inventory(this.inventorySize);
-    this.inventory.storage = this.inventory.storage.map((x) =>
-      construct(x, "itemstack")
-    );
+    this.inventory = new Inventory(this.inventorySize, this.inventory);
+    this.inventory.init();
   }
   onHealthZeroed() {
     //Drop items
@@ -24,6 +22,29 @@ class EquippedEntity extends InventoryEntity {
   rightHand = new Inventory(1);
   leftHand = new Inventory(1);
   body = new Inventory(1);
+
+  //Commonly used indices
+  /**@type {Component} */
+  get headPart() {
+    return this.components[0];
+  }
+  set headPart(_) {
+    this.components[0] = _;
+  }
+  /**@type {Component} */
+  get bodyPart() {
+    return this.components[1];
+  }
+  set bodyPart(_) {
+    this.components[1] = _;
+  }
+  /**@type {Component} */
+  get legsPart() {
+    return this.components[2];
+  }
+  set legsPart(_) {
+    this.components[2] = _;
+  }
 
   inventories = [
     this.inventory,
@@ -45,35 +66,56 @@ class EquippedEntity extends InventoryEntity {
   }
 
   draw() {
-    super.draw();
-    for (let inv of this.inventories) {
-      inv.iterate((x) => {
-        let item = x.getItem();
-        if (item instanceof Equippable) {
-          item.component.draw(
-            this.x,
-            this.y,
-            this.direction,
-            inv == this.leftHand
-          );
-        }
-      });
+    if (this.dead) return;
+    if (this.legsPart) {
+      this.legsPart.draw(this.x, this.y, this.direction);
+      this.legsPart.draw(this.x, this.y, this.direction, true);
     }
-
-    // for (let key of ["head", "rightHand", "leftHand", "body"]) {
-    //   if (this[key] instanceof Inventory) {
-    //     this[key].iterate((x) => {
-    //       let item = x.getItem();
-    //       if (item instanceof Equippable) {
-    //         item.component.draw(
-    //           this.x,
-    //           this.y,
-    //           this.direction,
-    //           key === "leftHand"
-    //         );
-    //       }
-    //     });
-    //   }
+    this.leftHand
+      .get(0)
+      ?.getItem()
+      ?.component?.draw(this.x, this.y, this.direction, true);
+    this.rightHand
+      .get(0)
+      ?.getItem()
+      ?.component?.draw(this.x, this.y, this.direction);
+    if (this.bodyPart) this.bodyPart.draw(this.x, this.y, this.direction);
+    this.body.iterate((x) => {
+      let item = x.getItem();
+      if (item instanceof Equippable) {
+        item.component.draw(
+          this.x,
+          this.y,
+          this.direction,
+          inv == this.leftHand
+        );
+      }
+    }, true);
+    if (this.headPart) this.headPart.draw(this.x, this.y, this.direction);
+    this.head.iterate((x) => {
+      let item = x.getItem();
+      if (item instanceof Equippable) {
+        item.component.draw(
+          this.x,
+          this.y,
+          this.direction,
+          inv == this.leftHand
+        );
+      }
+    }, true);
+    PhysicalObject.prototype.draw.call(this);
+    // for (let inv of this.inventories) {
+    //   inv.iterate((x) => {
+    //     let item = x.getItem();
+    //     if (item instanceof Equippable) {
+    //       item.component.draw(
+    //         this.x,
+    //         this.y,
+    //         this.direction,
+    //         inv == this.leftHand
+    //       );
+    //     }
+    //   });
     // }
   }
 }

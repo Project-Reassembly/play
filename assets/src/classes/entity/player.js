@@ -11,9 +11,17 @@ class Player extends EquippedEntity {
       [255, 255, 0]
     );
   }
-  onHealthZeroed() {
-    super.onHealthZeroed();
-    Log.send(this.name + " died", [255, 0, 0]);
+  onHealthZeroed(type, source) {
+    super.onHealthZeroed(type, source);
+    Log.send(
+      Registry.deathmsg.has(type)
+        ? Registry.deathmsg
+            .get(type)
+            .replaceAll("(1)", this.name)
+            .replaceAll("(2)", source?.name ?? "something")
+        : this.name + " died",
+      [255, 0, 0]
+    );
     let ticks = this.respawnTime / 60;
     respawnTimer.repeat(
       (iter) => Log.send("Respawning in: " + (ticks - iter)),

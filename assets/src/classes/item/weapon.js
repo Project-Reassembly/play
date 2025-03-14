@@ -10,7 +10,6 @@ class Weapon extends Equippable {
       spacing: 0,
     },
   };
-  rarity = 1;
 
   //Internal
   #delay = 0;
@@ -86,6 +85,9 @@ class Weapon extends Equippable {
         holder.world,
         holder
       );
+      if (this.component instanceof WeaponComponent) {
+        this.component.trigger();
+      }
     }
   }
   /**@param {EquippedEntity} holder  */

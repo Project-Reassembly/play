@@ -7,10 +7,14 @@ const game = {
   paused: false,
   get mouse() {
     return {
-      x: ui.lastMousePos.x + ui.camera.x,
-      blockX: Math.floor((ui.lastMousePos.x + ui.camera.x) / Block.size),
-      y: ui.lastMousePos.y + ui.camera.y,
-      blockY: Math.floor((ui.lastMousePos.y + ui.camera.y) / Block.size),
+      x: ui.lastMousePos.x / ui.camera.zoom + ui.camera.x,
+      blockX: Math.floor(
+        (ui.lastMousePos.x / ui.camera.zoom + ui.camera.x) / Block.size
+      ),
+      y: ui.lastMousePos.y / ui.camera.zoom + ui.camera.y,
+      blockY: Math.floor(
+        (ui.lastMousePos.y / ui.camera.zoom + ui.camera.y) / Block.size
+      ),
     };
   },
 };
@@ -28,6 +32,9 @@ let genMsg = "Generating World...";
 let genProgress = 0;
 let genStageProgress = 0;
 //
+let freecam = false;
+let freecamReturn = 0;
+let camDiff = { x: 0, y: 0 };
 
 if (!window.Worker) {
   const errmsg =
@@ -51,8 +58,13 @@ let waitingForWorker = false;
 let fonts = {};
 
 //Worldgen analysis
-let stats = {};
-let failed = 0;
+let stats = {
+  placed: Object.create(null),
+  total: 0,
+  failed: 0,
+  structures: Object.create(null),
+  structs: 0,
+};
 
 worldGenWorker.onmessage = (ev) => {
   if (ev.data === "finish") {
@@ -66,28 +78,38 @@ worldGenWorker.onmessage = (ev) => {
     worldGenWorker.terminate();
     //Worldgen stats
     let log = "\n";
-    let total = Object.values(stats).reduce((a, b) => a + b);
+    stats.total = Object.values(stats.placed).reduce((a, b) => a + b, 0);
+    stats.structs = Object.values(stats.structures).reduce((a, b) => a + b, 0);
     log += "\n#### WORLD GENERATED ####";
-    log += "\nWorld Breakdown:";
-    for (let key of Object.getOwnPropertyNames(stats)) {
-      let val = stats[key];
+    log += "\n//// World Breakdown ////";
+    log += "\n--- Tiles and Blocks: ---";
+    for (let key in stats.placed) {
+      let val = stats.placed[key];
       log +=
         "\n| " +
         key +
         ": " +
         val +
         " (" +
-        roundNum((val / total) * 100, 2) +
+        roundNum((val / stats.total) * 100, 2) +
         "%)";
     }
-    log += "\n" + total + " total blocks";
+    log += "\n" + stats.total + " total blocks";
     log +=
       "\n" +
-      failed +
+      stats.failed +
       " failed placements (" +
-      roundNum((failed / total) * 100, 2) +
+      roundNum((stats.failed / stats.total) * 100, 2) +
       "%)";
+    log += "\n------ Structures: ------";
+    for (let key in stats.structures) {
+      let val = stats.structures[key];
+      log += "\n| " + key + ": " + val;
+    }
+    log += "\n" + stats.structs + " total structures";
+    log += "\n-------------------------";
     log += "\n#########################";
+
     console.log(log);
   } else if (typeof ev.data === "object") {
     if (ev.data.type === "genstage") {
@@ -110,14 +132,14 @@ worldGenWorker.onmessage = (ev) => {
             def.construction ?? {}
           );
 
-          stats[tile.block] ??= 0;
-          stats[tile.block]++;
+          stats.placed[tile.block] ??= 0;
+          stats.placed[tile.block]++;
         } catch (e) {
           console.warn("Worldgen Error:\n" + e);
-          failed++;
+          stats.failed++;
 
-          stats["(" + tile.block + ")"] ??= 0;
-          stats["(" + tile.block + ")"]++;
+          stats.placed["(" + tile.block + ")"] ??= 0;
+          stats.placed["(" + tile.block + ")"]++;
         }
       }
       chunk.world = world;
@@ -127,19 +149,67 @@ worldGenWorker.onmessage = (ev) => {
     }
     if (ev.data.type === "build") {
       let def = ev.data.def;
+      let successful = true;
       for (let block of def.blocks) {
         //Create block, and overwrite properties
-        if (world.isPositionFree(ev.data.x + block.x, ev.data.y + block.y))
-          Object.assign(
-            world.placeAt(
-              block.block,
+        if (
+          world.isPositionFree(ev.data.x + block.x, ev.data.y + block.y) &&
+          (!ev.data.target ||
+            world.getBlock(
               ev.data.x + block.x,
               ev.data.y + block.y,
-              "blocks"
-            ),
-            def.construction ?? {}
-          );
+              "tiles"
+            ) === ev.data.target)
+        )
+          try {
+            Object.assign(
+              world.placeAt(
+                block.block,
+                ev.data.x + block.x,
+                ev.data.y + block.y,
+                ev.data.layer ?? "blocks"
+              ),
+              def.construction ?? {}
+            );
+
+            stats.placed[block.block] ??= 0;
+            stats.placed[block.block]++;
+          } catch (e) {
+            console.warn("Worldgen Error:\n" + e);
+            successful = false;
+            stats.failed++;
+
+            stats.placed["(" + block.block + ")"] ??= 0;
+            stats.placed["(" + block.block + ")"]++;
+          }
       }
+      stats.structures[
+        successful ? ev.data.name : "(" + ev.data.name + ")"
+      ] ??= 0;
+      stats.structures[successful ? ev.data.name : "(" + ev.data.name + ")"]++;
+    }
+    if (ev.data.type === "place") {
+      if (
+        (ev.data.layer !== "blocks" ||
+          world.isPositionFree(ev.data.x, ev.data.y)) &&
+        (!ev.data.target ||
+          world.getBlock(ev.data.x, ev.data.y, "tiles") === ev.data.target)
+      )
+        try {
+          Object.assign(
+            world.placeAt(ev.data.block, ev.data.x, ev.data.y, ev.data.layer),
+            ev.data.construction ?? {}
+          );
+
+          stats.placed["[Ore] " + ev.data.block] ??= 0;
+          stats.placed["[Ore] " + ev.data.block]++;
+        } catch (e) {
+          console.warn("Worldgen Error:\n" + e);
+          stats.failed++;
+
+          stats.placed["[Ore] (" + ev.data.block + ")"] ??= 0;
+          stats.placed["[Ore] (" + ev.data.block + ")"]++;
+        }
     }
   }
 };
@@ -221,6 +291,7 @@ function draw() {
     if (!errored) frame();
   } catch (error) {
     errored = true;
+    console.error(error);
     Log.send("Project: Reassembly has encountered an error:", [255, 50, 50]);
     Log.send(
       "   [" + error.constructor.name + "] " + error.message,
@@ -317,18 +388,25 @@ function fpsUpdate() {
 function uiFrame() {
   Inventory.tooltip = null;
   //Tick UI
+  UIComponent.setCondition("containerselected:" + !!Container.selectedBlock);
   updateUIActivity();
   tickUI();
   //Reset mouse held status
   if (ui.waitingForMouseUp && !mouseIsPressed) ui.waitingForMouseUp = false;
   //Draw UI and mouse pos
-  drawUI();
   if (generationStarted && !generating && ui.menuState === "in-game") {
     ui.hoveredBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
-    if (ui.hoveredBlock) {
-      ui.hoveredBlock.drawTooltip(ui.lastMousePos.x, ui.lastMousePos.y);
+    if (ui.hoveredBlock) ui.hoveredBlock.highlight();
+    let conblock = Container.selectedBlock;
+    if (conblock) {
+      conblock.highlight(true);
+      conblock.drawTooltip(
+        conblock.uiX + Block.size * ui.camera.zoom,
+        conblock.uiY
+      );
     }
   }
+  drawUI();
   Inventory.drawMIS(40);
   Inventory.drawTooltip();
   showMousePos();
@@ -350,8 +428,15 @@ function gameFrame() {
       world.tickAll();
     }
   });
-  ui.camera.x = game.player.x;
-  ui.camera.y = game.player.y;
+  if (!freecam && freecamReturn <= 0) {
+    ui.camera.x = game.player.x;
+    ui.camera.y = game.player.y;
+  }
+  if (!freecam && freecamReturn >= 0) {
+    freecamReturn -= 0.05;
+    ui.camera.x -= camDiff.x * 0.05;
+    ui.camera.y -= camDiff.y * 0.05;
+  }
   scale(ui.camera.zoom);
   rotate(radians(ui.camera.rotation));
   translate(-ui.camera.x, -ui.camera.y);
@@ -369,33 +454,55 @@ function gameFrame() {
 }
 
 function movePlayer() {
-  if (
-    keyIsDown(87) &&
-    game.player.y > borders()[1] /* Top */ + game.player.hitSize
-  ) {
-    //If 'W' pressed
-    game.player.move(0, -game.player.speed);
-  }
-  if (
-    keyIsDown(83) &&
-    game.player.y < borders()[3] /* Bottom */ - game.player.hitSize
-  ) {
-    //If 'S' pressed
-    game.player.move(0, game.player.speed);
-  }
-  if (
-    keyIsDown(65) &&
-    game.player.x > borders()[0] /* Left */ + game.player.hitSize
-  ) {
-    //If 'A' pressed
-    game.player.move(-game.player.speed, 0);
-  }
-  if (
-    keyIsDown(68) &&
-    game.player.x < borders()[2] /* Right */ - game.player.hitSize
-  ) {
-    //If 'D' pressed
-    game.player.move(game.player.speed, 0);
+  if (keyIsDown(SHIFT) || game.player.dead) {
+    freecam = true;
+    if (keyIsDown(87)) {
+      ui.camera.y -= 5;
+    }
+    if (keyIsDown(83)) {
+      ui.camera.y += 5;
+    }
+    if (keyIsDown(65)) {
+      ui.camera.x -= 5;
+    }
+    if (keyIsDown(68)) {
+      ui.camera.x += 5;
+    }
+  } else {
+    if (freecam) {
+      freecamReturn = 1;
+      camDiff.x = ui.camera.x - game.player.x;
+      camDiff.y = ui.camera.y - game.player.y;
+    }
+    freecam = false;
+    if (
+      keyIsDown(87) &&
+      game.player.y > borders()[1] /* Top */ + game.player.hitSize
+    ) {
+      //If 'W' pressed
+      game.player.move(0, -game.player.speed);
+    }
+    if (
+      keyIsDown(83) &&
+      game.player.y < borders()[3] /* Bottom */ - game.player.hitSize
+    ) {
+      //If 'S' pressed
+      game.player.move(0, game.player.speed);
+    }
+    if (
+      keyIsDown(65) &&
+      game.player.x > borders()[0] /* Left */ + game.player.hitSize
+    ) {
+      //If 'A' pressed
+      game.player.move(-game.player.speed, 0);
+    }
+    if (
+      keyIsDown(68) &&
+      game.player.x < borders()[2] /* Right */ - game.player.hitSize
+    ) {
+      //If 'D' pressed
+      game.player.move(game.player.speed, 0);
+    }
   }
 }
 
@@ -429,7 +536,7 @@ function tickUI() {
 
 function showMousePos() {
   push();
-  if (ui.menuState === "in-game" && keyIsDown(SHIFT)) {
+  if (ui.menuState === "in-game" && keyIsDown(ALT)) {
     textAlign(CENTER, CENTER);
     textFont(fonts.ocr);
     stroke(0);
@@ -488,9 +595,20 @@ function createPlayer() {
     health: 100,
     components: [
       {
-        type: "component",
-        width: 30,
-        height: 30,
+        image: "entity.scrap-sentinel.head",
+        width: 32,
+        height: 32,
+      },
+      {
+        image: "entity.scrap-sentinel.body",
+        width: 32,
+        height: 32,
+      },
+      {
+        type: "leg-component",
+        image: "entity.scrap-sentinel.legs",
+        width: 32,
+        height: 32,
       },
     ],
     team: "player",
@@ -502,7 +620,7 @@ function createPlayer() {
   player.inventory.addItem("stone", 99);
   player.inventory.addItem("scrap-assembler");
   player.addToWorld(world);
-  player.setSpawn()
+  player.setSpawn();
   game.player = player;
 
   //Change to an accessor property
@@ -587,27 +705,34 @@ function interact() {
     world.getBlock(game.mouse.blockX, game.mouse.blockY, "floor") ??
     world.getBlock(game.mouse.blockX, game.mouse.blockY, "tiles");
   //If space is free, and buildable
-  if (heldItem !== null && clickedTile?.buildable) {
+  if (clickedTile?.buildable) {
     //Place items on free space
-    if (heldItem instanceof PlaceableItem)
+    if (heldItem instanceof PlaceableItem) {
       heldItem.place(
         Inventory.mouseItemStack,
         game.mouse.blockX,
         game.mouse.blockY,
         selectedDirection
       );
-    else Container.selectedBlock = null;
+      return;
+    }
+  }
+  //If clicked again
+  if (clickedBlock && clickedBlock === Container.selectedBlock) {
+    Container.selectedBlock = null;
+    ui.waitingForMouseUp = true;
+    return;
+  }
+  //If block is (not) interacted with
+  if (clickedBlock && clickedBlock.selectable) {
+    Container.selectedBlock = clickedBlock;
+    ui.waitingForMouseUp = true;
     return;
   } else {
-    //If block is (not) interacted with
-    if (clickedBlock && clickedBlock.selectable) {
-      Container.selectedBlock = clickedBlock;
+    if (Container.selectedBlock) {
+      Container.selectedBlock = null;
+      ui.waitingForMouseUp = true;
       return;
-    } else {
-      if (Container.selectedBlock) {
-        Container.selectedBlock = null;
-        return;
-      }
     }
   }
   if (
@@ -677,10 +802,25 @@ function keyPressed() {
   return false;
 }
 
+const zoomSpeed = 0.025;
+/**@param {WheelEvent} ev  */
+function mouseWheel(ev) {
+  //CTRL + scroll to zoom
+  if (ev.ctrlKey)
+    ui.camera.zoom = clamp(ui.camera.zoom + ev.delta * zoomSpeed, 1, 5);
+  //scroll normally to change block placement direction
+  else
+    selectedDirection = (
+      ev.delta > 0 ? Block.dir.rotateAntiClockwise : Block.dir.rotateClockwise
+    )(selectedDirection);
+  return false;
+}
+
 function nextRecipe() {
   let block = ui.hoveredBlock ?? Container.selectedBlock;
   if (!block) return;
   if (block instanceof Crafter) {
+    block.changeRecipe();
     block._recipe++;
     if (block._recipe >= block.recipes.length) block._recipe = 0;
   }
@@ -690,6 +830,7 @@ function prevRecipe() {
   let block = ui.hoveredBlock ?? Container.selectedBlock;
   if (!block) return;
   if (block instanceof Crafter) {
+    block.changeRecipe();
     block._recipe--;
     if (block._recipe < 0) block._recipe = block.recipes.length - 1;
   }

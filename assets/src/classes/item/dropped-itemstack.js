@@ -33,18 +33,30 @@ class DroppedItemStack extends Entity {
       for (let ent of this.world.entities) {
         if (ent instanceof InventoryEntity && ent.collidesWith(this)) {
           let it = this.item.item;
-          if (ent === game.player) {
-            Log.send("Picked up " + this.item.toString(true));
-          }
           if (ent instanceof EquippedEntity) {
             let leftOver = ent.equipment.addItem(it, this.item.count);
             if (!leftOver) {
+              if (ent === game.player) {
+                Log.send("Picked up " + this.item.toString(true));
+              }
               this.item.count = 0;
             } else {
               let leftOver2 = ent.inventory.addItem(it, leftOver);
               if (!leftOver2) {
+                if (ent === game.player) {
+                  Log.send("Picked up " + this.item.toString(true));
+                }
                 this.item.count = 0;
-              } else this.item.count = leftOver2;
+              } else {
+                if (ent === game.player) {
+                  let newcount = this.item.count - leftOver2;
+                  if (newcount > 0)
+                    Log.send(
+                      "Picked up " + this.item.getItem().name + " x" + newcount
+                    );
+                }
+                this.item.count = leftOver2;
+              }
             }
           } else {
             this.item.count = ent.inventory.addItem(it, this.item.count);
