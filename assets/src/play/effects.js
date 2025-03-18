@@ -247,16 +247,7 @@ function createDestructionExplosion(x, y, source) {
     source.maxHealth * source.explosiveness,
     "explosion",
     (source.width + source.height) * source.explosiveness * 5,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    source.team
+    source
   );
 }
 function liquidDestructionBlast(
@@ -275,7 +266,7 @@ function liquidDestructionBlast(
   for (let i = 0; i < rootMHP; i++) {
     let delta = variation.map((x) => rnd(-x, x));
     world.floorParticles.push(
-      new LiquidParticle(
+      new ShapeParticle(
         x,
         y,
         rnd(0, 360),
@@ -313,7 +304,7 @@ function liquidDestructionBlast(
           if (speed > 0.1) {
             let delta = variation.map((x) => rnd(-x, x));
             world.floorParticles.push(
-              new LiquidParticle(
+              new ShapeParticle(
                 ix,
                 iy,
                 rnd(0, 360),

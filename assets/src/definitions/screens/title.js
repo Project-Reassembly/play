@@ -7,12 +7,29 @@ createUIComponent(
   50,
   "none",
   () => {
-    ui.menuState = "in-game"
+    genMode = "create";
+    ui.menuState = "in-game";
   },
-  "Play",
+  "New",
   true,
   30
-)
+);
+createUIComponent(
+  ["title"],
+  [],
+  0,
+  60,
+  100,
+  50,
+  "none",
+  () => {
+    genMode = "load";
+    ui.menuState = "in-game";
+  },
+  "Load",
+  true,
+  30
+);
 createUIComponent(
   ["title"],
   [],
@@ -22,7 +39,7 @@ createUIComponent(
   0,
   "none",
   null,
-  "/   Project:   \\\n\\Reassembly/",
+  ">>> Project: <<<\n< Reassembly >",
   false,
   50
-).setTextColour([100,100,100])
+).setTextColour([100, 100, 100]);

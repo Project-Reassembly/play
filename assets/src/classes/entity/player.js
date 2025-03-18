@@ -2,12 +2,11 @@ const respawnTimer = new Timer();
 
 class Player extends EquippedEntity {
   respawnTime = 180;
-  spawnpoint = { x: 0, y: 0 };
   setSpawn(x, y) {
-    this.spawnpoint.x = x ?? this.x;
-    this.spawnpoint.y = y ?? this.y;
+    this.spawnX = x ?? this.x;
+    this.spawnY = y ?? this.y;
     Log.send(
-      "Spawnpoint set to " + this.spawnpoint.x + ", " + this.spawnpoint.y,
+      "Spawnpoint set to " + this.spawnX + ", " + this.spawnY,
       [255, 255, 0]
     );
   }
@@ -31,10 +30,15 @@ class Player extends EquippedEntity {
     respawnTimer.do(() => {
       this.health = this.maxHealth;
       this.dead = false;
-      this.x = this.spawnpoint.x;
-      this.y = this.spawnpoint.y;
+      this.x = this.spawnX;
+      this.y = this.spawnY;
       this.addToWorld(world);
       blindingFlash(this.x, this.y, 255, 30, 400);
     }, this.respawnTime);
+  }
+  ai() {
+    if (this.target) {
+      this.rotateTowards(this.target.x, this.target.y, this.turnSpeed);
+    }
   }
 }

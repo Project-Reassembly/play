@@ -32,6 +32,7 @@ class LaserBullet extends Bullet {
     }
   }
   draw() {
+    if (this.drawer.hidden) return;
     push();
     //Width is useless, as it is replaced by length, and height is useless as it is replaced by hitsize
     let drawnLength = this.length * this.#lengthFraction;
@@ -69,7 +70,7 @@ class LaserBullet extends Bullet {
   collidesWith(obj) {
     let currentLength = this.length * this.#lengthFraction;
     let currentHitSize = this.hitSize * this.#widthFraction;
-    if(currentHitSize <= 0) return false; //Catch problem where hitsize = 0 causes infinite loop
+    if (currentHitSize <= 0) return false; //Catch problem where hitsize = 0 causes infinite loop
     let offset = {
       x: Math.cos(this.directionRad),
       y: Math.sin(this.directionRad),

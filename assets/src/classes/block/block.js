@@ -1,7 +1,15 @@
+/**
+ * @typedef SerialisedBlock
+ * @prop {int} x
+ * @prop {int} y
+ * @prop {string} block Registry name
+ * @prop {number} direction
+ */
+/** */
 class Block extends ShootableObject {
   static size = 30;
   selectable = false;
-  /**@readonly*/
+  /**@readonly @enum*/
   static direction = {
     /**@readonly */
     UP: -Math.PI / 2,
@@ -31,6 +39,35 @@ class Block extends ShootableObject {
     },
     vectorOf(direction) {
       return { x: Math.cos(direction), y: Math.sin(direction) };
+    },
+    /**@param {0|1|2|3} */
+    fromEnum(en) {
+      switch (en) {
+        case 0:
+          return Block.dir.UP;
+        case 1:
+          return Block.dir.DOWN;
+        case 2:
+          return Block.dir.LEFT;
+        case 3:
+          return Block.dir.RIGHT;
+        default:
+          return Block.dir.UP;
+      }
+    },
+    toEnum(en) {
+      switch (en) {
+        case Block.dir.UP:
+          return 0;
+        case Block.dir.DOWN:
+          return 1;
+        case Block.dir.LEFT:
+          return 2;
+        case Block.dir.RIGHT:
+          return 3;
+        default:
+          return 0;
+      }
     },
   };
   /**@readonly */
@@ -80,7 +117,7 @@ class Block extends ShootableObject {
   canBreak(type = BreakType.delete) {
     return true;
   }
-  onHealthZeroed() {
+  onHealthZeroed(type, source) {
     if (this.break(BreakType.attack)) {
       this.world.break(this.gridX, this.gridY, "blocks");
       //Block go boom
@@ -138,22 +175,31 @@ class Block extends ShootableObject {
     pop();
   }
   get x() {
-    return (this.blockX + this.chunk.x * Chunk.size) * Block.size;
+    return (this.blockX + this.chunk.i * Chunk.size) * Block.size;
   }
   get y() {
-    return (this.blockY + this.chunk.y * Chunk.size) * Block.size;
+    return (this.blockY + this.chunk.j * Chunk.size) * Block.size;
   }
   get gridX() {
-    return this.blockX + this.chunk.x * Chunk.size;
+    return this.blockX + this.chunk.i * Chunk.size;
   }
   get gridY() {
-    return this.blockY + this.chunk.y * Chunk.size;
+    return this.blockY + this.chunk.j * Chunk.size;
   }
   get uiX() {
     return (this.x - ui.camera.x) * ui.camera.zoom;
   }
   get uiY() {
     return (this.y - ui.camera.y) * ui.camera.zoom;
+  }
+  /**@returns {SerialisedBlock} */
+  serialise() {
+    return {
+      block: this.registryName,
+      direction: Block.dir.toEnum(this.direction),
+      health: this.health,
+      team: this.team,
+    };
   }
 }
 /** Stores values to describe how blocks are broken.

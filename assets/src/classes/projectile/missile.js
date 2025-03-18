@@ -7,6 +7,7 @@ class Missile extends Bullet {
   _trailInterval = -1;
   turnSpeed = 1;
   targetType = "mouse"; //"nearest", "mouse", "hovered"
+  trackingRange = 200;
   init() {
     if (this._trailInterval === -1) {
       this._trailInterval = this.speed / this.hitSize;
@@ -42,34 +43,39 @@ class Missile extends Bullet {
       }
     }
   }
-  rotateTowards(x, y, amount) {
-    let maxRotateAmount = radians(amount); //use p5 to get radians
-    let delta = { x: x - this.x, y: y - this.y };
-    //Define variables
-    let currentDirection = p5.Vector.fromAngle(this.directionRad).heading(); //Find current angle, standardised
-    let targetDirection = Math.atan2(delta.y, delta.x); //Find target angle, standardised
-    if (targetDirection === currentDirection) return; //Do nothing if facing the right way
-    let deltaRot = targetDirection - currentDirection;
-    //Rotation correction
-    if (deltaRot < -PI) {
-      deltaRot += TWO_PI;
-    } else if (deltaRot > PI) {
-      deltaRot -= TWO_PI;
-    }
-    let sign = deltaRot < 0 ? -1 : 1; //Get sign: -1 if negative, 1 if positive
-    let deltaD = 0;
-    //Choose smaller turn
-    if (Math.abs(deltaRot) > maxRotateAmount) {
-      deltaD = maxRotateAmount * sign;
-    } else {
-      deltaD = deltaRot;
-    }
-    //Turn
-    this.direction += degrees(deltaD);
-  }
+  // rotateTowards(x, y, amount) {
+  //   let maxRotateAmount = radians(amount); //use p5 to get radians
+  //   let delta = { x: x - this.x, y: y - this.y };
+  //   //Define variables
+  //   let currentDirection = p5.Vector.fromAngle(this.directionRad).heading(); //Find current angle, standardised
+  //   let targetDirection = Math.atan2(delta.y, delta.x); //Find target angle, standardised
+  //   if (targetDirection === currentDirection) return; //Do nothing if facing the right way
+  //   let deltaRot = targetDirection - currentDirection;
+  //   //Rotation correction
+  //   if (deltaRot < -PI) {
+  //     deltaRot += TWO_PI;
+  //   } else if (deltaRot > PI) {
+  //     deltaRot -= TWO_PI;
+  //   }
+  //   let sign = deltaRot < 0 ? -1 : 1; //Get sign: -1 if negative, 1 if positive
+  //   let deltaD = 0;
+  //   //Choose smaller turn
+  //   if (Math.abs(deltaRot) > maxRotateAmount) {
+  //     deltaD = maxRotateAmount * sign;
+  //   } else {
+  //     deltaD = deltaRot;
+  //   }
+  //   //Turn
+  //   this.direction += degrees(deltaD);
+  // }
   step(dt) {
     super.step(dt);
-    if (this.target && !this.target.dead && !this.target.remove) {
+    if (
+      this.target &&
+      !this.target.dead &&
+      !this.target.remove &&
+      this.distanceTo(this.target) < this.trackingRange
+    ) {
       //If target still there
       this.rotateTowards(this.target.x, this.target.y, this.turnSpeed);
     }

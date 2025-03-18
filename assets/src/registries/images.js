@@ -10,10 +10,23 @@ Registry.images.add("item.raw-copper", new ImageContainer("assets/textures/item/
 Registry.images.add("item.copper-ingot", new ImageContainer("assets/textures/item/copper-ingot.png"))
 Registry.images.add("item.wire", new ImageContainer("assets/textures/item/wire.png"))
 
+Registry.images.add("item.raw-iron", new ImageContainer("assets/textures/item/raw-iron.png"))
+Registry.images.add("item.iron-ingot", new ImageContainer("assets/textures/item/iron-ingot.png"))
+
+Registry.images.add("item.raw-titanium", new ImageContainer("assets/textures/item/raw-titanium.png"))
+Registry.images.add("item.titanium-ingot", new ImageContainer("assets/textures/item/titanium-ingot.png"))
+
+Registry.images.add("item.raw-aluminium", new ImageContainer("assets/textures/item/raw-aluminium.png"))
+Registry.images.add("item.aluminium-ingot", new ImageContainer("assets/textures/item/aluminium-ingot.png"))
+
+Registry.images.add("item.raw-tungsten", new ImageContainer("assets/textures/item/raw-tungsten.png"))
+Registry.images.add("item.tungsten-ingot", new ImageContainer("assets/textures/item/tungsten-ingot.png"))
+
 Registry.images.add("item.scrap", new ImageContainer("assets/textures/item/scrap.png"))
 Registry.images.add("item.plate", new ImageContainer("assets/textures/item/plate.png"))
 
 Registry.images.add("item.stone", new ImageContainer("assets/textures/item/stone.png"))
+
 Registry.images.add("item.sand", new ImageContainer("assets/textures/item/sand.png"))
 Registry.images.add("item.sandstone", new ImageContainer("assets/textures/item/sandstone.png"))
 //Items > Ammo

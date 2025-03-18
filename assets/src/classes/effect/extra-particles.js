@@ -31,29 +31,31 @@ class ExecutorParticle {
   }
 }
 
-class LiquidParticle extends ShapeParticle {
-  step(dt) {
-    super.step(dt);
-    let blockOn = world.getBlock(
-      Math.floor(this.x / Block.size),
-      Math.floor(this.y / Block.size),
-      "tiles"
-    );
-    if (!blockOn) return;
-    if (blockOn.registryName.includes("water")) {
-      this.sizeXTo += 0.8;
-      this.sizeYTo += 0.8;
-      this.colourTo[3] ??= 255
-      this.colourFrom[3] ??= 255
-      this.colourTo[3] -= 0.6;
-      this.colourFrom[3] -= 0.6;
-      if (this.colourTo[3] < 0.1) {
-        this.remove = true;
-      }
-    }
-  }
-}
+//Too laggy to be worth the effect
+
+// class LiquidParticle extends ShapeParticle {
+//   step(dt) {
+//     super.step(dt);
+//     let blockOn = world.getBlock(
+//       Math.floor(this.x / Block.size),
+//       Math.floor(this.y / Block.size),
+//       "tiles"
+//     );
+//     if (!blockOn) return;
+//     if (blockOn.registryName.includes("water")) {
+//       this.sizeXTo += 0.8;
+//       this.sizeYTo += 0.8;
+//       this.colourTo[3] ??= 255
+//       this.colourFrom[3] ??= 255
+//       this.colourTo[3] -= 0.6;
+//       this.colourFrom[3] -= 0.6;
+//       if (this.colourTo[3] < 0.1) {
+//         this.remove = true;
+//       }
+//     }
+//   }
+// }
 
 class Pseudo3DParticle{
-  
+
 }

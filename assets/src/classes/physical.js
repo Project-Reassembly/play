@@ -117,8 +117,37 @@ class PhysicalObject extends RegisteredItem {
     }
   }
   tick() {}
+  /**
+   * @param {PhysicalObject} otherObj
+   */
+  distanceTo(otherObj) {
+    return ((this.y - otherObj.y) ** 2 + (this.x - otherObj.x) ** 2) ** 0.5;
+  }
+  distanceToPoint(x, y) {
+    return ((this.y - y) ** 2 + (this.x - x) ** 2) ** 0.5;
+  }
   get size() {
     return (this.width + this.height) / 2;
+  }
+  /**
+   * @param {PhysicalObject[]} array Array to find objects in.
+   * @param {number} maxDist Maximum distance, above which no entity will be targeted.
+   * @param {(obj: PhysicalObject) => boolean} where Predicate for targeted objects.
+   * @returns {PhysicalObject | null} The closest `PhysicalObject`, or `null` if the array had no `PhysicalObject`s
+   */
+  closestFrom(array, maxDist, where) {
+    let mindist = Infinity;
+    let chosen = null;
+    for (let obj of array) {
+      if (!where(obj)) continue;
+      let dist = this.distanceTo(obj);
+      if (dist > maxDist) continue;
+      if (dist < mindist) {
+        mindist = dist;
+        chosen = obj;
+      }
+    }
+    return chosen;
   }
 }
 
@@ -166,11 +195,13 @@ class ShootableObject extends PhysicalObject {
     );
     if (this.health <= 0) {
       this.health = 0;
-      this.dead = true;
-      this.onHealthZeroed(type, source);
+      if (!this.dead) {
+        this.dead = true;
+        this.onHealthZeroed(type, source);
+      }
     }
   }
-  onHealthZeroed() {}
+  onHealthZeroed(type, source) {}
   checkBullets() {
     if (!this.world) return;
     for (let bullet of this.world.bullets) {

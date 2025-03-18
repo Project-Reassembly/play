@@ -647,3 +647,53 @@ Object.defineProperties(
     },
   }
 );
+
+//##############################################################
+
+//                        OTHER
+
+//##############################################################
+let command = "";
+let cmdHistory = [];
+let histIndex = 0;
+UIComponent.setCondition("cmd-open:false");
+//Command Line Input
+Object.defineProperties(
+  createUIComponent(
+    ["in-game"],
+    ["cmd-open:true"],
+    0,
+    0,
+    500,
+    40,
+    "both"
+  ).anchorBottom(100),
+  {
+    width: {
+      get: () => {
+        textSize(20);
+        return Math.max(400, textWidth(command)+100);
+      },
+    },
+  }
+);
+Object.defineProperties(
+  createUIComponent(
+    ["in-game"],
+    ["cmd-open:true"],
+    0,
+    0,
+    0,
+    40,
+    "none",
+    null,
+    "Enter command here",
+    true,
+    20
+  ).anchorBottom(100),
+  {
+    text: {
+      get: () => command + "_",
+    },
+  }
+);

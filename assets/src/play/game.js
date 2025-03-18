@@ -18,7 +18,6 @@ const game = {
     };
   },
 };
-const world = new World();
 const contentScale = 1;
 let worldSize = Block.size * Chunk.size * World.size;
 const borders = () => [0, 0, worldSize, worldSize];
@@ -31,6 +30,7 @@ let generating = false;
 let genMsg = "Generating World...";
 let genProgress = 0;
 let genStageProgress = 0;
+let genMode = "create";
 //
 let freecam = false;
 let freecamReturn = 0;
@@ -65,6 +65,8 @@ let stats = {
   structures: Object.create(null),
   structs: 0,
 };
+//Create or load world
+const world = new World();
 
 worldGenWorker.onmessage = (ev) => {
   if (ev.data === "finish") {
@@ -143,8 +145,8 @@ worldGenWorker.onmessage = (ev) => {
         }
       }
       chunk.world = world;
-      chunk.x = def.i;
-      chunk.y = def.j;
+      chunk.i = def.i;
+      chunk.j = def.j;
       world.chunks[def.j][def.i] = chunk;
     }
     if (ev.data.type === "build") {
@@ -193,7 +195,9 @@ worldGenWorker.onmessage = (ev) => {
         (ev.data.layer !== "blocks" ||
           world.isPositionFree(ev.data.x, ev.data.y)) &&
         (!ev.data.target ||
-          world.getBlock(ev.data.x, ev.data.y, "tiles") === ev.data.target)
+          world.getBlock(ev.data.x, ev.data.y, "tiles") === ev.data.target) &&
+        (world.getBlock(ev.data.x, ev.data.y, "tiles")?.buildable ||
+          world.getBlock(ev.data.x, ev.data.y, "floor")?.buildable)
       )
         try {
           Object.assign(
@@ -233,6 +237,104 @@ worldGenWorker.onmessageerror = (ev) => {
   console.warn("Message could not be deserialised.");
 };
 
+function saveGame(name) {
+  name ??= "save.game";
+  //Create file
+  let file = JSON.stringify(world.serialise());
+  //Minify the file
+  //About 18 times smaller file size because of this
+  //General find-and-replace:
+  file = file.replaceAll('"health":', "h=");
+  file = file.replaceAll('"direction":', "d=");
+  file = file.replaceAll('"block":', "b=");
+  file = file.replaceAll('"team":', "t=");
+  file = file.replaceAll('"x":', "x=");
+  file = file.replaceAll('"y":', "y=");
+  file = file.replaceAll("null", "#");
+  file = file.replaceAll("[#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#]", "~");
+  //Dictionary replacement:
+  let dict = [];
+  let num = 0;
+  Registry.blocks.forEach((name) => {
+    dict.push([num, name]);
+    num++;
+  });
+  dict.forEach((val) => {
+    file = file.replaceAll('"' + val[1] + '"', "@" + val[0]);
+  });
+  //Dictionary compression
+  file = file.replaceAll(/{b=@[0-9]+}/gi, (tile) => {
+    return "t" + tile.substring(3, tile.length - 1);
+  });
+  file =
+    "DICT<" +
+    dict.map((entry) => entry[0] + "=" + entry[1]).join("|") +
+    ">" +
+    file;
+  let spaceUsed = sizeKB(name + file);
+  Serialiser.set(name, file);
+  console.log("Game saved (" + roundNum(spaceUsed, 2) + "KB).");
+  Log.send("Game has been saved (" + roundNum(spaceUsed, 2) + "KB).", [0, 255, 0]);
+}
+
+function clearData() {
+  console.log("All saves deleted.");
+  Log.send("Stored saved deleted.", [255, 0, 0]);
+  Serialiser.clear("pr");
+}
+
+function loadGame(name) {
+  name ??= "save.game";
+  //Get file
+  /**@type {string} */
+  let file = Serialiser.get(name);
+  if (!file) {
+    Log.send("There is no save at '" + name + "'", [255, 255, 0]);
+    return false;
+  }
+  //Deminify the file
+  //Dictionary decompression
+  file = file.replaceAll(/t@[0-9]+/gi, (tile) => {
+    return "{b=" + tile.substring(1) + "}";
+  });
+  let dict = [];
+  file = file.replace(/DICT<.*>/gim, (dictionary) => {
+    let encoded = dictionary.substring(5, dictionary.length - 1);
+    dict = encoded.split("|").map((entry) => entry.split("="));
+    return "";
+  });
+  dict.forEach((entry) => {
+    file = file.replaceAll("@" + entry[0] + ",", '"' + entry[1] + '",');
+    file = file.replaceAll("@" + entry[0] + "}", '"' + entry[1] + '"}');
+  });
+  //Unreplace
+  file = file.replaceAll("~", "[#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#]");
+  file = file.replaceAll("#", "null");
+  file = file.replaceAll("h=", '"health":');
+  file = file.replaceAll("d=", '"direction":');
+  file = file.replaceAll("b=", '"block":');
+  file = file.replaceAll("t=", '"team":');
+  file = file.replaceAll("x=", '"x":');
+  file = file.replaceAll("y=", '"y":');
+  world.become(World.deserialise(JSON.parse(file)));
+  console.log("Game loaded.");
+  Log.send("You are now playing on '" + world.name + "'.", [0, 255, 0]);
+  return true;
+}
+
+function localStorageSpace() {
+  var allStrings = "";
+  for (var key in window.localStorage) {
+    if (window.localStorage.hasOwnProperty(key)) {
+      allStrings += window.localStorage[key];
+    }
+  }
+  return roundNum(sizeKB(allStrings), 2) + "KB";
+}
+function sizeKB(string) {
+  return string ? 3 + (string.length * 16) / (8 * 1024) : 0;
+}
+
 async function preload() {
   Registry.images.forEachAsync((name, el) => el.load());
   fonts.ocr = loadFont("assets/font/ocr_a_extended.ttf");
@@ -246,6 +348,7 @@ function setup() {
   imageMode(CENTER);
   colorMode("rgb", 255);
   textFont(fonts.darktech);
+  textStyle("normal");
 }
 
 async function delay(ms) {
@@ -359,7 +462,11 @@ function frame() {
     //Draw everything else
     if (ui.menuState === "in-game") {
       if (!generationStarted) {
-        generateWorld(64927391); //2147483647
+        if (genMode === "create") generateWorld(64927391); //2147483647
+        else if (genMode === "load") {
+          if (loadGame()) generationStarted = true;
+          else genMode = "create";
+        } else throw new Error("No generation mode! Use 'create' or 'load'.");
         return;
       }
       gameFrame();
@@ -437,6 +544,9 @@ function gameFrame() {
     ui.camera.x -= camDiff.x * 0.05;
     ui.camera.y -= camDiff.y * 0.05;
   }
+  //ISL again
+  _x.value = game.player.x;
+  _y.value = game.player.y;
   scale(ui.camera.zoom);
   rotate(radians(ui.camera.rotation));
   translate(-ui.camera.x, -ui.camera.y);
@@ -454,6 +564,7 @@ function gameFrame() {
 }
 
 function movePlayer() {
+  if (UIComponent.evaluateCondition("cmd-open:true")) return false;
   if (keyIsDown(SHIFT) || game.player.dead) {
     freecam = true;
     if (keyIsDown(87)) {
@@ -585,50 +696,26 @@ function showMousePos() {
   pop();
 }
 
-function createPlayer() {
+function createPlayer(player = null) {
   /** @type {Player} */
-  let player = construct({
-    type: "player",
-    x: worldSize / 2,
-    y: worldSize / 2,
-    name: "Player",
-    health: 100,
-    components: [
-      {
-        image: "entity.scrap-sentinel.head",
-        width: 32,
-        height: 32,
-      },
-      {
-        image: "entity.scrap-sentinel.body",
-        width: 32,
-        height: 32,
-      },
-      {
-        type: "leg-component",
-        image: "entity.scrap-sentinel.legs",
-        width: 32,
-        height: 32,
-      },
-    ],
-    team: "player",
-    width: 25,
-    height: 25,
-    speed: 3,
-  });
-  player.inventory.addItem("scrap", 35);
-  player.inventory.addItem("stone", 99);
-  player.inventory.addItem("scrap-assembler");
-  player.addToWorld(world);
-  player.setSpawn();
+  if (!player) {
+    player = construct(Registry.entities.get("player"));
+    player.inventory.addItem("scrap", 35);
+    player.inventory.addItem("stone", 99);
+    player.inventory.addItem("scrap-assembler");
+    player.addToWorld(world);
+    player.setSpawn();
+  }
   game.player = player;
+  //For ISL
+  _self.value = player;
+  console.log("Self: ", _self);
 
   //Change to an accessor property
   Object.defineProperty(player, "target", {
-    get: () => {
-      return game.mouse;
-    }, //This way, I only have to set it once.
+    get: () => game.mouse, //This way, I only have to set it once.
   });
+
   world.particles.push(
     new WaveParticle(
       player.x,
@@ -768,12 +855,38 @@ function reset() {
   game.player = null;
 }
 
-//Triggers on any key press
-function keyPressed() {
+/**Triggers on any key press
+ * @param {KeyboardEvent} ev
+ */
+function keyPressed(ev) {
   //CAPS LOCK doesn't matter
   key = key.toString().toLowerCase();
+  if (UIComponent.evaluateCondition("cmd-open:true")) {
+    if (key === "enter") {
+      islinterface.do(command);
+      cmdHistory.unshift(command);
+      command = "";
+      UIComponent.setCondition("cmd-open:false");
+      histIndex = -1;
+    }
+    if (key === "escape") UIComponent.setCondition("cmd-open:false");
+    if (key === "arrowup") {
+      histIndex++;
+      let last = cmdHistory[histIndex];
+      if (last !== undefined) command = last;
+      else histIndex--;
+    }
+    if (key === "arrowdown") {
+      histIndex--;
+      let last = cmdHistory[histIndex];
+      if (last !== undefined) command = last;
+      else histIndex++;
+    }
+    if (key === "backspace") command = command.substring(0, command.length - 1);
+    return false;
+  }
   //hold grave to log keys
-  if (keyIsDown("`")) console.log(key);
+  if (keyIsDown("`")) console.log(ev, key);
 
   //Hotkeys
   if (key === " ")
@@ -798,9 +911,28 @@ function keyPressed() {
   //Recipe controls
   else if (key === "arrowright") nextRecipe();
   else if (key === "arrowleft") prevRecipe();
+  //Command line
+  else if (key === "/") UIComponent.setCondition("cmd-open:true");
   //Prevent any default behaviour
+  ev.preventDefault();
+  ev.stopPropagation();
+  ev.stopImmediatePropagation();
   return false;
 }
+
+function keyTyped() {
+  if (UIComponent.evaluateCondition("cmd-open:false")) return false;
+  if (key !== "/") command += key;
+  return false;
+}
+
+//Show dialog box if game in progress
+onbeforeunload = (ev) => {
+  if (ui.menuState === "in-game") {
+    ev.stopPropagation();
+    ev.preventDefault();
+  }
+};
 
 const zoomSpeed = 0.025;
 /**@param {WheelEvent} ev  */

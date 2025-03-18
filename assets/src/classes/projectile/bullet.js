@@ -101,28 +101,29 @@ class Bullet extends PhysicalObject {
     }
   }
   draw() {
-    if (this.drawer.image) {
-      rotatedImg(
-        this.drawer.image,
-        this.x,
-        this.y,
-        this.drawer.width,
-        this.drawer.height,
-        this.directionRad
-      );
-    } else {
-      //If no image, draw shape instead
-      noStroke();
-      fill(this.drawer.fill);
-      rotatedShape(
-        this.drawer.shape,
-        this.x,
-        this.y,
-        this.drawer.width,
-        this.drawer.height,
-        this.directionRad
-      );
-    }
+    if (!this.drawer.hidden)
+      if (this.drawer.image) {
+        rotatedImg(
+          this.drawer.image,
+          this.x,
+          this.y,
+          this.drawer.width,
+          this.drawer.height,
+          this.directionRad
+        );
+      } else {
+        //If no image, draw shape instead
+        noStroke();
+        fill(this.drawer.fill);
+        rotatedShape(
+          this.drawer.shape,
+          this.x,
+          this.y,
+          this.drawer.width,
+          this.drawer.height,
+          this.directionRad
+        );
+      }
     super.draw();
   }
   frag() {

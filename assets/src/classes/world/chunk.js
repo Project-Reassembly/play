@@ -1,3 +1,12 @@
+/**
+ * @typedef SerialisedChunk
+ * @prop {SerialisedBlock[][]} blocks
+ * @prop {SerialisedBlock[][]} tiles
+ * @prop {SerialisedBlock[][]} floors
+ * @prop {int} i
+ * @prop {int} j
+ */
+
 /** 16x16 Block group for ticking and rendering.*/
 class Chunk {
   /**@readonly Holds values for possible chunk layers. */
@@ -14,8 +23,14 @@ class Chunk {
   blocks = create2DArray(Chunk.size);
   floor = create2DArray(Chunk.size);
   //Not representative of the actual position of the blocks, though
-  x = 0;
-  y = 0;
+  i = 0;
+  get x() {
+    return this.i;
+  }
+  j = 0;
+  get y() {
+    return this.j;
+  }
   /**@type {World} */
   world = null;
   /**
@@ -107,6 +122,51 @@ class Chunk {
     iterate2DArray(this.blocks, (block) => block && block.draw());
     iterate2DArray(this.blocks, (block) => block && block.postDraw());
     pop();
+  }
+  /**@returns {SerialisedChunk} */
+  serialise() {
+    return {
+      blocks: this.blocks.map((x) => x.map((y) => (y ? y.serialise() : null))),
+      tiles: this.tiles.map((x) => x.map((y) => (y ? y.serialise() : null))),
+      floors: this.floor.map((x) => x.map((y) => (y ? y.serialise() : null))),
+      i: this.i,
+      j: this.j,
+    };
+  }
+  /**@param {SerialisedChunk} created  */
+  static deserialise(created) {
+    let chunk = new this();
+    chunk.i = created.i;
+    chunk.j = created.j;
+    for (let y = 0; y < Chunk.size; y++) {
+      for (let x = 0; x < Chunk.size; x++) {
+        let sblock = created.blocks[y][x];
+        let sfloor = created.floors[y][x];
+        let stile = created.tiles[y][x];
+        if (sblock) {
+          //Block
+          let blk = chunk.addBlock(sblock.block, x, y, "blocks");
+          if (sblock.direction)
+            blk.direction = Block.dir.fromEnum(sblock.direction);
+          if (sblock.health) blk.health = sblock.health;
+          if (sblock.team) blk.team = sblock.team;
+          //Specific saves
+          if (blk instanceof Container) {
+            blk.inventory = Inventory.deserialise(sblock.inventory);
+          }
+          if (blk instanceof Crafter) {
+            blk.changeRecipe(sblock.recipe);
+          }
+          if (blk instanceof Unloader) {
+            blk.filter = sblock.filter;
+          }
+        }
+        //Floor, Tile
+        if (sfloor) chunk.addBlock(sfloor.block, x, y, "floor");
+        if (stile) chunk.addBlock(stile.block, x, y, "tiles");
+      }
+    }
+    return chunk;
   }
 }
 

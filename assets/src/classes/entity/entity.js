@@ -1,3 +1,15 @@
+/**
+ * @typedef SerialisedEntity
+ * @prop {number} health
+ * @prop {string} entity Registry name.
+ * @prop {{effect: string, duration: int}[]} statuses
+ * @prop {number} x
+ * @prop {number} y
+ * @prop {number} spawnX
+ * @prop {number} spawnY
+ * @prop {boolean} isMainPlayer
+ */
+/** */
 class Entity extends ShootableObject {
   name = "Entity";
   resistances = [];
@@ -9,7 +21,17 @@ class Entity extends ShootableObject {
   hitSize = 20;
   speed = 10;
   turnSpeed = 10;
-  target = { x: 0, y: 0 };
+  target = null;
+
+  //AI
+  aiType = "passive";
+  followRange = 100;
+  targetRange = 1000;
+  waitTime = 90;
+  waitVariance = 60;
+  _waiting = 0;
+  spawnX = 0;
+  spawnY = 0;
 
   //Status effects
   effectiveDamageMult = 1;
@@ -42,10 +64,18 @@ class Entity extends ShootableObject {
   }
 
   addToWorld(world, x, y) {
+    if (!(world instanceof World))
+      throw new TypeError(
+        "Cannot add entity to non-world object of type '" +
+          world.constructor.name +
+          "'"
+      );
     world.entities.push(this);
     this.world = world;
     if (x != null) this.x = x;
+    this.spawnX = this.x;
     if (y != null) this.y = y;
+    this.spawnY = this.y;
   }
 
   knock(
@@ -128,8 +158,111 @@ class Entity extends ShootableObject {
   }
 
   ai() {
+    if (this.aiType === "passive") {
+      this._passiveAI();
+    } else if (this.aiType === "hostile") {
+      this._hostileAI();
+    } else if (this.aiType === "guard") {
+      this._guardAI();
+    } else if (this.aiType === "scavenger") {
+      this._scavengerAI();
+    }
+    //Base AI
     if (this.target) {
-      this.rotateTowards(this.target.x, this.target.y, this.turnSpeed);
+      this._waiting--;
+      if (this._waiting <= 0) {
+        if (this.distanceToPoint(this.target.x, this.target.y) > this.size / 2)
+          this.moveTowards(this.target.x, this.target.y, true);
+      }
+    }
+  }
+
+  /**Passive AI
+   * - Wanders aimlessly towards random points outside the follow range, but within target range.
+   * - Used by Hostile to patrol and find entities to attack.
+   */
+  _passiveAI() {
+    if (!this.target || this.target instanceof PhysicalObject)
+      this.target = { x: this.x, y: this.y };
+    if (this.distanceTo(this.target) < this.size) {
+      let xOffset =
+        rnd(this.followRange, this.targetRange) * (tru(0.5) ? -1 : 1);
+      let yOffset =
+        rnd(this.followRange, this.targetRange) * (tru(0.5) ? -1 : 1);
+      this.target.x += xOffset;
+      this.target.y += yOffset;
+      this._waiting =
+        this.waitTime + rnd(this.waitVariance, -this.waitVariance);
+    }
+  }
+
+  /**Hostile AI
+   * - Follows entities within its taregt range.
+   * - Acts as Passive when no entity can be found.
+   */
+  _hostileAI() {
+    if (!this._generic_AttackerAI((ent) => !(ent instanceof DroppedItemStack)))
+      this._passiveAI();
+  }
+
+  /**Scavenger AI
+   * - Follows entities within its target range.
+   * - Prioritises dropped items.
+   * - Acts as Passive when no entity can be found.
+   */
+  _scavengerAI() {
+    if (
+      !this._generic_AttackerAI((ent) => ent instanceof DroppedItemStack, false)
+    )
+      if (!this._generic_AttackerAI()) this._passiveAI();
+  }
+
+  /**Guard AI
+   * - Follows entities within its `targetRange` of its spawnpoint
+   * - Returns to the spawnpoint if the entity left the range, or died
+   * - Just waits at the spawnpoint, no passive movement.
+   */
+  _guardAI() {
+    if (
+      !this._generic_AttackerAI(
+        (ent) =>
+          !(ent instanceof DroppedItemStack) &&
+          ent.distanceToPoint(this.spawnX, this.spawnY) < this.targetRange
+      )
+    )
+      this.target = { x: this.spawnX, y: this.spawnY };
+  }
+
+  /** Generic AI for attacking entities.
+   * @param {(entity: Entity) => boolean} conditions Condition for selecting entities, to make this AI less generic.
+   * @param {boolean} [shoots=true] Whether or not the entity should shoot at the new target.
+   * @returns {boolean} `true` if an entity is being targeted, `false` if not.
+   */
+  _generic_AttackerAI(conditions = () => true, shoots = true) {
+    let tempTarget = this.target;
+    this.target = this.closestFrom(
+      this.world.entities,
+      this.targetRange,
+      (ent) => !ent.dead && ent.team !== this.team && conditions(ent)
+    );
+    if (this.target) {
+      if (shoots && this.distanceTo(this.target) < this.followRange)
+        if (this instanceof EquippedEntity) {
+          if (
+            this.rightHand.get(0) instanceof ItemStack &&
+            this.rightHand.get(0).getItem() instanceof Equippable
+          )
+            this.rightHand.get(0).getItem().use(this);
+          if (
+            this.leftHand.get(0) instanceof ItemStack &&
+            this.leftHand.get(0).getItem() instanceof Equippable
+          )
+            this.leftHand.get(0).getItem().use(this);
+        }
+      return true;
+    } else {
+      this.target = tempTarget;
+      return false;
     }
   }
 
@@ -152,7 +285,42 @@ class Entity extends ShootableObject {
     for (let component of this.components) {
       component.draw(this.x, this.y, this.direction);
     }
+    if (PhysicalObject.debug) this._debugAI();
     super.draw();
+  }
+  /**Draws extra lines and stuff for AI debugging. */
+  _debugAI() {
+    push();
+    noFill();
+    stroke(this.target instanceof ShootableObject ? [255, 0, 0] : [0, 255, 0]);
+    strokeWeight(4);
+    square(this.target.x, this.target.y, this.size);
+    line(this.x, this.y, this.target.x, this.target.y);
+    if (this.aiType === "hostile" || this.aiType === "guard") {
+      stroke(
+        this.target instanceof ShootableObject
+          ? [200, 0, 255, 100]
+          : [255, 255, 0, 100]
+      );
+      circle(this.x, this.y, this.followRange * 2);
+    }
+    if (this.aiType === "hostile" || this.aiType === "scavenger") {
+      stroke(
+        this.target instanceof ShootableObject
+          ? [255, 0, 0, 100]
+          : [0, 255, 0, 100]
+      );
+      circle(this.x, this.y, this.targetRange * 2);
+    }
+    if (this.aiType === "guard") {
+      stroke(
+        this.target instanceof ShootableObject
+          ? [255, 128, 0, 100]
+          : [0, 255, 255, 100]
+      );
+      circle(this.spawnX, this.spawnY, this.targetRange * 2);
+    }
+    pop();
   }
 
   tickStatuses() {
@@ -192,8 +360,8 @@ class Entity extends ShootableObject {
   move(x, y) {
     super.move(x, y, this.flying);
   }
-  onHealthZeroed() {
-    super.onHealthZeroed();
+  onHealthZeroed(type, source) {
+    super.onHealthZeroed(type, source);
     liquidDestructionBlast(
       this.x,
       this.y,
@@ -205,5 +373,45 @@ class Entity extends ShootableObject {
       this.world
     );
     createDestructionExplosion(this.x, this.y, this);
+  }
+  /**@returns {SerialisedEntity} */
+  serialise() {
+    return {
+      entity: this.registryName,
+      x: this.x,
+      y: this.y,
+      spawnX: this.spawnX,
+      spawnY: this.spawnY,
+      health: this.health,
+      statuses: this.statuses.map((x) => ({
+        effect: x.effect,
+        duration: timeLeft,
+      })),
+      isMainPlayer: this === game.player,
+    };
+  }
+  /**@param {SerialisedEntity} created  */
+  static deserialise(created, inFull = true) {
+    /**@type {Entity} */
+    let entity = construct(Registry.entities.get(created.entity), "entity");
+    created.statuses.forEach((s) => entity.applyStatus(s.effect, s.duration));
+    entity.health = created.health;
+    if (entity instanceof InventoryEntity) {
+      entity.inventory = Inventory.deserialise(created.inventory);
+    }
+    if (entity instanceof EquippedEntity) {
+      entity.equipment = Inventory.deserialise(created.equipment);
+      entity.leftHand = Inventory.deserialise(created.leftHand);
+      entity.rightHand = Inventory.deserialise(created.rightHand);
+      entity.head = Inventory.deserialise(created.head);
+      entity.body = Inventory.deserialise(created.body);
+    }
+    //Rest handled in-chunk, but here it is:
+    if (!inFull) return entity;
+    entity.spawnX = created.spawnX;
+    entity.spawnY = created.spawnY;
+    entity.x = created.x;
+    entity.y = created.y;
+    return entity;
   }
 }

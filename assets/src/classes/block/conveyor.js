@@ -134,4 +134,9 @@ class Unloader extends Conveyor {
       );
     }
   }
+  serialise() {
+    let b = super.serialise();
+    b.filter = this.filter;
+    return b;
+  }
 }

@@ -6,28 +6,79 @@ Registry.items.add("scrap", {
     "A small piece of scrap,\nrecovered from remains\nof destroyed machines.",
   image: "item.scrap",
 });
+Registry.items.add("plate", {
+  name: "Metal Plate",
+  description: "Sturdy metal plate, better than unrefined scrap.",
+  image: "item.plate",
+});
+
 Registry.items.add("raw-copper", {
-  name: "Raw Copper",
+  name: "Raw Copper (Malachite)",
   description:
     "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-copper",
 });
 Registry.items.add("copper-ingot", {
   name: "Copper Ingot",
-  description:
-    "A bar of copper.\nA material widely used in electronics.",
+  description: "A material widely used in electronics.",
   image: "item.copper-ingot",
-});
-Registry.items.add("plate", {
-  name: "Metal Plate",
-  description: "Sturdy metal plate, better than unrefined scrap.",
-  image: "item.plate",
 });
 Registry.items.add("wire", {
   name: "Copper Wire",
-  description: "Basic wire, used for circuitry\n and low-power energy transmission.",
+  description:
+    "Basic wire, used for circuitry\n and low-power energy transmission.",
   image: "item.wire",
 });
+
+Registry.items.add("raw-iron", {
+  name: "Raw Iron (Hematite)",
+  description:
+    "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
+  image: "item.raw-iron",
+});
+Registry.items.add("iron-ingot", {
+  name: "Iron Ingot",
+  description: "Strong material, but easily oxidises and corrodes.",
+  image: "item.iron-ingot",
+});
+
+Registry.items.add("raw-titanium", {
+  name: "Raw Titanium (Ilmenite)",
+  description:
+    "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
+  image: "item.raw-titanium",
+});
+Registry.items.add("titanium-ingot", {
+  name: "Titanium Ingot",
+  description: "Strong, corrosion resistant metal.",
+  image: "item.titanium-ingot",
+});
+
+Registry.items.add("raw-aluminium", {
+  name: "Raw Aluminium (Bauxite)",
+  description:
+    "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
+  image: "item.raw-aluminium",
+});
+Registry.items.add("aluminium-ingot", {
+  name: "Aluminium Ingot",
+  description:
+    "Strong and light metal.\nYes, 'Aluminium'. Not my fault you can't spell.",
+  image: "item.aluminium-ingot",
+});
+
+Registry.items.add("raw-tungsten", {
+  name: "Raw Tungsten (Wolframite)",
+  description:
+    "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
+  image: "item.raw-tungsten",
+});
+Registry.items.add("tungsten-ingot", {
+  name: "Tungsten Ingot",
+  description: "Extremely dense but brittle metal.",
+  image: "item.tungsten-ingot",
+});
+
 Registry.items.add("stone", {
   name: "Stone",
   description: "A piece of rock.\nUsed in primitive construction.",
@@ -40,7 +91,7 @@ Registry.items.add("sand", {
 });
 Registry.items.add("sandstone", {
   name: "Sandstone",
-  description: "A pile of sand, compressed\ninto a hard ball.",
+  description: "A pile of sand, compressed into a hard ball.",
   image: "item.sandstone",
 });
 //Weapons
@@ -99,9 +150,9 @@ Registry.items.add("iti-laser-caster", {
   name: "Laser Caster",
   rarity: Item.rarity.ITI,
   description:
-    "Fires fast bolts of high-damage plasma.\nBolts deal secondary damage, with homing fragmentation.\nRequires no ammunition.",
+    "Fires fast-moving bolts of high-damage plasma.\nBolts deal secondary damage, with homing fragmentation.\nRequires no ammunition.",
   image: "weapon.scrap-shooter.item",
-  reload: 60,
+  reload: 80,
   ammoType: "none",
   shoot: {
     bullet: {
@@ -142,6 +193,8 @@ Registry.items.add("iti-laser-caster", {
       intervalTime: 999,
       intervalBullet: {
         lifetime: 0,
+        drawer: { hidden: true },
+        trail: false,
         damage: [
           {
             amount: 0,
@@ -155,14 +208,15 @@ Registry.items.add("iti-laser-caster", {
           },
         ],
       },
-      fragNumber: 3,
+      fragNumber: 6,
       fragSpread: 180,
       fragBullet: {
         type: "missile",
         targetType: "nearest",
+        trackingRange: 100,
         knockback: 2,
         turnSpeed: 20,
-        lifetime: 20,
+        lifetime: 10,
         speed: 10,
         trail: true,
         hitSize: 1.5,
@@ -179,8 +233,8 @@ Registry.items.add("iti-laser-caster", {
         damage: [
           {
             type: "laser",
-            amount: 5,
-            spread: 1,
+            amount: 2.5,
+            spread: 0.75,
           },
           {
             type: "no",
@@ -195,9 +249,7 @@ Registry.items.add("iti-laser-caster", {
         ],
       },
     },
-    pattern: {
-      spread: 1.5,
-    },
+    pattern: {},
   },
   component: {
     type: "weapon-component",

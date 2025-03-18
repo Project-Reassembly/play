@@ -9,7 +9,8 @@ class InGameMessageBox {
     this.maxLines = maxLines;
     this.textSize = textSize;
   }
-  draw(backgroundColour = [95, 100, 100, 160]) {
+  draw(backgroundColour = [0, 0, 0, 100]) {
+    //[95, 100, 100, 160]
     if (this._messages.length === 0) return;
     let actualY = this.y < 0 ? height + this.y : this.y;
     let actualX = this.x < 0 ? width + this.x : this.x;
@@ -28,6 +29,7 @@ class InGameMessageBox {
       if (measured > w) w = measured;
     }
     for (let index = 0; index < len; index++) {
+      push();
       let message = (
         this.y < 0 ? this._messages.slice(0).reverse() : this._messages
       )[index];
@@ -46,9 +48,12 @@ class InGameMessageBox {
       fill(txtcol);
       let txt = message.msg;
       if ((message.count ?? 1) > 1) txt = "[" + message.count + "]" + txt;
+      textStyle(message.style);
       text(txt, actualX, drawY);
+      pop();
     }
     pop();
+    textStyle("normal");
   }
   tick() {
     let len = this._messages.length;
@@ -61,17 +66,18 @@ class InGameMessageBox {
       }
     }
   }
-  send(message, colour = [255, 255, 255, 255]) {
+  send(message, colour = [255, 255, 255, 255], style = "normal") {
     let count = 1;
     if (this.read() === message) {
       count = this._messages.at(-1).count + 1;
-      this._messages.pop()
+      this._messages.pop();
     }
     this._messages.push({
       msg: message,
       timer: 240,
       colour: colour,
       count: count,
+      style: style,
     });
   }
   read() {

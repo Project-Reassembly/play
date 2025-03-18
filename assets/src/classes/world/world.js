@@ -1,5 +1,14 @@
+/**
+ * @typedef SerialisedWorld
+ * @prop {SerialisedChunk[][]} chunks
+ * @prop {SerialisedEntity[]} entities
+ * @prop {string} name
+ * @prop {int} seed
+ */
+
+/** */
 class World {
-  static size = 64;
+  static size = 16;
   /** The distance in chunks **outside the render distance** that will still tick. */
   static simulationDistance = 5;
   /** @type {Array<ImageParticle|ShapeParticle|TextParticle|WaveParticle>} */
@@ -274,5 +283,54 @@ class World {
     if (block === null)
       throw new Error("There is no block at x:" + x + ", y:" + y);
     return block;
+  }
+  /**@returns {SerialisedWorld} */
+  serialise() {
+    return {
+      chunks: this.chunks.map((x) => x.map((y) => y.serialise())),
+      name: this.name,
+      entities: this.entities.map((x) => x.serialise()),
+      seed: this.seed,
+    };
+  }
+  /**@param {SerialisedWorld} created  */
+  static deserialise(created) {
+    let wrold = new this();
+    wrold.chunks = created.chunks.map((x) =>
+      x.map((y) => Chunk.deserialise(y))
+    );
+    created.entities.forEach((entity) => {
+      if (entity["-"]) {
+        DroppedItemStack.create(
+          ItemStack.deserialise(entity.stack),
+          wrold,
+          entity.x,
+          entity.y,
+          0,
+          0
+        );
+      } else {
+        let ent = Entity.deserialise(entity, false);
+        ent.addToWorld(wrold, entity.x, entity.y);
+        ent.spawnX = entity.spawnX;
+        ent.spawnY = entity.spawnY;
+        if (entity.isMainPlayer) createPlayer(ent);
+      }
+    });
+    wrold.seed = created.seed;
+    wrold.name = created.name;
+    //Set world properties
+    iterate2DArray(wrold.chunks, (chunk) => {
+      chunk.world = wrold;
+      iterate2DArray(chunk.blocks, (block) => {
+        if (block) block.world = wrold;
+      });
+    });
+    return wrold;
+  }
+  /**Sets everything on this world possible to those values on a source world.
+   * @param {World} world  */
+  become(world) {
+    Object.assign(this, world);
   }
 }

@@ -1,25 +1,32 @@
+/**
+ * @typedef SerialisedInventory
+ * @prop {SerialisedItemStack[]} storage
+ * @prop {int} size
+ */
+/** */
 class Inventory {
   /** @type {Array<ItemStack>} */
   storage = [];
   size = 30;
-  constructor(size) {
+  constructor(size, stacks = []) {
     this.size = size;
+    this.storage = stacks.map((x) => construct(x, "itemstack"));
     this.storage.length = this.size;
   }
-  init() {
-    this.storage = this.storage.map((x) => construct(x, "itemstack"));
-  }
+  /**@returns {SerialisedInventory} */
   serialise() {
     return {
       size: this.size,
       storage: this.storage.map((x) => x.serialise()),
     };
   }
+  /**@param {SerialisedInventory} created  */
   static deserialise(created) {
     let inv = new this(0);
     inv.storage = created.storage ?? [];
-    inv.storage.length = created.size ?? inv.size;
-    inv.init();
+    inv.size = inv.storage.length = created.size ?? inv.size;
+    if (created.storage)
+      inv.storage = created.storage.map((x) => ItemStack.deserialise(x));
     return inv;
   }
 

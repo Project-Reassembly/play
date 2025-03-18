@@ -10,6 +10,7 @@ class Registry {
   static images = new this();
   static items = new this();
   static blocks = new this();
+  static entities = new this();
   static statuses = new this();
   static worldgen = new this();
   //Slightly odd registries
@@ -63,7 +64,11 @@ class Registry {
       );
     //Return item, if it exists.
     let item = this.#content.get(name);
-    try{item.registryName = name}catch(e){console.warn("Non-object entries do not have full feature support.")}
+    try {
+      item.registryName = name;
+    } catch (e) {
+      console.warn("Non-object entries do not have full feature support.");
+    }
     return item;
   }
   /**

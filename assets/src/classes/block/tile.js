@@ -31,6 +31,12 @@ class Tile extends Block {
     );
     entity.damage(this.damageType, this.damage);
   }
+  /**@returns {SerialisedBlock} */
+  serialise() {
+    return {
+      block: this.registryName,
+    };
+  }
 }
 
 class Ore extends Tile {

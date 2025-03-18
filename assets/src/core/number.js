@@ -24,6 +24,9 @@ function roundNum(number, dp = 0) {
 function rnd(a, b) {
   return a + Math.random() * (b - a);
 }
+function tru(chance) {
+  return rnd(0, 1) < chance;
+}
 
 function dynamicSort(property) {
   let sortOrder = 1;

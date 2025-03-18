@@ -1,27 +1,37 @@
 class InventoryEntity extends Entity {
-  inventory = new Inventory(30);
+  /**@type {Inventory} */
+  inventory;
   inventorySize = 30;
   init() {
     super.init();
     this.inventory = new Inventory(this.inventorySize, this.inventory);
-    this.inventory.init();
   }
-  onHealthZeroed() {
+  onHealthZeroed(type, source) {
     //Drop items
     this.inventory.iterate((stack) => {
-      DroppedItemStack.create(stack, this.world, this.x, this.y);
+      if (tru(this.dropChance))
+        DroppedItemStack.create(stack, this.world, this.x, this.y);
     }, true);
     this.inventory.clear();
-    super.onHealthZeroed();
+    super.onHealthZeroed(type, source);
+  }
+  serialise() {
+    let e = super.serialise();
+    e.inventory = this.inventory.serialise();
+    return e;
   }
 }
 
 class EquippedEntity extends InventoryEntity {
   equipment = new Inventory(5);
-  head = new Inventory(1);
-  rightHand = new Inventory(1);
-  leftHand = new Inventory(1);
-  body = new Inventory(1);
+  /**@type {Inventory} */
+  head;
+  /**@type {Inventory} */
+  rightHand;
+  /**@type {Inventory} */
+  leftHand;
+  /**@type {Inventory} */
+  body;
 
   //Commonly used indices
   /**@type {Component} */
@@ -46,23 +56,35 @@ class EquippedEntity extends InventoryEntity {
     this.components[2] = _;
   }
 
-  inventories = [
-    this.inventory,
-    this.equipment,
-    this.head,
-    this.rightHand,
-    this.leftHand,
-    this.body,
-  ];
+  get inventories() {
+    return [
+      this.inventory,
+      this.equipment,
+      this.head,
+      this.rightHand,
+      this.leftHand,
+      this.body,
+    ];
+  }
 
-  onHealthZeroed() {
-    for (let inv of this.inventories) {
+  init() {
+    super.init();
+    this.rightHand = new Inventory(1, this.rightHand);
+    this.leftHand = new Inventory(1, this.leftHand);
+    this.body = new Inventory(1, this.body);
+    this.head = new Inventory(1, this.head);
+  }
+
+  onHealthZeroed(type, source) {
+    let invs = this.inventories;
+    for (let inv of invs) {
       inv.iterate((stack) => {
-        DroppedItemStack.create(stack, this.world, this.x, this.y);
+        if (tru(stack.dropChance))
+          DroppedItemStack.create(stack, this.world, this.x, this.y);
       }, true);
       inv.clear();
     }
-    super.onHealthZeroed();
+    super.onHealthZeroed(type, source);
   }
 
   draw() {
@@ -104,6 +126,7 @@ class EquippedEntity extends InventoryEntity {
       }
     }, true);
     PhysicalObject.prototype.draw.call(this);
+    if (PhysicalObject.debug) this._debugAI();
     // for (let inv of this.inventories) {
     //   inv.iterate((x) => {
     //     let item = x.getItem();
@@ -117,5 +140,14 @@ class EquippedEntity extends InventoryEntity {
     //     }
     //   });
     // }
+  }
+  serialise() {
+    let e = super.serialise();
+    e.equipment = this.equipment.serialise();
+    e.leftHand = this.leftHand.serialise();
+    e.rightHand = this.rightHand.serialise();
+    e.head = this.head.serialise();
+    e.body = this.body.serialise();
+    return e;
   }
 }

@@ -156,6 +156,11 @@ class Crafter extends Container {
       Item.getColourFromRarity(0, "light")
     );
   }
+  serialise() {
+    let b = super.serialise();
+    b.recipe = this._recipe;
+    return b;
+  }
 }
 
 class Uncrafter extends Crafter {

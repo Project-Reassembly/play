@@ -16,6 +16,7 @@ class DroppedItemStack extends Entity {
     this.speed = rnd(2, 4);
     this.components = [];
     this.hitSize = 7.5;
+    this.team = "items";
   }
   damage() {}
   tick() {
@@ -70,5 +71,13 @@ class DroppedItemStack extends Entity {
   }
   draw() {
     drawImg(this.item?.getItem()?.image ?? "error", this.x, this.y, 15, 15);
+  }
+  serialise() {
+    return {
+      "-": true,
+      stack: this.item.serialise(),
+      x: this.x,
+      y: this.y,
+    };
   }
 }

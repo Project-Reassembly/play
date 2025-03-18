@@ -8,9 +8,8 @@
   <title>Project: Reassembly</title>
   <link rel="icon" type="image/x-icon" href="./assets/textures/ui/moab.png">
   <link href="./style.css" rel="stylesheet" type="text/css" />
-  <!-- Import p5 -->
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script> -->
-  <script src="https://q5js.org/q5.js"></script>
+
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script> -->
 </head>
 
@@ -20,12 +19,15 @@
     const gameVersion = "0.0.0";
     const isPreview = true;
   </script>
+  <!-- Libraries -->
+  <script src="https://q5js.org/q5.js"></script>
   <!-- Core -->
   <script src="./assets/src/core/ui.js"></script>
   <script src="./assets/src/core/constructor.js"></script>
   <script src="./assets/src/core/number.js"></script>
   <script src="./assets/src/core/registered-item.js"></script>
   <script src="./assets/src/core/registry.js"></script>
+  <script src="./assets/src/core/serialiser.js"></script>
   <!-- Classes -->
   <script src="./assets/src/classes/effect/animation.js"></script>
   <script src="./assets/src/classes/effect/shape-particle.js"></script>
@@ -35,7 +37,7 @@
   <script src="./assets/src/classes/effect/status-effect.js"></script>
   <script src="./assets/src/classes/effect/extra-particles.js"></script>
 
-  
+
   <script src="./assets/src/classes/timer.js"></script>
   <script src="./assets/src/classes/physical.js"></script>
 
@@ -77,6 +79,7 @@
   <script src="./assets/src/registries/images.js"></script>
   <script src="./assets/src/registries/type.js"></script>
   <script src="./assets/src/registries/item.js"></script>
+  <script src="./assets/src/registries/entity.js"></script>
   <script src="./assets/src/registries/block.js"></script>
   <script src="./assets/src/registries/worldgen.js"></script>
   <script src="./assets/src/registries/deathmsg.js"></script>
@@ -86,6 +89,8 @@
   <!-- Actual gameplay -->
   <script src="./assets/src/play/messaging.js"></script>
   <script src="./assets/src/play/game.js"></script>
+  <!-- ISL -->
+  <script src="./assets/src/lib/isl.js" type="module"></script>
 </body>
 
 </html>
