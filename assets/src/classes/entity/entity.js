@@ -378,8 +378,8 @@ class Entity extends ShootableObject {
   serialise() {
     return {
       entity: this.registryName,
-      x: this.x,
-      y: this.y,
+      x: roundNum(this.x),
+      y: roundNum(this.y),
       spawnX: this.spawnX,
       spawnY: this.spawnY,
       health: this.health,

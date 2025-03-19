@@ -43,7 +43,7 @@ createLinkedBlockAndItem(
   "Stone Wall",
   "block.stone-wall",
   {
-    health: 100,
+    health: 150,
   },
   {
     description: "A block of solid stone.\nCould be used as defense.",
@@ -54,21 +54,65 @@ createLinkedBlockAndItem(
   "Sandstone Wall",
   "block.sandstone-wall",
   {
-    health: 45,
+    health: 90,
   },
   {
-    description: "A block of sandstone.\nCould be used as defense.",
+    description: "A block of sandstone.\n\nCould be used as defense.",
   }
 );
 createLinkedBlockAndItem(
   "scrap-wall",
   "Scrap Wall",
-  "block.scrap-wall",
+  "base.scrap",
   {
-    health: 100,
+    health: 300,
   },
   {
-    description: "A block of electrical\nscrap. Could be used\nas defense.",
+    description: "A block of electrical scrap.\n\nCould be used as defense.",
+  }
+);
+createLinkedBlockAndItem(
+  "copper-wall",
+  "Copper Wall",
+  "base.copper",
+  {
+    health: 400,
+  },
+  {
+    description: "A solid copper cube.\n\nCould be used as defense.",
+  }
+);
+createLinkedBlockAndItem(
+  "iron-wall",
+  "Iron Wall",
+  "base.iron",
+  {
+    health: 600,
+  },
+  {
+    description: "A solid iron cube.\nSomehow doesn't rust.\n\nCould be used as defense.",
+  }
+);
+createLinkedBlockAndItem(
+  "tungsten-wall",
+  "Tungsten Wall",
+  "base.tungsten",
+  {
+    health: 1500,
+  },
+  {
+    description: "An extremely dense cube of tungsten.\nGood thing you're a robot.\n\nCould be used as defense.",
+  }
+);
+createLinkedBlockAndItem(
+  "titanium-wall",
+  "Titanium Wall",
+  "base.titanium",
+  {
+    health: 2000,
+  },
+  {
+    description: "A cube of titanium.\n\nCould be used as defense.",
   }
 );
 //## CRAFTERS ##
@@ -79,68 +123,8 @@ createLinkedBlockAndItem(
   {
     type: "crafter",
     title: "Scrap Assembler",
-    inventorySize: 4,
+    inventorySize: 6,
     recipes: [
-      {
-        inputs: [
-          {
-            item: "sand",
-            count: 4,
-          },
-        ],
-        outputs: [
-          {
-            item: "sandstone",
-            count: 2,
-          },
-        ],
-        time: 20,
-      },
-      {
-        inputs: [
-          {
-            item: "sandstone",
-            count: 4,
-          },
-        ],
-        outputs: [
-          {
-            item: "sandstone-wall",
-            count: 1,
-          },
-        ],
-        time: 80,
-      },
-      {
-        inputs: [
-          {
-            item: "stone",
-            count: 4,
-          },
-        ],
-        outputs: [
-          {
-            item: "stone-wall",
-            count: 1,
-          },
-        ],
-        time: 120,
-      },
-      {
-        inputs: [
-          {
-            item: "scrap",
-            count: 4,
-          },
-        ],
-        outputs: [
-          {
-            item: "scrap-wall",
-            count: 1,
-          },
-        ],
-        time: 100,
-      },
       {
         inputs: [
           {
@@ -210,10 +194,6 @@ createLinkedBlockAndItem(
           {
             item: "plate",
             count: 4,
-          },
-          {
-            item: "wire",
-            count: 6,
           },
         ],
         outputs: [
@@ -287,6 +267,21 @@ createLinkedBlockAndItem(
       {
         inputs: [
           {
+            item: "scrap",
+            count: 40,
+          },
+        ],
+        outputs: [
+          {
+            item: "scrap-compressor",
+            count: 1,
+          },
+        ],
+        time: 400,
+      },
+      {
+        inputs: [
+          {
             item: "scrap-assembler",
             count: 1,
           },
@@ -307,7 +302,7 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "A simple construction,\ncapable of crafting\nitems and some low-quality machines.\n\nCan reproduce.",
+      "A simple construction,\ncapable of crafting\nbasic machinery.\n\nCan reproduce.",
   }
 );
 createLinkedBlockAndItem(
@@ -323,6 +318,82 @@ createLinkedBlockAndItem(
   {
     description:
       "A machine capable of reversing\nthe work of a Scrap Assembler.",
+  }
+);
+createLinkedBlockAndItem(
+  "scrap-compressor",
+  "Scrap Compressor",
+  "crafter.scrap-compressor",
+  {
+    type: "crafter",
+    title: "Scrap Compressor",
+    inventorySize: 4,
+    recipes: [
+      {
+        inputs: [
+          {
+            item: "sand",
+            count: 4,
+          },
+        ],
+        outputs: [
+          {
+            item: "sandstone",
+            count: 2,
+          },
+        ],
+        time: 20,
+      },
+      {
+        inputs: [
+          {
+            item: "sandstone",
+            count: 4,
+          },
+        ],
+        outputs: [
+          {
+            item: "sandstone-wall",
+            count: 1,
+          },
+        ],
+        time: 80,
+      },
+      {
+        inputs: [
+          {
+            item: "stone",
+            count: 4,
+          },
+        ],
+        outputs: [
+          {
+            item: "stone-wall",
+            count: 1,
+          },
+        ],
+        time: 120,
+      },
+      {
+        inputs: [
+          {
+            item: "scrap",
+            count: 4,
+          },
+        ],
+        outputs: [
+          {
+            item: "scrap-wall",
+            count: 1,
+          },
+        ],
+        time: 100,
+      },
+    ],
+  },
+  {
+    description:
+      "Compresses low-tier resources into cubes.",
   }
 );
 //## DRILLS ##
@@ -360,7 +431,7 @@ createLinkedBlockAndItem(
     title: "Scrap Conveyor",
     type: "conveyor",
     moveTime: 100,
-    baseImg: "conveyor.scrap-conveyor.base",
+    baseImg: "base.scrap",
     beltImg: "conveyor.scrap-conveyor.belt",
   },
   {
@@ -376,7 +447,7 @@ createLinkedBlockAndItem(
     title: "Scrap Unloader",
     type: "unloader",
     moveTime: 100,
-    baseImg: "conveyor.scrap-conveyor.base",
+    baseImg: "base.scrap",
     beltImg: "conveyor.scrap-unloader.belt",
   },
   {

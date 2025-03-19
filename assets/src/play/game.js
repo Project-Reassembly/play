@@ -242,16 +242,33 @@ function saveGame(name) {
   //Create file
   let file = JSON.stringify(world.serialise());
   //Minify the file
-  //About 18 times smaller file size because of this
+  //About 100(!) times smaller file size because of this
   //General find-and-replace:
   file = file.replaceAll('"health":', "h=");
   file = file.replaceAll('"direction":', "d=");
   file = file.replaceAll('"block":', "b=");
+  file = file.replaceAll('"blocks":', "B=");
+  file = file.replaceAll('"tiles":', "T=");
+  file = file.replaceAll('"floors":', "F=");
   file = file.replaceAll('"team":', "t=");
   file = file.replaceAll('"x":', "x=");
   file = file.replaceAll('"y":', "y=");
+  file = file.replaceAll('"spawnX":', "sx=");
+  file = file.replaceAll('"spawnY":', "sy=");
+  file = file.replaceAll('"storage":', "S=");
+  file = file.replaceAll('"recipe":', "R=");
+  file = file.replaceAll(
+    /{"item":"nothing","count":[0-9]+,"tags":\[[^}]*\]}/gi,
+    "[x]"
+  );
+  file = file.replaceAll('"item":', "I=");
+  file = file.replaceAll('"tags":', "ta=");
+  file = file.replaceAll('"count":', "C=");
+  file = file.replaceAll('"size":', "Si=");
+  file = file.replaceAll('"inventory":', "i=");
   file = file.replaceAll("null", "#");
   file = file.replaceAll("[#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#]", "~");
+  file = file.replaceAll("[~,~,~,~,~,~,~,~,~,~,~,~,~,~,~,~]", "+");
   //Dictionary replacement:
   let dict = [];
   let num = 0;
@@ -262,10 +279,16 @@ function saveGame(name) {
   dict.forEach((val) => {
     file = file.replaceAll('"' + val[1] + '"', "@" + val[0]);
   });
-  //Dictionary compression
+  //Dictionary compression: Tiles
   file = file.replaceAll(/{b=@[0-9]+}/gi, (tile) => {
     return "t" + tile.substring(3, tile.length - 1);
   });
+  //Dictionary compression: RLE
+  file = file.replaceAll(/(t@[0-9]+),?(?:\1,?)*/gi, (tile) => {
+    let arr = tile.split(",").filter((x) => x.length > 0);
+    return "x" + arr.length + arr[0];
+  });
+  //Add dictionary to save
   file =
     "DICT<" +
     dict.map((entry) => entry[0] + "=" + entry[1]).join("|") +
@@ -274,12 +297,15 @@ function saveGame(name) {
   let spaceUsed = sizeKB(name + file);
   Serialiser.set(name, file);
   console.log("Game saved (" + roundNum(spaceUsed, 2) + "KB).");
-  Log.send("Game has been saved (" + roundNum(spaceUsed, 2) + "KB).", [0, 255, 0]);
+  Log.send(
+    "Game has been saved (" + roundNum(spaceUsed, 2) + "KB).",
+    [0, 255, 0]
+  );
 }
 
 function clearData() {
   console.log("All saves deleted.");
-  Log.send("Stored saved deleted.", [255, 0, 0]);
+  Log.send("Stored saves deleted.", [255, 0, 0]);
   Serialiser.clear("pr");
 }
 
@@ -293,7 +319,15 @@ function loadGame(name) {
     return false;
   }
   //Deminify the file
-  //Dictionary decompression
+  //Dictionary decompression: Run Length Decoding
+  file = file
+    .replaceAll(/x[0-9]+t@[0-9]+/gi, (tile) => {
+      let str = tile.match(/t@[0-9]+/)[0] + ",";
+      let out = str.repeat(parseInt(tile.match(/(?<=x)[0-9]+(?=t)/)[0]));
+      return out;
+    })
+    .replaceAll(/,]/g, "]");
+  //Dictionary decompression: untile
   file = file.replaceAll(/t@[0-9]+/gi, (tile) => {
     return "{b=" + tile.substring(1) + "}";
   });
@@ -308,14 +342,28 @@ function loadGame(name) {
     file = file.replaceAll("@" + entry[0] + "}", '"' + entry[1] + '"}');
   });
   //Unreplace
+  file = file.replaceAll("+", "[~,~,~,~,~,~,~,~,~,~,~,~,~,~,~,~]");
   file = file.replaceAll("~", "[#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#]");
+  file = file.replaceAll("[x]", '{"item":"nothing","count":0,"tags":[]}');
   file = file.replaceAll("#", "null");
   file = file.replaceAll("h=", '"health":');
   file = file.replaceAll("d=", '"direction":');
   file = file.replaceAll("b=", '"block":');
   file = file.replaceAll("t=", '"team":');
+  file = file.replaceAll("sx=", '"spawnX":');
+  file = file.replaceAll("sy=", '"spawnY":');
   file = file.replaceAll("x=", '"x":');
   file = file.replaceAll("y=", '"y":');
+  file = file.replaceAll("S=", '"storage":');
+  file = file.replaceAll("I=", '"item":');
+  file = file.replaceAll("C=", '"count":');
+  file = file.replaceAll("Si=", '"size":');
+  file = file.replaceAll("ta=", '"tags":');
+  file = file.replaceAll("R=", '"recipe":');
+  file = file.replaceAll("B=", '"blocks":');
+  file = file.replaceAll("T=", '"tiles":');
+  file = file.replaceAll("F=", '"floors":');
+  file = file.replaceAll("i=", '"inventory":');
   world.become(World.deserialise(JSON.parse(file)));
   console.log("Game loaded.");
   Log.send("You are now playing on '" + world.name + "'.", [0, 255, 0]);
@@ -329,10 +377,10 @@ function localStorageSpace() {
       allStrings += window.localStorage[key];
     }
   }
-  return roundNum(sizeKB(allStrings), 2) + "KB";
+  return roundNum(3 + sizeKB(allStrings), 2) + "KB";
 }
 function sizeKB(string) {
-  return string ? 3 + (string.length * 16) / (8 * 1024) : 0;
+  return string ? string.length / 512 : 0;
 }
 
 async function preload() {
@@ -934,12 +982,15 @@ onbeforeunload = (ev) => {
   }
 };
 
-const zoomSpeed = 0.025;
+const zoomSpeed = 0.0125;
 /**@param {WheelEvent} ev  */
 function mouseWheel(ev) {
   //CTRL + scroll to zoom
   if (ev.ctrlKey)
-    ui.camera.zoom = clamp(ui.camera.zoom + ev.delta * zoomSpeed, 1, 5);
+    ui.camera.zoom = roundNum(
+      clamp(ui.camera.zoom - ev.delta * zoomSpeed, 1, 5),
+      2
+    );
   //scroll normally to change block placement direction
   else
     selectedDirection = (

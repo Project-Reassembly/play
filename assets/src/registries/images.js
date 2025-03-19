@@ -46,13 +46,21 @@ Registry.images.add("ore.copper", new ImageContainer("assets/textures/block/ore/
 Registry.images.add("ore.copper.exposed", new ImageContainer("assets/textures/block/ore/copper-ore-exposed.png"))
 Registry.images.add("ore.copper.weathered", new ImageContainer("assets/textures/block/ore/copper-ore-weathered.png"))
 Registry.images.add("ore.copper.oxidised", new ImageContainer("assets/textures/block/ore/copper-ore-oxidised.png"))
+//Blocks
+Registry.images.add("base.scrap", new ImageContainer("assets/textures/block/blocks/scrap-block-base.png"))
+Registry.images.add("base.scrap.smooth", new ImageContainer("assets/textures/block/blocks/smooth-scrap-block-base.png"))
+Registry.images.add("base.copper", new ImageContainer("assets/textures/block/blocks/copper-block-base.png"))
+Registry.images.add("base.iron", new ImageContainer("assets/textures/block/blocks/iron-block-base.png"))
+Registry.images.add("base.titanium", new ImageContainer("assets/textures/block/blocks/titanium-block-base.png"))
+Registry.images.add("base.tungsten", new ImageContainer("assets/textures/block/blocks/tungsten-block-base.png"))
+//Registry.images.add("base.carbon", new ImageContainer("assets/textures/block/blocks/carbon-block-base.png"))
 //Blocks > Defense
 Registry.images.add("block.stone-wall", new ImageContainer("assets/textures/block/blocks/defense/stone-wall.png"))
 Registry.images.add("block.sandstone-wall", new ImageContainer("assets/textures/block/blocks/defense/sandstone-wall.png"))
-Registry.images.add("block.scrap-wall", new ImageContainer("assets/textures/block/blocks/defense/scrap-wall.png"))
 //Blocks > Crafters
 Registry.images.add("crafter.scrap-assembler", new ImageContainer("assets/textures/block/blocks/crafter/scrap-assembler.png"))
 Registry.images.add("crafter.scrap-disassembler", new ImageContainer("assets/textures/block/blocks/crafter/scrap-disassembler.png"))
+Registry.images.add("crafter.scrap-compressor", new ImageContainer("assets/textures/block/blocks/crafter/scrap-compressor.png"))
 //Blocks > Drills
 Registry.images.add("drill.scrap-drill.top", new ImageContainer("assets/textures/block/blocks/drill/scrap-drill-top.png"))
 Registry.images.add("drill.scrap-drill.spinner", new ImageContainer("assets/textures/block/blocks/drill/scrap-drill-spinner.png"))
@@ -60,7 +68,6 @@ Registry.images.add("drill.scrap-drill.base", new ImageContainer("assets/texture
 Registry.images.add("drill.scrap-drill.ui", new ImageContainer("assets/textures/block/blocks/drill/scrap-drill.png"))
 //Blocks > Conveyors
 Registry.images.add("conveyor.scrap-conveyor.belt", new ImageContainer("assets/textures/block/blocks/conveyor/scrap-conveyor-belt.png"))
-Registry.images.add("conveyor.scrap-conveyor.base", new ImageContainer("assets/textures/block/blocks/conveyor/scrap-conveyor-base.png"))
 Registry.images.add("conveyor.scrap-conveyor.ui", new ImageContainer("assets/textures/block/blocks/conveyor/scrap-conveyor.png"))
 Registry.images.add("conveyor.scrap-unloader.belt", new ImageContainer("assets/textures/block/blocks/conveyor/scrap-unloader-belt.png"))
 Registry.images.add("conveyor.scrap-unloader.ui", new ImageContainer("assets/textures/block/blocks/conveyor/scrap-unloader.png"))

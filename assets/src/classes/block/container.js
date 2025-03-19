@@ -36,14 +36,8 @@ class Container extends Block {
     return true;
   }
   serialise() {
-    return {
-      x: this.blockX,
-      y: this.blockY,
-      block: this.registryName,
-      direction: Block.dir.toEnum(this.direction),
-      health: this.health,
-      team: this.team,
-      inventory: this.inventory.serialise(),
-    };
+    let b = super.serialise();
+    b.inventory = this.inventory.serialise();
+    return b;
   }
 }
