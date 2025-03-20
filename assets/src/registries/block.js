@@ -90,7 +90,8 @@ createLinkedBlockAndItem(
     health: 600,
   },
   {
-    description: "A solid iron cube.\nSomehow doesn't rust.\n\nCould be used as defense.",
+    description:
+      "A solid iron cube.\nSomehow doesn't rust.\n\nCould be used as defense.",
   }
 );
 createLinkedBlockAndItem(
@@ -101,7 +102,8 @@ createLinkedBlockAndItem(
     health: 1500,
   },
   {
-    description: "An extremely dense cube of tungsten.\nGood thing you're a robot.\n\nCould be used as defense.",
+    description:
+      "An extremely dense cube of tungsten.\nGood thing you're a robot.\n\nCould be used as defense.",
   }
 );
 createLinkedBlockAndItem(
@@ -116,6 +118,7 @@ createLinkedBlockAndItem(
   }
 );
 //## CRAFTERS ##
+//Scrap Tier [0]
 createLinkedBlockAndItem(
   "scrap-assembler",
   "Scrap Assembler",
@@ -125,51 +128,6 @@ createLinkedBlockAndItem(
     title: "Scrap Assembler",
     inventorySize: 6,
     recipes: [
-      {
-        inputs: [
-          {
-            item: "scrap",
-            count: 2,
-          },
-        ],
-        outputs: [
-          {
-            item: "plate",
-            count: 1,
-          },
-        ],
-        time: 180,
-      },
-      {
-        inputs: [
-          {
-            item: "raw-copper",
-            count: 2,
-          },
-        ],
-        outputs: [
-          {
-            item: "copper-ingot",
-            count: 1,
-          },
-        ],
-        time: 60,
-      },
-      {
-        inputs: [
-          {
-            item: "copper-ingot",
-            count: 1,
-          },
-        ],
-        outputs: [
-          {
-            item: "wire",
-            count: 6,
-          },
-        ],
-        time: 240,
-      },
       {
         inputs: [
           {
@@ -238,6 +196,21 @@ createLinkedBlockAndItem(
         inputs: [
           {
             item: "scrap",
+            count: 20,
+          },
+        ],
+        outputs: [
+          {
+            item: "scrap-storage",
+            count: 1,
+          },
+        ],
+        time: 100,
+      },
+      {
+        inputs: [
+          {
+            item: "scrap",
             count: 10,
           },
         ],
@@ -282,11 +255,26 @@ createLinkedBlockAndItem(
       {
         inputs: [
           {
+            item: "scrap",
+            count: 30,
+          },
+        ],
+        outputs: [
+          {
+            item: "scrap-smelter",
+            count: 1,
+          },
+        ],
+        time: 400,
+      },
+      {
+        inputs: [
+          {
             item: "scrap-assembler",
             count: 1,
           },
           {
-            item: "scrap",
+            item: "plate",
             count: 5,
           },
         ],
@@ -296,7 +284,26 @@ createLinkedBlockAndItem(
             count: 1,
           },
         ],
-        time: 400,
+        time: 600,
+      },
+      {
+        inputs: [
+          {
+            item: "copper-ingot",
+            count: 25,
+          },
+          {
+            item: "plate",
+            count: 10,
+          },
+        ],
+        outputs: [
+          {
+            item: "basic-assembler",
+            count: 1,
+          },
+        ],
+        time: 1080,
       },
     ],
   },
@@ -318,6 +325,69 @@ createLinkedBlockAndItem(
   {
     description:
       "A machine capable of reversing\nthe work of a Scrap Assembler.",
+  }
+);
+createLinkedBlockAndItem(
+  "scrap-smelter",
+  "Scrap Smelter",
+  "crafter.scrap-smelter",
+  {
+    type: "smelter",
+    title: "Scrap Smelter",
+    fuelTypes: {
+      coal: 600,
+    },
+    inventorySize: 4,
+    recipes: [
+      {
+        inputs: [
+          {
+            item: "scrap",
+            count: 2,
+          },
+        ],
+        outputs: [
+          {
+            item: "plate",
+            count: 1,
+          },
+        ],
+        time: 180,
+      },
+      {
+        inputs: [
+          {
+            item: "raw-copper",
+            count: 2,
+          },
+        ],
+        outputs: [
+          {
+            item: "copper-ingot",
+            count: 1,
+          },
+        ],
+        time: 60,
+      },
+      {
+        inputs: [
+          {
+            item: "raw-iron",
+            count: 2,
+          },
+        ],
+        outputs: [
+          {
+            item: "iron-ingot",
+            count: 1,
+          },
+        ],
+        time: 90,
+      },
+    ],
+  },
+  {
+    description: "Smelts and casts basic ores into ingot form.",
   }
 );
 createLinkedBlockAndItem(
@@ -392,11 +462,84 @@ createLinkedBlockAndItem(
     ],
   },
   {
-    description:
-      "Compresses low-tier resources into cubes.",
+    description: "Compresses low-tier resources into cubes.",
+  }
+);
+//Copper Tier [1]
+createLinkedBlockAndItem(
+  "basic-assembler",
+  "Basic Assembler",
+  "crafter.basic-assembler",
+  {
+    type: "crafter",
+    title: "Basic Assembler",
+    inventorySize: 6,
+    recipes: [
+      {
+        inputs: [
+          {
+            item: "copper-ingot",
+            count: 1,
+          },
+          {
+            item: "plate",
+            count: 1,
+          },
+        ],
+        outputs: [
+          {
+            item: "basic-conveyor",
+            count: 2,
+          },
+        ],
+        time: 60,
+      },
+      {
+        inputs: [
+          {
+            item: "copper-ingot",
+            count: 3,
+          },
+          {
+            item: "plate",
+            count: 2,
+          },
+        ],
+        outputs: [
+          {
+            item: "basic-unloader",
+            count: 2,
+          },
+        ],
+        time: 90,
+      },
+      {
+        inputs: [
+          {
+            item: "copper-ingot",
+            count: 10,
+          },
+          {
+            item: "plate",
+            count: 5,
+          },
+        ],
+        outputs: [
+          {
+            item: "basic-drill",
+            count: 1,
+          },
+        ],
+        time: 200,
+      },
+    ],
+  },
+  {
+    description: "Constructs machines for use in production and defense.",
   }
 );
 //## DRILLS ##
+//Scrap Tier [0]
 createLinkedBlockAndItem(
   "scrap-drill",
   "Scrap Drill",
@@ -410,7 +553,7 @@ createLinkedBlockAndItem(
       sand: "sand",
       "sand-water": "sand",
       stone: "stone",
-      "copper-ore": "raw-copper"
+      "copper-ore": "raw-copper",
     },
     amount: 1,
     spinSpeed: 1,
@@ -422,15 +565,50 @@ createLinkedBlockAndItem(
     description: "Slowly collects resources from below it.",
   }
 );
+//Copper Tier [1]
+createLinkedBlockAndItem(
+  "basic-drill",
+  "Basic Drill",
+  "drill.basic-drill.ui",
+  {
+    type: "drill",
+    topImg: "drill.basic-drill.top",
+    spinnerImg: "drill.basic-drill.spinner",
+    baseImg: "drill.basic-drill.base",
+    results: {
+      sand: "sand",
+      "sand-water": "sand",
+      stone: "stone",
+      "copper-ore": "raw-copper",
+      "iron-ore": "raw-iron",
+      "electrum-ore": "raw-electrum",
+    },
+    amount: 1,
+    spinSpeed: 2,
+    duration: 200,
+    inventorySize: 1,
+    title: "Basic Drill",
+    smoke: {
+      size: 5,
+      amount: 3,
+      chance: 0.2,
+      cone: 15,
+    },
+  },
+  {
+    description:
+      "Slowly collects resources from below it.\nCan drill Iron and Electrum.",
+  }
+);
 //## CONVEYOR ##
+//Scrap Tier [0]
 createLinkedBlockAndItem(
   "scrap-conveyor",
   "Scrap Conveyor",
   "conveyor.scrap-conveyor.ui",
   {
-    title: "Scrap Conveyor",
     type: "conveyor",
-    moveTime: 100,
+    moveTime: 180,
     baseImg: "base.scrap",
     beltImg: "conveyor.scrap-conveyor.belt",
   },
@@ -444,9 +622,8 @@ createLinkedBlockAndItem(
   "Scrap Unloader",
   "conveyor.scrap-unloader.ui",
   {
-    title: "Scrap Unloader",
     type: "unloader",
-    moveTime: 100,
+    moveTime: 180,
     baseImg: "base.scrap",
     beltImg: "conveyor.scrap-unloader.belt",
   },
@@ -455,13 +632,44 @@ createLinkedBlockAndItem(
       "A slow-moving belt.\nTransports items from one place to another.\nPulls selected items from the block behind it.",
   }
 );
+//Copper Tier [1]
+createLinkedBlockAndItem(
+  "basic-conveyor",
+  "Basic Conveyor",
+  "conveyor.basic-conveyor.ui",
+  {
+    type: "conveyor",
+    moveTime: 120,
+    baseImg: "base.basic",
+    beltImg: "conveyor.basic-conveyor.belt",
+  },
+  {
+    description:
+      "A slightly faster-moving belt.\nTransports items from one place to another.",
+  }
+);
+createLinkedBlockAndItem(
+  "basic-unloader",
+  "Basic Unloader",
+  "conveyor.basic-unloader.ui",
+  {
+    type: "unloader",
+    moveTime: 120,
+    baseImg: "base.basic",
+    beltImg: "conveyor.basic-unloader.belt",
+  },
+  {
+    description:
+      "A slightly faster-moving belt.\nTransports items from one place to another.\nPulls selected items from the block behind it.",
+  }
+);
 //## CONTAINERS ##
 createLinkedBlockAndItem(
   "scrap-storage",
-  "Scrap Storage",
-  "block.scrap-wall",
+  "Scrap Storage Unit",
+  "base.scrap.smooth",
   {
-    title: "Scrap Storage",
+    title: "Scrap Storage Unit",
     type: "container",
     inventorySize: 12,
   },

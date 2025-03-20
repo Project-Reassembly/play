@@ -37,6 +37,7 @@ Registry.type.add("tile", Tile);
 Registry.type.add("ore", Ore);
 Registry.type.add("container", Container);
 Registry.type.add("crafter", Crafter);
+Registry.type.add("smelter", Smelter);
 Registry.type.add("uncrafter", Uncrafter);
 Registry.type.add("tile-producer", TileProducer);
 Registry.type.add("drill", Drill);

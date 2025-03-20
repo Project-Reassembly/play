@@ -41,6 +41,7 @@ importScripts(
   "../classes/block/tile.js",
   "../classes/block/container.js",
   "../classes/block/production/crafter.js",
+  "../classes/block/production/smelter.js",
   "../classes/block/production/tile-producer.js",
   "../classes/block/production/drill.js",
   "../classes/block/conveyor.js"

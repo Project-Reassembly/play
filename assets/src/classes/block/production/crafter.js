@@ -64,25 +64,30 @@ class Crafter extends Container {
   tick() {
     super.tick();
     let recipe = this.recipes[this._recipe];
-    if (!this.inventory.hasItems(recipe.inputs, this.outputSlots)) return;
+    if (!recipe) {
+      this.#progress = 0;
+      this._recipe = 0;
+      return;
+    }
     this.tickRecipe(recipe, recipe.time);
   }
   /**
    * @param {Recipe} recipe
    */
   tickRecipe(recipe, time) {
-    if (recipe) {
-      //If a recipe exists, and will fit
-      if (this.inventory.canAddItems(recipe.outputs))
-        if (this.#progress > time) {
-          if (this.onFinish(recipe)) this.#progress = 0;
-        } else {
-          this.#progress += this.#speed;
-          this.createTickEffect();
-        }
-    } else {
-      this.#progress = 0;
-    }
+    //If items for recipe are present, and outputs fit
+    if (
+      this.inventory.hasItems(recipe.inputs) &&
+      this.inventory.canAddItems(recipe.outputs)
+    )
+      if (this.#progress > time) {
+        if (this.onFinish(recipe)) this.#progress = 0;
+      } else {
+        this.#progress += this.#speed;
+        this.createTickEffect();
+        return true;
+      }
+    return false;
   }
   /**@param {Recipe} recipe  */
   onFinish(recipe) {

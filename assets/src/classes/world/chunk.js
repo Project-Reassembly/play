@@ -160,6 +160,9 @@ class Chunk {
           if (blk instanceof Unloader) {
             blk.filter = sblock.filter;
           }
+          if (blk instanceof Smelter) {
+            blk.setFuel(sblock.fuel);
+          }
         }
         //Floor, Tile
         if (sfloor) chunk.addBlock(sfloor.block, x, y, "floor");

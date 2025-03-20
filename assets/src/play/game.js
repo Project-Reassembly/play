@@ -236,7 +236,33 @@ worldGenWorker.onerror = (ev) => {
 worldGenWorker.onmessageerror = (ev) => {
   console.warn("Message could not be deserialised.");
 };
-
+const cantUseInSaves = [
+  "h=",
+  "d=",
+  "b=",
+  "B=",
+  "T=",
+  "F=",
+  "t=",
+  "x=",
+  "y=",
+  "sx=",
+  "sy=",
+  "S=",
+  "R=",
+  "I=",
+  "ta=",
+  "C=",
+  "Si=",
+  "i=",
+  "#",
+  "~",
+  "+",
+  "[x]",
+  "@[0-9]+",
+  "t@[0-9]+",
+  "x[0-9]+t@[0-9]+",
+];
 function saveGame(name) {
   name ??= "save.game";
   //Create file

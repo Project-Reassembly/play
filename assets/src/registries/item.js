@@ -94,6 +94,13 @@ Registry.items.add("sandstone", {
   description: "A pile of sand, compressed into a hard ball.",
   image: "item.sandstone",
 });
+
+
+Registry.items.add("coal", {
+  name: "Coal",
+  description: "A small chunk of coal.\nUsed as fuel in smelters.\nYay, pollution!",
+  image: "item.coal",
+});
 //Weapons
 Registry.items.add("scrap-shooter", {
   type: "weapon",

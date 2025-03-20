@@ -1,0 +1,62 @@
+>>> PROJECT: <<<
+<  REASSEMBLY  >
+// TIER GUIDE //
+
+Prerequisites: Extra unlocks required to start tier
+Materials: Items used in construction of blocks. Not exhaustive.
+Unlocks: New materials to be mined or crafted
+Machines: Machine types this tier has. [*] means new, [+] means upgraded
+Weapons: Weapon classes (Ranged, Melee, Placed etc) in this tier.
+Items: All items considered to be in this tier.
+Blocks: All non-machine blocks in this tier. Machines are in the {Machines} section.
+Item names are formatted as [Name] or [#Category] (referring to all items in Category)
+
+>-- - Scrap Tier [0] - --<
+
+Basic machines, for starting a factory
+Not intended for automation, mostly for getting started in progression
+Also contains items outside of progression, like [Sand]
+
+Prerequisites: None
+Materials: [Scrap]
+Unlocks: [#Copper] [#Stone] [#Sand]
+Machines:
+  [*] Assembler (Makes Machines)
+  [*] Compressor (Makes Walls)
+  [*] Smelter (Makes Ingots)
+  [*] Conveyor/Unloader (Distribution and Automation)
+  [*] Storage (External Item slots)
+  [*] Fabricator (Makes Components)
+Weapons:
+  [*] Ranged [Scrap Shooter]
+Items:
+  [Sand]
+  [Stone]
+  [Sandstone]
+  [Scrap]
+  [Metal Plate]
+  [Scrap Bullet]
+  [Scrap Shooter]
+Blocks:
+  [Sandstone Wall]
+  [Stone Wall]
+  [Scrap Wall]
+
+>-- - Copper "Basic" Tier [1] - --<
+
+First tier items, for small factories
+Industrial-grade machines; Not pretty, but gets the job done
+
+Prerequisites: None
+Materials: [Copper Ingot], [Metal Plate]
+Unlocks: [#Iron]
+Machines:
+  [+] Assembler
+  [+] Conveyor/Unloader
+Weapons: None
+Items:
+  [Malachite]
+  [Copper Ingot]
+  [Copper Wire]
+Blocks:
+  [Copper Wall]
