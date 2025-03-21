@@ -36,6 +36,16 @@ Registry.blocks.add("copper-ore", {
   stages: ["", ".exposed", ".weathered", ".oxidised"],
   drillSpeed: 0.75,
 });
+Registry.blocks.add("iron-ore", {
+  type: "ore",
+  image: "ore.iron",
+  drillSpeed: 0.65,
+});
+Registry.blocks.add("electrum-ore", {
+  type: "ore",
+  image: "ore.electrum",
+  drillSpeed: 0.45,
+});
 //### BLOCKS ###
 //## DEFENSE ##
 createLinkedBlockAndItem(

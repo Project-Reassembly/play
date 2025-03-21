@@ -584,8 +584,6 @@ function drawImg(
     try {
       image(img, x, y, width, height, ...otherParameters);
     } catch (error) {
-      //Say the problem
-      console.error("Could not draw image: ", img);
       //Replace with a working image
       drawImg("error", x, y, width, height, ...otherParameters);
     }
@@ -638,6 +636,47 @@ function rotatedShape(
       break;
   }
   pop(); //Return to old state
+}
+
+function rotatedShapeExt(
+  layer, 
+  shape = "circle",
+  x,
+  y,
+  width,
+  height,
+  angle,
+  flipV = false
+) {
+  layer.push(); //Save current position, rotation, etc
+  layer.rectMode(CENTER)
+  layer.translate(x, y); //Move middle to 0,0
+  layer.rotate(angle);
+  if (flipV) layer.scale(1, -1);
+  switch (shape) {
+    case "circle":
+      layer.circle(0, 0, (width + height) / 2);
+      break;
+    case "square":
+      layer.square(0, 0, (width + height) / 2);
+      break;
+    case "ellipse":
+      layer.ellipse(0, 0, width, height);
+      break;
+    case "rect":
+      layer.rect(0, 0, width, height);
+      break;
+    case "rhombus":
+      layer.scale(width, height); //Change the size
+      layer.rotate(QUARTER_PI); //turn it
+      layer.square(0, 0, 1); //make a square
+      layer.scale(1, 1); //scale back
+      layer.rotate(-QUARTER_PI); //turn back
+      break;
+    default:
+      break;
+  }
+  layer.pop(); //Return to old state
 }
 
 class SliderUIComponent extends UIComponent {

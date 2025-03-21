@@ -35,12 +35,37 @@ Registry.worldgen.add("base-generator", {
 });
 Registry.worldgen.add("ore-generator", {
   type: "ore-generator",
-  stageTitle: "Generating Ores...",
+  stageTitle: "Exposing Resources...",
   ores: [
     {
-      threshold: 75,
+      threshold: 70,
       scale: 4,
       tile: "copper-ore",
+    },
+    {
+      threshold: 60,
+      scale: 5,
+      tile: "iron-ore",
+      target: "stone",
+    },
+    {
+      threshold: 65,
+      scale: 3,
+      tile: "electrum-ore",
+      target: "stone",
+    },
+  ],
+});
+Registry.worldgen.add("ruins-generator", {
+  type: "block-generator",
+  name: "Scrap Ruins",
+  stageTitle: "Destroying Buildings...",
+  separation: 20,
+  defs: [
+    {
+      x: 0,
+      y: 0,
+      block: "scrap-wall",
     },
   ],
 });

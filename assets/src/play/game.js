@@ -18,6 +18,19 @@ const game = {
     };
   },
 };
+//Slightly laggy effect stuff
+const effects = {
+  lighting: false, //You need this for insanity
+  shadeColour: [0, 230],
+  lightColour: [255, 100],
+  lightScale: 1,
+  corruption: false,
+  corruptionCount: 5,
+  corruptionOffset: 100,
+  corruptionSize: 500,
+  corruptionHeight: 100,
+  corruptionCopies: 2,
+};
 const contentScale = 1;
 let worldSize = Block.size * Chunk.size * World.size;
 const borders = () => [0, 0, worldSize, worldSize];
@@ -150,18 +163,18 @@ worldGenWorker.onmessage = (ev) => {
       world.chunks[def.j][def.i] = chunk;
     }
     if (ev.data.type === "build") {
-      let def = ev.data.def;
       let successful = true;
-      for (let block of def.blocks) {
+      console.log(ev.data)
+      for (let block of ev.data.blocks) {
         //Create block, and overwrite properties
         if (
           world.isPositionFree(ev.data.x + block.x, ev.data.y + block.y) &&
-          (!ev.data.target ||
+          (!(ev.data.target || block.target) ||
             world.getBlock(
               ev.data.x + block.x,
               ev.data.y + block.y,
               "tiles"
-            ) === ev.data.target)
+            ) === (block.target ?? ev.data.target))
         )
           try {
             Object.assign(
@@ -169,9 +182,9 @@ worldGenWorker.onmessage = (ev) => {
                 block.block,
                 ev.data.x + block.x,
                 ev.data.y + block.y,
-                ev.data.layer ?? "blocks"
+                block.layer ?? "blocks"
               ),
-              def.construction ?? {}
+              block.construction ?? {}
             );
 
             stats.placed[block.block] ??= 0;
@@ -195,7 +208,8 @@ worldGenWorker.onmessage = (ev) => {
         (ev.data.layer !== "blocks" ||
           world.isPositionFree(ev.data.x, ev.data.y)) &&
         (!ev.data.target ||
-          world.getBlock(ev.data.x, ev.data.y, "tiles") === ev.data.target) &&
+          world.getBlock(ev.data.x, ev.data.y, "tiles")?.registryName ===
+            ev.data.target) &&
         (world.getBlock(ev.data.x, ev.data.y, "tiles")?.buildable ||
           world.getBlock(ev.data.x, ev.data.y, "floor")?.buildable)
       )
@@ -485,6 +499,31 @@ function draw() {
   }
   Log.draw();
 }
+
+function postProcess() {
+  push();
+  //Corruption/glitch effect
+  imageMode(CORNER);
+  if (effects.corruption)
+    for (let i = 0; i < effects.corruptionCount; i++) {
+      let x = random(-effects.corruptionOffset, width),
+        y = random(-effects.corruptionOffset, height);
+      let tile = get(
+        x,
+        y,
+        random(effects.corruptionSize, width + effects.corruptionOffset),
+        random(effects.corruptionHeight / 2, effects.corruptionHeight)
+      );
+      for (let j = 0; j < effects.corruptionCopies; j++)
+        image(
+          tile,
+          x + rnd(-effects.corruptionOffset, effects.corruptionOffset),
+          y + rnd(-effects.corruptionOffset, effects.corruptionOffset)
+        );
+    }
+  pop();
+}
+
 function fixError(ev) {
   if (ev.key === " ") {
     errored = false;
@@ -500,7 +539,7 @@ function frame() {
     stroke(255);
     strokeWeight(3);
     textAlign(CENTER);
-    textSize(50);
+    textSize(40);
     text(genMsg, width / 2, height / 2);
     fill(0);
     rectMode(CENTER);
@@ -545,6 +584,8 @@ function frame() {
       }
       gameFrame();
     }
+    if (effects.lighting)
+      lighting(effects.shadeColour, effects.lightColour, effects.lightScale);
     fpsUpdate();
     uiFrame();
     if (!ui.waitingForMouseUp) mouseInteraction();
@@ -600,11 +641,16 @@ function uiFrame() {
   pop();
 }
 
+function tickTimers() {
+  respawnTimer.tick();
+  effectTimer.tick();
+}
+
 function gameFrame() {
   push();
   frameSkippingFunction(() => {
     if (!game.paused) {
-      respawnTimer.tick();
+      tickTimers();
       movePlayer();
       world.tickAll();
     }

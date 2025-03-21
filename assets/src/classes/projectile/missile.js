@@ -18,24 +18,25 @@ class Missile extends Bullet {
     for (let e = 0; e < this.speed * dt; e++) {
       if (this._trailCounter <= 0) {
         if (this.world?.particles != null && this.trail) {
-          this.world.particles.push(
-            new ShapeParticle(
-              this.x - e * p5.Vector.fromAngle(this.directionRad).x,
-              this.y - e * p5.Vector.fromAngle(this.directionRad).y,
-              this.directionRad,
-              this.flameLength / this.speed, //Fixed life
-              0,
-              0,
-              this.trailShape, //flames
-              this.trailColour,
-              this.trailColourTo, //Lerp colour thing
-              this.hitSize * 1.9,
-              0,
-              this.hitSize * 1.9,
-              0,
-              0
-            )
+          let trailparticle = new ShapeParticle(
+            this.x - e * p5.Vector.fromAngle(this.directionRad).x,
+            this.y - e * p5.Vector.fromAngle(this.directionRad).y,
+            this.directionRad,
+            this.flameLength / this.speed, //Fixed life
+            0,
+            0,
+            this.trailShape, //flames
+            this.trailColour,
+            this.trailColourTo, //Lerp colour thing
+            this.hitSize * 1.9,
+            0,
+            this.hitSize * 1.9,
+            0,
+            0
           );
+
+          trailparticle.light = this.trailLight;
+          this.world.particles.push(trailparticle);
         }
         this._trailCounter = this._trailInterval;
       } else {

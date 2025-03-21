@@ -27,6 +27,8 @@ Registry.type.add("chunk", Chunk);
 Registry.type.add("generator", Generator);
 Registry.type.add("tile-generator", TileGenerator);
 Registry.type.add("ore-generator", OreGenerator);
+Registry.type.add("block-generator", BlockGenerator);
+
 
 Registry.type.add("gen-options", GenerationOptions);
 Registry.type.add("tile-gen-options", TileGenerationOptions);

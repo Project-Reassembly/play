@@ -42,6 +42,29 @@ Registry.items.add("iron-ingot", {
   image: "item.iron-ingot",
 });
 
+Registry.items.add("raw-electrum", {
+  name: "Natural Electrum",
+  description:
+    "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
+  image: "item.raw-electrum",
+});
+Registry.items.add("electrum-ingot", {
+  name: "Electrum Ingot",
+  description: "An alloy of expensive metals.",
+  image: "item.electrum-ingot",
+});
+Registry.items.add("silver-ingot", {
+  name: "Silver Ingot",
+  description: "Reflective metal that tarnishes quickly.",
+  image: "item.silver-ingot",
+});
+Registry.items.add("gold-ingot", {
+  name: "Gold Ingot",
+  description: "A great electrical conductor, but very soft.",
+  image: "item.gold-ingot",
+});
+
+
 Registry.items.add("raw-titanium", {
   name: "Raw Titanium (Ilmenite)",
   description:
@@ -113,6 +136,7 @@ Registry.items.add("scrap-shooter", {
     bullet: {
       lifetime: 15,
       speed: 15,
+      light: 30,
       trail: true,
       hitSize: 2.5,
       trailShape: "rhombus",
@@ -164,12 +188,14 @@ Registry.items.add("iti-laser-caster", {
   shoot: {
     bullet: {
       lifetime: 15,
+      light: 120,
       speed: 20,
       pierce: 1,
       trail: true,
       hitSize: 3,
       trailShape: "rhombus",
       trailColour: [0, 200, 255, 200],
+      trailLight: 80,
       knockback: 10,
       drawer: {
         shape: "rhombus",
@@ -221,6 +247,8 @@ Registry.items.add("iti-laser-caster", {
         type: "missile",
         targetType: "nearest",
         trackingRange: 100,
+        light: 120,
+        trailLight: 80,
         knockback: 2,
         turnSpeed: 20,
         lifetime: 10,

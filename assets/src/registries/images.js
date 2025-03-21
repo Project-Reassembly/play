@@ -13,6 +13,11 @@ Registry.images.add("item.wire", new ImageContainer("assets/textures/item/wire.p
 Registry.images.add("item.raw-iron", new ImageContainer("assets/textures/item/raw-iron.png"))
 Registry.images.add("item.iron-ingot", new ImageContainer("assets/textures/item/iron-ingot.png"))
 
+Registry.images.add("item.raw-electrum", new ImageContainer("assets/textures/item/raw-electrum.png"))
+Registry.images.add("item.electrum-ingot", new ImageContainer("assets/textures/item/electrum-ingot.png"))
+Registry.images.add("item.silver-ingot", new ImageContainer("assets/textures/item/silver-ingot.png"))
+Registry.images.add("item.gold-ingot", new ImageContainer("assets/textures/item/gold-ingot.png"))
+
 Registry.images.add("item.raw-titanium", new ImageContainer("assets/textures/item/raw-titanium.png"))
 Registry.images.add("item.titanium-ingot", new ImageContainer("assets/textures/item/titanium-ingot.png"))
 
@@ -48,6 +53,9 @@ Registry.images.add("ore.copper", new ImageContainer("assets/textures/block/ore/
 Registry.images.add("ore.copper.exposed", new ImageContainer("assets/textures/block/ore/copper-ore-exposed.png"))
 Registry.images.add("ore.copper.weathered", new ImageContainer("assets/textures/block/ore/copper-ore-weathered.png"))
 Registry.images.add("ore.copper.oxidised", new ImageContainer("assets/textures/block/ore/copper-ore-oxidised.png"))
+
+Registry.images.add("ore.iron", new ImageContainer("assets/textures/block/ore/iron-ore.png"))
+Registry.images.add("ore.electrum", new ImageContainer("assets/textures/block/ore/electrum-ore.png"))
 //Blocks
 Registry.images.add("base.scrap", new ImageContainer("assets/textures/block/blocks/scrap-block-base.png"))
 Registry.images.add("base.scrap.smooth", new ImageContainer("assets/textures/block/blocks/smooth-scrap-block-base.png"))

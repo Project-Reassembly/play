@@ -149,6 +149,12 @@ class PhysicalObject extends RegisteredItem {
     }
     return chosen;
   }
+  get uiX() {
+    return (this.x - ui.camera.x) * ui.camera.zoom;
+  }
+  get uiY() {
+    return (this.y - ui.camera.y) * ui.camera.zoom;
+  }
 }
 
 class ShootableObject extends PhysicalObject {

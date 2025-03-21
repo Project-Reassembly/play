@@ -1,3 +1,4 @@
+const effectTimer = new Timer();
 /**@param {string} [team="enemy"] Not required, unless `sourceEntity` is null. */
 function splashDamageInstance(
   centreX = 0,
@@ -131,7 +132,7 @@ function blindingFlash(
       0,
       glareSize * 1.5,
       0,
-      true
+      glareSize * 2
     ),
     new ShapeParticle(
       x,
@@ -148,7 +149,8 @@ function blindingFlash(
       0,
       glareSize * 2,
       0,
-      true
+
+      glareSize * 2
     ),
     new ShapeParticle(
       x,
@@ -165,7 +167,8 @@ function blindingFlash(
       0,
       glareSize * 2.5,
       0,
-      true
+
+      glareSize * 2
     ),
     // Doesn't really work outside of MA
     // new ShapeParticle(
@@ -201,7 +204,7 @@ function blindingFlash(
       glareSize / 5,
       0,
       0,
-      true
+      glareSize * 2
     ),
     new ShapeParticle(
       x,
@@ -218,7 +221,8 @@ function blindingFlash(
       (glareSize / 5) * 0.6,
       0,
       0,
-      true
+
+      glareSize * 2
     ),
     new ShapeParticle(
       x,
@@ -235,7 +239,8 @@ function blindingFlash(
       (glareSize / 5) * 0.3,
       0,
       0,
-      true
+
+      glareSize * 2
     )
   );
 }
@@ -326,4 +331,69 @@ function liquidDestructionBlast(
       )
     );
   }
+}
+function insanity() {
+  //insanity death
+  game.shadeColour = [0, 0];
+  game.lightColour = [255, 100];
+  game.lightScale = 1;
+  game.lighting = true;
+  effectTimer.repeat((i) => {
+    game.shadeColour = [0, i];
+    game.lightColour = [255, 100 - i / 2.5];
+  }, 250);
+  effectTimer.do(
+    () =>
+      effectTimer.repeat((i) => {
+        game.shadeColour = [i / 10, 0, 0, 250];
+        game.lightColour = [255, i / 25];
+      }, 250),
+    750
+  );
+  effectTimer.do(
+    () =>
+      effectTimer.repeat((i) => {
+        game.shadeColour = [25 + i * 2.5, 0, 0, 250 + i / 5];
+        game.lightColour = [255, 10 + i * 1.5];
+        game.lightScale = 1 - i / 27.5;
+      }, 25),
+    1500
+  );
+  effectTimer.repeat((i) => {
+    let dir = rnd(0, TAU);
+    let dist = rnd(30, 600);
+    let p = new ShapeParticle(
+      game.player.x + cos(dir) * dist,
+      game.player.y + sin(dir) * dist,
+      dir,
+      60,
+      0,
+      0,
+      "rhombus",
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+      10,
+      0,
+      25,
+      25,
+      0,
+      240
+    );
+    world.particles.push(p);
+  }, 1500);
+  effectTimer.do(() => {
+    for (let j = 0; j < 100; j++)
+      game.player.damage("insanity", rnd(100, 1000));
+    game.lightScale = 0;
+    effectTimer.repeat((i) => {
+      game.lightScale = i / 60;
+      game.lightColour = [255, 47.5 + i * 2];
+      game.shadeColour = [85, 0, 0, 254.8 - (254.8 * i) / 60];
+    }, 60);
+  }, 1560);
+  effectTimer.do(() => {
+    game.shadeColour = [0, 0];
+    game.lightColour = [255, 100];
+    game.lighting = false;
+  }, 1740);
 }

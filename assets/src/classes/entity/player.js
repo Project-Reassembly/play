@@ -12,13 +12,13 @@ class Player extends EquippedEntity {
   }
   onHealthZeroed(type, source) {
     super.onHealthZeroed(type, source);
+    let messagearray = Registry.deathmsg.has(type)
+      ? Registry.deathmsg.get(type)[source ? 1 : 0]
+      : ["(1) died"];
     Log.send(
-      Registry.deathmsg.has(type)
-        ? Registry.deathmsg
-            .get(type)
-            .replaceAll("(1)", this.name)
-            .replaceAll("(2)", source?.name ?? "something")
-        : this.name + " died",
+      (messagearray[Math.floor(rnd(0, messagearray.length))] ?? "(1) died")
+        .replaceAll("(1)", this.name)
+        .replaceAll("(2)", source?.name ?? "something"),
       [255, 0, 0]
     );
     let ticks = this.respawnTime / 60;

@@ -23,6 +23,9 @@ class World {
   chunks = null;
   name = "World";
   seed = null;
+  /**Chunks to render this frame.
+   * @type {Array<Chunk>} */
+  toRender = [];
   constructor(name = "World") {
     this.name = name;
   }
@@ -31,6 +34,7 @@ class World {
     this.#removeDead();
   }
   #actualTick() {
+    this.toRender = this.getRenderedChunks(undefined, ui.camera.zoom);
     //Tick *everything*
     for (let particle of this.floorParticles) {
       particle.step(1);
@@ -57,18 +61,8 @@ class World {
       }
     }
     //Only tick simulated chunks
-    iterate2DArray(
-      this.chunks,
-      (chunk) =>
-        chunk &&
-        World.isInRenderDistance(
-          chunk,
-          Chunk.size * Block.size,
-          0.5 + World.simulationDistance,
-          0.5,
-          0.5
-        ) &&
-        chunk.tick()
+    this.getRenderedChunks(World.simulationDistance).forEach((chunk) =>
+      chunk.tick()
     );
   }
   #removeDead() {
@@ -133,7 +127,12 @@ class World {
     }
     //No search algorithms => faster
   }
-  drawAll() {
+  /**
+   * Returns an array of chunks to be rendered this frame.
+   * @returns {Chunk[]}
+   */
+  getRenderedChunks(padding = 0, zoom = 1) {
+    let chunks = [];
     iterate2DArray(
       this.chunks,
       (chunk) =>
@@ -141,29 +140,22 @@ class World {
         World.isInRenderDistance(
           chunk,
           Chunk.size * Block.size,
+          0.5 + padding,
           0.5,
           0.5,
-          0.5
+          zoom
         ) &&
-        chunk.drawFloorsOnly()
+        chunks.push(chunk)
     );
+    return chunks;
+  }
+  drawAll() {
+    this.toRender.forEach((chunk) => chunk.drawFloorsOnly());
     for (let particle of this.floorParticles) {
       if (!World.isInRenderDistance(particle)) continue;
       particle.draw();
     }
-    iterate2DArray(
-      this.chunks,
-      (chunk) =>
-        chunk &&
-        World.isInRenderDistance(
-          chunk,
-          Chunk.size * Block.size,
-          0.5,
-          0.5,
-          0.5
-        ) &&
-        chunk.drawBlocksOnly()
-    );
+    this.toRender.forEach((chunk) => chunk.drawBlocksOnly());
     for (let entity of this.entities) {
       if (!World.isInRenderDistance(entity)) continue;
       entity.draw();
@@ -186,7 +178,8 @@ class World {
     posScale = 1,
     padding = 0,
     xoffset = 0,
-    yoffset = 0
+    yoffset = 0,
+    zoom = 1
   ) {
     if (thing.size) padding += thing.size;
     else if (thing.sizeX && thing.sizeY)
@@ -197,22 +190,22 @@ class World {
 
     if (
       (thing.x + xoffset) * posScale <
-      ui.camera.x - width / 2 - padding * posScale
+      ui.camera.x - width / zoom / 2 - padding * posScale
     )
       return false;
     if (
       (thing.x + xoffset) * posScale >
-      ui.camera.x + width / 2 + padding * posScale
+      ui.camera.x + width / zoom / 2 + padding * posScale
     )
       return false;
     if (
       (thing.y + yoffset) * posScale <
-      ui.camera.y - height / 2 - padding * posScale
+      ui.camera.y - height / zoom / 2 - padding * posScale
     )
       return false;
     if (
       (thing.y + yoffset) * posScale >
-      ui.camera.y + height / 2 + padding * posScale
+      ui.camera.y + height / zoom / 2 + padding * posScale
     )
       return false;
     return true;

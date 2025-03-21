@@ -84,9 +84,42 @@ class TileGenerator extends NoiseGenerator {
   }
 }
 
-class BlockGenerator extends NoiseGenerator {
+class BlockGenerator extends Generator {
   /**@type {{x: int, y: int, block: string}[]} */
   defs = [];
+  name = "-";
+  attempts = 1000;
+  chance = 0.1;
+  separation = 3;
+  _positions = [];
+  generate(seed) {
+    rng1.setSeed(seed);
+    for (let i = 0; i < this.attempts; i++) {
+      let x = Math.floor(rng1.rand() * World.size * Chunk.size);
+      let y = Math.floor(rng1.rand() * World.size * Chunk.size);
+      if (rng1.rand() < this.chance) this.forEachPosition(x, y);
+    }
+  }
+  forEachPosition(x, y) {
+    if (this.outOfRange(x, y)) {
+      postMessage({
+        type: "build",
+        name: this.name,
+        blocks: this.defs,
+        x: x,
+        y: y,
+      });
+      this._positions.push({ x: x, y: y });
+      this._generated++;
+    }
+  }
+  outOfRange(x, y) {
+    for (let pos of this._positions) {
+      if (((x - pos.x) ** 2 + (y - pos.y) ** 2) ** 0.5 < this.separation)
+        return false;
+    }
+    return true;
+  }
 }
 
 class OreGenerator extends Generator {

@@ -7,8 +7,10 @@ class Bullet extends PhysicalObject {
   trail = true;
   trailColour = [255, 255, 255, 200];
   trailShape = "rhombus";
+  trailLight = 0;
   remove = false;
   pierce = 0;
+  light = 0;
   drawer = {
     shape: "circle",
     fill: "red",
@@ -77,24 +79,24 @@ class Bullet extends PhysicalObject {
       this._trailCounter--;
       if (this._trailCounter <= 0) {
         if (this.world?.particles != null && this.trail) {
-          this.world.particles.push(
-            new ShapeParticle(
-              this.x - e * p5.Vector.fromAngle(this.directionRad).x,
-              this.y - e * p5.Vector.fromAngle(this.directionRad).y,
-              this.directionRad,
-              (this.maxLife * 1.2) ** 0.4,
-              0,
-              0,
-              this.trailShape,
-              this.trailColour,
-              this.trailColour,
-              this.hitSize * 1.9,
-              0,
-              this.hitSize * this._trailInterval * 0.25,
-              this.hitSize * this._trailInterval * 0.25,
-              0
-            )
+          let trailparticle = new ShapeParticle(
+            this.x - e * p5.Vector.fromAngle(this.directionRad).x,
+            this.y - e * p5.Vector.fromAngle(this.directionRad).y,
+            this.directionRad,
+            (this.maxLife * 1.2) ** 0.4,
+            0,
+            0,
+            this.trailShape,
+            this.trailColour,
+            this.trailColour,
+            this.hitSize * 1.9,
+            0,
+            this.hitSize * this._trailInterval * 0.25,
+            this.hitSize * this._trailInterval * 0.25,
+            0
           );
+          trailparticle.light = this.trailLight;
+          this.world.particles.push(trailparticle);
         }
         this._trailCounter = this._trailInterval;
       }

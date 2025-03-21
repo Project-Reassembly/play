@@ -14,7 +14,8 @@ class ShapeParticle {
     sizeXTo,
     sizeYFrom,
     sizeYTo,
-    rotateSpeed
+    rotateSpeed,
+    light = 0
   ) {
     this.x = x;
     this.y = y;
@@ -35,6 +36,7 @@ class ShapeParticle {
     this.sizeY = sizeYFrom;
     this.rotateSpeed = rotateSpeed;
     this.#rotOffset = 0;
+    this.light = light;
   }
   step(dt) {
     if (this.lifetime >= dt) {
@@ -87,5 +89,11 @@ class ShapeParticle {
       this.direction + this.#rotOffset + HALF_PI
     );
     pop();
+  }
+  get uiX() {
+    return (this.x - ui.camera.x) * ui.camera.zoom;
+  }
+  get uiY() {
+    return (this.y - ui.camera.y) * ui.camera.zoom;
   }
 }
