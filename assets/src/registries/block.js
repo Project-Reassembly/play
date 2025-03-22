@@ -687,3 +687,30 @@ createLinkedBlockAndItem(
     description: "A small box for item storage.",
   }
 );
+//## DEV ##
+createLinkedBlockAndItem(
+  "dev::structurereader",
+  "Structure Reader",
+  "block.dev.structurereader",
+  {
+    title: "Structure Reader",
+    type: "dev::structurereader",
+  },
+  {
+    description:
+      "Outputs a structure array into the console.\nDEVELOPMENT ITEM",
+  }
+);
+createLinkedBlockAndItem(
+  "dev::itemcatalog",
+  "Item Catalog",
+  "block.dev.itemcatalog",
+  {
+    title: "Item Catalog",
+    type: "dev::itemcatalog",
+  },
+  {
+    description:
+      "Contains an infinite supply of every registered item.\nAlso has a trash slot.\nDEVELOPMENT ITEM",
+  }
+);

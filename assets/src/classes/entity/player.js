@@ -15,6 +15,7 @@ class Player extends EquippedEntity {
     let messagearray = Registry.deathmsg.has(type)
       ? Registry.deathmsg.get(type)[source ? 1 : 0]
       : ["(1) died"];
+    console.log(messagearray)
     Log.send(
       (messagearray[Math.floor(rnd(0, messagearray.length))] ?? "(1) died")
         .replaceAll("(1)", this.name)

@@ -85,8 +85,8 @@ class TileGenerator extends NoiseGenerator {
 }
 
 class BlockGenerator extends Generator {
-  /**@type {{x: int, y: int, block: string}[]} */
-  defs = [];
+  /**@type {{defs: {x: int, y: int, block: string, direction: int}, weight: int}[]} */
+  variants = [];
   name = "-";
   attempts = 1000;
   chance = 0.1;
@@ -98,14 +98,29 @@ class BlockGenerator extends Generator {
       let x = Math.floor(rng1.rand() * World.size * Chunk.size);
       let y = Math.floor(rng1.rand() * World.size * Chunk.size);
       if (rng1.rand() < this.chance) this.forEachPosition(x, y);
+      postMessage({ type: "progress", progress: i / this.attempts });
     }
   }
   forEachPosition(x, y) {
+    let extraName = "";
+    let totalWeight = this.variants.reduce((sum, thi) => sum + thi.weight, 0);
+    let variant = Math.floor(rng1.rand() * totalWeight + 1);
+    let index = 0;
+    let selected = this.variants.at(0);
+    for (let v of this.variants) {
+      index += v.weight;
+      if (index > variant) {
+        selected = v;
+        extraName = v.name ?? "";
+        break;
+      }
+      selected = this.variants.at(-1);
+    }
     if (this.outOfRange(x, y)) {
       postMessage({
         type: "build",
-        name: this.name,
-        blocks: this.defs,
+        name: this.name + (extraName ? " (" + extraName + ")" : ""),
+        blocks: selected.defs,
         x: x,
         y: y,
       });

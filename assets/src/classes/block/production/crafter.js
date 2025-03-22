@@ -61,6 +61,14 @@ class Crafter extends Container {
       recipe.outputs = recipe.outputs.map((inp) => construct(inp, "itemstack"));
     });
   }
+  rightArrow() {
+    this.changeRecipe(this._recipe + 1);
+    if (this._recipe >= this.recipes.length) this._recipe = 0;
+  }
+  leftArrow() {
+    this.changeRecipe(this._recipe - 1);
+    if (this._recipe < 0) this._recipe = this.recipes.length - 1;
+  }
   tick() {
     super.tick();
     let recipe = this.recipes[this._recipe];

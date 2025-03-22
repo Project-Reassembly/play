@@ -380,9 +380,9 @@ class Entity extends ShootableObject {
       entity: this.registryName,
       x: roundNum(this.x),
       y: roundNum(this.y),
-      spawnX: this.spawnX,
-      spawnY: this.spawnY,
-      health: this.health,
+      spawnX: roundNum(this.spawnX),
+      spawnY: roundNum(this.spawnY),
+      health: roundNum(this.health),
       statuses: this.statuses.map((x) => ({
         effect: x.effect,
         duration: timeLeft,

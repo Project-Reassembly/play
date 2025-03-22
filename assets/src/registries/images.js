@@ -64,6 +64,9 @@ Registry.images.add("base.copper", new ImageContainer("assets/textures/block/blo
 Registry.images.add("base.iron", new ImageContainer("assets/textures/block/blocks/iron-block-base.png"))
 Registry.images.add("base.titanium", new ImageContainer("assets/textures/block/blocks/titanium-block-base.png"))
 Registry.images.add("base.tungsten", new ImageContainer("assets/textures/block/blocks/tungsten-block-base.png"))
+//Blocks > Dev
+Registry.images.add("block.dev.structurereader", new ImageContainer("assets/textures/block/blocks/dev/structure-reader.png"))
+Registry.images.add("block.dev.itemcatalog", new ImageContainer("assets/textures/block/blocks/dev/item-catalog.png"))
 //Blocks > Defense
 Registry.images.add("block.stone-wall", new ImageContainer("assets/textures/block/blocks/defense/stone-wall.png"))
 Registry.images.add("block.sandstone-wall", new ImageContainer("assets/textures/block/blocks/defense/sandstone-wall.png"))

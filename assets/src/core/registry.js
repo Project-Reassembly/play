@@ -130,4 +130,16 @@ class Registry {
       async (value, key) => await void callback(key, value)
     );
   }
+  /**
+   *
+   * @param {int} index Zero-based index of the item to get.
+   * @returns The registry item at the index.
+   */
+  at(index) {
+    if (index >= this.#content.size)
+      throw new RangeError(
+        "Index " + index + " out of bounds for registry length " + this.size
+      );
+    return [...this.#content.keys()][index];
+  }
 }

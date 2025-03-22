@@ -334,28 +334,28 @@ function liquidDestructionBlast(
 }
 function insanity() {
   //insanity death
-  game.shadeColour = [0, 0];
-  game.lightColour = [255, 100];
-  game.lightScale = 1;
-  game.lighting = true;
+  effects.shadeColour = [0, 0];
+  effects.lightColour = [255, 100];
+  effects.lightScale = 1;
+  effects.lighting = true;
   effectTimer.repeat((i) => {
-    game.shadeColour = [0, i];
-    game.lightColour = [255, 100 - i / 2.5];
+    effects.shadeColour = [0, i];
+    effects.lightColour = [255, 100 - i / 2.5];
   }, 250);
   effectTimer.do(
     () =>
       effectTimer.repeat((i) => {
-        game.shadeColour = [i / 10, 0, 0, 250];
-        game.lightColour = [255, i / 25];
+        effects.shadeColour = [i / 10, 0, 0, 250];
+        effects.lightColour = [255, i / 25];
       }, 250),
     750
   );
   effectTimer.do(
     () =>
       effectTimer.repeat((i) => {
-        game.shadeColour = [25 + i * 2.5, 0, 0, 250 + i / 5];
-        game.lightColour = [255, 10 + i * 1.5];
-        game.lightScale = 1 - i / 27.5;
+        effects.shadeColour = [25 + i * 2.5, 0, 0, 250 + i / 5];
+        effects.lightColour = [255, 10 + i * 1.5];
+        effects.lightScale = 1 - i / 27.5;
       }, 25),
     1500
   );
@@ -384,16 +384,16 @@ function insanity() {
   effectTimer.do(() => {
     for (let j = 0; j < 100; j++)
       game.player.damage("insanity", rnd(100, 1000));
-    game.lightScale = 0;
+    effects.lightScale = 0;
     effectTimer.repeat((i) => {
-      game.lightScale = i / 60;
-      game.lightColour = [255, 47.5 + i * 2];
-      game.shadeColour = [85, 0, 0, 254.8 - (254.8 * i) / 60];
+      effects.lightScale = i / 60;
+      effects.lightColour = [255, 47.5 + i * 2];
+      effects.shadeColour = [85, 0, 0, 254.8 - (254.8 * i) / 60];
     }, 60);
   }, 1560);
   effectTimer.do(() => {
-    game.shadeColour = [0, 0];
-    game.lightColour = [255, 100];
-    game.lighting = false;
+    effects.shadeColour = [0, 0];
+    effects.lightColour = [255, 100];
+    effects.lighting = false;
   }, 1740);
 }

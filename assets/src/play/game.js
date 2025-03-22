@@ -164,7 +164,6 @@ worldGenWorker.onmessage = (ev) => {
     }
     if (ev.data.type === "build") {
       let successful = true;
-      console.log(ev.data)
       for (let block of ev.data.blocks) {
         //Create block, and overwrite properties
         if (
@@ -177,15 +176,15 @@ worldGenWorker.onmessage = (ev) => {
             ) === (block.target ?? ev.data.target))
         )
           try {
-            Object.assign(
-              world.placeAt(
-                block.block,
-                ev.data.x + block.x,
-                ev.data.y + block.y,
-                block.layer ?? "blocks"
-              ),
-              block.construction ?? {}
+            let blk = world.placeAt(
+              block.block,
+              ev.data.x + block.x,
+              ev.data.y + block.y,
+              block.layer ?? "blocks"
             );
+            Object.assign(blk, block.construction ?? {});
+
+            blk.direction = Block.dir.fromEnum(block.direction);
 
             stats.placed[block.block] ??= 0;
             stats.placed[block.block]++;
@@ -250,65 +249,71 @@ worldGenWorker.onerror = (ev) => {
 worldGenWorker.onmessageerror = (ev) => {
   console.warn("Message could not be deserialised.");
 };
-const cantUseInSaves = [
-  "h=",
-  "d=",
-  "b=",
-  "B=",
-  "T=",
-  "F=",
-  "t=",
-  "x=",
-  "y=",
-  "sx=",
-  "sy=",
-  "S=",
-  "R=",
-  "I=",
-  "ta=",
-  "C=",
-  "Si=",
-  "i=",
-  "#",
-  "~",
-  "+",
-  "[x]",
-  "@[0-9]+",
-  "t@[0-9]+",
-  "x[0-9]+t@[0-9]+",
+const propertyReplacements = [
+  ['"health":', "ḣ"],
+  ['"direction":', "ḋ"],
+  ['"block":', "ḃ"],
+  ['"blocks":', "ḇ"],
+  ['"tiles":', "ṫ"],
+  ['"floors":', "ḟ"],
+  ['"team":', "ṭ"],
+  ['"x":', "ẋ"],
+  ['"y":', "ẏ"],
+  ['"i":', "ï"],
+  ['"j":', "ĵ"],
+  ['"spawnX":', "ξ"],
+  ['"spawnY":', "ŷ"],
+  ['"storage":', "§"],
+  ['"recipe":', "ʀ"],
+  [
+    /{"item":"nothing","count":[0-9]+,"tags":\[[^}]*\]}/gi,
+    "л",
+    '{"item":"nothing","count":0,"tags":[]}',
+  ],
+  ['"item":', "ī"],
+  ['"tags":', "θ"],
+  ['"count":', "©"],
+  ['"inventory":', "ѝ"],
+  ['"size":', "∫"],
+  ["null", "ⁿ"],
+  ["[ⁿ,ⁿ,ⁿ,ⁿ,ⁿ,ⁿ,ⁿ,ⁿ,ⁿ,ⁿ,ⁿ,ⁿ,ⁿ,ⁿ,ⁿ,ⁿ]", "ɴ"],
+  ["[ɴ,ɴ,ɴ,ɴ,ɴ,ɴ,ɴ,ɴ,ɴ,ɴ,ɴ,ɴ,ɴ,ɴ,ɴ,ɴ]", "ℕ"],
+  ['"isMainPlayer":', "ṁ"],
+  ['"rightHand":', "ʀ"],
+  ['"leftHand":', "λ"],
+  ['"head":', "ײ"],
+  ['"entity":', "ɜ"],
+  ['"equipment":', "ɛ"],
+  ['"statuses":', "ʃ"],
+  ['"body":', "β"],
 ];
+const postDictReplacers = [
+  ["},{", "⁺"],
+  ["],[", "₊"],
+];
+/**
+ * Checks for a name in a number-name dictionary, such as the one used in save files..
+ * @param {string} name Name to search for
+ * @param {[int, string][]} dict Number-Name dictionary to search through.
+ * @returns
+ */
+function hasNameInDictArray(name, dict) {
+  for (let entry of dict) {
+    if (entry[1] === name) return true;
+  }
+  return false;
+}
+
 function saveGame(name) {
   name ??= "save.game";
   //Create file
   let file = JSON.stringify(world.serialise());
   //Minify the file
-  //About 100(!) times smaller file size because of this
+  //About 128(!) times smaller file size because of this
   //General find-and-replace:
-  file = file.replaceAll('"health":', "h=");
-  file = file.replaceAll('"direction":', "d=");
-  file = file.replaceAll('"block":', "b=");
-  file = file.replaceAll('"blocks":', "B=");
-  file = file.replaceAll('"tiles":', "T=");
-  file = file.replaceAll('"floors":', "F=");
-  file = file.replaceAll('"team":', "t=");
-  file = file.replaceAll('"x":', "x=");
-  file = file.replaceAll('"y":', "y=");
-  file = file.replaceAll('"spawnX":', "sx=");
-  file = file.replaceAll('"spawnY":', "sy=");
-  file = file.replaceAll('"storage":', "S=");
-  file = file.replaceAll('"recipe":', "R=");
-  file = file.replaceAll(
-    /{"item":"nothing","count":[0-9]+,"tags":\[[^}]*\]}/gi,
-    "[x]"
-  );
-  file = file.replaceAll('"item":', "I=");
-  file = file.replaceAll('"tags":', "ta=");
-  file = file.replaceAll('"count":', "C=");
-  file = file.replaceAll('"size":', "Si=");
-  file = file.replaceAll('"inventory":', "i=");
-  file = file.replaceAll("null", "#");
-  file = file.replaceAll("[#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#]", "~");
-  file = file.replaceAll("[~,~,~,~,~,~,~,~,~,~,~,~,~,~,~,~]", "+");
+  for (let replacer of propertyReplacements) {
+    file = file.replaceAll(replacer[0], replacer[1]);
+  }
   //Dictionary replacement:
   let dict = [];
   let num = 0;
@@ -316,18 +321,32 @@ function saveGame(name) {
     dict.push([num, name]);
     num++;
   });
+  Registry.items.forEach((name) => {
+    if (!hasNameInDictArray(name, dict)) {
+      dict.push([num, name]);
+      num++;
+    }
+  });
+  Registry.entities.forEach((name) => {
+    dict.push([num, name]);
+    num++;
+  });
   dict.forEach((val) => {
-    file = file.replaceAll('"' + val[1] + '"', "@" + val[0]);
+    file = file.replaceAll('"' + val[1] + '"', "⁝" + val[0]);
   });
   //Dictionary compression: Tiles
-  file = file.replaceAll(/{b=@[0-9]+}/gi, (tile) => {
-    return "t" + tile.substring(3, tile.length - 1);
+  file = file.replaceAll(/{ḃ⁝[0-9]+}/gi, (tile) => {
+    return "…" + tile.substring(3, tile.length - 1);
   });
   //Dictionary compression: RLE
-  file = file.replaceAll(/(t@[0-9]+),?(?:\1,?)*/gi, (tile) => {
+  file = file.replaceAll(/(…[0-9]+),?(?:\1,?)*/gi, (tile) => {
     let arr = tile.split(",").filter((x) => x.length > 0);
-    return "x" + arr.length + arr[0];
+    return "×" + arr.length + arr[0];
   });
+  //Postdict replacers
+  for (let replacer of postDictReplacers) {
+    file = file.replaceAll(replacer[0], replacer[1]);
+  }
   //Add dictionary to save
   file =
     "DICT<" +
@@ -359,17 +378,26 @@ function loadGame(name) {
     return false;
   }
   //Deminify the file
+  //Unreplace first
+  let reversedPDReplacers = postDictReplacers.map((x) => x.slice(0));
+  for (let replacer of reversedPDReplacers.reverse()) {
+    file = file.replaceAll(
+      replacer[1],
+      (typeof replacer[0] === "string" ? replacer[0] : replacer[2]) ??
+        replacer[0]
+    );
+  }
   //Dictionary decompression: Run Length Decoding
   file = file
-    .replaceAll(/x[0-9]+t@[0-9]+/gi, (tile) => {
-      let str = tile.match(/t@[0-9]+/)[0] + ",";
-      let out = str.repeat(parseInt(tile.match(/(?<=x)[0-9]+(?=t)/)[0]));
+    .replaceAll(/×[0-9]+…[0-9]+/gi, (tile) => {
+      let str = tile.match(/…[0-9]+/)[0] + ",";
+      let out = str.repeat(parseInt(tile.match(/(?<=×)[0-9]+(?=…)/)[0]));
       return out;
     })
     .replaceAll(/,]/g, "]");
   //Dictionary decompression: untile
-  file = file.replaceAll(/t@[0-9]+/gi, (tile) => {
-    return "{b=" + tile.substring(1) + "}";
+  file = file.replaceAll(/…[0-9]+/gi, (tile) => {
+    return "{ḃ⁝" + tile.substring(1) + "}";
   });
   let dict = [];
   file = file.replace(/DICT<.*>/gim, (dictionary) => {
@@ -378,32 +406,19 @@ function loadGame(name) {
     return "";
   });
   dict.forEach((entry) => {
-    file = file.replaceAll("@" + entry[0] + ",", '"' + entry[1] + '",');
-    file = file.replaceAll("@" + entry[0] + "}", '"' + entry[1] + '"}');
+    file = file.replaceAll("⁝" + entry[0] + ",", '"' + entry[1] + '",');
+    file = file.replaceAll("⁝" + entry[0] + "}", '"' + entry[1] + '"}');
   });
   //Unreplace
-  file = file.replaceAll("+", "[~,~,~,~,~,~,~,~,~,~,~,~,~,~,~,~]");
-  file = file.replaceAll("~", "[#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#]");
-  file = file.replaceAll("[x]", '{"item":"nothing","count":0,"tags":[]}');
-  file = file.replaceAll("#", "null");
-  file = file.replaceAll("h=", '"health":');
-  file = file.replaceAll("d=", '"direction":');
-  file = file.replaceAll("b=", '"block":');
-  file = file.replaceAll("t=", '"team":');
-  file = file.replaceAll("sx=", '"spawnX":');
-  file = file.replaceAll("sy=", '"spawnY":');
-  file = file.replaceAll("x=", '"x":');
-  file = file.replaceAll("y=", '"y":');
-  file = file.replaceAll("S=", '"storage":');
-  file = file.replaceAll("I=", '"item":');
-  file = file.replaceAll("C=", '"count":');
-  file = file.replaceAll("Si=", '"size":');
-  file = file.replaceAll("ta=", '"tags":');
-  file = file.replaceAll("R=", '"recipe":');
-  file = file.replaceAll("B=", '"blocks":');
-  file = file.replaceAll("T=", '"tiles":');
-  file = file.replaceAll("F=", '"floors":');
-  file = file.replaceAll("i=", '"inventory":');
+  let reversedReplacers = propertyReplacements.map((x) => x.slice(0));
+  for (let replacer of reversedReplacers.reverse()) {
+    file = file.replaceAll(
+      replacer[1],
+      (typeof replacer[0] === "string" ? replacer[0] : replacer[2]) ??
+        replacer[0]
+    );
+  }
+  console.log(file);
   world.become(World.deserialise(JSON.parse(file)));
   console.log("Game loaded.");
   Log.send("You are now playing on '" + world.name + "'.", [0, 255, 0]);
@@ -610,7 +625,9 @@ function fpsUpdate() {
 function uiFrame() {
   Inventory.tooltip = null;
   //Tick UI
-  UIComponent.setCondition("containerselected:" + !!Container.selectedBlock);
+  UIComponent.setCondition(
+    "containerselected:" + (Container.selectedBlock instanceof Container)
+  );
   updateUIActivity();
   tickUI();
   //Reset mouse held status
@@ -866,7 +883,7 @@ function mouseInteraction() {
 function secondaryInteract() {
   if (Inventory.mouseItemStack.item === "nothing") {
     let block = world.getBlock(game.mouse.blockX, game.mouse.blockY);
-    if (block)
+    if (block && block.team === game.player.team)
       if (block.dropItem) {
         //Break breakables
 
@@ -905,6 +922,7 @@ function interact() {
   let clickedBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
   if (
     clickedBlock &&
+    clickedBlock.team === game.player.team &&
     clickedBlock.interaction(game.player, Inventory.mouseItemStack)
   )
     return;
@@ -931,7 +949,11 @@ function interact() {
     return;
   }
   //If block is (not) interacted with
-  if (clickedBlock && clickedBlock.selectable) {
+  if (
+    clickedBlock &&
+    clickedBlock.selectable &&
+    clickedBlock.team === game.player.team
+  ) {
     Container.selectedBlock = clickedBlock;
     ui.waitingForMouseUp = true;
     return;
@@ -1074,21 +1096,13 @@ function mouseWheel(ev) {
 function nextRecipe() {
   let block = ui.hoveredBlock ?? Container.selectedBlock;
   if (!block) return;
-  if (block instanceof Crafter) {
-    block.changeRecipe();
-    block._recipe++;
-    if (block._recipe >= block.recipes.length) block._recipe = 0;
-  }
+  block.rightArrow();
 }
 
 function prevRecipe() {
   let block = ui.hoveredBlock ?? Container.selectedBlock;
   if (!block) return;
-  if (block instanceof Crafter) {
-    block.changeRecipe();
-    block._recipe--;
-    if (block._recipe < 0) block._recipe = block.recipes.length - 1;
-  }
+  block.leftArrow();
 }
 
 function pause() {

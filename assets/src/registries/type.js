@@ -29,7 +29,6 @@ Registry.type.add("tile-generator", TileGenerator);
 Registry.type.add("ore-generator", OreGenerator);
 Registry.type.add("block-generator", BlockGenerator);
 
-
 Registry.type.add("gen-options", GenerationOptions);
 Registry.type.add("tile-gen-options", TileGenerationOptions);
 Registry.type.add("ore-gen-options", OreGenerationOptions);
@@ -45,3 +44,6 @@ Registry.type.add("tile-producer", TileProducer);
 Registry.type.add("drill", Drill);
 Registry.type.add("conveyor", Conveyor);
 Registry.type.add("unloader", Unloader);
+
+Registry.type.add("dev::structurereader", StructureReaderBlock);
+Registry.type.add("dev::itemcatalog", ItemCatalogBlock);

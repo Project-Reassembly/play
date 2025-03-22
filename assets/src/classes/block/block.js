@@ -201,6 +201,8 @@ class Block extends ShootableObject {
       team: this.team,
     };
   }
+  rightArrow() {}
+  leftArrow() {}
 }
 /** Stores values to describe how blocks are broken.
  * @enum

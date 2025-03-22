@@ -527,39 +527,51 @@ function drawMultilineText(
   txtSize = 20
 ) {
   push();
+  //Setup
   textAlign(LEFT);
   textFont(fonts.ocr);
   textSize(txtSize);
   strokeWeight(txtSize / 10);
+  //Max width
   let maxWidth = textWidth(header) * 1.05;
+  let boxH = txtSize * 2;
   let body = txt.split("\n");
-  let descLines = txt.split("\n").length + 2;
-  let lines = 2 + Math.ceil(descLines);
+  let descLines = txt.split("\n").length;
+  let lines = 1 + Math.ceil(descLines);
   textSize(txtSize * 0.9);
+  //Max width of body text, plus small buffer, and also height
   for (let line of body) {
     let lw = textWidth(line);
+    boxH += txtSize * 0.9;
     if (lw > maxWidth) maxWidth = lw + txtSize * 0.6;
   }
+  //X pos
   let displayX = x + maxWidth / 2;
-  textSize(txtSize);
-  let displayY = y + (lines * txtSize * 0.6) / 2;
-  if (displayY + lines * txtSize * 0.3 > height / 2) {
-    displayY = height / 2 - lines * txtSize * 0.3;
+  //Y pos, can't go offscreen
+  let displayY = y + boxH / 2;
+  if (displayY + boxH / 2 > height / 2) {
+    displayY = height / 2 - boxH / 2;
   }
+  //Stop horizontal overflow
+  if (displayX + maxWidth / 2 > width / 2) {
+    displayX = width / 2 - maxWidth / 2;
+  }
+  textSize(txtSize);
   fill(backgroundColour);
   strokeWeight(5);
   stroke(outlineColour);
-  rect(displayX, displayY, maxWidth, lines * txtSize * 0.6);
+  //Box, with padding
+  rect(displayX, displayY, maxWidth, boxH);
   fill(colour);
   stroke(colour);
   strokeWeight(1);
-  let textX = x + 10;
-  let textY = displayY - lines * 6 + 28;
+  let textX = displayX - maxWidth / 2 + 10;
+  let textY = displayY - boxH / 2 + txtSize * 1.5;
   text(header, textX, textY - 5);
   textSize(txtSize * 0.9);
   noStroke();
   for (let line = 0; line < lines; line++) {
-    text(body[line], textX, textY + txtSize * 0.75 + line * txtSize * 0.75);
+    text(body[line], textX, textY + txtSize + line * txtSize * 0.9);
   }
   pop();
 }

@@ -167,9 +167,6 @@ class ShootableObject extends PhysicalObject {
   init() {
     super.init();
     this.maxHealth = this.health;
-    console.log(
-      "Shootable with health " + this.health + " (" + this.maxHealth + ")"
-    );
   }
   tick() {
     this.checkBullets();

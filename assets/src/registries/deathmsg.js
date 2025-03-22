@@ -28,8 +28,11 @@ Registry.deathmsg.add("impact", [
   ["(1) was crushed by (2)", "(1) was squashed by (2)"],
 ]);
 Registry.deathmsg.add("explosion", [
-  ["(1) blew up", "(1) was blown up by (2)"],
-  ["(1) became geography", "(1)'s surface area was rapidly increased by (2)"],
+  ["(1) blew up", "(1) became geography"],
+  [
+    "(1) was blown up by (2)",
+    "(1)'s surface area was rapidly increased by (2)",
+  ],
 ]);
 Registry.deathmsg.add("fire", [
   [

@@ -1,0 +1,183 @@
+class StructureReaderBlock extends Block {
+  _range = 1;
+  _output = [];
+  _becomes = null;
+  selectable = true;
+  static unreadable = ["dev::structurereader"];
+  drawTooltip(x, y, outline, background) {
+    drawMultilineText(
+      x,
+      y,
+      this._output.join("\n"),
+      this.title + " [" + this._range + " blocks]",
+      Item.getColourFromRarity(0, "light")
+    );
+  }
+  leftArrow() {
+    if (this._range > 1) this._range--;
+  }
+  rightArrow() {
+    this._range++;
+  }
+  highlight(emphasised) {
+    super.highlight(emphasised);
+    push();
+    noFill();
+    stroke(255, emphasised ? 0 : 255, emphasised ? 0 : 255);
+    strokeWeight((emphasised ? 2 : 1) * ui.camera.zoom);
+    rect(
+      this.uiX + (Block.size * ui.camera.zoom) / 2,
+      this.uiY + (Block.size * ui.camera.zoom) / 2,
+      (this._range * 2 + 1) * Block.size * ui.camera.zoom,
+      (this._range * 2 + 1) * Block.size * ui.camera.zoom
+    );
+    pop();
+  }
+  /**@param {ItemStack | undefined} istack  */
+  interaction(ent, istack) {
+    if (keyIsDown(SHIFT)) {
+      this._output = this.outputStructure().map(
+        (x) =>
+          x.block +
+          ": " +
+          (x.x < 0 ? "" : "+") +
+          x.x +
+          ", " +
+          (x.y < 0 ? "" : "+") +
+          x.y
+      );
+      ui.waitingForMouseUp = true;
+      return true;
+    }
+    if (!istack) return false;
+    let item = istack.getItem();
+    if (item instanceof PlaceableItem) {
+      this._becomes = item.block;
+      Log.send("This block will be read as " + item.name);
+      ui.waitingForMouseUp = true;
+      return true;
+    }
+    return false;
+  }
+  postDraw() {
+    push();
+    noFill();
+    stroke(255);
+    strokeWeight(1);
+    rect(
+      this.uiX + Block.size / 2,
+      this.uiY + Block.size / 2,
+      (this._range * 2 + 1) * Block.size,
+      (this._range * 2 + 1) * Block.size
+    );
+    opacity(0.66);
+    if (this._becomes)
+      drawImg(
+        Registry.blocks.get(this._becomes).image,
+        this.x,
+        this.y,
+        Block.size,
+        Block.size
+      );
+    pop();
+  }
+  outputStructure() {
+    let blocks = [];
+    for (let x = -this._range; x <= this._range; x++) {
+      for (let y = -this._range; y <= this._range; y++) {
+        let bx = this.gridX + x,
+          by = this.gridY + y;
+        let block = this.world.getBlock(bx, by, "blocks");
+        let exists = !!block;
+        let unreadable =
+          exists &&
+          StructureReaderBlock.unreadable.includes(block.registryName);
+        this.world.particles.push(
+          new ShapeParticle(
+            (bx + 0.5) * Block.size,
+            (by + 0.5) * Block.size,
+            0,
+            120,
+            0,
+            0,
+            "rect",
+            unreadable ? [255, 255, 0] : exists ? [0, 255, 0] : [255, 0, 0],
+            [255, 255, 255, 0],
+            Block.size,
+            Block.size,
+            Block.size,
+            Block.size,
+            0,
+            60
+          ),
+          new TextParticle(
+            (bx + 0.5) * Block.size,
+            (by + 0.5) * Block.size,
+            0,
+            120,
+            0,
+            0,
+            x + ", " + y,
+            [255, 255, 255],
+            unreadable
+              ? [255, 255, 0]
+              : exists
+              ? [100, 255, 100, 0]
+              : [255, 100, 100, 0],
+            5,
+            5,
+            0,
+            true
+          )
+        );
+
+        if (exists) {
+          if (block === this && this._becomes) {
+            blocks.push({
+              x: x,
+              y: y,
+              block: this._becomes,
+            });
+          }
+          if (!unreadable) {
+            if (block.direction !== 0)
+              blocks.push({
+                x: x,
+                y: y,
+                block: block.registryName,
+                direction: Block.dir.toEnum(block.direction),
+              });
+            else
+              blocks.push({
+                x: x,
+                y: y,
+                block: block.registryName,
+              });
+          }
+        }
+      }
+    }
+    console.log(blocks);
+    return blocks;
+  }
+}
+class ItemCatalogBlock extends Container {
+  init() {
+    this.inventorySize = Registry.items.size;
+    super.init();
+  }
+  tick() {
+    this.inventory.iterate((item, slot) => {
+      this.inventory.set(slot, new ItemStack(Registry.items.at(slot)));
+    });
+  }
+  break(type) {
+    return Block.prototype.break.call(this, type);
+  }
+  //Space efficiency!
+  serialise() {
+    let c = super.serialise();
+    c.inventory = [];
+    return c;
+  }
+}
