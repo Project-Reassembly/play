@@ -20,10 +20,8 @@ class Registry {
    * @param {*} item Item to add to registry.
    */
   add(name, item) {
-    if (!name) return; //catch empty name
-    if (!item) return; //catch null items
-    if (typeof name !== "string") name = name.toString(); //Stringify name
-    name = name.toLowerCase(); //Remove case sensitivity.
+    name = Registry.#processName(name);
+    if (!item) throw new TypeError("Registries cannot contain null");
     //Throw an error if the item already exists.
     if (this.has(name))
       throw new SyntaxError(
@@ -41,8 +39,7 @@ class Registry {
    */
   has(name) {
     if (!name) return false;
-    if (typeof name !== "string") name = name.toString(); //Stringify name
-    name = name.toLowerCase(); //Remove case sensitivity.
+    name = Registry.#processName(name);
     //Return presence
     return this.#content.has(name);
   }
@@ -53,7 +50,7 @@ class Registry {
    */
   get(name) {
     if (!name) throw new ReferenceError("No registry contains null!");
-    if (typeof name !== "string") name = name.toString(); //Stringify name
+    name = Registry.#processName(name);
     name = name.toLowerCase(); //Remove case sensitivity.
     //Throw an error if the item doesn't exist.
     if (!this.has(name))
@@ -77,8 +74,7 @@ class Registry {
    * @param {string} newName What to change the name to.
    */
   rename(name, newName) {
-    if (typeof name !== "string") name = name.toString(); //Stringify name
-    name = name.toLowerCase(); //Remove case sensitivity.
+    name = Registry.#processName(name);
     //Throw an error if the item doesn't exist.
     if (!this.has(name))
       throw new ReferenceError(
@@ -99,8 +95,7 @@ class Registry {
    * @param {string} as What to change the name to.
    */
   alias(name, as) {
-    if (typeof name !== "string") name = name.toString(); //Stringify name
-    name = name.toLowerCase(); //Remove case sensitivity.
+    name = Registry.#processName(name);
     //Throw an error if the item doesn't exist.
     if (!this.has(name))
       throw new ReferenceError(
@@ -142,4 +137,20 @@ class Registry {
       );
     return [...this.#content.keys()][index];
   }
+  static #processName(name) {
+    if (!name) throw new TypeError("Registry name must be defined");
+    if (hasNonAscii(name))
+      throw new TypeError("Registry names may only contain ASCII characters");
+    return name.toString().toLowerCase();
+  }
+  static isValidName(name) {
+    try {
+      this.#processName(name);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
 }
+
+let hasNonAscii = (str) => [...str].some((char) => char.charCodeAt(0) > 127);

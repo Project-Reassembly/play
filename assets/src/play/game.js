@@ -418,7 +418,6 @@ function loadGame(name) {
         replacer[0]
     );
   }
-  console.log(file);
   world.become(World.deserialise(JSON.parse(file)));
   console.log("Game loaded.");
   Log.send("You are now playing on '" + world.name + "'.", [0, 255, 0]);
