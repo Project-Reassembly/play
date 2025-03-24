@@ -304,6 +304,18 @@ function hasNameInDictArray(name, dict) {
   return false;
 }
 
+const escapeJSON = function (str) {
+  return str
+    .replace(/[\\]/g, "\\\\")
+    .replace(/[\"]/g, '\\"')
+    .replace(/[\/]/g, "\\/")
+    .replace(/[\b]/g, "\\b")
+    .replace(/[\f]/g, "\\f")
+    .replace(/[\n]/g, "\\n")
+    .replace(/[\r]/g, "\\r")
+    .replace(/[\t]/g, "\\t");
+};
+
 function saveGame(name) {
   name ??= "save.game";
   //Create file
@@ -408,6 +420,7 @@ function loadGame(name) {
   dict.forEach((entry) => {
     file = file.replaceAll("⁝" + entry[0] + ",", '"' + entry[1] + '",');
     file = file.replaceAll("⁝" + entry[0] + "}", '"' + entry[1] + '"}');
+    file = file.replaceAll("⁝" + entry[0] + ":", '"' + entry[1] + '":');
   });
   //Unreplace
   let reversedReplacers = propertyReplacements.map((x) => x.slice(0));
@@ -418,6 +431,7 @@ function loadGame(name) {
         replacer[0]
     );
   }
+  console.log(file);
   world.become(World.deserialise(JSON.parse(file)));
   console.log("Game loaded.");
   Log.send("You are now playing on '" + world.name + "'.", [0, 255, 0]);
@@ -1000,7 +1014,7 @@ function keyPressed(ev) {
   key = key.toString().toLowerCase();
   if (ui.texteditor.active) {
     if (key === "enter") {
-      ui.endEdit()
+      ui.endEdit();
     }
     if (key === "escape") ui.texteditor.active = false;
     if (ui.texteditor.isCommandLine) {
@@ -1061,18 +1075,26 @@ function keyPressed(ev) {
 
 function openCommandLine() {
   ui.texteditor.active = true;
-  ui.texteditor.title = "Command Line"
+  ui.texteditor.title = "Command Line";
   ui.texteditor.isCommandLine = true;
   ui.texteditor.save = (command) => {
-    islinterface.do(command, new ExecutionContext(game.player.x, game.player.y, game.player));
+    islinterface.do(
+      command,
+      new ExecutionContext(game.player.x, game.player.y, game.player)
+    );
     cmdHistory.unshift(command);
     histIndex = -1;
   };
 }
-
-function keyTyped() {
+/**@param {KeyboardEvent} ev  */
+function keyTyped(ev) {
   if (!ui.texteditor.active) return false;
-  if (key !== "/") ui.texteditor.text += key;
+  if (key !== "/") {
+    ui.texteditor.text +=
+      ev.shiftKey || ev.getModifierState("CapsLock")
+        ? key.toUpperCase()
+        : key.toLowerCase();
+  }
   return false;
 }
 

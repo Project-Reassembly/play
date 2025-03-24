@@ -3,7 +3,13 @@ class StructureReaderBlock extends Block {
   _output = [];
   _becomes = null;
   selectable = true;
-  static unreadable = ["dev::structurereader"];
+  static unreadable = [
+    "dev::structurereader",
+    "dev::commandblock",
+    "dev::commandblock.chain",
+    "dev::commandblock.loop",
+    "dev::itemcatalog",
+  ];
   drawTooltip(x, y, outline, background) {
     drawMultilineText(
       x,
@@ -257,7 +263,6 @@ class CommandExecutorBlock extends Block {
     }
     this._activatedThisTick = false;
   }
-  /**@param {ItemStack | undefined} istack  */
   interaction(ent, istack) {
     if (keyIsDown(SHIFT)) {
       this.activated();
@@ -273,6 +278,7 @@ class CommandExecutorBlock extends Block {
       Log.send("Set command to '" + cmd + "'", [200, 200, 200], "italic");
       this._command = cmd;
     };
+    ui.waitingForMouseUp = true;
   }
   serialise() {
     let b = super.serialise();

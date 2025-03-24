@@ -99,6 +99,8 @@ Registry.images.add("conveyor.basic-conveyor.belt", new ImageContainer("assets/t
 Registry.images.add("conveyor.basic-conveyor.ui", new ImageContainer("assets/textures/block/blocks/conveyor/basic-conveyor.png"))
 Registry.images.add("conveyor.basic-unloader.belt", new ImageContainer("assets/textures/block/blocks/conveyor/basic-unloader-belt.png"))
 Registry.images.add("conveyor.basic-unloader.ui", new ImageContainer("assets/textures/block/blocks/conveyor/basic-unloader.png"))
+//Blocks > Decoration
+Registry.images.add("block.message", new ImageContainer("assets/textures/block/blocks/deco/message.png"))
 //Icons
 Registry.images.add("icon.chest", new ImageContainer("assets/textures/icon/chest.png"))
 Registry.images.add("icon.cross", new ImageContainer("assets/textures/icon/cross.png"))

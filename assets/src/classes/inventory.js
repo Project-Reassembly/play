@@ -533,11 +533,11 @@ function drawMultilineText(
   textSize(txtSize);
   strokeWeight(txtSize / 10);
   //Max width
-  let maxWidth = textWidth(header) * 1.05;
-  let boxH = txtSize * 2;
+  let maxWidth = header ? textWidth(header) * 1.05 : 0;
+  let boxH = header ? txtSize * 2 : txtSize * 0.6;
   let body = txt.split("\n");
   let descLines = txt.split("\n").length;
-  let lines = 1 + Math.ceil(descLines);
+  let lines = (header ? 1 : 0) + Math.ceil(descLines);
   textSize(txtSize * 0.9);
   //Max width of body text, plus small buffer, and also height
   for (let line of body) {
@@ -566,8 +566,8 @@ function drawMultilineText(
   stroke(colour);
   strokeWeight(1);
   let textX = displayX - maxWidth / 2 + 10;
-  let textY = displayY - boxH / 2 + txtSize * 1.5;
-  text(header, textX, textY - 5);
+  let textY = displayY - boxH / 2 + (header ? txtSize * 1.5 : 0);
+  if (header) text(header, textX, textY - 5);
   textSize(txtSize * 0.9);
   noStroke();
   for (let line = 0; line < lines; line++) {

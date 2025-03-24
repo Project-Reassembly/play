@@ -45,7 +45,8 @@ importScripts(
   "../classes/block/production/tile-producer.js",
   "../classes/block/production/drill.js",
   "../classes/block/conveyor.js",
-  "../classes/block/devblocks.js"
+  "../classes/block/devblocks.js",
+  "../classes/block/decoration.js"
 );
 console.log("[World Gen] [Setup] Imported P:R Classes");
 importScripts(

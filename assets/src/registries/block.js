@@ -687,6 +687,18 @@ createLinkedBlockAndItem(
     description: "A small box for item storage.",
   }
 );
+//## DECO ##
+createLinkedBlockAndItem(
+  "message",
+  "Message Unit",
+  "block.message",
+  {
+    type: "sign",
+  },
+  {
+    description: "A small digital storage device for holding messages.",
+  }
+);
 //## DEV ##
 createLinkedBlockAndItem(
   "dev::structurereader",
