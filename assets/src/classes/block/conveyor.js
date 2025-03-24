@@ -139,4 +139,11 @@ class Unloader extends Conveyor {
     b.filter = this.filter;
     return b;
   }
+  /**
+   * @param {Unloader} deserialised
+   * @param {object} creator
+   */
+  static applyExtraProps(deserialised, creator) {
+    deserialised.filter = creator.filter;
+  }
 }

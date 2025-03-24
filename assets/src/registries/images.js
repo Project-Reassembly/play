@@ -67,6 +67,10 @@ Registry.images.add("base.tungsten", new ImageContainer("assets/textures/block/b
 //Blocks > Dev
 Registry.images.add("block.dev.structurereader", new ImageContainer("assets/textures/block/blocks/dev/structure-reader.png"))
 Registry.images.add("block.dev.itemcatalog", new ImageContainer("assets/textures/block/blocks/dev/item-catalog.png"))
+Registry.images.add("block.dev.commandblock", new ImageContainer("assets/textures/block/blocks/dev/command-block.png"))
+Registry.images.add("block.dev.commandblock.chain", new ImageContainer("assets/textures/block/blocks/dev/command-block-chain.png"))
+Registry.images.add("block.dev.commandblock.loop", new ImageContainer("assets/textures/block/blocks/dev/command-block-repeat.png"))
+Registry.images.add("block.dev.commandblock.heat", new ImageContainer("assets/textures/block/blocks/dev/command-block-heat.png"))
 //Blocks > Defense
 Registry.images.add("block.stone-wall", new ImageContainer("assets/textures/block/blocks/defense/stone-wall.png"))
 Registry.images.add("block.sandstone-wall", new ImageContainer("assets/textures/block/blocks/defense/sandstone-wall.png"))

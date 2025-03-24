@@ -8,6 +8,8 @@ class ImageParticle {
     speed,
     decel,
     image,
+    opacityFrom,
+    opacityTo,
     sizeXFrom,
     sizeXTo,
     sizeYFrom,
@@ -22,6 +24,8 @@ class ImageParticle {
     this.decel = decel;
     this.image = image;
     this.remove = false;
+    this.opacityFrom = opacityFrom;
+    this.opacityTo = opacityTo;
     this.maxLifetime = lifetime;
     this.sizeXFrom = sizeXFrom;
     this.sizeXTo = sizeXTo;
@@ -69,6 +73,11 @@ class ImageParticle {
   }
   draw() {
     //Draw the particle
+    push();
+    opacity(
+      this.opacityFrom * this.calcLifeFract() +
+        this.opacityTo * (1 - this.calcLifeFract())
+    );
     rotatedImg(
       this.image,
       this.x,
@@ -77,5 +86,6 @@ class ImageParticle {
       this.sizeY,
       this.direction + this.#rotOffset + HALF_PI
     );
+    pop();
   }
 }

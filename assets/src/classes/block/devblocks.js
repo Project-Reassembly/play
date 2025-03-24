@@ -182,4 +182,108 @@ class ItemCatalogBlock extends Container {
     c.inventory = [];
     return c;
   }
+  static applyExtraProps(deser, creator) {
+    deser.inventory = new Inventory(Registry.items.size);
+  }
+}
+
+class CommandExecutorBlock extends Block {
+  _activatedThisTick = false;
+  _command = "";
+  chaining = false;
+  loops = false;
+  _on = false;
+  activated() {
+    //Stop infinite command loops
+    if (!this._activatedThisTick) {
+      this._activatedThisTick = true;
+      //Execute the command
+      let ex = (this.gridX + 0.5) * Block.size,
+        ey = (this.gridY + 0.5) * Block.size;
+      this.world.particles.push(
+        new ImageParticle(
+          ex,
+          ey,
+          0,
+          120,
+          0,
+          0,
+          "block.dev.commandblock.heat",
+          1,
+          0,
+          Block.size,
+          Block.size,
+          Block.size,
+          Block.size,
+          0
+        )
+      );
+      islinterface.do(this._command, new ExecutionContext(ex, ey, this));
+      //Activate next block
+      if (this.chaining) {
+        let vct = Block.direction.vectorOf(this.direction);
+        let nextblock = this.world.getBlock(
+          this.gridX + vct.x,
+          this.gridY + vct.y
+        );
+        if (nextblock instanceof CommandExecutorBlock) {
+          nextblock.activated();
+        }
+      }
+    }
+  }
+  draw() {
+    super.draw();
+    if (this.chaining) {
+      push();
+      noStroke();
+      fill(100, 205 + Math.floor(50 * Math.sin(frameCount / 60)), 100);
+      rotatedShape(
+        "moved-triangle",
+        this.x,
+        this.y,
+        15,
+        15,
+        this.direction,
+        false
+      );
+      pop();
+    }
+  }
+  tick() {
+    super.tick();
+    if (this.loops && this._on) {
+      this.activated();
+    }
+    this._activatedThisTick = false;
+  }
+  /**@param {ItemStack | undefined} istack  */
+  interaction(ent, istack) {
+    if (keyIsDown(SHIFT)) {
+      this.activated();
+      if (this.loops) this._on = !this._on;
+      ui.waitingForMouseUp = true;
+      return true;
+    }
+    ui.texteditor.text = this._command;
+    ui.texteditor.active = true;
+    ui.texteditor.isCommandLine = true;
+    ui.texteditor.title = "Set Console Command:";
+    ui.texteditor.save = (cmd) => {
+      Log.send("Set command to '" + cmd + "'", [200, 200, 200], "italic");
+      this._command = cmd;
+    };
+  }
+  serialise() {
+    let b = super.serialise();
+    b.command = this._command;
+    return b;
+  }
+  /**
+   * @param {CommandExecutorBlock} deserialised
+   * @param {object} creator
+   */
+  static applyExtraProps(deserialised, creator) {
+    deserialised._command = creator.command;
+  }
 }

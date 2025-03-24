@@ -201,6 +201,11 @@ class Block extends ShootableObject {
       team: this.team,
     };
   }
+  /**
+   * @param {Block} deserialised
+   * @param {object} creator
+   */
+  static applyExtraProps(deserialised, creator) {}
   rightArrow() {}
   leftArrow() {}
 }

@@ -65,6 +65,13 @@ class Smelter extends Crafter {
     c.fuel = this._fuelLeft;
     return c;
   }
+  /**
+   * @param {Smelter} deserialised
+   * @param {object} creator
+   */
+  static applyExtraProps(deserialised, creator) {
+    deserialised._fuelLeft = creator.fuel;
+  }
   setFuel(_) {
     this._fuelLeft = _;
     this._fuelMax = _;

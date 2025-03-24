@@ -9,43 +9,83 @@ import { ISLExtension } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@ma
 function feedback(msg) {
   Log.send("ISL> " + msg, [200, 200, 200], "italic");
 }
+function getPos(x, y) {
+  let obj = {
+    x: x
+      ? x.type === "relpos"
+        ? ctx.x + parseFloat(x.value.substring(1))
+        : x.type === "identifier" && x.value === "~"
+        ? ctx.x
+        : x.value
+      : ctx.x,
+    y: y
+      ? y.type === "relpos"
+        ? ctx.y + parseFloat(y.value.substring(1))
+        : y.type === "identifier" && y.value === "~"
+        ? ctx.y
+        : y.value
+      : ctx.y,
+  };
+  if (typeof obj.x !== "number" || typeof obj.y !== "number")
+    throw new TypeError("Positions must be numbers!");
+  return obj;
+}
+class ExecutionContext {
+  get isEntity() {
+    return this.self instanceof Entity;
+  }
+  constructor(x, y, self) {
+    this.x = x;
+    this.y = y;
+    this.self = self;
+  }
+}
 //Extension
-
+const positionType = "number|relpos|identifier";
 const cle = new ISLExtension("pr-cmd");
 cle.addType("rloc-item", (val) => Registry.items.has(val));
 cle.addType("rloc-entity", (val) => Registry.entities.has(val));
 cle.addType("entity", () => false);
+cle.addType("nonentity-ctx", () => false);
 window["_self"] = cle.addVariable("self", new Entity(), "entity");
-window["_x"] = cle.addVariable("x", 0, "number");
-window["_y"] = cle.addVariable("y", 0, "number");
+const _ctx = (window["_ctx"] = cle.addVariable(
+  "ctx",
+  new Block(),
+  "nonentity-ctx"
+));
 let _ce = (window["_created"] = cle.addVariable("created", "null", "null"));
 cle.addKeyword(
   "give",
   (interp, labels, entity, item, amount) => {
     let target = entity?.value;
-    console.log(target);
-    let leftover = target.equipment.addItem(item?.value, amount?.value);
+    let leftover =
+      target instanceof EquippedEntity
+        ? target.equipment.addItem(item?.value, amount?.value)
+        : amount?.value;
     let notgiven = 0;
     if (leftover) notgiven = target.inventory.addItem(item?.value, leftover);
     feedback(
-      "You have been given " +
+      "Given " +
         ((amount?.value ?? 1) - notgiven) +
         " " +
-        Registry.items.get(item?.value).name
+        Registry.items.get(item?.value).name +
+        " to " +
+        target.name
     );
   },
   [
     { name: "target", type: "entity" },
     { name: "item", type: "rloc-item" },
-    { name: "amount", type: "number", optional: "true" },
+    { name: "amount", type: "number", optional: true },
   ]
 );
 cle.addKeyword(
   "explode",
   (interp, labels, x, y, damage, radius) => {
+    let pos = getPos(x, y);
     splashDamageInstance(
-      x?.value ?? 0,
-      y?.value ?? 0,
+      pos.x,
+      pos.y,
       damage?.value ?? 100,
       "explosion",
       radius?.value ?? 100,
@@ -62,9 +102,9 @@ cle.addKeyword(
     );
     feedback(
       "Created explosion at " +
-        (x?.value ?? 0) +
+        pos.x +
         ", " +
-        (y?.value ?? 0) +
+        pos.y +
         ", dealing " +
         (damage?.value ?? 100) +
         " damage in a " +
@@ -73,60 +113,40 @@ cle.addKeyword(
     );
   },
   [
-    { name: "x", type: "number" },
-    { name: "y", type: "number" },
-    { name: "damage", type: "number" },
-    { name: "radius", type: "number" },
+    { name: "x", type: positionType, optional: true },
+    { name: "y", type: positionType, optional: true },
+    { name: "damage", type: "number", optional: true },
+    { name: "radius", type: "number", optional: true },
   ]
 );
 cle.addKeyword(
   "spawn",
   (interp, labels, entity, x, y) => {
     let ent = construct(Registry.entities.get(entity?.value), "entity");
-    ent.addToWorld(world, x?.value ?? 0, y?.value ?? 0);
+    let pos = getPos(x, y);
+    ent.addToWorld(world, pos.x, pos.y);
     _ce.value = ent;
     _ce.type = "entity";
-    feedback(
-      "Spawned new " +
-        ent.name +
-        " at " +
-        (x?.value ?? 0) +
-        ", " +
-        (y?.value ?? 0)
-    );
+    feedback("Spawned new " + ent.name + " at " + pos.x + ", " + pos.y);
   },
   [
     { name: "entity", type: "rloc-entity" },
-    { name: "x", type: "number" },
-    { name: "y", type: "number" },
+    { name: "x", type: positionType, optional: true },
+    { name: "y", type: positionType, optional: true },
   ]
 );
 cle.addKeyword(
   "teleport",
   (interp, labels, target, x, y) => {
-    let xpos =
-      x.type === "relpos"
-        ? game.player.x + parseFloat(x.value.substring(1))
-        : x.value;
-    let ypos =
-      y.type === "relpos"
-        ? game.player.y + parseFloat(y.value.substring(1))
-        : y.value;
-    target.value.x = xpos ?? target.value.x;
-    target.value.y = ypos ?? target.value.y;
-    feedback(
-      "Teleported " +
-        target.value.name +
-        " to " +
-        (xpos ?? 0) +
-        ", " +
-        (ypos ?? 0)
-    );
+    let pos = getPos(x, y);
+    target.value.x = pos.x;
+    target.value.y = pos.y;
+    feedback("Teleported " + target.value.name + " to " + pos.x + ", " + pos.y);
   },
   [
     { name: "target", type: "entity" },
-    { name: "x", type: "number|relpos" },
-    { name: "y", type: "number|relpos" },
+    { name: "x", type: positionType, optional: true },
+    { name: "y", type: positionType, optional: true },
   ]
 );
 cle.addKeyword(
@@ -164,15 +184,27 @@ const commandLine = new ISLInterpreter({
   },
 });
 commandLine.extend(cle);
+let ctx = new ExecutionContext(0, 0, null);
 
+window["ExecutionContext"] = ExecutionContext;
 window["islinterface"] = {
-  do: (isl) => isl.split(/[\n\;]/g).forEach((line) => runCommand(line)),
+  do: (isl, context) =>
+    isl.split(/[\n\;]/g).forEach((line) => runCommand(line, context)),
 };
-function runCommand(cmd) {
+/**
+ *
+ * @param {string} cmd Command to execute.
+ * @param {ExecutionContext} context Options for executing this command.
+ */
+function runCommand(cmd, context) {
+  if (!context) throw new SyntaxError("Execution context is not defined!");
+  _ctx.value = context.self;
+  _ctx.type = context.isEntity ? "entity" : "nonentity-ctx";
+  ctx = context;
   cmd = cmd.replaceAll("#", "\\_created\\");
-  cmd = cmd.replaceAll("@", "\\_self\\");
-  cmd = cmd.replaceAll("~x", "\\_x\\");
-  cmd = cmd.replaceAll("~y", "\\_y\\");
+  cmd = cmd.replaceAll("@s", "\\_ctx\\");
+  cmd = cmd.replaceAll("@p", "\\_self\\");
   commandLine.executeLine(cmd);
 }
+
 console.log("ISL ready.");

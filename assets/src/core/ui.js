@@ -34,6 +34,19 @@ const ui = {
   currentFPS: 0,
   previousFPS: [],
   hoveredBlock: null,
+  texteditor: {
+    text: "",
+    title: "Enter Text:",
+    save: (txt) => {},
+    active: false,
+    isCommandLine: false,
+  },
+  endEdit() {
+    this.texteditor.save(this.texteditor.text);
+    this.texteditor.text = "";
+    this.texteditor.active = false;
+    this.texteditor.isCommandLine = false;
+  },
 };
 
 class UIComponent {
@@ -104,7 +117,9 @@ class UIComponent {
     this.rotation += rotation;
     return this;
   }
-  //Evaluates property:value on game ui: input "slot:1" => if "slot" is "1" (or equivalent, e.g. 1) return true, else false
+  /**Evaluates property:value on game ui: input "slot:1" => if "slot" is "1" (or equivalent, e.g. 1) return true, else false
+   * The property `texteditor` cannot be set, as it is a special property of the ui.
+   */
   static evaluateCondition(condition) {
     const parts = condition.split(":"); //Separate property <- : -> value
     if (parts.length !== 2) {
@@ -116,6 +131,9 @@ class UIComponent {
       let values = parts[1].split("|");
       //If property exists
       return values.includes(ui.conditions[parts[0]]); //Check it and return
+    }
+    if (parts[0] === "texteditor") {
+      return parts[1] === "true" ? ui.texteditor.active : !ui.texteditor.active;
     }
     return true; //If unsure, ignore
   }
@@ -632,6 +650,12 @@ function rotatedShape(
       scale(1, 1); //scale back
       rotate(-QUARTER_PI); //turn back
       break;
+    case "triangle":
+      triangle(width / 2, 0, -width / 2, -height / 2, -width / 2, height / 2);
+      break;
+    case "moved-triangle":
+      triangle(width, 0, 0, -height / 2, 0, height / 2);
+      break;
     default:
       break;
   }
@@ -639,7 +663,7 @@ function rotatedShape(
 }
 
 function rotatedShapeExt(
-  layer, 
+  layer,
   shape = "circle",
   x,
   y,
@@ -649,7 +673,7 @@ function rotatedShapeExt(
   flipV = false
 ) {
   layer.push(); //Save current position, rotation, etc
-  layer.rectMode(CENTER)
+  layer.rectMode(CENTER);
   layer.translate(x, y); //Move middle to 0,0
   layer.rotate(angle);
   if (flipV) layer.scale(1, -1);

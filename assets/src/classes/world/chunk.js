@@ -164,18 +164,7 @@ class Chunk {
           if (sblock.health) blk.health = sblock.health;
           if (sblock.team) blk.team = sblock.team;
           //Specific saves
-          if (blk instanceof Container) {
-            blk.inventory = Inventory.deserialise(sblock.inventory);
-          }
-          if (blk instanceof Crafter) {
-            blk.changeRecipe(sblock.recipe);
-          }
-          if (blk instanceof Unloader) {
-            blk.filter = sblock.filter;
-          }
-          if (blk instanceof Smelter) {
-            blk.setFuel(sblock.fuel);
-          }
+          blk.constructor.applyExtraProps(blk, sblock)
         }
         //Floor, Tile
         if (sfloor) chunk.addBlock(sfloor.block, x, y, "floor");

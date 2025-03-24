@@ -44,6 +44,7 @@ Registry.type.add("tile-producer", TileProducer);
 Registry.type.add("drill", Drill);
 Registry.type.add("conveyor", Conveyor);
 Registry.type.add("unloader", Unloader);
-
+//Dev blocks
 Registry.type.add("dev::structurereader", StructureReaderBlock);
 Registry.type.add("dev::itemcatalog", ItemCatalogBlock);
+Registry.type.add("dev::commandblock", CommandExecutorBlock);

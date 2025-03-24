@@ -650,18 +650,16 @@ Object.defineProperties(
 
 //##############################################################
 
-//                        OTHER
+//                        TEXT EDITOR
 
 //##############################################################
-let command = "";
 let cmdHistory = [];
 let histIndex = 0;
-UIComponent.setCondition("cmd-open:false");
 //Command Line Input
 Object.defineProperties(
   createUIComponent(
     ["in-game"],
-    ["cmd-open:true"],
+    ["texteditor:true"],
     0,
     0,
     500,
@@ -672,7 +670,7 @@ Object.defineProperties(
     width: {
       get: () => {
         textSize(20);
-        return Math.max(400, textWidth(command)+100);
+        return Math.max(400, textWidth(ui.texteditor.text) + 100);
       },
     },
   }
@@ -680,20 +678,40 @@ Object.defineProperties(
 Object.defineProperties(
   createUIComponent(
     ["in-game"],
-    ["cmd-open:true"],
+    ["texteditor:true"],
     0,
     0,
     0,
     40,
     "none",
     null,
-    "Enter command here",
+    "editor text",
     true,
     20
   ).anchorBottom(100),
   {
     text: {
-      get: () => command + "_",
+      get: () => ui.texteditor.text + "_",
+    },
+  }
+);
+Object.defineProperties(
+  createUIComponent(
+    ["in-game"],
+    ["texteditor:true"],
+    0,
+    0,
+    0,
+    40,
+    "none",
+    null,
+    "editor title",
+    true,
+    20
+  ).anchorBottom(130),
+  {
+    text: {
+      get: () => ui.texteditor.title,
     },
   }
 );

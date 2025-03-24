@@ -174,6 +174,13 @@ class Crafter extends Container {
     b.recipe = this._recipe;
     return b;
   }
+  /**
+   * @param {Crafter} deserialised
+   * @param {object} creator
+   */
+  static applyExtraProps(deserialised, creator) {
+    deserialised._recipe = creator.recipe;
+  }
 }
 
 class Uncrafter extends Crafter {

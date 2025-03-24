@@ -680,9 +680,6 @@ function gameFrame() {
     ui.camera.x -= camDiff.x * 0.05;
     ui.camera.y -= camDiff.y * 0.05;
   }
-  //ISL again
-  _x.value = game.player.x;
-  _y.value = game.player.y;
   scale(ui.camera.zoom);
   rotate(radians(ui.camera.rotation));
   translate(-ui.camera.x, -ui.camera.y);
@@ -700,7 +697,7 @@ function gameFrame() {
 }
 
 function movePlayer() {
-  if (UIComponent.evaluateCondition("cmd-open:true")) return false;
+  if (ui.texteditor.active) return false;
   if (keyIsDown(SHIFT) || game.player.dead) {
     freecam = true;
     if (keyIsDown(87)) {
@@ -845,7 +842,6 @@ function createPlayer(player = null) {
   game.player = player;
   //For ISL
   _self.value = player;
-  console.log("Self: ", _self);
 
   //Change to an accessor property
   Object.defineProperty(player, "target", {
@@ -1002,28 +998,30 @@ function reset() {
 function keyPressed(ev) {
   //CAPS LOCK doesn't matter
   key = key.toString().toLowerCase();
-  if (UIComponent.evaluateCondition("cmd-open:true")) {
+  if (ui.texteditor.active) {
     if (key === "enter") {
-      islinterface.do(command);
-      cmdHistory.unshift(command);
-      command = "";
-      UIComponent.setCondition("cmd-open:false");
-      histIndex = -1;
+      ui.endEdit()
     }
-    if (key === "escape") UIComponent.setCondition("cmd-open:false");
-    if (key === "arrowup") {
-      histIndex++;
-      let last = cmdHistory[histIndex];
-      if (last !== undefined) command = last;
-      else histIndex--;
+    if (key === "escape") ui.texteditor.active = false;
+    if (ui.texteditor.isCommandLine) {
+      if (key === "arrowup") {
+        histIndex++;
+        let last = cmdHistory[histIndex];
+        if (last !== undefined) ui.texteditor.text = last;
+        else histIndex--;
+      }
+      if (key === "arrowdown") {
+        histIndex--;
+        let last = cmdHistory[histIndex];
+        if (last !== undefined) ui.texteditor.text = last;
+        else histIndex++;
+      }
     }
-    if (key === "arrowdown") {
-      histIndex--;
-      let last = cmdHistory[histIndex];
-      if (last !== undefined) command = last;
-      else histIndex++;
-    }
-    if (key === "backspace") command = command.substring(0, command.length - 1);
+    if (key === "backspace")
+      ui.texteditor.text = ui.texteditor.text.substring(
+        0,
+        ui.texteditor.text.length - 1
+      );
     return false;
   }
   //hold grave to log keys
@@ -1053,7 +1051,7 @@ function keyPressed(ev) {
   else if (key === "arrowright") nextRecipe();
   else if (key === "arrowleft") prevRecipe();
   //Command line
-  else if (key === "/") UIComponent.setCondition("cmd-open:true");
+  else if (key === "/") openCommandLine();
   //Prevent any default behaviour
   ev.preventDefault();
   ev.stopPropagation();
@@ -1061,9 +1059,20 @@ function keyPressed(ev) {
   return false;
 }
 
+function openCommandLine() {
+  ui.texteditor.active = true;
+  ui.texteditor.title = "Command Line"
+  ui.texteditor.isCommandLine = true;
+  ui.texteditor.save = (command) => {
+    islinterface.do(command, new ExecutionContext(game.player.x, game.player.y, game.player));
+    cmdHistory.unshift(command);
+    histIndex = -1;
+  };
+}
+
 function keyTyped() {
-  if (UIComponent.evaluateCondition("cmd-open:false")) return false;
-  if (key !== "/") command += key;
+  if (!ui.texteditor.active) return false;
+  if (key !== "/") ui.texteditor.text += key;
   return false;
 }
 

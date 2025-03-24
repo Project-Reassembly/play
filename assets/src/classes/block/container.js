@@ -40,4 +40,11 @@ class Container extends Block {
     b.inventory = this.inventory.serialise();
     return b;
   }
+  /**
+   * @param {Container} deserialised
+   * @param {object} creator
+   */
+  static applyExtraProps(deserialised, creator) {
+    deserialised.inventory = Inventory.deserialise(creator.inventory);
+  }
 }

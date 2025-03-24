@@ -714,3 +714,41 @@ createLinkedBlockAndItem(
       "Contains an infinite supply of every registered item.\nAlso has a trash slot.\nDEVELOPMENT ITEM",
   }
 );
+createLinkedBlockAndItem(
+  "dev::commandblock",
+  "Command Block",
+  "block.dev.commandblock",
+  {
+    type: "dev::commandblock",
+  },
+  {
+    description: "Executes a pre-set command on activation.\nDEVELOPMENT ITEM",
+  }
+);
+createLinkedBlockAndItem(
+  "dev::commandblock.chain",
+  "Chained Command Block",
+  "block.dev.commandblock.chain",
+  {
+    type: "dev::commandblock",
+    chaining: true,
+    rotatable: true,
+  },
+  {
+    description:
+      "Executes a pre-set command on activation.\nCan be pointed into another command block to chain.\nDEVELOPMENT ITEM",
+  }
+);
+createLinkedBlockAndItem(
+  "dev::commandblock.loop",
+  "Looping Command Block",
+  "block.dev.commandblock.loop",
+  {
+    type: "dev::commandblock",
+    loops: true,
+  },
+  {
+    description:
+      "Executes a pre-set command continuously on activation.\nActivation while running will stop execution.\nDEVELOPMENT ITEM",
+  }
+);

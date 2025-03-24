@@ -300,6 +300,7 @@ function liquidDestructionBlast(
           rnd(0.5, 0.7) * (3 + smallerRootMHP * 3),
           0.5,
           component.image,
+          10,0,
           component.width,
           component.width,
           component.height,
