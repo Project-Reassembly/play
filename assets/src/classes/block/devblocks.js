@@ -8,6 +8,7 @@ class StructureReaderBlock extends Block {
     "dev::commandblock",
     "dev::commandblock.chain",
     "dev::commandblock.loop",
+    "dev::commandblock.selector",
     "dev::itemcatalog",
   ];
   drawTooltip(x, y, outline, background) {
@@ -203,53 +204,59 @@ class CommandExecutorBlock extends Block {
     //Stop infinite command loops
     if (!this._activatedThisTick) {
       this._activatedThisTick = true;
+      //Loops
+      if (this.loops) this._on = !this._on;
       //Execute the command
-      let ex = (this.gridX + 0.5) * Block.size,
-        ey = (this.gridY + 0.5) * Block.size;
-      this.world.particles.push(
-        new ImageParticle(
-          ex,
-          ey,
-          0,
-          120,
-          0,
-          0,
-          "block.dev.commandblock.heat",
-          1,
-          0,
-          Block.size,
-          Block.size,
-          Block.size,
-          Block.size,
-          0
-        )
+      this.run();
+    }
+  }
+  run() {
+    let ex = (this.gridX + 0.5) * Block.size,
+      ey = (this.gridY + 0.5) * Block.size;
+    this.world.particles.push(
+      new ImageParticle(
+        ex,
+        ey,
+        0,
+        120,
+        0,
+        0,
+        "block.dev.commandblock.heat",
+        1,
+        0,
+        Block.size,
+        Block.size,
+        Block.size,
+        Block.size,
+        0
+      )
+    );
+    islinterface.do(this._command, new ExecutionContext(ex, ey, this));
+    //Activate next block
+    if (this.chaining) {
+      let vct = Block.direction.vectorOf(this.direction);
+      let nextblock = this.world.getBlock(
+        this.gridX + vct.x,
+        this.gridY + vct.y
       );
-      islinterface.do(this._command, new ExecutionContext(ex, ey, this));
-      //Activate next block
-      if (this.chaining) {
-        let vct = Block.direction.vectorOf(this.direction);
-        let nextblock = this.world.getBlock(
-          this.gridX + vct.x,
-          this.gridY + vct.y
-        );
-        if (nextblock instanceof CommandExecutorBlock) {
-          nextblock.activated();
-        }
+      if (nextblock instanceof CommandExecutorBlock) {
+        nextblock.activated();
       }
     }
   }
-  draw() {
-    super.draw();
+  highlight(emphasised) {
+    super.highlight(emphasised);
     if (this.chaining) {
       push();
       noStroke();
-      fill(100, 205 + Math.floor(50 * Math.sin(frameCount / 60)), 100);
+      let pulse = Math.sin(frameCount / 60);
+      fill(80 + pulse * 20, 205 + 50 * pulse, 80 + pulse * 20);
       rotatedShape(
         "moved-triangle",
-        this.x,
-        this.y,
-        15,
-        15,
+        this.uiX + (Block.size / 2) * ui.camera.zoom,
+        this.uiY + (Block.size / 2) * ui.camera.zoom,
+        Block.size * ui.camera.zoom,
+        (Block.size / 2) * ui.camera.zoom,
         this.direction,
         false
       );
@@ -259,14 +266,13 @@ class CommandExecutorBlock extends Block {
   tick() {
     super.tick();
     if (this.loops && this._on) {
-      this.activated();
+      this.run();
     }
     this._activatedThisTick = false;
   }
   interaction(ent, istack) {
     if (keyIsDown(SHIFT)) {
       this.activated();
-      if (this.loops) this._on = !this._on;
       ui.waitingForMouseUp = true;
       return true;
     }
