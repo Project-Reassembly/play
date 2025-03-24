@@ -66,7 +66,7 @@ class InGameMessageBox {
       }
     }
   }
-  send(message, colour = [255, 255, 255, 255], style = "normal") {
+  send(message, colour = [255, 255, 255, 255], style = "normal", time = 240) {
     let count = 1;
     if (this.read() === message) {
       count = this._messages.at(-1).count + 1;
@@ -74,7 +74,7 @@ class InGameMessageBox {
     }
     this._messages.push({
       msg: message,
-      timer: 240,
+      timer: time,
       colour: colour,
       count: count,
       style: style,

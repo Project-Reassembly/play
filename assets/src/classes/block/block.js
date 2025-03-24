@@ -114,6 +114,8 @@ class Block extends ShootableObject {
   interaction(entity, usedItemStack = ItemStack.EMPTY) {
     return false;
   }
+  /**Fired when a block is activated through an interaction, commands or ISL. */
+  activated() {}
   canBreak(type = BreakType.delete) {
     return true;
   }
