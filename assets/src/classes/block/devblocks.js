@@ -167,8 +167,10 @@ class ItemCatalogBlock extends Container {
     super.init();
   }
   tick() {
-    this.inventory.iterate((item, slot) => {
+    let slot = 0;
+    Registry.items.forEach((name) => {
       this.inventory.set(slot, new ItemStack(Registry.items.at(slot)));
+      slot++;
     });
   }
   break(type) {

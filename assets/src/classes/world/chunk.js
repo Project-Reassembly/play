@@ -97,9 +97,17 @@ class Chunk {
       );
     return this[layer][y][x];
   }
+  randomTick() {
+    iterate2DArray(
+      this.tiles,
+      (tile) => tile && tru(World.randomTick) && tile.tick()
+    );
+    iterate2DArray(
+      this.floor,
+      (floor) => floor && tru(World.randomTick) && floor.tick()
+    );
+  }
   tick() {
-    iterate2DArray(this.tiles, (tile) => tile && tile.tick());
-    iterate2DArray(this.floor, (floor) => floor && floor.tick());
     iterate2DArray(
       this.blocks,
       (block) => block && !block.disabled && block.tick()
@@ -120,6 +128,11 @@ class Chunk {
     push();
     translate(Block.size / 2, Block.size / 2);
     iterate2DArray(this.blocks, (block) => block && block.draw());
+    pop();
+  }
+  postDrawBlocksOnly() {
+    push();
+    translate(Block.size / 2, Block.size / 2);
     iterate2DArray(this.blocks, (block) => block && block.postDraw());
     pop();
   }

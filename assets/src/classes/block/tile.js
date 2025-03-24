@@ -41,11 +41,11 @@ class Tile extends Block {
 
 class Ore extends Tile {
   stages = [""];
-  stageChance = 0.01;
+  stageChance = 0.05;
   _stage = 0;
   tick() {
     if (this._stage < this.stages.length - 1)
-      if (rnd(0, 100) < this.stageChance) {
+      if (rnd(0, 1) < this.stageChance) {
         this._stage++;
       }
   }

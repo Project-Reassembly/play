@@ -114,7 +114,6 @@ class BlockGenerator extends Generator {
         extraName = v.name ?? "";
         break;
       }
-      selected = this.variants.at(-1);
     }
     if (this.outOfRange(x, y)) {
       postMessage({

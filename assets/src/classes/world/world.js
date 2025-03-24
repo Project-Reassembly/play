@@ -9,6 +9,8 @@
 /** */
 class World {
   static size = 16;
+  /** The chance for a *chunk* to random tick. */
+  static randomTick = 0.01;
   /** The distance in chunks **outside the render distance** that will still tick. */
   static simulationDistance = 5;
   /** @type {Array<ImageParticle|ShapeParticle|TextParticle|WaveParticle>} */
@@ -61,9 +63,10 @@ class World {
       }
     }
     //Only tick simulated chunks
-    this.getRenderedChunks(World.simulationDistance).forEach((chunk) =>
-      chunk.tick()
-    );
+    this.getRenderedChunks(World.simulationDistance).forEach((chunk) => {
+      chunk.tick();
+      if(tru(World.randomTick)) chunk.randomTick();
+    });
   }
   #removeDead() {
     //THEN remove dead stuff
@@ -156,6 +159,7 @@ class World {
       particle.draw();
     }
     this.toRender.forEach((chunk) => chunk.drawBlocksOnly());
+    this.toRender.forEach((chunk) => chunk.postDrawBlocksOnly());
     for (let entity of this.entities) {
       if (!World.isInRenderDistance(entity)) continue;
       entity.draw();
