@@ -6,8 +6,18 @@ import {
 } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@main/core/interpreter.js";
 import { ISLExtension } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@main/core/extensions.js";
 //Util
+let quietMode = false;
 function feedback(msg) {
-  Log.send("ISL> " + msg, [200, 200, 200], "italic");
+  if (!quietMode) Log.send("ISL> " + msg, [200, 200, 200], "italic");
+}
+function give(entity, item, amount) {
+  let leftover =
+    entity instanceof EquippedEntity
+      ? entity.equipment.addItem(item, amount)
+      : amount ?? 0;
+  let notgiven = 0;
+  if (leftover) notgiven = entity.inventory.addItem(item, leftover);
+  return notgiven;
 }
 function getPos(x, y) {
   let obj = {
@@ -69,12 +79,7 @@ cle.addKeyword(
   "give",
   (interp, labels, entity, item, amount) => {
     let target = entity?.value;
-    let leftover =
-      target instanceof EquippedEntity
-        ? target.equipment.addItem(item?.value, amount?.value)
-        : amount?.value;
-    let notgiven = 0;
-    if (leftover) notgiven = target.inventory.addItem(item?.value, leftover);
+    let notgiven = give(target, item?.value, amount?.value);
     feedback(
       "Given " +
         ((amount?.value ?? 1) - notgiven) +
@@ -160,6 +165,26 @@ cle.addKeyword(
     { name: "y", type: positionType, optional: true },
   ]
 );
+
+cle.addKeyword(
+  "devset",
+  (interp, labels) => {
+    if (!ctx.isEntity && !(ctx.self instanceof EquippedEntity))
+      throw new ISLError(
+        "Cannot give items to non-entity executor!",
+        TypeError
+      );
+    else {
+      give(ctx.self, "dev::commandblock", 99)
+      give(ctx.self, "dev::commandblock.chain", 99)
+      give(ctx.self, "dev::commandblock.loop", 99)
+      give(ctx.self, "message", 99)
+      give(ctx.self, "dev::itemcatalog", 1)
+    }
+  },
+  []
+);
+
 cle.addKeyword(
   "save",
   (interp, labels, worldName) => {
@@ -230,7 +255,10 @@ cle.addKeyword(
         Math.floor(pos.x / 30),
         Math.floor(pos.y / 30)
       );
-      if (type.value === "ignore" || toBreak.break(BreakType[type.value]??"delete"))
+      if (
+        type.value === "ignore" ||
+        toBreak.break(BreakType[type.value] ?? "delete")
+      )
         world.break(Math.floor(pos.x / 30), Math.floor(pos.y / 30));
     } catch (err) {
       throw new ISLError(err.message, err.constructor);
@@ -251,6 +279,75 @@ cle.addKeyword(
       type: "=ignore|deconstruct|delete|explode|replace",
       optional: true,
     },
+  ]
+);
+
+cle.addKeyword(
+  "quietmode",
+  (interp, labels, enabled) => {
+    if (quietMode) feedback("Disabling quiet mode.");
+    else feedback("Enabling quiet mode.");
+    quietMode = enabled?.value ?? true;
+  },
+  [{ type: "boolean", name: "enabled", optional: true }]
+);
+
+cle.addKeyword(
+  "read",
+  (interp, labels, x, y, as, variable) => {
+    let pos = getPos(x, y);
+    let toRead;
+    try {
+      toRead = world.getBlockErroring(
+        Math.floor(pos.x / 30),
+        Math.floor(pos.y / 30)
+      );
+    } catch (err) {
+      throw new ISLError(err.message, err.constructor);
+    }
+    let val = toRead.read();
+    if (as.value === "to") {
+      interp.setVar(variable.value, val);
+    } else {
+      Log.send(
+        "ISL> Actually, extensions can't create variables. This is here as a placeholder.",
+        [255, 255, 0],
+        "italic"
+      );
+    }
+  },
+  [
+    { name: "x", type: positionType },
+    { name: "y", type: positionType },
+    { name: "separator", type: "=as|to" },
+    { name: "variable", type: "identifier" },
+  ]
+);
+
+cle.addKeyword(
+  "write",
+  (interp, labels, text, x, y) => {
+    let pos = getPos(x, y);
+    let toWriteTo;
+    try {
+      toWriteTo = world.getBlockErroring(
+        Math.floor(pos.x / 30),
+        Math.floor(pos.y / 30)
+      );
+    } catch (err) {
+      throw new ISLError(err.message, err.constructor);
+    }
+    if (
+      toWriteTo instanceof CommandExecutorBlock ||
+      toWriteTo instanceof SignBlock
+    )
+      toWriteTo.write(text.value);
+    else throw new ISLError("Selected block cannot be written to.", TypeError);
+  },
+  [
+    { name: "text", type: "string" },
+    { name: "x", type: positionType, optional: true },
+    { name: "y", type: positionType, optional: true },
   ]
 );
 
@@ -281,6 +378,11 @@ cle.addKeyword(
         b("storage");
         s(" save");
         s(" load");
+        b("ui");
+        s(" quietmode");
+        b("information");
+        s(" read");
+        s(" write");
       } else if (command === "give") {
         b("utility > give");
         s(" Adds an item to an entity's inventory.");
@@ -309,6 +411,17 @@ cle.addKeyword(
         s(" x, y: Position from top-left corner. 1 block = 30px.");
         s(" damage: Amount of damage to deal.");
         s(" radius: Radius of the explosion in pixels.");
+      } else if (command === "devset") {
+        b("utility > devset");
+        s(" Gives the executor:");
+        s("  99 Command Blocks");
+        s("  99 Chaining Command Blocks");
+        s("  99 Looping Command Blocks");
+        s("  99 Message Units");
+        s("  1 Item Catalog");
+        s(" Useful for testing.");
+        b("Parameters:");
+        s(" (none)");
       } else if (command === "activate") {
         b("manipulation > activate");
         s(" Activates a block. Different blocks do different things.");
@@ -333,6 +446,27 @@ cle.addKeyword(
         s(" (type): Breaking type. Leave blank or set to [ignore] to just");
         s("         remove the block, disregarding any special behaviour.");
         s("         May have side-effects, especially with mods.");
+      } else if (command === "read") {
+        b("information > read");
+        s(" Reads data from a block, stores the result in a variable.");
+        s("Results by block type:");
+        s(" Sign blocks: Set text.");
+        s(" Containers: Registry name of item in first non-empty slot.");
+        s(" Conveyors: Registry name of transported item.");
+        s(" Unloaders: Filter item.");
+        s(" Structure readers: Group of block registry names.");
+        s(" Command blocks: Set command.");
+        s(" Other blocks: Registry name.");
+        b("Parameters:");
+        s(" x, y: Position from top-left corner. 1 block = 30px.");
+        s(" as");
+        s(" variable: Variable to set the value of.");
+      } else if (command === "write") {
+        b("information > write");
+        s(" Writes a string to a sign or command block.");
+        b("Parameters:");
+        s(" text: String to write to the block.");
+        s(" (x, y): Position from top-left corner. 1 block = 30px.");
       } else if (command === "save") {
         b("storage > save");
         s(" Saves the game.");
@@ -348,6 +482,13 @@ cle.addKeyword(
         b("Parameters:");
         s(" (name): Name of the save file. Needed for custom files.");
         s("         Leave blank to use the default save file.");
+      } else if (command === "quietmode") {
+        b("isl > quietmode");
+        s(" Enables or disables quiet mode.");
+        s(" When in quiet mode, ordinary feedback (prefixed with ISL>)");
+        s(" will not be shown.");
+        b("Parameters:");
+        s(" (enabled): State to set quiet mode to. If blank, will turn it on.");
       } else {
         Log.send("Invalid Command: " + command, [255, 0, 0], "bold", 1080);
         s(" The chosen keyword is not a command line");
@@ -388,11 +529,13 @@ const commandLine = new ISLInterpreter({
   },
   onerror: (msg) => {
     if (msg.includes("Error detected")) {
-      Log.send("ISL> Could not complete operation: ", [255, 0, 0], "italic");
-      (msg + "")
-        .split("\n")[1]
-        .split(",")
-        .forEach((x) => Log.send("    " + x, [255, 0, 0], "italic"));
+      if (!quietMode) {
+        Log.send("ISL> Could not complete operation: ", [255, 0, 0], "italic");
+        (msg + "")
+          .split("\n")[1]
+          .split(",")
+          .forEach((x) => Log.send("    " + x, [255, 0, 0], "italic"));
+      }
     } else (msg + "").split("\n").forEach((val) => Log.send(val, [255, 0, 0]));
     console.log("[ISL Error] " + msg);
   },

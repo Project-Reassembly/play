@@ -707,6 +707,7 @@ createLinkedBlockAndItem(
   {
     title: "Structure Reader",
     type: "dev::structurereader",
+    health: 1000000,
   },
   {
     description:
@@ -720,6 +721,7 @@ createLinkedBlockAndItem(
   {
     title: "Item Catalog",
     type: "dev::itemcatalog",
+    health: 1000000,
   },
   {
     description:
@@ -732,6 +734,7 @@ createLinkedBlockAndItem(
   "block.dev.commandblock",
   {
     type: "dev::commandblock",
+    health: 1000000,
   },
   {
     description: "Executes a pre-set command on activation.\nDEVELOPMENT ITEM",
@@ -743,6 +746,7 @@ createLinkedBlockAndItem(
   "block.dev.commandblock.chain",
   {
     type: "dev::commandblock",
+    health: 1000000,
     chaining: true,
     rotatable: true,
   },
@@ -757,6 +761,7 @@ createLinkedBlockAndItem(
   "block.dev.commandblock.loop",
   {
     type: "dev::commandblock",
+    health: 1000000,
     loops: true,
   },
   {

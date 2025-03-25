@@ -210,6 +210,9 @@ class Block extends ShootableObject {
   static applyExtraProps(deserialised, creator) {}
   rightArrow() {}
   leftArrow() {}
+  read() {
+    return this.registryName;
+  }
 }
 /** Stores values to describe how blocks are broken.
  * @enum

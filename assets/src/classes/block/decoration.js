@@ -4,7 +4,7 @@ class SignBlock extends Block {
     drawMultilineText(
       x,
       y,
-      this._message,
+      this._message.replaceAll("\\n", "\n"),
       null,
       Item.getColourFromRarity(0, "light")
     );
@@ -35,5 +35,11 @@ class SignBlock extends Block {
    */
   static applyExtraProps(deserialised, creator) {
     deserialised._message = creator.message;
+  }
+  read(){
+    return this._message;
+  }
+  write(txt){
+    this._message = txt;
   }
 }

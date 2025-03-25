@@ -1,6 +1,7 @@
 class StructureReaderBlock extends Block {
   _range = 1;
   _output = [];
+  _outTxt = "";
   _becomes = null;
   selectable = true;
   static unreadable = [
@@ -15,7 +16,7 @@ class StructureReaderBlock extends Block {
     drawMultilineText(
       x,
       y,
-      this._output.join("\n"),
+      this._outTxt.join("\n"),
       this.title + " [" + this._range + " blocks]",
       Item.getColourFromRarity(0, "light")
     );
@@ -43,7 +44,8 @@ class StructureReaderBlock extends Block {
   /**@param {ItemStack | undefined} istack  */
   interaction(ent, istack) {
     if (keyIsDown(SHIFT)) {
-      this._output = this.outputStructure().map(
+      this._output = this.outputStructure();
+      this._outTxt = this._output.map(
         (x) =>
           x.block +
           ": " +
@@ -167,6 +169,9 @@ class StructureReaderBlock extends Block {
     console.log(blocks);
     return blocks;
   }
+  read() {
+    return "[" + this._output.map((x) => this.x.block).join("|") + "]";
+  }
 }
 class ItemCatalogBlock extends Container {
   init() {
@@ -191,6 +196,9 @@ class ItemCatalogBlock extends Container {
   }
   static applyExtraProps(deser, creator) {
     deser.inventory = new Inventory(Registry.items.size);
+  }
+  read() {
+    return "";
   }
 }
 
@@ -297,5 +305,11 @@ class CommandExecutorBlock extends Block {
    */
   static applyExtraProps(deserialised, creator) {
     deserialised._command = creator.command;
+  }
+  read() {
+    return this._command;
+  }
+  write(txt){
+    this._message = txt;
   }
 }

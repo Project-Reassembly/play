@@ -87,6 +87,9 @@ class Conveyor extends Container {
     let speed = Block.size / this.moveTime;
     entity.move(vct.x * speed, vct.y * speed);
   }
+  read() {
+    return this.inventory.get(0).item;
+  }
 }
 
 class Unloader extends Conveyor {
@@ -145,5 +148,8 @@ class Unloader extends Conveyor {
    */
   static applyExtraProps(deserialised, creator) {
     deserialised.filter = creator.filter;
+  }
+  read() {
+    return this.filter;
   }
 }

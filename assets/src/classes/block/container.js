@@ -47,4 +47,12 @@ class Container extends Block {
   static applyExtraProps(deserialised, creator) {
     deserialised.inventory = Inventory.deserialise(creator.inventory);
   }
+  read() {
+    let item = "";
+    this.inventory.iterate((stack, slot, sotp) => {
+      sotp();
+      item = stack.item;
+    }, true);
+    return item;
+  }
 }

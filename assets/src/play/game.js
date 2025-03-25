@@ -412,7 +412,7 @@ function loadGame(name) {
     return "{ḃ⁝" + tile.substring(1) + "}";
   });
   let dict = [];
-  file = file.replace(/DICT<.*>/gim, (dictionary) => {
+  file = file.replace(/DICT<.*?>/gim, (dictionary) => {
     let encoded = dictionary.substring(5, dictionary.length - 1);
     dict = encoded.split("|").map((entry) => entry.split("="));
     return "";

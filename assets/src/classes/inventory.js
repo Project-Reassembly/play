@@ -338,18 +338,46 @@ class Inventory {
               mouseIsPressed &&
               !ui.waitingForMouseUp
             ) {
-              ui.waitingForMouseUp = true;
-              if (
-                invitemstack.count + Inventory.mouseItemStack.count <=
-                  invitem.stackSize &&
-                this.canPlaceInSlot(index)
-              ) {
-                invitemstack.count += Inventory.mouseItemStack.count;
-                Inventory.mouseItemStack = ItemStack.EMPTY;
-              } else {
-                let toMove = invitem.stackSize - invitemstack.count;
-                invitemstack.count = invitem.stackSize;
-                Inventory.mouseItemStack.count -= toMove;
+              //Mouse to inv
+              if (!keyIsDown(SHIFT) && this.canPlaceInSlot(index)) {
+                ui.waitingForMouseUp = true;
+                if (ui.mouseButton === "left")
+                  if (
+                    invitemstack.count + Inventory.mouseItemStack.count <=
+                    invitem.stackSize
+                  ) {
+                    //Place items
+                    invitemstack.count += Inventory.mouseItemStack.count;
+                    Inventory.mouseItemStack = ItemStack.EMPTY;
+                  } else {
+                    //
+                    let toMove = invitem.stackSize - invitemstack.count;
+                    invitemstack.count = invitem.stackSize;
+                    Inventory.mouseItemStack.count -= toMove;
+                  }
+                else if (ui.mouseButton === "right")
+                  if (invitemstack.count + 1 <= invitem.stackSize) {
+                    //Place items
+                    invitemstack.count++;
+                    Inventory.mouseItemStack.count--;
+                  }
+              } else if (this.canPickupFromSlot(index)) {
+                ui.waitingForMouseUp = true;
+                //Move from inv to mouse
+                if (
+                  invitemstack.count + Inventory.mouseItemStack.count <=
+                  invitem.stackSize
+                ) {
+                  //Place items
+                  Inventory.mouseItemStack.count += invitemstack.count;
+                  this.storage[index] = ItemStack.EMPTY;
+                } else {
+                  //
+                  let toMove =
+                    invitem.stackSize - Inventory.mouseItemStack.count;
+                  Inventory.mouseItemStack.count = invitem.stackSize;
+                  invitemstack.count -= toMove;
+                }
               }
             }
             Inventory.tooltip = {
@@ -362,6 +390,7 @@ class Inventory {
             strokeWeight(5);
             rect(displayX, displayY, itemSize, itemSize);
             if (selected && mouseIsPressed && !ui.waitingForMouseUp) {
+              //Pick up whole stack
               if (Inventory.mouseItemStack.isEmpty()) {
                 if (this.canPickupFromSlot(index)) {
                   ui.waitingForMouseUp = true;
@@ -380,6 +409,8 @@ class Inventory {
                   }
                 }
               } else {
+                //(if both itemstacks are different, and mouse is full)
+                //swap
                 if (
                   this.canPickupFromSlot(index) &&
                   this.canPlaceInSlot(index)
@@ -417,9 +448,18 @@ class Inventory {
             !ui.waitingForMouseUp &&
             this.canPlaceInSlot(index)
           ) {
-            ui.waitingForMouseUp = true;
-            this.storage[index] = Inventory.mouseItemStack;
-            Inventory.mouseItemStack = ItemStack.EMPTY;
+            if (ui.mouseButton === "right") {
+              Log.send("place in empty slot");
+
+              ui.waitingForMouseUp = true;
+              invitemstack.item = Inventory.mouseItemStack.item;
+              invitemstack.count = 1;
+              Inventory.mouseItemStack.count--;
+            } else if (ui.mouseButton === "left") {
+              ui.waitingForMouseUp = true;
+              this.storage[index] = Inventory.mouseItemStack;
+              Inventory.mouseItemStack = ItemStack.EMPTY;
+            }
           }
         }
         pop();
@@ -533,7 +573,7 @@ function drawMultilineText(
   textSize(txtSize);
   strokeWeight(txtSize / 10);
   //Max width
-  let maxWidth = header ? textWidth(header) * 1.05 : 0;
+  let maxWidth = header ? textWidth(header) + txtSize * 1.2 : 0;
   let boxH = header ? txtSize * 2 : txtSize * 0.6;
   let body = txt.split("\n");
   let descLines = txt.split("\n").length;
@@ -543,7 +583,7 @@ function drawMultilineText(
   for (let line of body) {
     let lw = textWidth(line);
     boxH += txtSize * 0.9;
-    if (lw > maxWidth) maxWidth = lw + txtSize * 0.6;
+    if (lw > maxWidth) maxWidth = lw + txtSize * 1.2;
   }
   //X pos
   let displayX = x + maxWidth / 2;
