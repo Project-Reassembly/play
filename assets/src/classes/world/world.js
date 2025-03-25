@@ -65,7 +65,7 @@ class World {
     //Only tick simulated chunks
     this.getRenderedChunks(World.simulationDistance).forEach((chunk) => {
       chunk.tick();
-      if(tru(World.randomTick)) chunk.randomTick();
+      if (tru(World.randomTick)) chunk.randomTick();
     });
   }
   #removeDead() {
@@ -77,26 +77,21 @@ class World {
         bullet.exploded = true;
         for (let instance of bullet.damage) {
           if (!instance.spread) instance.spread = 0;
-          if (instance.area)
+          if (instance.area) {
             //If it explodes
-            splashDamageInstance(
-              bullet.x,
-              bullet.y,
-              instance.amount + rnd(instance.spread, -instance.spread),
-              instance.type,
-              instance.area,
-              bullet.entity,
-              instance.visual, //        \
-              instance.sparkColour, //   |
-              instance.sparkColourTo, // |
-              instance.smokeColour, //   |- These are optional, but can be set per instance
-              instance.smokeColourTo, // |
-              instance.waveColour, //     /
-              bullet.status,
-              bullet.statusDuration
+            let boom = new (instance.nuclear ? NuclearExplosion : Explosion)(
+              instance
             );
+            boom.x = bullet.x;
+            boom.y = bullet.y;
+            boom.radius = instance.radius ?? instance.area;
+            boom.world = bullet.world;
+            if (!instance.hidden) boom.create();
+            boom.dealDamage();
+            console.log(boom);
+          }
           if (instance.blinds) {
-            blindingFlash(
+            flash(
               bullet.x,
               bullet.y,
               instance.blindOpacity,

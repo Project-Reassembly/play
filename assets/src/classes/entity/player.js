@@ -34,7 +34,7 @@ class Player extends EquippedEntity {
       this.x = this.spawnX;
       this.y = this.spawnY;
       this.addToWorld(world);
-      blindingFlash(this.x, this.y, 255, 30, 400);
+      flash(this.x, this.y, 255, 30, 400);
     }, this.respawnTime);
   }
   ai() {

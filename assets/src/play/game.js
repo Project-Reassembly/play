@@ -44,18 +44,23 @@ const effects = {
     });
   },
   applyShake() {
+    let intensity = 0;
     this.screenShakeInstances.forEach((v, i, a) => {
       v.duration--;
       if (v.duration < 0) {
         a.splice(i, 1);
       } else {
         let int =
-          (v.intensity * (v.duration / v.originalDuration) * this.screenShakeScale * 100) /
-          (Math.max(game.player.distanceToPoint(v.x, v.y), 50));
-        ui.camera.x += rnd(-int, int);
-        ui.camera.y += rnd(-int, int);
+          (v.intensity *
+            (v.duration / v.originalDuration) *
+            this.screenShakeScale *
+            100) /
+          Math.max(game.player.distanceToPoint(v.x, v.y), 50);
+        intensity += int;
       }
     });
+    ui.camera.x += rnd(-intensity, intensity);
+    ui.camera.y += rnd(-intensity, intensity);
   },
 };
 const contentScale = 1;
@@ -709,7 +714,7 @@ function gameFrame() {
     if (!game.paused) {
       tickTimers();
       movePlayer();
-       if (!freecam && freecamReturn <= 0) {
+      if (!freecam && freecamReturn <= 0) {
         ui.camera.x = game.player.x;
         ui.camera.y = game.player.y;
       }

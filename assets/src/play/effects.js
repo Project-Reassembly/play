@@ -1,59 +1,49 @@
 const effectTimer = new Timer();
-/**@param {string} [team="enemy"] Not required, unless `sourceEntity` is null. */
-function splashDamageInstance(
-  centreX = 0,
-  centreY = 0,
-  amount = 0,
-  damageType = "explosion",
-  damageRadius = 0,
-  sourceEntity = null,
-  showExplosion = true,
-  sparkColour = [255, 245, 215, 255], //The colour the sparks start at
-  sparkColourTo = [255, 215, 0, 55], //The colour the sparks go to
-  smokeColour = [100, 100, 100, 200], //The colour the smoke starts at
-  smokeColourTo = [100, 100, 100, 0], //The colour the smoke goes to
-  waveColour = [255, 128, 0, 0], //The colour the wave ends at. It always starts white.
-  status = "none",
-  statusDuration = 0,
-  team = "enemy",
-  knockback = NaN
-) {
-  //Most of these powers are just to make it less insane at high radii
-  //They are tested repeatedly to make sure they look good
-  let radius = damageRadius ** 1.05;
-  if (showExplosion) {
-    // world.particles.push(
-    //   new TextParticle(
-    //     centreX,
-    //     centreY,
-    //     radians(rnd(0, 360)),
-    //     rnd(radius ** 0.65, radius ** 0.8 * 2),
-    //     rnd(radius ** 0.25 * 0.3, radius ** 0.25 * 0.5),
-    //     0.01,
-    //     "BOOM",
-    //     [255, 0, 0],
-    //     [255, 0, 0, 0],
-    //     radius ** 0.85,
-    //     0,
-    //     true
-    //   )
-    // );
+class Explosion {
+  x = 0;
+  y = 0;
+  world = null;
+  knockback = NaN;
+  radius = 0;
+  sparkColour = [255, 245, 215, 255]; //The colour the sparks start at
+  sparkColourTo = [255, 215, 0, 55]; //The colour the sparks go to
+  smokeColour = [100, 100, 100, 200]; //The colour the smoke starts at
+  smokeColourTo = [100, 100, 100, 0]; //The colour the smoke goes to
+  waveColour = [255, 128, 0, 0]; //The colour the wave ends at. It always starts white.
+  amount = 0;
+  type = "explosion";
+  status = "none";
+  statusDuration = 0;
+  team = "neutral";
+  source = null;
+  constructor(opts = {}) {
+    for (let key of Object.keys(opts)) {
+      if (typeof this[key] !== "function") {
+        this[key] = opts[key];
+      }
+    }
+  }
+  //Basic explosion
+  create() {
+    //Most of these powers are just to make it less insane at high radii
+    //They are tested repeatedly to make sure they look good
+
     //Spawn smoke
-    for (let i = 0; i < radius ** 0.6; i++) {
-      world.particles.push(
+    for (let i = 0; i < this.radius ** 0.6; i++) {
+      this.world.particles.push(
         new ShapeParticle(
-          centreX,
-          centreY,
+          this.x,
+          this.y,
           radians(rnd(0, 360)),
-          rnd(radius ** 0.65, radius ** 0.8 * 2),
-          rnd(radius ** 0.25 * 0.3, radius ** 0.25 * 0.5),
+          rnd(this.radius ** 0.65, this.radius ** 0.8 * 2),
+          rnd(this.radius ** 0.25 * 0.3, this.radius ** 0.25 * 0.5),
           0.01,
           "circle",
-          smokeColour,
-          smokeColourTo,
-          radius ** 0.85,
+          this.smokeColour,
+          this.smokeColourTo,
+          this.radius ** 0.85,
           0,
-          radius ** 0.85,
+          this.radius ** 0.85,
           0,
           0,
           true
@@ -61,74 +51,245 @@ function splashDamageInstance(
       );
     }
     //Yellow sparks
-    for (let i = 0; i < radius ** 0.7; i++) {
-      world.particles.push(
+    for (let i = 0; i < this.radius ** 0.7; i++) {
+      this.world.particles.push(
         new ShapeParticle(
-          centreX,
-          centreY,
+          this.x,
+          this.y,
           radians(rnd(0, 360)),
-          rnd(radius ** 0.75, radius ** 0.75 * 1.5),
-          rnd(radius ** 0.25 * 0.1, radius ** 0.25 * 2),
+          rnd(this.radius ** 0.75, this.radius ** 0.75 * 1.5),
+          rnd(this.radius ** 0.25 * 0.1, this.radius ** 0.25 * 2),
           0.075,
           "rect",
-          sparkColour,
-          sparkColourTo,
-          radius ** 0.5,
+          this.sparkColour,
+          this.sparkColourTo,
+          this.radius ** 0.5,
           0,
-          radius ** 0.75,
-          radius ** 0.5,
+          this.radius ** 0.75,
+          this.radius ** 0.5,
           0,
           true
         )
       );
     }
-    world.particles.push(
+    this.world.particles.push(
       new WaveParticle(
-        centreX,
-        centreY,
+        this.x,
+        this.y,
         30,
         0,
-        damageRadius,
+        this.radius,
         [255, 255, 255, 255],
-        waveColour,
-        radius ** 0.75,
+        this.waveColour,
+        this.radius ** 0.75,
         0,
         true
       )
     );
-  }
-  for (let e of world.entities) {
-    //If hit
-    if (
-      !e.dead &&
-      ((centreX - e.x) ** 2 + (centreY - e.y) ** 2) ** 0.5 <=
-        damageRadius + e.size
-    ) {
-      //If enemy, damage, and affect
-      if (e.team !== (sourceEntity?.team ?? team)) {
-        e.damage(damageType, amount, sourceEntity);
-        if (status !== "none") e.applyStatus(status, statusDuration);
-      }
-      //Knock regardless of team
-      e.knock(
-        !isNaN(knockback) ? knockback : amount,
-        degrees(createVector(e.x - centreX, e.y - centreY).heading()),
-        true
-      );
+    //Screen shake
+    if (this.radius > 30) {
+      effects.shake(this.x, this.y, this.radius ** 0.75, this.radius ** 0.75);
     }
+    return this;
   }
-  //Screen shake
-  if (radius > 30) {
-    effects.shake(centreX, centreY, radius ** 0.75, radius ** 0.75);
+  dealDamage() {
+    for (let e of this.world.entities) {
+      //If hit
+      if (
+        !e.dead &&
+        ((this.x - e.x) ** 2 + (this.y - e.y) ** 2) ** 0.5 <=
+          this.radius ** 0.95 + e.size
+      ) {
+        //If enemy, damage, and affect
+        if (e.team !== (this.source?.team ?? this.team)) {
+          e.damage(this.type, this.amount, this.source);
+          if (this.status !== "none")
+            e.applyStatus(this.status, this.statusDuration);
+        }
+        //Knock regardless of team
+        e.knock(
+          !isNaN(this.knockback) ? this.knockback : this.amount,
+          degrees(createVector(e.x - this.x, e.y - this.y).heading()),
+          true
+        );
+      }
+    }
+    return this;
   }
 }
-function blindingFlash(
-  x = 0,
-  y = 0,
-  opacity = 255,
-  duration = 60,
-  glareSize = 600
-) {
+
+class NuclearExplosion extends Explosion {
+  flashColour = [255, 255, 255];
+  flashColourToLight = [255, 255, 200, 0];
+  flashColourTo = [255, 255, 200, 0];
+  fireColour = [255, 255, 100, 100];
+  fireColourTo = [155, 0, 0, 0];
+  constructor(opts = {}) {
+    super(opts);
+    for (let key of Object.keys(opts)) {
+      if (typeof this[key] !== "function") {
+        this[key] = opts[key];
+      }
+    }
+  }
+  create() {
+    let flashSize = this.radius ** 1.6;
+    let flashAmount = this.radius ** 0.6;
+    let size = this.radius / 3;
+    for (let i = 0; i < flashAmount; i++) {
+      this.world.particles.push(
+        new ShapeParticle(
+          this.x,
+          this.y,
+          rnd(0, TAU),
+          rnd(6, 18) * size ** 0.5,
+          0,
+          0,
+          "inverted-triangle",
+          this.flashColour,
+          this.flashColourTo,
+          0,
+          flashSize * 2,
+          flashSize ** 0.95,
+          flashSize ** 0.85,
+          0.005 * (tru(0.5) ? 1 : -1),
+          100
+        ),
+        new ShapeParticle(
+          this.x,
+          this.y,
+          rnd(0, TAU),
+          rnd(6, 18) * size ** 0.5,
+          0,
+          0,
+          "inverted-triangle",
+          this.flashColour,
+          this.flashColourToLight,
+          0,
+          flashSize,
+          flashSize ** 0.85,
+          flashSize ** 0.75,
+          0.005 * (tru(0.5) ? 1 : -1)
+        )
+      );
+    }
+    //Smoke ring
+    let wave = new WaveParticle(
+      this.x,
+      this.y,
+      25 * size ** 0.5,
+      0,
+      size * 24,
+      this.smokeColour,
+      this.smokeColourTo,
+      size ** 0.8,
+      size
+    );
+    effects.shake(this.x, this.y, size ** 0.8, size ** 0.5);
+    effects.shake(this.x, this.y, size ** 0.8, size ** 0.5 * 25);
+    this.world.particles.push(wave);
+    let rad = size * 0.2;
+    //Now, the mushroom cloud
+    effects.shake(this.x, this.y, size ** 0.8, size * 5.5);
+    effectTimer.repeat((i) => {
+      let progress = i / (size * 5);
+      let life = rnd(4, 14) * rad ** 0.5;
+      this.world.particles.unshift(
+        new ShapeParticle(
+          this.x,
+          this.y,
+          -HALF_PI,
+          life,
+          (rad * 10 * progress) / life,
+          0,
+          "circle",
+          this.fireColourTo,
+          this.fireColour,
+          rad * 4 ** 0.8,
+          rad * 4 ** 0.6,
+          rad * 4 ** 0.8,
+          rad * 4 ** 0.6,
+          0,
+          100
+        )
+      );
+      //for (let j = 0; j < 2; j++) {
+      let dir = rnd(0, TAU),
+        dist = rnd(rad, rad * 2) * 3;
+      this.world.floorParticles.unshift(
+        new ShapeParticle(
+          this.x + Math.cos(dir) * dist,
+          this.y + Math.sin(dir) * dist,
+          dir + PI,
+          life,
+          rad ** 0.6,
+          rad ** 0.6 / life ** 0.5 / 4,
+          "circle",
+          this.fireColour,
+          this.fireColourTo,
+          rad * 4 ** 0.6,
+          rad * 4 ** 0.4,
+          rad * 4 ** 0.6,
+          rad * 4 ** 0.4,
+          0,
+          100
+        )
+      );
+      dir = rnd(0, TAU);
+      dist = rnd(rad, rad * 2) * 3;
+      this.world.particles.unshift(
+        new ShapeParticle(
+          this.x + Math.cos(dir) * dist,
+          this.y + Math.sin(dir) * dist,
+          dir + PI,
+          life,
+          rad ** 0.6,
+          rad ** 0.6 / life ** 0.5 / 4,
+          "circle",
+          this.fireColour,
+          this.fireColourTo,
+          rad * 4 ** 0.6,
+          rad * 4 ** 0.4,
+          rad * 4 ** 0.6,
+          rad * 4 ** 0.4,
+          0,
+          100
+        )
+      );
+      //}
+
+      for (let j = 0; j < 3; j++)
+        this.world.particles.push(
+          new ShapeParticle(
+            this.x,
+            this.y - rad * 10 * progress,
+            rnd(0, TAU),
+            life,
+            rad ** 0.75,
+            rad ** 0.75 / life ** 0.6,
+            "circle",
+            this.fireColour,
+            this.fireColourTo,
+            rad * 4 ** 0.9,
+            rad * 4 ** 0.7,
+            rad * 4 ** 0.9,
+            rad * 4 ** 0.7,
+            0,
+            100
+          )
+        );
+    }, size * 5);
+    return this;
+  }
+  dealDamage() {
+    effectTimer.repeat((i) => {
+      super.dealDamage();
+    }, (this.radius / 3) * 5);
+    return this;
+  }
+}
+
+function flash(x = 0, y = 0, opacity = 255, duration = 60, glareSize = 600) {
   world.particles.push(
     //Obscure screen
     new ShapeParticle(
@@ -260,14 +421,13 @@ function blindingFlash(
 }
 
 function createDestructionExplosion(x, y, source) {
-  splashDamageInstance(
-    x,
-    y,
-    source.maxHealth * source.explosiveness,
-    "explosion",
-    (source.width + source.height) * source.explosiveness * 5,
-    source
-  );
+  new Explosion({
+    x: x,
+    y: y,
+    amount: source.maxHealth * source.explosiveness,
+    radius: (source.width + source.height) * source.explosiveness * 5,
+    source: source,
+  }).create().dealDamage();
 }
 function liquidDestructionBlast(
   x,

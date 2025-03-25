@@ -656,6 +656,9 @@ function rotatedShape(
     case "moved-triangle":
       triangle(width, 0, 0, -height / 2, 0, height / 2);
       break;
+      case "inverted-triangle":
+      triangle(0, 0, width, -height / 2, width, height / 2);
+      break;
     default:
       break;
   }

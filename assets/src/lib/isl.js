@@ -99,23 +99,13 @@ cle.addKeyword(
   "explode",
   (interp, labels, x, y, damage, radius, team) => {
     let pos = getPos(x, y);
-    splashDamageInstance(
-      pos.x,
-      pos.y,
-      damage?.value ?? 100,
-      "explosion",
-      radius?.value ?? 100,
-      null,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      team?.value ?? "neutral"
-    );
+    new Explosion({
+      x: pos.x,
+      y: pos.y,
+      amount: damage?.value ?? 100,
+      radius: radius?.value ?? 100,
+      team: team?.value ?? "neutral",
+    });
     feedback(
       "Created explosion at " +
         pos.x +
