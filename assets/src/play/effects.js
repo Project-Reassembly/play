@@ -11,6 +11,7 @@ class Explosion {
   smokeColourTo = [100, 100, 100, 0]; //The colour the smoke goes to
   waveColour = [255, 128, 0, 0]; //The colour the wave ends at. It always starts white.
   amount = 0;
+  spread = 0;
   type = "explosion";
   status = "none";
   statusDuration = 0;
@@ -18,7 +19,7 @@ class Explosion {
   source = null;
   constructor(opts = {}) {
     for (let key of Object.keys(opts)) {
-      if (typeof this[key] !== "function") {
+      if (this[key] !== undefined && typeof this[key] !== "function") {
         this[key] = opts[key];
       }
     }
@@ -102,7 +103,11 @@ class Explosion {
       ) {
         //If enemy, damage, and affect
         if (e.team !== (this.source?.team ?? this.team)) {
-          e.damage(this.type, this.amount, this.source);
+          e.damage(
+            this.type,
+            this.amount + rnd(-this.spread, this.spread),
+            this.source
+          );
           if (this.status !== "none")
             e.applyStatus(this.status, this.statusDuration);
         }
@@ -127,7 +132,7 @@ class NuclearExplosion extends Explosion {
   constructor(opts = {}) {
     super(opts);
     for (let key of Object.keys(opts)) {
-      if (typeof this[key] !== "function") {
+      if (this[key] !== undefined && typeof this[key] !== "function") {
         this[key] = opts[key];
       }
     }
@@ -427,7 +432,9 @@ function createDestructionExplosion(x, y, source) {
     amount: source.maxHealth * source.explosiveness,
     radius: (source.width + source.height) * source.explosiveness * 5,
     source: source,
-  }).create().dealDamage();
+  })
+    .create()
+    .dealDamage();
 }
 function liquidDestructionBlast(
   x,

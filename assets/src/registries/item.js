@@ -157,7 +157,7 @@ Registry.items.add("scrap-shooter", {
         {
           type: "no",
           amount: 0,
-          area: 10,
+          radius: 10,
         },
       ],
     },
@@ -214,7 +214,7 @@ Registry.items.add("iti-laser-caster", {
           type: "laser",
           amount: 5,
           spread: 1,
-          area: 20,
+          radius: 20,
           waveColour: [0, 255, 255],
           sparkColour: [200, 255, 255],
           sparkColourTo: [0, 200, 255],
@@ -232,7 +232,7 @@ Registry.items.add("iti-laser-caster", {
           {
             amount: 0,
             type: "no",
-            area: 10,
+            radius: 10,
             waveColour: [0, 255, 255],
             sparkColour: [200, 255, 255],
             sparkColourTo: [0, 200, 255],
@@ -274,7 +274,7 @@ Registry.items.add("iti-laser-caster", {
           {
             type: "no",
             amount: 0,
-            area: 5,
+            radius: 5,
             waveColour: [0, 255, 255],
             sparkColour: [200, 255, 255],
             sparkColourTo: [0, 200, 255],

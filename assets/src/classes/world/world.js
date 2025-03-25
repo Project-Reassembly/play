@@ -84,7 +84,6 @@ class World {
             );
             boom.x = bullet.x;
             boom.y = bullet.y;
-            boom.radius = instance.radius ?? instance.area;
             boom.world = bullet.world;
             if (!instance.hidden) boom.create();
             boom.dealDamage();
