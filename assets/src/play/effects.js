@@ -193,11 +193,11 @@ class NuclearExplosion extends Explosion {
     effects.shake(this.x, this.y, size ** 0.8, size ** 0.5);
     effects.shake(this.x, this.y, size ** 0.8, size ** 0.5 * 25);
     this.world.particles.push(wave);
-    let rad = size * 0.2;
+    let rad = size * 0.4;
     //Now, the mushroom cloud
-    effects.shake(this.x, this.y, size ** 0.8, size * 5.5);
+    effects.shake(this.x, this.y, size ** 0.8, size * 10.5);
     effectTimer.repeat((i) => {
-      let progress = i / (size * 5);
+      let progress = i / (size * 10);
       let life = rnd(4, 14) * rad ** 0.5;
       this.world.particles.unshift(
         new ShapeParticle(
@@ -283,13 +283,13 @@ class NuclearExplosion extends Explosion {
             100
           )
         );
-    }, size * 5);
+    }, size * 10);
     return this;
   }
   dealDamage() {
     effectTimer.repeat((i) => {
       super.dealDamage();
-    }, (this.radius / 3) * 5);
+    }, (this.radius / 3) * 10);
     return this;
   }
 }
