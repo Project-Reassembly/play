@@ -105,7 +105,8 @@ cle.addKeyword(
       amount: damage?.value ?? 100,
       radius: radius?.value ?? 100,
       team: team?.value ?? "neutral",
-    });
+      world: world
+    }).create().dealDamage();
     feedback(
       "Created explosion at " +
         pos.x +
