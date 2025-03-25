@@ -30,6 +30,33 @@ const effects = {
   corruptionSize: 500,
   corruptionHeight: 100,
   corruptionCopies: 2,
+  screenShake: true,
+  screenShakeScale: 1,
+  /** @type {{ x: float, y: float, intensity: float, duration: int, originalDuration: int}[]} */
+  screenShakeInstances: [],
+  shake(x, y, intensity, duration) {
+    this.screenShakeInstances.push({
+      x: x,
+      y: y,
+      intensity: intensity,
+      duration: duration,
+      originalDuration: duration,
+    });
+  },
+  applyShake() {
+    this.screenShakeInstances.forEach((v, i, a) => {
+      v.duration--;
+      if (v.duration < 0) {
+        a.splice(i, 1);
+      } else {
+        let int =
+          (v.intensity * (v.duration / v.originalDuration) * this.screenShakeScale * 100) /
+          (Math.max(game.player.distanceToPoint(v.x, v.y), 50));
+        ui.camera.x += rnd(-int, int);
+        ui.camera.y += rnd(-int, int);
+      }
+    });
+  },
 };
 const contentScale = 1;
 let worldSize = Block.size * Chunk.size * World.size;
@@ -682,18 +709,19 @@ function gameFrame() {
     if (!game.paused) {
       tickTimers();
       movePlayer();
+       if (!freecam && freecamReturn <= 0) {
+        ui.camera.x = game.player.x;
+        ui.camera.y = game.player.y;
+      }
+      if (!freecam && freecamReturn >= 0) {
+        freecamReturn -= 0.05;
+        ui.camera.x -= camDiff.x * 0.05;
+        ui.camera.y -= camDiff.y * 0.05;
+      }
+      effects.applyShake();
       world.tickAll();
     }
   });
-  if (!freecam && freecamReturn <= 0) {
-    ui.camera.x = game.player.x;
-    ui.camera.y = game.player.y;
-  }
-  if (!freecam && freecamReturn >= 0) {
-    freecamReturn -= 0.05;
-    ui.camera.x -= camDiff.x * 0.05;
-    ui.camera.y -= camDiff.y * 0.05;
-  }
   scale(ui.camera.zoom);
   rotate(radians(ui.camera.rotation));
   translate(-ui.camera.x, -ui.camera.y);

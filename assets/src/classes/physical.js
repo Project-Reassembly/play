@@ -45,7 +45,7 @@ class PhysicalObject extends RegisteredItem {
     let right = this.world.getBlock(hx + 1, hy, "blocks");
     let downleft = this.world.getBlock(hx - 1, hy + 1, "blocks");
     let here = this.world.getBlock(hx, hy, "blocks");
-    let inBlock = !here.walkable && this.collidesWith(here);
+    let inBlock = here && !here.walkable && this.collidesWith(here);
     //Entity colliders
     let topcollision = this.y + this.height / 2;
     let bottomcollision = this.y - this.height / 2;
@@ -56,29 +56,21 @@ class PhysicalObject extends RegisteredItem {
       upleft &&
       !upleft.walkable &&
       bottomcollision < upleft.y + Block.size &&
-      upleft &&
-      !upleft.walkable &&
       leftcollision < upleft.x + Block.size;
     let hitsupright =
       upright &&
       !upright.walkable &&
       bottomcollision < upright.y + Block.size &&
-      upright &&
-      !upright.walkable &&
       rightcollision > upright.x;
     let hitsdownleft =
       downleft &&
       !downleft.walkable &&
       topcollision > downleft.y &&
-      downleft &&
-      !downleft.walkable &&
       leftcollision < downleft.x + Block.size;
     let hitsdownright =
       downright &&
       !downright.walkable &&
       topcollision > downright.y &&
-      downright &&
-      !downright.walkable &&
       rightcollision > downright.x;
     //Movement
     let noup =

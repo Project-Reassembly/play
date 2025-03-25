@@ -117,6 +117,10 @@ function splashDamageInstance(
       );
     }
   }
+  //Screen shake
+  if (radius > 30) {
+    effects.shake(centreX, centreY, radius ** 0.75, radius ** 0.75);
+  }
 }
 function blindingFlash(
   x = 0,
