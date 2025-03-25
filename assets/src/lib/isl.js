@@ -75,6 +75,8 @@ const _ctx = (window["_ctx"] = cle.addVariable(
   "nonentity-ctx"
 ));
 let _ce = (window["_created"] = cle.addVariable("created", "null", "null"));
+window["_playerx"] = cle.addVariable("playerx", 0, "number");
+window["_playery"] = cle.addVariable("playery", 0, "number");
 cle.addKeyword(
   "give",
   (interp, labels, entity, item, amount) => {
@@ -95,27 +97,32 @@ cle.addKeyword(
     { name: "amount", type: "number", optional: true },
   ]
 );
+cle.addLabel("nuclear", ["explode"]);
 cle.addKeyword(
   "explode",
   (interp, labels, x, y, damage, radius, team) => {
-    let pos = getPos(x, y);
-    new Explosion({
+    let pos = getPos(x, y),
+      rad = radius?.value ?? (labels.includes("nuclear") ? 500 : 100),
+      amt = damage?.value ?? (labels.includes("nuclear") ? 10 : 100);
+    new (labels.includes("nuclear") ? NuclearExplosion : Explosion)({
       x: pos.x,
       y: pos.y,
-      amount: damage?.value ?? 100,
-      radius: radius?.value ?? 100,
+      amount: amt,
+      radius: rad,
       team: team?.value ?? "neutral",
-      world: world
-    }).create().dealDamage();
+      world: world,
+    })
+      .create()
+      .dealDamage();
     feedback(
       "Created explosion at " +
         pos.x +
         ", " +
         pos.y +
         ", dealing " +
-        (damage?.value ?? 100) +
+        amt +
         " damage in a " +
-        (radius?.value ?? 100) +
+        rad +
         "px radius"
     );
   },

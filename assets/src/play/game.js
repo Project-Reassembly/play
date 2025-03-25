@@ -464,6 +464,9 @@ function loadGame(name) {
     );
   }
   console.log(file);
+  effectTimer.cancel("*")
+  respawnTimer.cancel("*")
+  effects.screenShakeInstances.splice(0)
   world.become(World.deserialise(JSON.parse(file)));
   console.log("Game loaded.");
   Log.send("You are now playing on '" + world.name + "'.", [0, 255, 0]);
@@ -795,6 +798,8 @@ function movePlayer() {
       game.player.move(game.player.speed, 0);
     }
   }
+  _playerx.value = game.player.x;
+  _playery.value = game.player.y;
 }
 
 function updateUIActivity() {
