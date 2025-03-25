@@ -32,23 +32,77 @@ class PhysicalObject extends RegisteredItem {
     this.x += dx;
     this.y += dy;
     if (ignoresBlocks) return;
+    //COLLISION DETECTION AAAA
     let hx = Math.floor(this.x / Block.size);
     let hy = Math.floor(this.y / Block.size);
+    //Blocks
     let up = this.world.getBlock(hx, hy - 1, "blocks");
+    let upright = this.world.getBlock(hx + 1, hy - 1, "blocks");
     let down = this.world.getBlock(hx, hy + 1, "blocks");
+    let downright = this.world.getBlock(hx + 1, hy + 1, "blocks");
     let left = this.world.getBlock(hx - 1, hy, "blocks");
+    let upleft = this.world.getBlock(hx - 1, hy - 1, "blocks");
     let right = this.world.getBlock(hx + 1, hy, "blocks");
-    if (
-      this.collidesWith(this.world.getBlock(hx, hy, "blocks")) ||
-      (right && !right.walkable && this.x + this.width / 2 > right.x) ||
-      (down && !down.walkable && this.y + this.height / 2 > down.y) ||
-      (left &&
-        !left.walkable &&
-        this.x - this.width / 2 < left.x + Block.size) ||
-      (up && !up.walkable && this.y - this.height / 2 < up.y + Block.size)
-    ) {
-      this.x -= dx;
+    let downleft = this.world.getBlock(hx - 1, hy + 1, "blocks");
+    let here = this.world.getBlock(hx, hy, "blocks");
+    let inBlock = !here.walkable && this.collidesWith(here);
+    //Entity colliders
+    let topcollision = this.y + this.height / 2;
+    let bottomcollision = this.y - this.height / 2;
+    let leftcollision = this.x - this.width / 2;
+    let rightcollision = this.x + this.width / 2;
+    //Intermediary
+    let hitsupleft =
+      upleft &&
+      !upleft.walkable &&
+      bottomcollision < upleft.y + Block.size &&
+      upleft &&
+      !upleft.walkable &&
+      leftcollision < upleft.x + Block.size;
+    let hitsupright =
+      upright &&
+      !upright.walkable &&
+      bottomcollision < upright.y + Block.size &&
+      upright &&
+      !upright.walkable &&
+      rightcollision > upright.x;
+    let hitsdownleft =
+      downleft &&
+      !downleft.walkable &&
+      topcollision > downleft.y &&
+      downleft &&
+      !downleft.walkable &&
+      leftcollision < downleft.x + Block.size;
+    let hitsdownright =
+      downright &&
+      !downright.walkable &&
+      topcollision > downright.y &&
+      downright &&
+      !downright.walkable &&
+      rightcollision > downright.x;
+    //Movement
+    let noup =
+      (up && !up.walkable && bottomcollision < up.y + Block.size) ||
+      hitsupleft ||
+      hitsupright;
+    let nodown =
+      (down && !down.walkable && topcollision > down.y) ||
+      hitsdownright ||
+      hitsdownleft;
+    let noleft =
+      (left && !left.walkable && leftcollision < left.x + Block.size) ||
+      hitsupleft ||
+      hitsdownleft;
+    let noright =
+      (right && !right.walkable && rightcollision > right.x) ||
+      hitsdownright ||
+      hitsupright;
+    //Final judgement
+    if (inBlock || nodown || noup) {
       this.y -= dy;
+    }
+    if (inBlock || noright || noleft) {
+      this.x -= dx;
     }
   }
 

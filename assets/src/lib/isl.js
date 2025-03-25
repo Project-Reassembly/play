@@ -97,7 +97,7 @@ cle.addKeyword(
 );
 cle.addKeyword(
   "explode",
-  (interp, labels, x, y, damage, radius) => {
+  (interp, labels, x, y, damage, radius, team) => {
     let pos = getPos(x, y);
     splashDamageInstance(
       pos.x,
@@ -114,7 +114,7 @@ cle.addKeyword(
       undefined,
       undefined,
       undefined,
-      "neutral"
+      team?.value ?? "neutral"
     );
     feedback(
       "Created explosion at " +
@@ -133,6 +133,7 @@ cle.addKeyword(
     { name: "y", type: positionType, optional: true },
     { name: "damage", type: "number", optional: true },
     { name: "radius", type: "number", optional: true },
+    { name: "team", type: "string", optional: true },
   ]
 );
 cle.addKeyword(
@@ -175,11 +176,11 @@ cle.addKeyword(
         TypeError
       );
     else {
-      give(ctx.self, "dev::commandblock", 99)
-      give(ctx.self, "dev::commandblock.chain", 99)
-      give(ctx.self, "dev::commandblock.loop", 99)
-      give(ctx.self, "message", 99)
-      give(ctx.self, "dev::itemcatalog", 1)
+      give(ctx.self, "dev::commandblock", 99);
+      give(ctx.self, "dev::commandblock.chain", 99);
+      give(ctx.self, "dev::commandblock.loop", 99);
+      give(ctx.self, "message", 99);
+      give(ctx.self, "dev::itemcatalog", 1);
     }
   },
   []
@@ -371,6 +372,7 @@ cle.addKeyword(
         s(" spawn");
         s(" teleport");
         s(" explode");
+        s(" devset");
         b("manipulation");
         s(" activate");
         s(" place");
@@ -408,9 +410,10 @@ cle.addKeyword(
         b("utility > explode");
         s(" Creates an explosion.");
         b("Parameters:");
-        s(" x, y: Position from top-left corner. 1 block = 30px.");
-        s(" damage: Amount of damage to deal.");
-        s(" radius: Radius of the explosion in pixels.");
+        s(" (x, y): Position from top-left corner. 1 block = 30px.");
+        s(" (damage): Amount of damage to deal. Default 100.");
+        s(" (radius): Radius of the explosion in pixels. Default 100.");
+        s(' (team): Team of the explosion. By default "neutral".');
       } else if (command === "devset") {
         b("utility > devset");
         s(" Gives the executor:");

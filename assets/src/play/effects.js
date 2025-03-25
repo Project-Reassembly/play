@@ -15,7 +15,8 @@ function splashDamageInstance(
   waveColour = [255, 128, 0, 0], //The colour the wave ends at. It always starts white.
   status = "none",
   statusDuration = 0,
-  team = "enemy"
+  team = "enemy",
+  knockback = NaN
 ) {
   //Most of these powers are just to make it less insane at high radii
   //They are tested repeatedly to make sure they look good
@@ -97,14 +98,23 @@ function splashDamageInstance(
     );
   }
   for (let e of world.entities) {
+    //If hit
     if (
+      !e.dead &&
       ((centreX - e.x) ** 2 + (centreY - e.y) ** 2) ** 0.5 <=
-        damageRadius + e.size &&
-      e.team !== (sourceEntity?.team ?? team) &&
-      !e.dead
+        damageRadius + e.size
     ) {
-      e.damage(damageType, amount, sourceEntity);
-      if (status !== "none") e.applyStatus(status, statusDuration);
+      //If enemy, damage, and affect
+      if (e.team !== (sourceEntity?.team ?? team)) {
+        e.damage(damageType, amount, sourceEntity);
+        if (status !== "none") e.applyStatus(status, statusDuration);
+      }
+      //Knock regardless of team
+      e.knock(
+        !isNaN(knockback) ? knockback : amount,
+        degrees(createVector(e.x - centreX, e.y - centreY).heading()),
+        true
+      );
     }
   }
 }
@@ -300,7 +310,8 @@ function liquidDestructionBlast(
           rnd(0.5, 0.7) * (3 + smallerRootMHP * 3),
           0.5,
           component.image,
-          10,0,
+          10,
+          0,
           component.width,
           component.width,
           component.height,
