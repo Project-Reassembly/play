@@ -432,6 +432,7 @@ function createDestructionExplosion(x, y, source) {
     amount: source.maxHealth * source.explosiveness,
     radius: (source.width + source.height) * source.explosiveness * 5,
     source: source,
+    world: source.world
   })
     .create()
     .dealDamage();

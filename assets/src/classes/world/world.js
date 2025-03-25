@@ -77,7 +77,7 @@ class World {
         bullet.exploded = true;
         for (let instance of bullet.damage) {
           if (!instance.spread) instance.spread = 0;
-          if (instance.area) {
+          if (instance.radius) {
             //If it explodes
             let boom = new (instance.nuclear ? NuclearExplosion : Explosion)(
               instance
@@ -87,7 +87,6 @@ class World {
             boom.world = bullet.world;
             if (!instance.hidden) boom.create();
             boom.dealDamage();
-            console.log(boom);
           }
           if (instance.blinds) {
             flash(

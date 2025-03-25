@@ -215,6 +215,7 @@ Registry.items.add("iti-laser-caster", {
           amount: 5,
           spread: 1,
           radius: 20,
+          nuclear: true,
           waveColour: [0, 255, 255],
           sparkColour: [200, 255, 255],
           sparkColourTo: [0, 200, 255],
