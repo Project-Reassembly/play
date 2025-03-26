@@ -136,6 +136,7 @@ class NuclearExplosion extends Explosion {
         this[key] = opts[key];
       }
     }
+    this.amount /= (this.radius / 3) * 10
   }
   create() {
     let flashSize = this.radius ** 1.6;

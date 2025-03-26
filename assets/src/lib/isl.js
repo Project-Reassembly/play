@@ -103,7 +103,7 @@ cle.addKeyword(
   (interp, labels, x, y, damage, radius, team) => {
     let pos = getPos(x, y),
       rad = radius?.value ?? (labels.includes("nuclear") ? 500 : 100),
-      amt = damage?.value ?? (labels.includes("nuclear") ? 10 : 100);
+      amt = damage?.value ?? (labels.includes("nuclear") ? 1000 : 100);
     new (labels.includes("nuclear") ? NuclearExplosion : Explosion)({
       x: pos.x,
       y: pos.y,
