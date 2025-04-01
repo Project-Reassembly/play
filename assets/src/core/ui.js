@@ -656,7 +656,7 @@ function rotatedShape(
     case "moved-triangle":
       triangle(width, 0, 0, -height / 2, 0, height / 2);
       break;
-      case "inverted-triangle":
+    case "inverted-triangle":
       triangle(0, 0, width, -height / 2, width, height / 2);
       break;
     default:
@@ -699,6 +699,22 @@ function rotatedShapeExt(
       layer.square(0, 0, 1); //make a square
       layer.scale(1, 1); //scale back
       layer.rotate(-QUARTER_PI); //turn back
+      break;
+    case "triangle":
+      layer.triangle(
+        width / 2,
+        0,
+        -width / 2,
+        -height / 2,
+        -width / 2,
+        height / 2
+      );
+      break;
+    case "moved-triangle":
+      layer.triangle(height, 0, 0, -width / 2, 0, width / 2);
+      break;
+    case "inverted-triangle":
+      layer.triangle(0, 0, height, -width / 2, height, width / 2);
       break;
     default:
       break;

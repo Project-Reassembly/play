@@ -16,7 +16,7 @@ class StructureReaderBlock extends Block {
     drawMultilineText(
       x,
       y,
-      this._outTxt.join("\n"),
+      this._outTxt,
       this.title + " [" + this._range + " blocks]",
       Item.getColourFromRarity(0, "light")
     );
@@ -54,7 +54,7 @@ class StructureReaderBlock extends Block {
           ", " +
           (x.y < 0 ? "" : "+") +
           x.y
-      );
+      ).join("\n");
       ui.waitingForMouseUp = true;
       return true;
     }

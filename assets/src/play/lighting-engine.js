@@ -1,4 +1,4 @@
-function addLightingCircles(layer, size = 1) {
+function addLightingCircles(layer, size = 1, col) {
   layer.push();
   layer.translate(width / 2, height / 2);
   //Particles (oh no)
@@ -10,11 +10,19 @@ function addLightingCircles(layer, size = 1) {
           particle.shape,
           particle.uiX,
           particle.uiY,
-          particle.sizeY / 10 * particle.light * size,
-          particle.sizeX / 10* particle.light * size,
+          (particle.sizeY / 10) * particle.light * size,
+          (particle.sizeX / 10) * particle.light * size,
           particle.direction,
           false
         );
+      } else if (particle instanceof WaveParticle) {
+        layer.noFill();
+        layer.stroke(col);
+        layer.strokeWeight(
+          particle.light * size * particle.calcLifeFract() ** 0.5
+        );
+        layer.noStroke();
+        layer.fill(col);
       } else
         layer.circle(
           particle.uiX,
@@ -60,12 +68,16 @@ function createLightingLayer(
   layer.rect(0, 0, width, height);
   layer.blendMode(REMOVE);
   layer.fill(lightColour);
-  addLightingCircles(layer, lightScale * ui.camera.zoom);
-  addLightingCircles(layer, lightScale * 0.8 * ui.camera.zoom);
-  addLightingCircles(layer, lightScale * 0.6 * ui.camera.zoom);
+  addLightingCircles(layer, lightScale * ui.camera.zoom, lightColour);
+  addLightingCircles(layer, lightScale * 0.8 * ui.camera.zoom, lightColour);
+  addLightingCircles(layer, lightScale * 0.6 * ui.camera.zoom, lightColour);
   layer.rectMode(CORNER);
 }
-function lighting(bgColour = [0, 230], lightColour = [255, 100], lightScale = 1) {
+function lighting(
+  bgColour = [0, 230],
+  lightColour = [255, 100],
+  lightScale = 1
+) {
   push();
   let layer = createGraphics(width, height);
   createLightingLayer(layer, bgColour, lightColour, lightScale);

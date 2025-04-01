@@ -2,6 +2,7 @@ class Weapon extends Equippable {
   reload = 30;
   ammoType = "none";
   ammoUse = 1;
+  shootX = 15;
   shoot = {
     bullet: null,
     pattern: {
@@ -75,8 +76,8 @@ class Weapon extends Equippable {
       this.shoot.pattern.spacing ??= 0;
 
       patternedBulletExpulsion(
-        pos.x,
-        pos.y,
+        pos.x + Math.cos(pos.direction) * this.shootX,
+        pos.y + Math.sin(pos.direction) * this.shootX,
         this.shoot.bullet,
         this.shoot.pattern.amount,
         degrees(pos.direction),
@@ -105,7 +106,11 @@ class Weapon extends Equippable {
       "\nAmmo: " +
       (this.ammoType !== "none" ? holder.inventory.count(this.ammoType) : "∞") +
       "\n" +
-      this.ammoType +
+      (this.ammoType !== "none"
+        ? Registry.items.get(this.ammoType).name
+        : "none") +
+      " x" +
+      this.ammoUse +
       "\n" +
       ""
         .padEnd((this.#cooldown / this.reload) * 15, "■")
@@ -149,5 +154,6 @@ function patternedBulletExpulsion(
     bulletToFire.world = world;
     //Spawn it in
     world.bullets.push(bulletToFire);
+    bulletToFire.oncreated();
   }
 }

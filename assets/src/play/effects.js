@@ -5,11 +5,6 @@ class Explosion {
   world = null;
   knockback = NaN;
   radius = 0;
-  sparkColour = [255, 245, 215, 255]; //The colour the sparks start at
-  sparkColourTo = [255, 215, 0, 55]; //The colour the sparks go to
-  smokeColour = [100, 100, 100, 200]; //The colour the smoke starts at
-  smokeColourTo = [100, 100, 100, 0]; //The colour the smoke goes to
-  waveColour = [255, 128, 0, 0]; //The colour the wave ends at. It always starts white.
   amount = 0;
   spread = 0;
   type = "explosion";
@@ -17,6 +12,7 @@ class Explosion {
   statusDuration = 0;
   team = "neutral";
   source = null;
+  effect = "explosion";
   constructor(opts = {}) {
     for (let key of Object.keys(opts)) {
       if (this[key] !== undefined && typeof this[key] !== "function") {
@@ -28,69 +24,8 @@ class Explosion {
   create() {
     //Most of these powers are just to make it less insane at high radii
     //They are tested repeatedly to make sure they look good
-
-    //Spawn smoke
-    for (let i = 0; i < this.radius ** 0.6; i++) {
-      this.world.particles.push(
-        new ShapeParticle(
-          this.x,
-          this.y,
-          radians(rnd(0, 360)),
-          rnd(this.radius ** 0.65, this.radius ** 0.8 * 2),
-          rnd(this.radius ** 0.25 * 0.3, this.radius ** 0.25 * 0.5),
-          0.01,
-          "circle",
-          this.smokeColour,
-          this.smokeColourTo,
-          this.radius ** 0.85,
-          0,
-          this.radius ** 0.85,
-          0,
-          0,
-          true
-        )
-      );
-    }
-    //Yellow sparks
-    for (let i = 0; i < this.radius ** 0.7; i++) {
-      this.world.particles.push(
-        new ShapeParticle(
-          this.x,
-          this.y,
-          radians(rnd(0, 360)),
-          rnd(this.radius ** 0.75, this.radius ** 0.75 * 1.5),
-          rnd(this.radius ** 0.25 * 0.1, this.radius ** 0.25 * 2),
-          0.075,
-          "rect",
-          this.sparkColour,
-          this.sparkColourTo,
-          this.radius ** 0.5,
-          0,
-          this.radius ** 0.75,
-          this.radius ** 0.5,
-          0,
-          true
-        )
-      );
-    }
-    this.world.particles.push(
-      new WaveParticle(
-        this.x,
-        this.y,
-        30,
-        0,
-        this.radius,
-        [255, 255, 255, 255],
-        this.waveColour,
-        this.radius ** 0.75,
-        0,
-        true
-      )
-    );
-    //Screen shake
-    if (this.radius > 30) {
-      effects.shake(this.x, this.y, this.radius ** 0.75, this.radius ** 0.75);
-    }
+    createEffect(this.effect, this.world, this.x, this.y, 0, this.radius);
+    this.dealDamage();
     return this;
   }
   dealDamage() {
@@ -124,11 +59,7 @@ class Explosion {
 }
 
 class NuclearExplosion extends Explosion {
-  flashColour = [255, 255, 255];
-  flashColourToLight = [255, 255, 200, 0];
-  flashColourTo = [255, 255, 200, 0];
-  fireColour = [255, 255, 100, 100];
-  fireColourTo = [155, 0, 0, 0];
+  effect = "nuke";
   constructor(opts = {}) {
     super(opts);
     for (let key of Object.keys(opts)) {
@@ -136,156 +67,7 @@ class NuclearExplosion extends Explosion {
         this[key] = opts[key];
       }
     }
-    this.amount /= (this.radius / 3) * 10
-  }
-  create() {
-    let flashSize = this.radius ** 1.6;
-    let flashAmount = this.radius ** 0.6;
-    let size = this.radius / 3;
-    for (let i = 0; i < flashAmount; i++) {
-      this.world.particles.push(
-        new ShapeParticle(
-          this.x,
-          this.y,
-          rnd(0, TAU),
-          rnd(6, 18) * size ** 0.5,
-          0,
-          0,
-          "inverted-triangle",
-          this.flashColour,
-          this.flashColourTo,
-          0,
-          flashSize * 2,
-          flashSize ** 0.95,
-          flashSize ** 0.85,
-          0.005 * (tru(0.5) ? 1 : -1),
-          100
-        ),
-        new ShapeParticle(
-          this.x,
-          this.y,
-          rnd(0, TAU),
-          rnd(6, 18) * size ** 0.5,
-          0,
-          0,
-          "inverted-triangle",
-          this.flashColour,
-          this.flashColourToLight,
-          0,
-          flashSize,
-          flashSize ** 0.85,
-          flashSize ** 0.75,
-          0.005 * (tru(0.5) ? 1 : -1)
-        )
-      );
-    }
-    //Smoke ring
-    let wave = new WaveParticle(
-      this.x,
-      this.y,
-      25 * size ** 0.5,
-      0,
-      size * 24,
-      this.smokeColour,
-      this.smokeColourTo,
-      size ** 0.8,
-      size
-    );
-    effects.shake(this.x, this.y, size ** 0.8, size ** 0.5);
-    effects.shake(this.x, this.y, size ** 0.8, size ** 0.5 * 25);
-    this.world.particles.push(wave);
-    let rad = size * 0.4;
-    //Now, the mushroom cloud
-    effects.shake(this.x, this.y, size ** 0.8, size * 10.5);
-    effectTimer.repeat((i) => {
-      let progress = i / (size * 10);
-      let life = rnd(4, 14) * rad ** 0.5;
-      this.world.particles.unshift(
-        new ShapeParticle(
-          this.x,
-          this.y,
-          -HALF_PI,
-          life,
-          (rad * 10 * progress) / life,
-          0,
-          "circle",
-          this.fireColourTo,
-          this.fireColour,
-          rad * 4 ** 0.8,
-          rad * 4 ** 0.6,
-          rad * 4 ** 0.8,
-          rad * 4 ** 0.6,
-          0,
-          100
-        )
-      );
-      //for (let j = 0; j < 2; j++) {
-      let dir = rnd(0, TAU),
-        dist = rnd(rad, rad * 2) * 3;
-      this.world.floorParticles.unshift(
-        new ShapeParticle(
-          this.x + Math.cos(dir) * dist,
-          this.y + Math.sin(dir) * dist,
-          dir + PI,
-          life,
-          rad ** 0.6,
-          rad ** 0.6 / life ** 0.5 / 4,
-          "circle",
-          this.fireColour,
-          this.fireColourTo,
-          rad * 4 ** 0.6,
-          rad * 4 ** 0.4,
-          rad * 4 ** 0.6,
-          rad * 4 ** 0.4,
-          0,
-          100
-        )
-      );
-      dir = rnd(0, TAU);
-      dist = rnd(rad, rad * 2) * 3;
-      this.world.particles.unshift(
-        new ShapeParticle(
-          this.x + Math.cos(dir) * dist,
-          this.y + Math.sin(dir) * dist,
-          dir + PI,
-          life,
-          rad ** 0.6,
-          rad ** 0.6 / life ** 0.5 / 4,
-          "circle",
-          this.fireColour,
-          this.fireColourTo,
-          rad * 4 ** 0.6,
-          rad * 4 ** 0.4,
-          rad * 4 ** 0.6,
-          rad * 4 ** 0.4,
-          0,
-          100
-        )
-      );
-      //}
-
-      for (let j = 0; j < 3; j++)
-        this.world.particles.push(
-          new ShapeParticle(
-            this.x,
-            this.y - rad * 10 * progress,
-            rnd(0, TAU),
-            life,
-            rad ** 0.75,
-            rad ** 0.75 / life ** 0.6,
-            "circle",
-            this.fireColour,
-            this.fireColourTo,
-            rad * 4 ** 0.9,
-            rad * 4 ** 0.7,
-            rad * 4 ** 0.9,
-            rad * 4 ** 0.7,
-            0,
-            100
-          )
-        );
-    }, size * 10);
-    return this;
+    this.amount /= (this.radius / 3) * 10;
   }
   dealDamage() {
     effectTimer.repeat((i) => {
@@ -295,6 +77,10 @@ class NuclearExplosion extends Explosion {
   }
 }
 
+/**No, this isn't a `VisualEffect`.\
+ * Creates a bright circle of light. From MOAB Adventure's nuclear blasts.\
+ * P:R has better nukes, using `NuclearExplosionEffect`.
+ */
 function flash(x = 0, y = 0, opacity = 255, duration = 60, glareSize = 600) {
   world.particles.push(
     //Obscure screen
@@ -433,7 +219,7 @@ function createDestructionExplosion(x, y, source) {
     amount: source.maxHealth * source.explosiveness,
     radius: (source.width + source.height) * source.explosiveness * 5,
     source: source,
-    world: source.world
+    world: source.world,
   })
     .create()
     .dealDamage();
@@ -517,6 +303,7 @@ function liquidDestructionBlast(
     );
   }
 }
+//Never used, just testing
 function insanity() {
   //insanity death
   effects.shadeColour = [0, 0];
@@ -581,4 +368,475 @@ function insanity() {
     effects.lightColour = [255, 100];
     effects.lighting = false;
   }, 1740);
+}
+
+//#### Actual Effect Classes ####
+/**Sort of abstract class for visual effects. */
+class VisualEffect {
+  create(world, x = 0, y = 0, direction = 0, scale = 1) {}
+  execute(world, x = 0, y = 0, direction = 0, scale = 1) {
+    this.create(world, x, y, direction, scale);
+  }
+}
+/**Extended class for repeated creation of a visual effect */
+class EmissionEffect extends VisualEffect {
+  emissions = 1;
+  interval = 0;
+  amount = 1;
+  delay = 0;
+  execute(world, x = 0, y = 0, direction = 0, scale = 1) {
+    if (this.emissions > 1)
+      effectTimer.repeat(
+        () => this.create(world, x, y, direction, scale),
+        this.emissions,
+        this.interval,
+        this.delay
+      );
+    else
+      effectTimer.do(
+        () => this.create(world, x, y, direction, scale),
+        this.delay
+      );
+  }
+}
+/**A container for many effects at once. */
+class MultiEffect extends VisualEffect {
+  /**@type {VisualEffect[]} */
+  effects = [];
+  init() {
+    this.effects = this.effects.map((x) => construct(x, "visual-effect"));
+  }
+  execute(world, x = 0, y = 0, direction = 0, scale = 1) {
+    this.effects.forEach((z) => z.execute(world, x, y, direction, scale));
+  }
+}
+
+class ParticleEmissionEffect extends EmissionEffect {
+  cone = 360;
+  //Contains properties for image and text particles too
+  particle = {
+    //All
+    lifetime: 60,
+    direction: 0,
+    speed: 1,
+    decel: 0.015,
+    rotateSpeed: 0,
+    light: 0,
+    //Shape
+    shape: "circle",
+    //Shape/Image
+    widthFrom: 20,
+    widthTo: 30,
+    heightFrom: 20,
+    heightTo: 30,
+    //Shape/Text/Wave
+    colourFrom: [50, 50, 50, 100],
+    colourTo: [100, 100, 100, 0],
+    //Text
+    text: "text",
+    useOCR: true,
+    sizeFrom: 20,
+    sizeTo: 10,
+    //Image
+    image: "error",
+    opacityFrom: 1,
+    opacityTo: 1,
+    //Wave
+    radiusFrom: 0,
+    radiusTo: 100,
+    strokeFrom: 10,
+    strokeTo: 0,
+  };
+  create(world, x = 0, y = 0, direction = 0, scale = 1) {
+    repeat(this.amount, () =>
+      world.particles.push(
+        new ShapeParticle(
+          x,
+          y,
+          direction +
+            (this.particle.direction ?? 0) +
+            radians(rnd(-(this.cone ?? 360) / 2, (this.cone ?? 360) / 2)),
+          this.particle.lifetime ?? 60,
+          this.particle.speed ?? 1,
+          this.particle.decel ?? 0.015,
+          this.particle.shape ?? "circle",
+          this.particle.colourFrom ?? [50, 50, 50, 100],
+          this.particle.colourTo ?? [100, 100, 100, 0],
+          this.particle.widthFrom ?? 20,
+          this.particle.widthTo ?? 30,
+          this.particle.heightFrom ?? 20,
+          this.particle.heightTo ?? 30,
+          this.particle.rotateSpeed ?? 0,
+          this.particle.light ?? 0
+        )
+      )
+    );
+  }
+}
+
+class ImageParticleEmissionEffect extends ParticleEmissionEffect {
+  create(world, x = 0, y = 0, direction = 0, scale = 1) {
+    repeat(this.amount, () =>
+      world.particles.push(
+        new ImageParticle(
+          x,
+          y,
+          direction +
+            (this.particle.direction ?? 0) +
+            radians(
+              rnd(
+                -(this.particle.cone ?? 360) / 2,
+                (this.particle.cone ?? 360) / 2
+              )
+            ),
+          this.particle.lifetime ?? 60,
+          this.particle.speed ?? 1,
+          this.particle.decel ?? 0.015,
+          this.particle.image,
+          this.particle.opacityFrom ?? 1,
+          this.particle.opacityTo ?? 1,
+          this.particle.widthFrom ?? 20,
+          this.particle.widthTo ?? 30,
+          this.particle.heightFrom ?? 20,
+          this.particle.heightTo ?? 30,
+          this.particle.rotateSpeed ?? 0
+        )
+      )
+    );
+  }
+}
+
+class TextParticleEmissionEffect extends ParticleEmissionEffect {
+  create(world, x = 0, y = 0, direction = 0, scale = 1) {
+    repeat(this.amount, () =>
+      world.particles.push(
+        new TextParticle(
+          x,
+          y,
+          direction +
+            (this.particle.direction ?? 0) +
+            radians(
+              rnd(
+                -(this.particle.cone ?? 360) / 2,
+                (this.particle.cone ?? 360) / 2
+              )
+            ),
+          this.particle.lifetime ?? 60,
+          this.particle.speed ?? 1,
+          this.particle.decel ?? 0.015,
+          this.particle.text,
+          this.particle.colourFrom ?? 20,
+          this.particle.colourTo ?? 30,
+          this.particle.colourFrom ?? [50, 50, 50, 100],
+          this.particle.colourTo ?? [100, 100, 100, 0],
+          this.particle.rotateSpeed ?? 0,
+          this.particle.useOCR ?? true
+        )
+      )
+    );
+  }
+}
+
+class WaveEmissionEffect extends ParticleEmissionEffect {
+  create(world, x = 0, y = 0, direction = 0, scale = 1) {
+    repeat(this.amount, () =>
+      world.particles.push(
+        new WaveParticle(
+          x,
+          y,
+          this.particle.lifetime ?? 60,
+          this.particle.radiusFrom ?? 0,
+          this.particle.radiusTo ?? 100,
+          this.particle.colourFrom ?? [50, 50, 50, 100],
+          this.particle.colourTo ?? [100, 100, 100, 0],
+          this.particle.strokeFrom ?? 10,
+          this.particle.strokeTo ?? 0
+        )
+      )
+    );
+  }
+}
+
+class ExplosionEffect extends VisualEffect {
+  sparkColour = [255, 245, 215, 255]; //The colour the sparks start at
+  sparkColourTo = [255, 215, 0, 55]; //The colour the sparks go to
+  smokeColour = [100, 100, 100, 200]; //The colour the smoke starts at
+  smokeColourTo = [100, 100, 100, 0]; //The colour the smoke goes to
+  waveColour = [255, 128, 0, 0]; //The colour the wave ends at. It always starts white.
+  smoke = true;
+  sparks = true;
+  wave = true;
+  shake = true;
+  create(world, x = 0, y = 0, direction = 0, scale = 1) {
+    //Spawn smoke
+    if (this.smoke)
+      for (let i = 0; i < scale ** 0.6; i++) {
+        world.particles.push(
+          new ShapeParticle(
+            x,
+            y,
+            radians(rnd(0, 360)),
+            rnd(scale ** 0.65, scale ** 0.8 * 2),
+            rnd(scale ** 0.25 * 0.3, scale ** 0.25 * 0.5),
+            0.01,
+            "circle",
+            this.smokeColour,
+            this.smokeColourTo,
+            scale ** 0.85,
+            0,
+            scale ** 0.85,
+            0,
+            0,
+            true
+          )
+        );
+      }
+    //Yellow sparks
+    if (this.sparks)
+      for (let i = 0; i < scale ** 0.7; i++) {
+        world.particles.push(
+          new ShapeParticle(
+            x,
+            y,
+            radians(rnd(0, 360)),
+            rnd(scale ** 0.75, scale ** 0.75 * 1.5),
+            rnd(scale ** 0.25 * 0.1, scale ** 0.25 * 2),
+            0.075,
+            "rect",
+            this.sparkColour,
+            this.sparkColourTo,
+            scale ** 0.5,
+            0,
+            scale ** 0.75,
+            scale ** 0.5,
+            0,
+            100
+          )
+        );
+      }
+    if (this.wave)
+      world.particles.push(
+        new WaveParticle(
+          x,
+          y,
+          30,
+          0,
+          scale,
+          [255, 255, 255, 255],
+          this.waveColour,
+          scale ** 0.75,
+          0,
+          20
+        )
+      );
+    //Screen shake
+    if (this.shake && this.radius > 30) {
+      effects.shake(this.x, this.y, this.radius ** 0.75, this.radius ** 0.75);
+    }
+  }
+}
+
+class NuclearExplosionEffect extends ExplosionEffect {
+  flashColour = [255, 255, 255];
+  flashColourToLight = [255, 255, 200, 0];
+  flashColourTo = [255, 255, 200, 0];
+  fireColour = [255, 255, 100, 100];
+  fireColourTo = [155, 0, 0, 0];
+  flash = true;
+  mushroom = true;
+  create(world, x = 0, y = 0, direction = 0, scale = 1) {
+    let flashSize = scale ** 1.6;
+    let flashAmount = scale ** 0.6;
+    let size = scale / 3;
+    if (this.flash)
+      for (let i = 0; i < flashAmount; i++) {
+        world.particles.push(
+          new ShapeParticle(
+            x,
+            y,
+            rnd(0, TAU),
+            rnd(6, 18) * size ** 0.65,
+            0,
+            0,
+            "inverted-triangle",
+            this.flashColour,
+            this.flashColourTo,
+            0,
+            flashSize * 2,
+            flashSize ** 0.95,
+            flashSize ** 0.85,
+            0.005 * (tru(0.5) ? 1 : -1),
+            20
+          ),
+          new ShapeParticle(
+            x,
+            y,
+            rnd(0, TAU),
+            rnd(6, 18) * size ** 0.5,
+            0,
+            0,
+            "inverted-triangle",
+            this.flashColour,
+            this.flashColourToLight,
+            0,
+            flashSize,
+            flashSize ** 0.85,
+            flashSize ** 0.75,
+            0.005 * (tru(0.5) ? 1 : -1),
+            20
+          )
+        );
+      }
+    //Smoke ring
+    if (this.smoke)
+      world.particles.push(
+        new WaveParticle(
+          x,
+          y,
+          25 * size ** 0.5,
+          0,
+          size * 24,
+          this.smokeColour,
+          this.smokeColourTo,
+          size ** 0.8,
+          size
+        )
+      );
+    if (this.shake) {
+      effects.shake(x, y, size ** 0.8, size ** 0.5);
+      effects.shake(x, y, size ** 0.8, size ** 0.5 * 25);
+      effects.shake(x, y, size ** 0.8, size * 10.5);
+    }
+    let rad = size * 0.4;
+    //Now, the mushroom cloud
+    if (this.mushroom)
+      effectTimer.repeat((i) => {
+        let progress = i / (size * 10);
+        let life = rnd(4, 14) * rad ** 0.5;
+        world.particles.unshift(
+          new ShapeParticle(
+            x,
+            y,
+            -HALF_PI,
+            life,
+            (rad * 10 * progress) / life,
+            0,
+            "circle",
+            this.fireColourTo,
+            this.fireColour,
+            rad * 4 ** 0.8,
+            rad * 4 ** 0.6,
+            rad * 4 ** 0.8,
+            rad * 4 ** 0.6,
+            0,
+            200
+          )
+        );
+        //for (let j = 0; j < 2; j++) {
+        let dir = rnd(0, TAU),
+          dist = rnd(rad, rad * 2) * 3;
+        world.floorParticles.unshift(
+          new ShapeParticle(
+            x + Math.cos(dir) * dist,
+            y + Math.sin(dir) * dist,
+            dir + PI,
+            life,
+            rad ** 0.6,
+            rad ** 0.6 / life ** 0.5 / 4,
+            "circle",
+            this.fireColour,
+            this.fireColourTo,
+            rad * 4 ** 0.6,
+            rad * 4 ** 0.4,
+            rad * 4 ** 0.6,
+            rad * 4 ** 0.4,
+            0,
+            200
+          )
+        );
+        dir = rnd(0, TAU);
+        dist = rnd(rad, rad * 2) * 3;
+        world.particles.unshift(
+          new ShapeParticle(
+            x + Math.cos(dir) * dist,
+            y + Math.sin(dir) * dist,
+            dir + PI,
+            life,
+            rad ** 0.6,
+            rad ** 0.6 / life ** 0.5 / 4,
+            "circle",
+            this.fireColour,
+            this.fireColourTo,
+            rad * 4 ** 0.6,
+            rad * 4 ** 0.4,
+            rad * 4 ** 0.6,
+            rad * 4 ** 0.4,
+            0,
+            200
+          )
+        );
+        //}
+
+        for (let j = 0; j < 3; j++)
+          world.particles.push(
+            new ShapeParticle(
+              x,
+              y - rad * 10 * progress,
+              rnd(0, TAU),
+              life,
+              rad ** 0.75,
+              rad ** 0.75 / life ** 0.6,
+              "circle",
+              this.fireColour,
+              this.fireColourTo,
+              rad * 4 ** 0.9,
+              rad * 4 ** 0.7,
+              rad * 4 ** 0.9,
+              rad * 4 ** 0.7,
+              0,
+              200
+            )
+          );
+      }, size * 10);
+  }
+}
+
+function repeat(n, func, ...params) {
+  for (let i = 0; i < n; i++) func(...params);
+}
+
+/**
+ * Creates an effect, independently of any objects.
+ * @param {string} effect Registry name of the visual effect
+ * @param {float} x X position of the effect's origin
+ * @param {float} y Y position of the effect's origin
+ * @param {float} direction Direction *in radians* of the effect. ONly for directed effects, such as `ParticleEmissionEffect`
+ * @param {float} scale Extra parameter to determine size of scalable effects
+ * @returns
+ */
+function createEffect(effect, world, x, y, direction, scale) {
+  /**@type {VisualEffect} */
+  let fx = construct(Registry.vfx.get(effect), "visual-effect");
+  fx.execute(world, x, y, direction, scale);
+  return fx;
+}
+
+/**
+ * Helper function for effects created from a source `PhysicalObject` such as bullet trails, or block smoke effects.\
+ * Uses an angle in *degrees*.
+ * @param {string} effect Registry name of effect to create. Use `effect~scale` to change scale.
+ * @param {PhysicalObject} source Object at which to spawn the effect.
+ * @param {number} [offX=0] X offset
+ * @param {number} [offY=0] Y offset
+ */
+function emitEffect(effect, source, offX = 0, offY = 0) {
+  let effectparts = effect.split("~");
+  createEffect(
+    effectparts[0],
+    source.world,
+    source.x + offX,
+    source.y + offY,
+    radians(source.direction),
+    effectparts[1] ?? 1
+  );
 }

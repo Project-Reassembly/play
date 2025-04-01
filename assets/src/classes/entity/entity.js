@@ -50,9 +50,6 @@ class Entity extends ShootableObject {
     );
   }
 
-  get directionRad() {
-    return (this.direction / 180) * Math.PI;
-  }
   init() {
     super.init();
     this.components = this.components.map((x) => construct(x, "component"));

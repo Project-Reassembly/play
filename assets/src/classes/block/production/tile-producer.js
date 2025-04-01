@@ -3,17 +3,8 @@ class TileProducer extends Container {
   amount = 0;
   duration = 0;
 
-  smoke = {
-    lifetime: 60,
-    speed: 1,
-    decel: 0.015,
-    colourFrom: [50, 50, 50, 100],
-    colourTo: [100, 100, 100, 0],
-    size: 20,
-    cone: 10,
-    amount: 1,
-    chance: 0.1,
-  };
+  tickEffect = "crafter-smoke";
+  tickEffectChance = 0.1;
 
   _speed = 1;
   _progress = 0;
@@ -55,27 +46,15 @@ class TileProducer extends Container {
     return true;
   }
   createTickEffect() {
-    let particle = () =>
-      new ShapeParticle(
+    if (tru(this.tickEffectChance))
+      createEffect(
+        this.tickEffect,
+        this.world,
         this.x + Block.size / 2,
         this.y + Block.size / 2,
-        -HALF_PI +
-          radians(rnd(-(this.smoke.cone ?? 10), this.smoke.cone ?? 10)),
-        this.smoke.lifetime ?? 60,
-        this.smoke.speed ?? 1,
-        this.smoke.decel ?? 0.015,
-        "circle",
-        this.smoke.colourFrom ?? [50, 50, 50, 100],
-        this.smoke.colourTo ?? [100, 100, 100, 0],
-        this.smoke.size ?? 20,
-        (this.smoke.size ?? 20) * 1.5,
-        this.smoke.size ?? 20,
-        (this.smoke.size ?? 20) * 1.5,
-        0
+        this.direction,
+        1
       );
-    if (Math.random() < this.smoke.chance ?? 0.5)
-      for (let i = 0; i < this.smoke.amount ?? 3; i++)
-        this.chunk.world.particles.push(particle());
   }
   stringifyRecipe() {
     return (

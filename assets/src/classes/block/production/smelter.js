@@ -1,17 +1,7 @@
 /**Extended Crafter which uses fuel items. */
 class Smelter extends Crafter {
-  sparks = {
-    lifetime: 60,
-    speed: 5,
-    decel: 0.3,
-    colourFrom: [255, 255, 100],
-    colourTo: [255, 0, 0, 0],
-    width: 10,
-    height: 2.5,
-    cone: 180,
-    amount: 4,
-    chance: 0.3,
-  };
+  activeTickEffect = "smelter-sparks";
+  activeTickEffectChance = 0.3;
   fuelTypes = {};
   /**Does this Smelter stop using fuel when the recipe can't be processed? */
   fuelEfficient = false;
@@ -21,7 +11,7 @@ class Smelter extends Crafter {
     if (this._fuelLeft > 0) {
       if (super.tickRecipe(recipe, time) || !this.fuelEfficient) {
         this._fuelLeft--;
-        this.createSmokeEffect();
+        super.createTickEffect();
       }
     } else {
       for (let item of Object.keys(this.fuelTypes)) {
@@ -34,31 +24,16 @@ class Smelter extends Crafter {
       }
     }
   }
-  createSmokeEffect() {
-    super.createTickEffect();
-  }
   createTickEffect() {
-    let particle = () =>
-      new ShapeParticle(
+    if (tru(this.activeTickEffectChance))
+      createEffect(
+        this.activeTickEffect,
+        this.world,
         this.x + Block.size / 2,
         this.y + Block.size / 2,
-        -HALF_PI +
-          radians(rnd(-(this.sparks.cone ?? 180), this.sparks.cone ?? 180)),
-        this.sparks.lifetime ?? 60,
-        (this.sparks.speed ?? 5) * rnd(0.75, 1.3),
-        this.sparks.decel ?? 0.3,
-        "rect",
-        this.sparks.colourFrom ?? [255, 255, 100],
-        this.sparks.colourTo ?? [255, 0, 0, 0],
-        this.sparks.height ?? 2.5,
-        0,
-        this.sparks.width ?? 10,
-        this.sparks.width ?? 10,
-        0
+        this.direction,
+        1
       );
-    if (Math.random() < this.sparks.chance ?? 0.3)
-      for (let i = 0; i < this.sparks.amount ?? 4; i++)
-        this.chunk.world.particles.push(particle());
   }
   serialise() {
     let c = super.serialise();
@@ -70,7 +45,9 @@ class Smelter extends Crafter {
    * @param {object} creator
    */
   static applyExtraProps(deserialised, creator) {
+    super.applyExtraProps(deserialised, creator);
     deserialised._fuelLeft = creator.fuel;
+    deserialised._fuelMax = creator.fuel;
   }
   setFuel(_) {
     this._fuelLeft = _;

@@ -85,7 +85,6 @@ class World {
             boom.x = bullet.x;
             boom.y = bullet.y;
             boom.world = bullet.world;
-            if (!instance.hidden) boom.create();
             boom.dealDamage();
           }
           if (instance.blinds) {
@@ -97,7 +96,9 @@ class World {
               instance.glareSize
             );
           }
+          bullet.emit(instance.effect ?? "none");
         }
+        bullet.emit(bullet.despawnEffect);
         bullet.frag();
         //Delete the bullet
         this.bullets.splice(b, 1);

@@ -43,13 +43,18 @@ class Bullet extends PhysicalObject {
   intervalSpacing = 0;
   intervalTime = 0;
   #intervalCounter = 0;
-  get directionRad() {
-    return (this.direction / 180) * Math.PI;
-  }
+  //vfx
+  shootEffect = "shoot";
+  despawnEffect = "explosion~5";
+  hitEffect = "none";
+  trailEffect = "default";
   init() {
     super.init();
     this.maxLife = this.lifetime;
     this._trailInterval = this.hitSize * 4;
+  }
+  oncreated() {
+    this.emit(this.shootEffect);
   }
   step(dt) {
     this.spawnTrail(dt);
@@ -75,32 +80,34 @@ class Bullet extends PhysicalObject {
   }
   spawnTrail(dt) {
     //This got too long
-    for (let e = 0; e < this.speed * dt; e++) {
-      this._trailCounter--;
-      if (this._trailCounter <= 0) {
-        if (this.world?.particles != null && this.trail) {
-          let trailparticle = new ShapeParticle(
-            this.x - e * p5.Vector.fromAngle(this.directionRad).x,
-            this.y - e * p5.Vector.fromAngle(this.directionRad).y,
-            this.directionRad,
-            (this.maxLife * 1.2) ** 0.4,
-            0,
-            0,
-            this.trailShape,
-            this.trailColour,
-            this.trailColour,
-            this.hitSize * 1.9,
-            0,
-            this.hitSize * this._trailInterval * 0.25,
-            this.hitSize * this._trailInterval * 0.25,
-            0
-          );
-          trailparticle.light = this.trailLight;
-          this.world.particles.push(trailparticle);
+    if (this.trailEffect === "default")
+      for (let e = 0; e < this.speed * dt; e++) {
+        this._trailCounter--;
+        if (this._trailCounter <= 0) {
+          if (this.world?.particles != null && this.trail) {
+            let trailparticle = new ShapeParticle(
+              this.x - e * p5.Vector.fromAngle(this.directionRad).x,
+              this.y - e * p5.Vector.fromAngle(this.directionRad).y,
+              this.directionRad,
+              (this.maxLife * 1.2) ** 0.4,
+              0,
+              0,
+              this.trailShape,
+              this.trailColour,
+              this.trailColour,
+              this.hitSize * 1.9,
+              0,
+              this.hitSize * this._trailInterval * 0.25,
+              this.hitSize * this._trailInterval * 0.25,
+              0
+            );
+            trailparticle.light = this.trailLight;
+            this.world.particles.push(trailparticle);
+          }
+          this._trailCounter = this._trailInterval;
         }
-        this._trailCounter = this._trailInterval;
       }
-    }
+    else this.emit(this.trailEffect);
   }
   draw() {
     if (!this.drawer.hidden)

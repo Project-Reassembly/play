@@ -296,7 +296,7 @@ const propertyReplacements = [
   ['"spawnX":', "ξ"],
   ['"spawnY":', "ŷ"],
   ['"storage":', "§"],
-  ['"recipe":', "ʀ"],
+  ['"recipe":', "®"],
   [
     /{"item":"nothing","count":[0-9]+,"tags":\[[^}]*\]}/gi,
     "л",
@@ -464,9 +464,9 @@ function loadGame(name) {
     );
   }
   console.log(file);
-  effectTimer.cancel("*")
-  respawnTimer.cancel("*")
-  effects.screenShakeInstances.splice(0)
+  effectTimer.cancel("*");
+  respawnTimer.cancel("*");
+  effects.screenShakeInstances.splice(0);
   world.become(World.deserialise(JSON.parse(file)));
   console.log("Game loaded.");
   Log.send("You are now playing on '" + world.name + "'.", [0, 255, 0]);
@@ -660,7 +660,7 @@ function fpsUpdate() {
   //calculate FPS
   if (frameRate() && ui?.previousFPS) {
     ui.previousFPS.push(frameRate());
-    if (ui.previousFPS.length > 30) {
+    if (ui.previousFPS.length > 5) {
       ui.previousFPS.splice(0, 1);
     }
     const sum = ui.previousFPS.reduce((a, b) => a + b, 0);
@@ -980,13 +980,15 @@ function interact() {
   if (clickedTile?.buildable) {
     //Place items on free space
     if (heldItem instanceof PlaceableItem) {
-      heldItem.place(
-        Inventory.mouseItemStack,
-        game.mouse.blockX,
-        game.mouse.blockY,
-        selectedDirection
-      );
-      return;
+      if (
+        heldItem.place(
+          Inventory.mouseItemStack,
+          game.mouse.blockX,
+          game.mouse.blockY,
+          selectedDirection
+        )
+      )
+        return;
     }
   }
   //If clicked again

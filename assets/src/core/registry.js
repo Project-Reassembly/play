@@ -12,6 +12,7 @@ class Registry {
   static blocks = new this();
   static entities = new this();
   static statuses = new this();
+  static vfx = new this();
   static worldgen = new this();
   //Slightly odd registries
   static deathmsg = new this();

@@ -49,3 +49,12 @@ Registry.type.add("sign", SignBlock);
 Registry.type.add("dev::structurereader", StructureReaderBlock);
 Registry.type.add("dev::itemcatalog", ItemCatalogBlock);
 Registry.type.add("dev::commandblock", CommandExecutorBlock);
+//Effects
+Registry.type.add("visual-effect", VisualEffect);
+Registry.type.add("particle-emission", ParticleEmissionEffect);
+Registry.type.add("image-particle-emission", ImageParticleEmissionEffect);
+Registry.type.add("text-particle-emission", TextParticleEmissionEffect);
+Registry.type.add("wave-emission", WaveEmissionEffect);
+Registry.type.add("multi-effect", MultiEffect);
+Registry.type.add("explosion", ExplosionEffect);
+Registry.type.add("nuclear-explosion", NuclearExplosionEffect);

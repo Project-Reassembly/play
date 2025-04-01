@@ -6,15 +6,22 @@ class PhysicalObject extends RegisteredItem {
   width = null;
   /**@type {number} */
   height = null;
+  /**Direction in degrees */
   direction = 0;
   _previousRot = 0;
   hitSize = 30;
   /** @type {World} */
   world = null;
+  get directionRad() {
+    return (this.direction / 180) * Math.PI;
+  }
   init() {
     this.width ??= this.hitSize;
     this.height ??= this.hitSize;
   }
+
+  oncreated() {}
+
   /**
    * @param {PhysicalObject} other
    */
@@ -200,6 +207,11 @@ class PhysicalObject extends RegisteredItem {
   }
   get uiY() {
     return (this.y - ui.camera.y) * ui.camera.zoom;
+  }
+
+  /**Shortcut for `emitEffect(effect, this, offX, offY)`. */
+  emit(effect, offX, offY) {
+    emitEffect(effect, this, offX, offY);
   }
 }
 

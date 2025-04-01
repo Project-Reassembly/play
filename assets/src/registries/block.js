@@ -598,12 +598,8 @@ createLinkedBlockAndItem(
     duration: 200,
     inventorySize: 1,
     title: "Basic Drill",
-    smoke: {
-      size: 5,
-      amount: 3,
-      chance: 0.2,
-      cone: 15,
-    },
+    tickEffect: "basic-drill-smoke",
+    tickEffectChance: 0.2,
   },
   {
     description:

@@ -45,6 +45,7 @@ class Container extends Block {
    * @param {object} creator
    */
   static applyExtraProps(deserialised, creator) {
+    super.applyExtraProps(deserialised, creator);
     deserialised.inventory = Inventory.deserialise(creator.inventory);
   }
   read() {

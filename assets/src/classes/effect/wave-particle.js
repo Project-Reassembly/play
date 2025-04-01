@@ -8,7 +8,8 @@ class WaveParticle {
     colourFrom,
     colourTo,
     strokeFrom,
-    strokeTo
+    strokeTo,
+    light
   ) {
     this.x = x;
     this.y = y;
@@ -22,6 +23,7 @@ class WaveParticle {
     this.maxLifetime = lifetime;
     this.strokeFrom = strokeFrom;
     this.strokeTo = strokeTo;
+    this.light = light ?? 0;
   }
   step(dt) {
     if (this.lifetime >= dt) {
@@ -47,7 +49,7 @@ class WaveParticle {
     circle(this.x, this.y, this.radius * 2);
     pop();
   }
-  get size(){
-    return this.radius*2
+  get size() {
+    return this.radius * 2;
   }
 }

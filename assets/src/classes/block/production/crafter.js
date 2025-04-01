@@ -8,26 +8,9 @@
 class Crafter extends Container {
   /** @type {Recipe[]} */
   recipes = [];
-  craftWave = {
-    lifetime: 30,
-    fromRadius: 0,
-    toRadius: 100,
-    colourFrom: [255, 200, 0, 255],
-    colourTo: [255, 150, 0, 0],
-    strokeFrom: 10,
-    strokeTo: 0,
-  };
-  smoke = {
-    lifetime: 60,
-    speed: 1,
-    decel: 0.015,
-    colourFrom: [50, 50, 50, 100],
-    colourTo: [100, 100, 100, 0],
-    size: 20,
-    cone: 10,
-    amount: 1,
-    chance: 0.1,
-  };
+  craftEffect = "crafter-craft";
+  tickEffectChance = 0.1;
+  tickEffect = "crafter-smoke";
   _recipe = 0;
   /*
   Recipes are like
@@ -105,41 +88,25 @@ class Crafter extends Container {
     return true;
   }
   createCraftEffect() {
-    let particle = new WaveParticle(
+    createEffect(
+      this.craftEffect,
+      this.world,
       this.x + Block.size / 2,
       this.y + Block.size / 2,
-      this.craftWave.lifetime ?? 30,
-      this.craftWave.fromRadius ?? 0,
-      this.craftWave.toRadius ?? 100,
-      this.craftWave.colourFrom ?? [255, 200, 0, 255],
-      this.craftWave.colourTo ?? [255, 150, 0, 0],
-      this.craftWave.strokeFrom ?? 10,
-      this.craftWave.strokeTo ?? 0
+      this.direction,
+      1
     );
-    this.chunk.world.particles.push(particle);
   }
   createTickEffect() {
-    let particle = () =>
-      new ShapeParticle(
+    if (tru(this.tickEffectChance))
+      createEffect(
+        this.tickEffect,
+        this.world,
         this.x + Block.size / 2,
         this.y + Block.size / 2,
-        -HALF_PI +
-          radians(rnd(-(this.smoke.cone ?? 10), this.smoke.cone ?? 10)),
-        this.smoke.lifetime ?? 60,
-        this.smoke.speed ?? 1,
-        this.smoke.decel ?? 0.015,
-        "circle",
-        this.smoke.colourFrom ?? [50, 50, 50, 100],
-        this.smoke.colourTo ?? [100, 100, 100, 0],
-        this.smoke.size ?? 20,
-        (this.smoke.size ?? 20) * 1.5,
-        this.smoke.size ?? 20,
-        (this.smoke.size ?? 20) * 1.5,
-        0
+        this.direction,
+        1
       );
-    if (Math.random() < this.smoke.chance ?? 0.5)
-      for (let i = 0; i < this.smoke.amount ?? 3; i++)
-        this.chunk.world.particles.push(particle());
   }
   /**
    * Converts a recipe to a string representation.
@@ -179,6 +146,7 @@ class Crafter extends Container {
    * @param {object} creator
    */
   static applyExtraProps(deserialised, creator) {
+    super.applyExtraProps(deserialised, creator);
     deserialised._recipe = creator.recipe;
   }
 }

@@ -64,7 +64,6 @@ Registry.items.add("gold-ingot", {
   image: "item.gold-ingot",
 });
 
-
 Registry.items.add("raw-titanium", {
   name: "Raw Titanium (Ilmenite)",
   description:
@@ -118,10 +117,10 @@ Registry.items.add("sandstone", {
   image: "item.sandstone",
 });
 
-
 Registry.items.add("coal", {
   name: "Coal",
-  description: "A small chunk of coal.\nUsed as fuel in smelters.\nYay, pollution!",
+  description:
+    "A small chunk of coal.\nUsed as fuel in smelters.\nYay, pollution!",
   image: "item.coal",
 });
 //Weapons
@@ -181,7 +180,7 @@ Registry.items.add("iti-laser-caster", {
   name: "Laser Caster",
   rarity: Item.rarity.ITI,
   description:
-    "Fires fast-moving bolts of high-damage plasma.\nBolts deal secondary damage, with homing fragmentation.\nRequires no ammunition.",
+    "Fires fast-moving bolts of high-damage plasma.\nBolts deal secondary damage, with homing fragmentation.\nInflicts a burning effect.\nRequires no ammunition.",
   image: "weapon.scrap-shooter.item",
   reload: 80,
   ammoType: "none",
@@ -190,7 +189,6 @@ Registry.items.add("iti-laser-caster", {
       lifetime: 15,
       light: 120,
       speed: 20,
-      pierce: 1,
       trail: true,
       hitSize: 3,
       trailShape: "rhombus",
@@ -215,32 +213,10 @@ Registry.items.add("iti-laser-caster", {
           amount: 5,
           spread: 1,
           radius: 20,
-          waveColour: [0, 255, 255],
-          sparkColour: [200, 255, 255],
-          sparkColourTo: [0, 200, 255],
-          smokeColour: [0, 0, 0, 0],
-          smokeColourTo: [0, 0, 0, 0],
         },
       ],
-      intervalNumber: 1,
-      intervalTime: 999,
-      intervalBullet: {
-        lifetime: 0,
-        drawer: { hidden: true },
-        trail: false,
-        damage: [
-          {
-            amount: 0,
-            type: "no",
-            radius: 10,
-            waveColour: [0, 255, 255],
-            sparkColour: [200, 255, 255],
-            sparkColourTo: [0, 200, 255],
-            smokeColour: [0, 0, 0, 0],
-            smokeColourTo: [0, 0, 0, 0],
-          },
-        ],
-      },
+      shootEffect: "laser-caster-explosion~10",
+      despawnEffect: "laser-caster-fiery-blast~20",
       fragNumber: 6,
       fragSpread: 180,
       fragBullet: {
@@ -268,20 +244,12 @@ Registry.items.add("iti-laser-caster", {
         damage: [
           {
             type: "laser",
-            amount: 2.5,
-            spread: 0.75,
-          },
-          {
-            type: "no",
-            amount: 0,
-            radius: 5,
-            waveColour: [0, 255, 255],
-            sparkColour: [200, 255, 255],
-            sparkColourTo: [0, 200, 255],
-            smokeColour: [0, 0, 0, 0],
-            smokeColourTo: [0, 0, 0, 0],
+            amount: 5,
+            spread: 2,
           },
         ],
+        shootEffect: "none",
+        despawnEffect: "laser-caster-frag",
       },
     },
     pattern: {},
