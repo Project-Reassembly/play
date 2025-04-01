@@ -13,7 +13,10 @@ class World {
   static randomTick = 0.01;
   /** The distance in chunks **outside the render distance** that will still tick. */
   static simulationDistance = 5;
-  /** @type {Array<ImageParticle|ShapeParticle|TextParticle|WaveParticle>} */
+  /**
+   * @type {Array<ImageParticle|ShapeParticle|TextParticle|WaveParticle>}
+   * Particles that will be drawn underneath normal blocks, but on top of floors and tiles.
+   */
   floorParticles = [];
   /** @type {Array<ImageParticle|ShapeParticle|TextParticle|WaveParticle>} */
   particles = [];
@@ -23,6 +26,13 @@ class World {
   bullets = [];
   /** @type {Array<Array<Chunk>>} */
   chunks = null;
+  /**
+   * @type {PhysicalObject[]} \
+   * An array of extra objects, none of which will be saved.\
+   * Will not render on their own, so use of VFX (`this.emit(...)`) is required for rendering.\
+   * Use one of `particles`, `floorParticles`, `entities` or `bullets` instead of this where possible.
+   */
+  physobjs = [];
   name = "World";
   seed = null;
   /**Chunks to render this frame.
@@ -38,16 +48,11 @@ class World {
   #actualTick() {
     this.toRender = this.getRenderedChunks(undefined, ui.camera.zoom);
     //Tick *everything*
-    for (let particle of this.floorParticles) {
-      particle.step(1);
-    }
-    for (let bullet of this.bullets) {
-      bullet.step(1);
-    }
-    for (let particle of this.particles) {
-      particle.step(1);
-    }
-    for (let entity of this.entities) {
+    this.physobjs.forEach((p) => p.tick());
+    this.floorParticles.forEach((p) => p.step(1));
+    this.bullets.forEach((b) => b.step(1));
+    this.particles.forEach((p) => p.step(1));
+    this.entities.forEach((entity) => {
       entity.tick();
       if (entity instanceof InventoryEntity) {
         entity.inventory.iterate((stack) => {
@@ -61,7 +66,7 @@ class World {
           }, true);
         }
       }
-    }
+    });
     //Only tick simulated chunks
     this.getRenderedChunks(World.simulationDistance).forEach((chunk) => {
       chunk.tick();
@@ -100,6 +105,7 @@ class World {
         }
         bullet.emit(bullet.despawnEffect);
         bullet.frag();
+        bullet.incend();
         //Delete the bullet
         this.bullets.splice(b, 1);
       }
@@ -120,6 +126,12 @@ class World {
     for (let e = 0; e < len; e++) {
       if (this.entities[e]?.dead) {
         this.entities.splice(e, 1);
+      }
+    }
+    len = this.physobjs.length;
+    for (let p = 0; p < len; p++) {
+      if (this.physobjs[p]?.remove) {
+        this.physobjs.splice(p, 1);
       }
     }
     //No search algorithms => faster
@@ -274,6 +286,20 @@ class World {
     if (block === null)
       throw new Error("There is no block at x:" + x + ", y:" + y);
     return block;
+  }
+  /**Gets all blocks neighbouring a position. Includes that position.*/
+  getAdjacent(x, y, layer = "blocks") {
+    return [
+      this.getBlock(x - 1, y - 1, layer),
+      this.getBlock(x, y - 1, layer),
+      this.getBlock(x + 1, y - 1, layer),
+      this.getBlock(x - 1, y, layer),
+      this.getBlock(x, y, layer),
+      this.getBlock(x + 1, y, layer),
+      this.getBlock(x - 1, y + 1, layer),
+      this.getBlock(x, y + 1, layer),
+      this.getBlock(x + 1, y + 1, layer),
+    ];
   }
   /**@returns {SerialisedWorld} */
   serialise() {

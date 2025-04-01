@@ -237,6 +237,16 @@ class ShootableObject extends PhysicalObject {
       source.damageDealt +=
         Math.min(amount, this.health) * this.effectiveHealthMult; //Stats pretend health was higher
     this.health -= amount;
+    this.createDamageNumber(amount);
+    if (this.health <= 0) {
+      this.health = 0;
+      if (!this.dead) {
+        this.dead = true;
+        this.onHealthZeroed(type, source);
+      }
+    }
+  }
+  createDamageNumber(amount) {
     this.world.particles.push(
       new TextParticle(
         this.x,
@@ -254,13 +264,6 @@ class ShootableObject extends PhysicalObject {
         true
       )
     );
-    if (this.health <= 0) {
-      this.health = 0;
-      if (!this.dead) {
-        this.dead = true;
-        this.onHealthZeroed(type, source);
-      }
-    }
   }
   onHealthZeroed(type, source) {}
   checkBullets() {
@@ -316,6 +319,7 @@ class ShootableObject extends PhysicalObject {
     }
   }
   hitByBullet(bullet) {}
+  /**Deals damage to this object. If health goes below zero, the object is removed.*/
   damage(type = "normal", amount = 0, source = null) {
     this._healthbarShowTime = 180;
     this.takeDamage(type, Math.max(amount, 0), source);

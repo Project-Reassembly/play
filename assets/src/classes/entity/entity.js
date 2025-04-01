@@ -38,7 +38,7 @@ class Entity extends ShootableObject {
   effectiveHealthMult = 1;
   effectiveResistanceMult = 1;
   effectiveSpeedMult = 1;
-  statuses = [];
+  statuses = {};
 
   //Physics
   flying = false;
@@ -264,6 +264,11 @@ class Entity extends ShootableObject {
   }
 
   tickGroundEffects() {
+    let blockIn = this.world.getBlock(
+      Math.floor(this.x / Block.size),
+      Math.floor(this.y / Block.size),
+      "blocks"
+    );
     let blockOn =
       this.world.getBlock(
         Math.floor(this.x / Block.size),
@@ -275,7 +280,8 @@ class Entity extends ShootableObject {
         Math.floor(this.y / Block.size),
         "tiles"
       );
-    if (blockOn instanceof Tile)
+    if (blockIn && blockIn.walkable) blockIn.steppedOnBy(this);
+    else if (blockOn instanceof Tile)
       this.speed = this.baseSpeed * blockOn.speedMultiplier;
   }
   draw() {
@@ -326,21 +332,30 @@ class Entity extends ShootableObject {
       this.effectiveHealthMult =
       this.effectiveResistanceMult =
         1;
-    for (let status of this.statuses) {
-      let effect = Registry.statuses.get(status.effect);
-      this.damage(effect.damageType, effect.damage);
-      this.heal(effect.healing);
+    for (let status in this.statuses) {
+      let time = this.statuses[status];
+      /**@type {StatusEffect} */
+      let effect = Registry.statuses.get(status);
+      if (tru(effect.effectChance))
+        this.emit(
+          effect.effect,
+          rnd(-this.width / 2, this.width / 2),
+          rnd(-this.height / 2, this.height / 2)
+        );
+      if (time % effect.interval === 0) {
+        this.damage(effect.damageType, effect.damage);
+        this.heal(effect.healing);
+      }
       this.effectiveSpeedMult *= effect.speedMult ?? 1;
       this.effectiveDamageMult *= effect.damageMult ?? 1;
       this.effectiveHealthMult *= effect.healthMult ?? 1;
       this.effectiveResistanceMult *= effect.resistanceMult ?? 1;
-      if (status.timeLeft > 0) status.timeLeft--; //Tick timer
-      else this.statuses.splice(this.statuses.indexOf(status), 1); //Delete status
+      if (time > 0) this.statuses[status]--; //Tick timer
+      else delete this.statuses[status];
     }
   }
   applyStatus(effect, time) {
-    if (time > 0)
-      this.statuses.push({ effect: effect, time: time, timeLeft: time });
+    if (time > (this.statuses[effect]?.time ?? 0)) this.statuses[effect] = time;
   }
 
   damage(type = "normal", amount = 0, source = null) {
@@ -380,10 +395,7 @@ class Entity extends ShootableObject {
       spawnX: roundNum(this.spawnX),
       spawnY: roundNum(this.spawnY),
       health: roundNum(this.health),
-      statuses: this.statuses.map((x) => ({
-        effect: x.effect,
-        duration: timeLeft,
-      })),
+      statuses: this.statuses,
       isMainPlayer: this === game.player,
     };
   }
@@ -391,7 +403,7 @@ class Entity extends ShootableObject {
   static deserialise(created, inFull = true) {
     /**@type {Entity} */
     let entity = construct(Registry.entities.get(created.entity), "entity");
-    created.statuses.forEach((s) => entity.applyStatus(s.effect, s.duration));
+    entity.statuses = created.statuses;
     entity.health = created.health;
     if (entity instanceof InventoryEntity) {
       entity.inventory = Inventory.deserialise(created.inventory);

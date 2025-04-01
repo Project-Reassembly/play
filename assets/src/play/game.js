@@ -587,6 +587,7 @@ function postProcess() {
   pop();
 }
 
+/**@param {KeyboardEvent} ev  */
 function fixError(ev) {
   if (ev.key === " ") {
     errored = false;

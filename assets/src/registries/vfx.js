@@ -115,7 +115,7 @@ Registry.vfx.add("shoot", {
       particle: {
         lifetime: 10,
         speed: 0,
-        direction: -Math.PI/2,
+        direction: -Math.PI / 2,
         shape: "moved-triangle",
         colourFrom: [255, 255, 255],
         colourTo: [255, 230, 175, 0],
@@ -126,26 +126,10 @@ Registry.vfx.add("shoot", {
         rotateSpeed: 0,
         light: 15,
       },
-    }
-  ]
-})
-Registry.vfx.add("laser-caster-fire", {
-  type: "particle-emission",
-  amount: 4,
-  emissions: 10,
-  interval: 10,
-  particle: {
-    shape: "rhombus",
-    lifetime: 30,
-    speed: 1,
-    widthFrom: 10,
-    widthTo: 5,
-    heightFrom: 10,
-    heightTo: 5,
-    colourFrom: [100, 255, 255],
-    colourTo: [0, 0, 255, 0],
-  },
+    },
+  ],
 });
+
 Registry.vfx.add("laser-caster-frag", {
   type: "particle-emission",
   amount: 4,
@@ -162,16 +146,83 @@ Registry.vfx.add("laser-caster-frag", {
     colourTo: [0, 255, 255, 0],
   },
 });
-Registry.vfx.add("laser-caster-fiery-blast", {
-  type: "multi-effect",
-  effects: [
-    Registry.vfx.get("laser-caster-explosion"),
-    Registry.vfx.get("laser-caster-fire")
-  ]
-})
 
 //Nuclear
 
 Registry.vfx.add("nuke", {
   type: "nuclear-explosion",
+});
+
+//Fire
+
+Registry.vfx.add("fire", {
+  type: "particle-emission",
+  amount: 4,
+  particle: {
+    shape: "rhombus",
+    lifetime: 30,
+    speed: 1,
+    decel: 0.03,
+    widthFrom: 5,
+    widthTo: 10,
+    heightFrom: 5,
+    heightTo: 10,
+    colourFrom: [255, 255, 100],
+    colourTo: [255, 0, 0, 0],
+    rotateSpeed: 0.2,
+  },
+});
+Registry.vfx.add("laser-caster-fire", {
+  type: "particle-emission",
+  amount: 4,
+  particle: {
+    shape: "rhombus",
+    lifetime: 30,
+    speed: 1,
+    decel: 0.03,
+    widthFrom: 5,
+    widthTo: 10,
+    heightFrom: 5,
+    heightTo: 10,
+    colourFrom: [100, 255, 255],
+    colourTo: [0, 0, 255, 0],
+    rotateSpeed: 0.2,
+  },
+});
+
+//Status
+
+Registry.vfx.add("burning", {
+  type: "particle-emission",
+  amount: 2,
+  particle: {
+    shape: "rhombus",
+    lifetime: 30,
+    speed: 0.5,
+    decel: 0.05,
+    widthFrom: 5,
+    widthTo: 10,
+    heightFrom: 5,
+    heightTo: 10,
+    colourFrom: [255, 255, 100],
+    colourTo: [255, 0, 0, 0],
+    rotateSpeed: 0.2,
+  },
+});
+Registry.vfx.add("plasma-burn", {
+  type: "particle-emission",
+  amount: 2,
+  particle: {
+    shape: "rhombus",
+    lifetime: 30,
+    speed: 0.5,
+    decel: 0.05,
+    widthFrom: 5,
+    widthTo: 10,
+    heightFrom: 5,
+    heightTo: 10,
+    colourFrom: [100, 255, 255],
+    colourTo: [0, 0, 255, 0],
+    rotateSpeed: 0.2,
+  },
 });

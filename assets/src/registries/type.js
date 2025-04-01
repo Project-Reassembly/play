@@ -50,6 +50,7 @@ Registry.type.add("dev::structurereader", StructureReaderBlock);
 Registry.type.add("dev::itemcatalog", ItemCatalogBlock);
 Registry.type.add("dev::commandblock", CommandExecutorBlock);
 //Effects
+Registry.type.add("status-effect", StatusEffect);
 Registry.type.add("visual-effect", VisualEffect);
 Registry.type.add("particle-emission", ParticleEmissionEffect);
 Registry.type.add("image-particle-emission", ImageParticleEmissionEffect);

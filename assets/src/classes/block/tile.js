@@ -16,8 +16,8 @@ class Tile extends Block {
       this.image,
       this.x,
       this.y,
-      this.size * Block.size,
-      this.size * Block.size
+      this.tileSize * Block.size,
+      this.tileSize * Block.size
     );
   }
   /**
@@ -54,8 +54,8 @@ class Ore extends Tile {
       this.image + this.stages[this._stage],
       this.x,
       this.y,
-      this.size * Block.size,
-      this.size * Block.size
+      this.tileSize * Block.size,
+      this.tileSize * Block.size
     );
   }
 }

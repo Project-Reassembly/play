@@ -48,6 +48,18 @@ class Bullet extends PhysicalObject {
   despawnEffect = "explosion~5";
   hitEffect = "none";
   trailEffect = "default";
+  //incendiary
+  fire = {};
+  fireChance = 1;
+  fires = 0;
+  fireSpread = 0;
+  /** If true, the number of fires created (`F`) will follow a binomial distribution: `F ~ B(fires,fireChance)`.\
+   * Each fire will have `fireChance` probability of being created.\
+   * If this is the case, the mean number of fires will be `fireChance * fires`, with variance `fireChance * (1 - fireChance) * fires`.\
+   * If false, all fire will be created at once with a probability of `fireChance`.\
+   * Generally, this option allows any integer number of fires between 0 and `fires` to spawn, whereas, with this off, the only options are `fires` fires, or no fires.
+   */
+  isFireBinomial = false;
   init() {
     super.init();
     this.maxLife = this.lifetime;
@@ -134,6 +146,31 @@ class Bullet extends PhysicalObject {
         );
       }
     super.draw();
+  }
+  incend() {
+    if (this.isFireBinomial)
+      repeat(this.fires, () => {
+        if (tru(this.fireChance))
+          Fire.create(
+            Object.assign(this.fire, {
+              x: this.x + rnd(this.fireSpread, -this.fireSpread),
+              y: this.y + rnd(this.fireSpread, -this.fireSpread),
+              world: this.world,
+              team: this.entity.team,
+            })
+          );
+      });
+    else if (tru(this.fireChance))
+      repeat(this.fires, () =>
+        Fire.create(
+          Object.assign(this.fire, {
+            x: this.x + rnd(this.fireSpread, -this.fireSpread),
+            y: this.y + rnd(this.fireSpread, -this.fireSpread),
+            world: this.world,
+            team: this.entity.team,
+          })
+        )
+      );
   }
   frag() {
     patternedBulletExpulsion(

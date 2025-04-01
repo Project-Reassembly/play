@@ -180,9 +180,9 @@ Registry.items.add("iti-laser-caster", {
   name: "Laser Caster",
   rarity: Item.rarity.ITI,
   description:
-    "Fires fast-moving bolts of high-damage plasma.\nBolts deal secondary damage, with homing fragmentation.\nInflicts a burning effect.\nRequires no ammunition.",
+    "Fires fast-moving incendiary bolts of high-damage plasma.\nBolts deal secondary damage, with homing fragmentation.\nSets targets on fire.\nRequires no ammunition.",
   image: "weapon.scrap-shooter.item",
-  reload: 80,
+  reload: 120,
   ammoType: "none",
   shoot: {
     bullet: {
@@ -195,6 +195,8 @@ Registry.items.add("iti-laser-caster", {
       trailColour: [0, 200, 255, 200],
       trailLight: 80,
       knockback: 10,
+      status: "plasma-burn",
+      statusDuration: 360,
       drawer: {
         shape: "rhombus",
         fill: [0, 255, 255],
@@ -216,7 +218,15 @@ Registry.items.add("iti-laser-caster", {
         },
       ],
       shootEffect: "laser-caster-explosion~10",
-      despawnEffect: "laser-caster-fiery-blast~20",
+      despawnEffect: "laser-caster-explosion~20",
+      fire: {
+        damage: 5,
+        interval: 10,
+        effect: "laser-caster-fire",
+        status: "plasma-burn",
+        lifetime: 180
+      },
+      fires: 1,
       fragNumber: 6,
       fragSpread: 180,
       fragBullet: {
@@ -232,6 +242,8 @@ Registry.items.add("iti-laser-caster", {
         trail: true,
         hitSize: 1.5,
         trailShape: "rhombus",
+        status: "plasma-burn",
+        statusDuration: 180,
         trailColour: [0, 200, 255, 255],
         trailColourTo: [0, 200, 255, 0],
         drawer: {

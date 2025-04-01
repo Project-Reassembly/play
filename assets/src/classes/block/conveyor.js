@@ -53,15 +53,15 @@ class Conveyor extends Container {
       this.baseImg,
       this.x,
       this.y,
-      this.size * Block.size,
-      this.size * Block.size
+      this.tileSize * Block.size,
+      this.tileSize * Block.size
     );
     rotatedImg(
       this.beltImg,
       this.x,
       this.y,
-      this.size * Block.size,
-      this.size * Block.size,
+      this.tileSize * Block.size,
+      this.tileSize * Block.size,
       this.direction
     );
   }

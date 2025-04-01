@@ -47,7 +47,8 @@ importScripts(
   "../classes/block/conveyor.js",
   "../classes/block/devblocks.js",
   "../classes/block/decoration.js",
-  "../play/effects.js"
+  "../play/effects.js",
+  "../classes/effect/status-effect.js",
 );
 console.log("[World Gen] [Setup] Imported P:R Classes");
 importScripts(

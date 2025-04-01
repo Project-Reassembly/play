@@ -28,7 +28,7 @@ Registry.deathmsg.add("impact", [
   ["(1) was crushed by (2)", "(1) was squashed by (2)"],
 ]);
 Registry.deathmsg.add("explosion", [
-  ["(1) blew up", "(1) became geography"],
+  ["(1) blew up", "(1) became geography", "(1) tried to rocket jump"],
   [
     "(1) was blown up by (2)",
     "(1)'s surface area was rapidly increased by (2)",
@@ -47,7 +47,7 @@ Registry.deathmsg.add("fire", [
   ],
 ]);
 Registry.deathmsg.add("electric", [
-  ["(1) was electrocuted"],
+  ["(1) was electrocuted", "(1) ignored the high-voltage warning sign"],
   [
     "(1) was electrocuted by (2)",
     "(2)'s attempt to defibrillate (1) failed", //Don't let them do CPR
@@ -69,10 +69,11 @@ Registry.deathmsg.add("fall", [
     "(1) stopped falling", //*b o n k*
     "(1) couldn't fly", //I believe i- [© has found you]
     "(1) missed the water", //mlg water bucket drop 360 no scope speed craft to bed- *cronch*
+    "(1) found out what a one-person trust fall looks like",
   ],
   [
     "(1) was defenestrated by (2)", //Throw it out the window!
     "(1) was gravitationally assisted by (2)", //Assisted in falling off a building, you mean?
-    "(1) was betrayed by (2)", //Betrayal = push off building, apparently
+    "(1)'s trust in (2) was misplaced", //TRUST FALL
   ],
 ]);
