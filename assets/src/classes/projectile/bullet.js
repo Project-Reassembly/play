@@ -44,7 +44,7 @@ class Bullet extends PhysicalObject {
   intervalTime = 0;
   #intervalCounter = 0;
   //vfx
-  shootEffect = "shoot";
+  spawnEffect = "none";
   despawnEffect = "explosion~5";
   hitEffect = "none";
   trailEffect = "default";
@@ -66,7 +66,7 @@ class Bullet extends PhysicalObject {
     this._trailInterval = this.hitSize * 4;
   }
   oncreated() {
-    this.emit(this.shootEffect);
+    this.emit(this.spawnEffect);
   }
   step(dt) {
     this.spawnTrail(dt);

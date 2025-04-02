@@ -136,7 +136,7 @@ Registry.vfx.add("laser-caster-frag", {
   cone: 20,
   particle: {
     shape: "rhombus",
-    lifetime: 30,
+    lifetime: 20,
     speed: 3,
     widthFrom: 2,
     widthTo: 0,
@@ -224,5 +224,23 @@ Registry.vfx.add("plasma-burn", {
     colourFrom: [100, 255, 255],
     colourTo: [0, 0, 255, 0],
     rotateSpeed: 0.2,
+  },
+});
+
+//Charge
+
+Registry.vfx.add("laser-caster-charge", {
+  type: "wave-emission",
+  emissions: 4,
+  interval: 10,
+  parentise: true,
+  particle: {
+    lifetime: 30,
+    radiusFrom: 20,
+    radiusTo: 0,
+    strokeFrom: 2,
+    strokeTo: 5,
+    colourFrom: [0, 255, 255, 0],
+    colourTo: [255, 255, 255],
   },
 });

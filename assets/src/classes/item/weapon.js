@@ -1,5 +1,9 @@
 class Weapon extends Equippable {
+  timer = new Timer();
   reload = 30;
+  readyEffect = "none";
+  charge = 0;
+  chargeEffect = "none";
   ammoType = "none";
   ammoUse = 1;
   shootX = 15;
@@ -9,8 +13,11 @@ class Weapon extends Equippable {
       spread: 0,
       amount: 1,
       spacing: 0,
+      burst: 1,
+      interval: 0,
     },
   };
+  fireEffect = "shoot";
 
   //Internal
   #delay = 0;
@@ -24,9 +31,21 @@ class Weapon extends Equippable {
   /**@param {EquippedEntity} holder  */
   tick(holder) {
     super.tick(holder);
+    this.timer.tick();
     this.decelerate();
     if (this.#cooldown > 0) {
       this.#cooldown--;
+      if (this.#cooldown <= 0) {
+        let pos = this._getShootPos(holder);
+        createEffect(
+          this.readyEffect,
+          holder.world,
+          pos.x,
+          pos.y,
+          pos.direction,
+          1
+        );
+      }
     }
   }
   getAcceleratedReloadRate() {
@@ -57,39 +76,80 @@ class Weapon extends Equippable {
       this.#acceleration = 0;
     }
   }
+  _getShootPos(holder) {
+    let pos = this.component.getPosOn(holder);
+    pos.x += Math.cos(pos.direction) * this.shootX;
+    pos.y += Math.sin(pos.direction) * this.shootX;
+    return pos;
+  }
   /**
    * @param {EquippedEntity} holder
    */
   fire(holder) {
     if (this.#cooldown <= 0) {
-      if (this.ammoType !== "none") {
-        if (holder.inventory.hasItem(this.ammoType, this.ammoUse))
-          holder.inventory.removeItem(this.ammoType, this.ammoUse);
-        else return;
-      }
-      let pos = this.component.getPosOn(holder);
-      this.#cooldown = this.getAcceleratedReloadRate();
-      this.accelerate(); //Apply acceleration effects
-      //Resolve nonexistent properties
-      this.shoot.pattern.spread ??= 0;
-      this.shoot.pattern.amount ??= 1;
-      this.shoot.pattern.spacing ??= 0;
-
-      patternedBulletExpulsion(
-        pos.x + Math.cos(pos.direction) * this.shootX,
-        pos.y + Math.sin(pos.direction) * this.shootX,
-        this.shoot.bullet,
-        this.shoot.pattern.amount,
-        degrees(pos.direction),
-        this.shoot.pattern.spread,
-        this.shoot.pattern.spacing,
-        holder.world,
-        holder
-      );
-      if (this.component instanceof WeaponComponent) {
-        this.component.trigger();
-      }
+      if (this.charge > 0) {
+        let pos = this._getShootPos(holder);
+        createEffect(
+          this.chargeEffect,
+          holder.world,
+          pos.x,
+          pos.y,
+          pos.direction,
+          1,
+          () => this._getShootPos(holder)
+        );
+        this.#cooldown = this.reload + this.charge;
+        this.timer.do(() => {
+          this._internalFire(holder, this.shoot);
+        }, this.charge);
+      } else this._internalFire(holder, this.shoot);
     }
+  }
+  _internalFire(holder, shoot = this.shoot) {
+    if (this.ammoType !== "none") {
+      if (holder.inventory.hasItem(this.ammoType, this.ammoUse))
+        holder.inventory.removeItem(this.ammoType, this.ammoUse);
+      else return;
+    }
+
+    this.#cooldown = this.getAcceleratedReloadRate();
+    this.accelerate(); //Apply acceleration effects
+    //Resolve nonexistent properties
+    shoot.pattern.spread ??= 0;
+    shoot.pattern.amount ??= 1;
+    shoot.pattern.spacing ??= 0;
+    shoot.pattern.burst ??= 1;
+    shoot.pattern.interval ??= 0;
+
+    this.timer.repeat(
+      () => {
+        let pos = this._getShootPos(holder);
+        createEffect(
+          this.fireEffect,
+          holder.world,
+          pos.x,
+          pos.y,
+          pos.direction,
+          1
+        );
+        patternedBulletExpulsion(
+          pos.x,
+          pos.y,
+          shoot.bullet,
+          shoot.pattern.amount,
+          degrees(pos.direction),
+          shoot.pattern.spread,
+          shoot.pattern.spacing,
+          holder.world,
+          holder
+        );
+        if (this.component instanceof WeaponComponent) {
+          this.component.trigger();
+        }
+      },
+      this.shoot.pattern.burst,
+      this.shoot.pattern.interval
+    );
   }
   /**@param {EquippedEntity} holder  */
   use(holder, isSecondary = false) {
@@ -112,12 +172,21 @@ class Weapon extends Equippable {
       " x" +
       this.ammoUse +
       "\n" +
-      ""
-        .padEnd((this.#cooldown / this.reload) * 15, "■")
-        .padEnd(15, "□")
-        .substring(0, 15) +
+      this.createProgressBar() +
       " "
     );
+  }
+  createProgressBar() {
+    if (this.#cooldown <= this.reload)
+      return ""
+        .padEnd((this.#cooldown / this.reload) * 15, "■")
+        .padEnd(15, "□")
+        .substring(0, 15);
+    else
+      return ""
+        .padEnd(15 - ((this.#cooldown - this.reload) / this.charge) * 15, "■")
+        .padEnd(15, "□")
+        .substring(0, 15);
   }
 }
 

@@ -373,9 +373,20 @@ function insanity() {
 //#### Actual Effect Classes ####
 /**Sort of abstract class for visual effects. */
 class VisualEffect {
+  parentise = false;
   create(world, x = 0, y = 0, direction = 0, scale = 1) {}
-  execute(world, x = 0, y = 0, direction = 0, scale = 1) {
-    this.create(world, x, y, direction, scale);
+  execute(
+    world,
+    x = 0,
+    y = 0,
+    direction = 0,
+    scale = 1,
+    pos = () => ({ x: 0, y: 0, direction: 0 })
+  ) {
+    if (this.parentise) {
+      let p = pos();
+      this.create(world, p.x, p.y, p.direction, scale);
+    } else this.create(world, x, y, direction, scale);
   }
 }
 /**Extended class for repeated creation of a visual effect */
@@ -384,19 +395,24 @@ class EmissionEffect extends VisualEffect {
   interval = 0;
   amount = 1;
   delay = 0;
-  execute(world, x = 0, y = 0, direction = 0, scale = 1) {
+  execute(
+    world,
+    x = 0,
+    y = 0,
+    direction = 0,
+    scale = 1,
+    pos = () => ({ x: x, y: y, direction: direction })
+  ) {
+    let fn = () => this.create(world, x, y, direction, scale);
+    if (this.parentise) {
+      fn = () => {
+        let p = pos();
+        this.create(world, p.x, p.y, p.direction, scale);
+      };
+    }
     if (this.emissions > 1)
-      effectTimer.repeat(
-        () => this.create(world, x, y, direction, scale),
-        this.emissions,
-        this.interval,
-        this.delay
-      );
-    else
-      effectTimer.do(
-        () => this.create(world, x, y, direction, scale),
-        this.delay
-      );
+      effectTimer.repeat(fn, this.emissions, this.interval, this.delay);
+    else effectTimer.do(fn, this.delay);
   }
 }
 /**A container for many effects at once. */
@@ -812,12 +828,13 @@ function repeat(n, func, ...params) {
  * @param {float} y Y position of the effect's origin
  * @param {float} direction Direction *in radians* of the effect. ONly for directed effects, such as `ParticleEmissionEffect`
  * @param {float} scale Extra parameter to determine size of scalable effects
+ * @param {() => {x: number, y: number, direction: number}} pos Function to get position for parentised effects.
  * @returns
  */
-function createEffect(effect, world, x, y, direction, scale) {
+function createEffect(effect, world, x, y, direction, scale, pos) {
   /**@type {VisualEffect} */
   let fx = construct(Registry.vfx.get(effect), "visual-effect");
-  fx.execute(world, x, y, direction, scale);
+  fx.execute(world, x, y, direction, scale, pos);
   return fx;
 }
 
@@ -837,6 +854,7 @@ function emitEffect(effect, source, offX = 0, offY = 0) {
     source.x + offX,
     source.y + offY,
     radians(source.direction),
-    effectparts[1] ?? 1
+    effectparts[1] ?? 1,
+    () => ({ x: source.x, y: source.y, direction: source.directionRad })
   );
 }

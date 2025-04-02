@@ -345,7 +345,7 @@ class PhysicalObject extends RegisteredItem {
 }
 
 class ShootableObject extends PhysicalObject {
-  health = 0;
+  health = 100;
   maxHealth = 0;
   team = "enemy";
   dead = false;

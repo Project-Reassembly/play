@@ -182,8 +182,11 @@ Registry.items.add("iti-laser-caster", {
   description:
     "Fires fast-moving incendiary bolts of high-damage plasma.\nBolts deal secondary damage, with homing fragmentation.\nSets targets on fire.\nRequires no ammunition.",
   image: "weapon.scrap-shooter.item",
-  reload: 120,
+  reload: 180,
   ammoType: "none",
+  charge: 60,
+  chargeEffect: "laser-caster-charge",
+  fireEffect: "laser-caster-frag",
   shoot: {
     bullet: {
       lifetime: 15,
@@ -207,24 +210,23 @@ Registry.items.add("iti-laser-caster", {
       damage: [
         {
           type: "laser",
-          amount: 15,
+          amount: 20,
           spread: 5,
         },
         {
           type: "laser",
-          amount: 5,
-          spread: 1,
+          amount: 10,
+          spread: 3,
           radius: 20,
         },
       ],
-      shootEffect: "laser-caster-explosion~10",
       despawnEffect: "laser-caster-explosion~20",
       fire: {
         damage: 5,
         interval: 10,
         effect: "laser-caster-fire",
         status: "plasma-burn",
-        lifetime: 180
+        lifetime: 180,
       },
       fires: 1,
       fragNumber: 6,
@@ -244,7 +246,7 @@ Registry.items.add("iti-laser-caster", {
         hitSize: 1.5,
         trailShape: "rhombus",
         status: "plasma-burn",
-        statusDuration: 180,
+        statusDuration: 60,
         trailColour: [0, 200, 255, 255],
         trailColourTo: [0, 200, 255, 0],
         drawer: {
@@ -257,11 +259,10 @@ Registry.items.add("iti-laser-caster", {
         damage: [
           {
             type: "laser",
-            amount: 5,
+            amount: 8,
             spread: 2,
           },
         ],
-        shootEffect: "none",
         despawnEffect: "laser-caster-frag",
       },
     },

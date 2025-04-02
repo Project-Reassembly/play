@@ -275,7 +275,6 @@ function createLinkedBlockAndItem(
       name: displayname,
       image: image,
       dropItem: regname,
-      health: 100,
     })
   );
   Registry.items.add(
