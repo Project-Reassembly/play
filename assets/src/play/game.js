@@ -962,6 +962,7 @@ function secondaryInteract() {
       game.player.direction + rnd(-10, 10)
     );
     Inventory.mouseItemStack.clear();
+    ui.waitingForMouseUp = true;
   }
 }
 

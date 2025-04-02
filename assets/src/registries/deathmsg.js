@@ -53,7 +53,10 @@ Registry.deathmsg.add("electric", [
     "(2)'s attempt to defibrillate (1) failed", //Don't let them do CPR
   ],
 ]);
-Registry.deathmsg.add("no", "(1) stopped existing because of (2)");
+Registry.deathmsg.add("no", [
+  ["(1) stopped existing"],
+  ["(1) stopped existing because of (2)"],
+]);
 Registry.deathmsg.add("insanity", [
   [
     "(1)'s inner demons escaped", //MY DEMONS NOOO

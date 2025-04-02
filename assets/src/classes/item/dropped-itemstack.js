@@ -15,7 +15,8 @@ class DroppedItemStack extends Entity {
     this.#delayLeft = this.delay;
     this.speed = rnd(2, 4);
     this.components = [];
-    this.hitSize = 7.5;
+    this.width = 10;
+    this.height = 10;
     this.team = "items";
   }
   damage() {}
@@ -27,8 +28,10 @@ class DroppedItemStack extends Entity {
     }
     this.item.getItem().groundTick(this.x, this.y, this.world);
     this.speed *= 0.9;
-    this.x += Math.cos(this.directionRad) * this.speed;
-    this.y += Math.sin(this.directionRad) * this.speed;
+    this.move(
+      Math.cos(this.directionRad) * this.speed,
+      Math.sin(this.directionRad) * this.speed
+    );
     this.#delayLeft--;
     if (this.#delayLeft <= 0)
       for (let ent of this.world.entities) {
@@ -68,6 +71,15 @@ class DroppedItemStack extends Entity {
           }
         }
       }
+    this.tickGroundEffects();
+  }
+  tickGroundEffects() {
+    let blockIn = this.world.getBlock(
+      Math.floor(this.x / Block.size),
+      Math.floor(this.y / Block.size),
+      "blocks"
+    );
+    if (blockIn && blockIn.walkable) blockIn.steppedOnBy(this);
   }
   draw() {
     drawImg(this.item?.getItem()?.image ?? "error", this.x, this.y, 15, 15);

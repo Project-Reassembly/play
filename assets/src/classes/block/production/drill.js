@@ -32,5 +32,6 @@ class Drill extends TileProducer {
       this.tileSize * Block.size,
       this.tileSize * Block.size
     );
+    ShootableObject.prototype.draw.call(this);
   }
 }

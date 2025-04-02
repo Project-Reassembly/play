@@ -64,6 +64,7 @@ class Conveyor extends Container {
       this.tileSize * Block.size,
       this.direction
     );
+    ShootableObject.prototype.draw.call(this);
   }
   postDraw() {
     let vct = Block.direction.vectorOf(this.direction);
@@ -78,11 +79,16 @@ class Conveyor extends Container {
           20
         );
     }
+    super.postDraw()
   }
   /**
    * @param {Entity} entity
    */
   steppedOnBy(entity) {
+    if (entity instanceof DroppedItemStack){
+      this.inventory.set(0, entity.item);
+      entity.dead = true;
+    }
     let vct = Block.direction.vectorOf(this.direction);
     let speed = Block.size / this.moveTime;
     entity.move(vct.x * speed, vct.y * speed);

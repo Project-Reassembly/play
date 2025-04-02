@@ -240,6 +240,7 @@ Registry.items.add("iti-laser-caster", {
         lifetime: 10,
         speed: 10,
         trail: true,
+        pierce: 1,
         hitSize: 1.5,
         trailShape: "rhombus",
         status: "plasma-burn",

@@ -48,7 +48,6 @@ class Fire extends PhysicalObject {
     let fire = new this();
     Object.assign(fire, opts);
     opts.world.physobjs.push(fire);
-    console.log(fire);
     return fire;
   }
 }
