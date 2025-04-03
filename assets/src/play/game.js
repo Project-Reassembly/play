@@ -1015,6 +1015,14 @@ function interact() {
       return;
     }
   }
+  if (heldItem !== null)
+    Inventory.mouseItemStack
+      .getItem()
+      .useInAir(game.player, Inventory.mouseItemStack);
+  if (Inventory.mouseItemStack?.isEmpty())
+    Inventory.mouseItemStack = ItemStack.EMPTY;
+  
+  if (ui.waitingForMouseUp) return;
   if (
     game.player.rightHand.get(0) instanceof ItemStack &&
     game.player.rightHand.get(0).getItem() instanceof Equippable

@@ -2,11 +2,17 @@ class Bullet extends PhysicalObject {
   direction = 0;
   damage = [];
   speed = 20;
+  decel = 0;
   lifetime = 60;
   hitSize = 5;
+  collides = true;
   trail = true;
   trailColour = [255, 255, 255, 200];
+  trailColourTo = null;
   trailShape = "rhombus";
+  trailWidth = 0;
+  trailLength = 0;
+  trailLife = 0;
   trailLight = 0;
   remove = false;
   pierce = 0;
@@ -22,10 +28,9 @@ class Bullet extends PhysicalObject {
   knockback = 0;
   kineticKnockback = false;
   controlledKnockback = false;
-  //Effectively a pierce thing
   damaged = [];
   _trailCounter = 20;
-  _trailInterval = 10;
+  trailInterval = null;
   //Statuseseseseses
   status = "none";
   statusDuration = 0;
@@ -63,7 +68,8 @@ class Bullet extends PhysicalObject {
   init() {
     super.init();
     this.maxLife = this.lifetime;
-    this._trailInterval = this.hitSize * 4;
+    this.trailInterval ??= this.hitSize * 4;
+    this.trailColourTo ??= this.trailColour;
   }
   oncreated() {
     this.emit(this.spawnEffect);
@@ -79,6 +85,8 @@ class Bullet extends PhysicalObject {
       moveVector.mult(this.speed * dt);
       //Move
       this.move(moveVector.x, moveVector.y);
+      //Speed change
+      this.speed = Math.max(this.speed - dt * this.decel, 0);
       //Tick lifetime
       if (this.lifetime <= 0) {
         this.remove = true;
@@ -86,6 +94,9 @@ class Bullet extends PhysicalObject {
         this.lifetime -= dt;
       }
     }
+  }
+  collidesWith(other) {
+    return this.collides && super.collidesWith(other);
   }
   move(x, y) {
     super.move(x, y, true);
@@ -101,22 +112,22 @@ class Bullet extends PhysicalObject {
               this.x - e * p5.Vector.fromAngle(this.directionRad).x,
               this.y - e * p5.Vector.fromAngle(this.directionRad).y,
               this.directionRad,
-              (this.maxLife * 1.2) ** 0.4,
+              this.trailLife || (this.maxLife * 1.2) ** 0.4,
               0,
               0,
               this.trailShape,
               this.trailColour,
-              this.trailColour,
-              this.hitSize * 1.9,
+              this.trailColourTo,
+              this.trailWidth || this.hitSize * 1.9,
               0,
-              this.hitSize * this._trailInterval * 0.25,
-              this.hitSize * this._trailInterval * 0.25,
+              (this.trailLength || this.hitSize) * this.trailInterval * 0.25,
+              (this.trailLength || this.hitSize) * this.trailInterval * 0.25,
               0
             );
             trailparticle.light = this.trailLight;
             this.world.particles.push(trailparticle);
           }
-          this._trailCounter = this._trailInterval;
+          this._trailCounter = this.trailInterval;
         }
       }
     else this.emit(this.trailEffect);

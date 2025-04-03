@@ -427,6 +427,25 @@ createLinkedBlockAndItem(
       {
         inputs: [
           {
+            item: "coal",
+            count: 5,
+          },
+          {
+            item: "scrap",
+            count: 2,
+          },
+        ],
+        outputs: [
+          {
+            item: "makeshift-explosive",
+            count: 2,
+          },
+        ],
+        time: 60,
+      },
+      {
+        inputs: [
+          {
             item: "sandstone",
             count: 4,
           },

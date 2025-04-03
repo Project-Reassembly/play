@@ -1,13 +1,17 @@
-class Item {
+class Item extends RegisteredItem {
   image = "error";
   name = "<unnamed item>";
   description = "<no description>";
   rarity = 0;
   stackSize = 99;
-  /**
-   * @param {EquippedEntity} holder Entity holding this item.
+  /** Called every ticj while in inventory.
+   * @param {InventoryEntity} holder Entity holding this item.
    */
   tick(holder) {}
+  /** Called when an interaction is attempted with this item, but nothing happens.
+   * @param {InventoryEntity} holder Entity using this item.
+   */
+  useInAir(holder) {}
   /**
    * Called when ticking on the ground.
    * @param {number} x
@@ -15,14 +19,15 @@ class Item {
    * @param {World} world
    */
   groundTick(x, y, world) {
-    if (rnd(0, 1) < 0.1)
+    if (tru(0.1))
       if (this.rarity === Item.rarity.SPECIAL) {
         let dir = rnd(0, Math.PI * 2);
         let size = rnd(3, 8);
+        let dist = rnd(0, 8);
         world.particles.push(
           new ShapeParticle(
-            x + Math.cos(dir) * rnd(0, 8),
-            y + Math.sin(dir) * rnd(0, 8),
+            x + Math.cos(dir) * dist,
+            y + Math.sin(dir) * dist,
             0,
             40,
             0,

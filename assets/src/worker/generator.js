@@ -31,6 +31,7 @@ importScripts(
   "../classes/item/placeable.js",
   "../classes/item/equippable.js",
   "../classes/item/weapon.js",
+  "../classes/item/throwable.js",
 
   "../classes/item/dropped-itemstack.js",
 

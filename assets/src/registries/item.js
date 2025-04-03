@@ -153,11 +153,6 @@ Registry.items.add("scrap-shooter", {
           amount: 7,
           spread: 2,
         },
-        {
-          type: "no",
-          amount: 0,
-          radius: 10,
-        },
       ],
     },
     pattern: {
@@ -282,8 +277,7 @@ Registry.items.add("iti-energy-repeater", {
   type: "weapon",
   name: "Energy Repeater",
   rarity: Item.rarity.ITI,
-  description:
-    "Shoots quickfire bursts of laser bolts.",
+  description: "Shoots quickfire bursts of laser bolts.",
   image: "weapon.iti-energy-repeater.item",
   reload: 30,
   charge: 20,
@@ -328,7 +322,7 @@ Registry.items.add("iti-energy-repeater", {
     pattern: {
       burst: 3,
       interval: 5,
-      spread: 3
+      spread: 3,
     },
   },
   component: {
@@ -348,4 +342,80 @@ Registry.items.add("scrap-bullet", {
   description: "A tiny piece of scrap,\nfashioned into a sharp bullet.",
   image: "item.scrap-bullet",
   stackSize: 9999,
+});
+//Throwables
+Registry.items.add("makeshift-explosive", {
+  type: "throwable",
+  name: "Makeshift Explosive",
+  description:
+    "A small bomb made from coal dust and scrap.\n\nThat's got to be against some convention.",
+  image: "item.coal",
+  bullet: {
+    lifetime: 120,
+    speed: 8,
+    decel: 0.2,
+    collides: false,
+    drawer: {
+      image: "item.coal",
+      width: 10,
+      height: 10,
+    },
+    status: "burning",
+    statusDuration: 360,
+    trailEffect: "burning",
+    // trailShape: "ellipse",
+    // trailWidth: 5,
+    // trailLength: 5,
+    // trailInterval: 3,
+    // trailLife: 60,
+    // trailColour: [255, 255, 100],
+    // trailColourTo: [255, 0, 0, 0],
+    damage: [
+      {
+        type: "explosion",
+        amount: 30,
+        spread: 10,
+        radius: 50,
+      },
+    ],
+    fragBullet: {
+      lifetime: 10,
+      speed: 15,
+      light: 30,
+      trail: true,
+      hitSize: 2.5,
+      trailShape: "rhombus",
+      drawer: {
+        shape: "rhombus",
+        fill: "#cd9f8b",
+        width: 8,
+        height: 3,
+        image: false,
+      },
+      trailColour: [255, 255, 100, 200],
+      trailColourTo: [120, -62, -55, 100],
+      trailLife: 30,
+      damage: [
+        {
+          type: "ballistic",
+          amount: 5,
+          spread: 3,
+        },
+      ],
+    },
+    fragNumber: 9,
+    fragSpread: 360,
+    despawnEffect: "explosion~50",
+    fires: 3,
+    isFireBinomial: true,
+    fire: {
+      damage: 3,
+      lifetime: 720,
+      interval: 20,
+      status: "burning",
+      statusDuration: 120,
+    },
+    fireChance: 0.5,
+    fireSpread: 20
+  },
 });

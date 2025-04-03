@@ -22,6 +22,7 @@ Registry.type.add("placeable", PlaceableItem);
 Registry.type.add("itemstack", ItemStack);
 Registry.type.add("equippable", Equippable);
 Registry.type.add("weapon", Weapon);
+Registry.type.add("throwable", Throwable);
 //World
 Registry.type.add("world", World);
 Registry.type.add("chunk", Chunk);
