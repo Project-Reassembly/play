@@ -142,3 +142,40 @@ Registry.entities.add("scrap-sentinel", {
     },
   ],
 });
+Registry.entities.add("iti-corporate-merchant", {
+  type: "npc",
+  name: "InfiniTech Industries Corporate Merchant",
+  inventorySize: 1,
+  trades: [
+    {
+      cost: 145000,
+      items: [
+        {
+          item: "iti-laser-caster",
+          count: 1
+        }
+      ]
+    }
+  ],
+  speed: 3,
+  health: 1000,
+  width: 35,
+  height: 35,
+  aiType: "passive",
+  followRange: 400,
+  angryRange: 700,
+  defensiveRange: 400,
+  targetRange: 300,
+  rightHand: [
+    {
+      item: "iti-laser-caster",
+      dropChance: 0.125,
+    },
+  ],
+  leftHand: [
+    {
+      item: "iti-laser-caster",
+      dropChance: 0.125,
+    },
+  ],
+})

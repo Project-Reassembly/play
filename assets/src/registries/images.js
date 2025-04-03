@@ -5,6 +5,8 @@ Registry.images.add("entity.scrap-sentinel.body", new ImageContainer("assets/tex
 Registry.images.add("entity.scrap-sentinel.legs", new ImageContainer("assets/textures/entity/component/scrap-sentinel-foot.png"))
 //Components > Weapons
 Registry.images.add("weapon.scrap-shooter.component", new ImageContainer("assets/textures/entity/weapon/scrap-shooter.png"))
+Registry.images.add("weapon.iti-laser-caster.component", new ImageContainer("assets/textures/entity/weapon/iti-laser-caster.png"))
+Registry.images.add("weapon.iti-energy-repeater.component", new ImageContainer("assets/textures/entity/weapon/iti-energy-repeater.png"))
 //Items
 Registry.images.add("item.raw-copper", new ImageContainer("assets/textures/item/raw-copper.png"))
 Registry.images.add("item.copper-ingot", new ImageContainer("assets/textures/item/copper-ingot.png"))
@@ -40,7 +42,8 @@ Registry.images.add("item.coal", new ImageContainer("assets/textures/item/coal.p
 Registry.images.add("item.scrap-bullet", new ImageContainer("assets/textures/item/scrap-bullet.png"))
 //Items > Weapons
 Registry.images.add("weapon.scrap-shooter.item", new ImageContainer("assets/textures/item/scrap-shooter.png"))
-Registry.images.add("weapon.iti-laser-caster.component", new ImageContainer("assets/textures/entity/weapon/iti-laser-caster.png"))
+Registry.images.add("weapon.iti-laser-caster.item", new ImageContainer("assets/textures/item/iti-laser-caster.png"))
+Registry.images.add("weapon.iti-energy-repeater.item", new ImageContainer("assets/textures/item/iti-energy-repeater.png"))
 //Tiles
 Registry.images.add("tile.grass", new ImageContainer("assets/textures/block/tile/grass.png"))
 Registry.images.add("tile.sand", new ImageContainer("assets/textures/block/tile/sand.png"))

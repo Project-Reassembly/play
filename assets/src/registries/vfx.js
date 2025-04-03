@@ -244,3 +244,15 @@ Registry.vfx.add("laser-caster-charge", {
     colourTo: [255, 255, 255],
   },
 });
+Registry.vfx.add("energy-repeater-charge", {
+  type: "wave-emission",
+  particle: {
+    lifetime: 20,
+    radiusFrom: 15,
+    radiusTo: 0,
+    strokeFrom: 2,
+    strokeTo: 5,
+    colourFrom: [0, 255, 255, 0],
+    colourTo: [255, 255, 255],
+  },
+});

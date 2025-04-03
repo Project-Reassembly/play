@@ -17,6 +17,7 @@ importScripts(
   "../classes/entity/component.js",
   "../classes/entity/inventory-entity.js",
   "../classes/entity/player.js",
+  "../classes/entity/npc.js",
 
   "../classes/projectile/bullet.js",
   "../classes/projectile/laser-bullet.js",

@@ -29,6 +29,7 @@ class Player extends EquippedEntity {
     );
     respawnTimer.do(() => {
       this.health = this.maxHealth;
+      this.statuses = {};
       this.dead = false;
       this.x = this.spawnX;
       this.y = this.spawnY;

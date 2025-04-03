@@ -7,6 +7,7 @@ Registry.type.add("weapon-component", WeaponComponent);
 Registry.type.add("entity", Entity);
 Registry.type.add("inventory-entity", InventoryEntity);
 Registry.type.add("equipped-entity", EquippedEntity);
+Registry.type.add("npc", NPC);
 Registry.type.add("player", Player);
 //Projectiles
 Registry.type.add("bullet", Bullet);

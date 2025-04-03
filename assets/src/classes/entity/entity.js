@@ -32,6 +32,8 @@ class Entity extends ShootableObject {
   _waiting = 0;
   spawnX = 0;
   spawnY = 0;
+  /** Multiplier for both range and movement speed while passive. */
+  passiveIncentiveModifier = 0.75;
 
   //Status effects
   effectiveDamageMult = 1;
@@ -57,7 +59,14 @@ class Entity extends ShootableObject {
   }
 
   moveTowards(x, y, rotate = true) {
-    super.moveTowards(x, y, this.speed, this.turnSpeed, rotate);
+    super.moveTowards(
+      x,
+      y,
+      this.speed *
+        (this.aiType === "passive" ? this.passiveIncentiveModifier : 1),
+      this.turnSpeed,
+      rotate
+    );
   }
 
   addToWorld(world, x, y) {
@@ -183,9 +192,13 @@ class Entity extends ShootableObject {
       this.target = { x: this.x, y: this.y };
     if (this.distanceTo(this.target) < this.size) {
       let xOffset =
-        rnd(this.followRange, this.targetRange) * (tru(0.5) ? -1 : 1);
+        rnd(this.targetRange, this.targetRange / 4) *
+        (tru(0.5) ? -1 : 1) *
+        this.passiveIncentiveModifier;
       let yOffset =
-        rnd(this.followRange, this.targetRange) * (tru(0.5) ? -1 : 1);
+        rnd(this.targetRange, this.targetRange / 4) *
+        (tru(0.5) ? -1 : 1) *
+        this.passiveIncentiveModifier;
       this.target.x += xOffset;
       this.target.y += yOffset;
       this._waiting =

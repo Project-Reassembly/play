@@ -269,7 +269,7 @@ worldGenWorker.onerror = (ev) => {
     ev.message +
     "\n - in " +
     ev.filename +
-    " at " +
+    "\nat " +
     ev.lineno +
     ":" +
     ev.colno;
