@@ -146,6 +146,24 @@ Registry.entities.add("iti-corporate-merchant", {
   type: "npc",
   name: "InfiniTech Industries Corporate Merchant",
   inventorySize: 1,
+  components: [
+    {
+      image: "npc.iti.corporate-merchant.head",
+      width: 35,
+      height: 35,
+    },
+    {
+      image: "npc.iti.generic.body",
+      width: 35,
+      height: 35,
+    },
+    {
+      type: "leg-component",
+      image: "npc.iti.generic.legs",
+      width: 35,
+      height: 35,
+    },
+  ],
   trades: [
     {
       cost: 145000,
