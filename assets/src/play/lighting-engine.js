@@ -67,9 +67,9 @@ function createLightingLayer(
   layer.rect(0, 0, width, height);
   layer.blendMode(REMOVE);
   layer.fill(lightColour);
-  addLightingCircles(layer, lightScale * 1.5 * ui.camera.zoom, lightColour);
-  addLightingCircles(layer, lightScale * ui.camera.zoom, lightColour);
-  addLightingCircles(layer, lightScale * 0.67 * ui.camera.zoom, lightColour);
+  addLightingCircles(layer, lightScale * 2.4 * ui.camera.zoom, lightColour);
+  addLightingCircles(layer, lightScale * 1.6 * ui.camera.zoom, lightColour);
+  addLightingCircles(layer, lightScale * 0.8 * ui.camera.zoom, lightColour);
   layer.rectMode(CORNER);
 }
 function lighting(

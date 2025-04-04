@@ -162,7 +162,7 @@ Object.defineProperty(
   createMultilineUIComponent(
     ["in-game"],
     [],
-    -235,
+    -110,
     230,
     0,
     0,
@@ -180,12 +180,14 @@ Object.defineProperty(
         ?.getItem()
         ?.getContextualisedInfo(game.player) ?? "",
   }
-).anchorBottom(45);
+)
+  .anchorBottom(45)
+  .alignRight();
 Object.defineProperty(
   createMultilineUIComponent(
     ["in-game"],
     [],
-    125,
+    110,
     230,
     0,
     0,
@@ -203,7 +205,8 @@ Object.defineProperty(
         ?.getItem()
         ?.getContextualisedInfo(game.player) ?? "",
   }
-).anchorBottom(45);
+)
+  .anchorBottom(45)
 UIComponent.setCondition("containerselected:false");
 // Selected block inventory controls
 //Yoink all

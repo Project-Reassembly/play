@@ -287,7 +287,7 @@ Registry.items.add("iti-energy-repeater", {
   shoot: {
     bullet: {
       type: "missile",
-      targetType: "nearest",
+      targetType: "hovered",
       trackingRange: 100,
       turnSpeed: 20,
       lifetime: 15,
@@ -317,7 +317,7 @@ Registry.items.add("iti-energy-repeater", {
           spread: 4,
         },
       ],
-      despawnEffect: "laser-caster-explosion~5",
+      despawnEffect: "laser-caster-frag",
     },
     pattern: {
       burst: 3,

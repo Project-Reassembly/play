@@ -4,7 +4,7 @@ Registry.entities.add("player", {
   y: (World.size * Chunk.size * Block.size) / 2,
   name: "Player",
   health: 100,
-  light: 200,
+  light: 100,
   components: [
     {
       image: "entity.scrap-sentinel.head",

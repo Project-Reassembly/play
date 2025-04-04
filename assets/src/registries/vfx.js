@@ -172,7 +172,7 @@ Registry.vfx.add("fire", {
     colourFrom: [255, 255, 100],
     colourTo: [255, 0, 0, 0],
     rotateSpeed: 0.2,
-    light: 90
+    light: 80
   },
 });
 Registry.vfx.add("laser-caster-fire", {
@@ -190,7 +190,7 @@ Registry.vfx.add("laser-caster-fire", {
     colourFrom: [100, 255, 255],
     colourTo: [0, 0, 255, 0],
     rotateSpeed: 0.2,
-    light: 90
+    light: 100
   },
 });
 
@@ -211,7 +211,7 @@ Registry.vfx.add("burning", {
     colourFrom: [255, 255, 100],
     colourTo: [255, 0, 0, 0],
     rotateSpeed: 0.2,
-    light: 60
+    light: 40
   },
 });
 Registry.vfx.add("plasma-burn", {
@@ -229,7 +229,7 @@ Registry.vfx.add("plasma-burn", {
     colourFrom: [100, 255, 255],
     colourTo: [0, 0, 255, 0],
     rotateSpeed: 0.2,
-    light: 60
+    light: 50
   },
 });
 
