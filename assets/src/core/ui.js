@@ -711,10 +711,14 @@ function rotatedShapeExt(
       );
       break;
     case "moved-triangle":
+      layer.rotate(HALF_PI); //turn it
       layer.triangle(height, 0, 0, -width / 2, 0, width / 2);
+      layer.rotate(-HALF_PI); //turn it
       break;
     case "inverted-triangle":
+      layer.rotate(HALF_PI); //turn it
       layer.triangle(0, 0, height, -width / 2, height, width / 2);
+      layer.rotate(-HALF_PI); //turn it
       break;
     default:
       break;

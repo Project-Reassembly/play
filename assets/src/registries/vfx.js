@@ -54,6 +54,7 @@ Registry.vfx.add("smelter-sparks", {
     heightFrom: 8,
     heightTo: 8,
     shape: "rect",
+    light: 20
   },
 });
 Registry.vfx.add("crafter-craft", {
@@ -124,7 +125,7 @@ Registry.vfx.add("shoot", {
         heightFrom: 8,
         heightTo: 0,
         rotateSpeed: 0,
-        light: 15,
+        light: 30,
       },
     },
   ],
@@ -144,6 +145,7 @@ Registry.vfx.add("laser-caster-frag", {
     heightTo: 20,
     colourFrom: [255, 255, 255],
     colourTo: [0, 255, 255, 0],
+    light: 40
   },
 });
 
@@ -170,6 +172,7 @@ Registry.vfx.add("fire", {
     colourFrom: [255, 255, 100],
     colourTo: [255, 0, 0, 0],
     rotateSpeed: 0.2,
+    light: 90
   },
 });
 Registry.vfx.add("laser-caster-fire", {
@@ -187,6 +190,7 @@ Registry.vfx.add("laser-caster-fire", {
     colourFrom: [100, 255, 255],
     colourTo: [0, 0, 255, 0],
     rotateSpeed: 0.2,
+    light: 90
   },
 });
 
@@ -207,6 +211,7 @@ Registry.vfx.add("burning", {
     colourFrom: [255, 255, 100],
     colourTo: [255, 0, 0, 0],
     rotateSpeed: 0.2,
+    light: 60
   },
 });
 Registry.vfx.add("plasma-burn", {
@@ -224,6 +229,7 @@ Registry.vfx.add("plasma-burn", {
     colourFrom: [100, 255, 255],
     colourTo: [0, 0, 255, 0],
     rotateSpeed: 0.2,
+    light: 60
   },
 });
 
@@ -242,6 +248,7 @@ Registry.vfx.add("laser-caster-charge", {
     strokeTo: 5,
     colourFrom: [0, 255, 255, 0],
     colourTo: [255, 255, 255],
+    light: 30
   },
 });
 Registry.vfx.add("energy-repeater-charge", {
@@ -254,5 +261,6 @@ Registry.vfx.add("energy-repeater-charge", {
     strokeTo: 5,
     colourFrom: [0, 255, 255, 0],
     colourTo: [255, 255, 255],
+    light: 30
   },
 });

@@ -99,7 +99,7 @@ function flash(x = 0, y = 0, opacity = 255, duration = 60, glareSize = 600) {
       0,
       glareSize * 1.5,
       0,
-      glareSize * 2
+      20
     ),
     new ShapeParticle(
       x,
@@ -117,7 +117,7 @@ function flash(x = 0, y = 0, opacity = 255, duration = 60, glareSize = 600) {
       glareSize * 2,
       0,
 
-      glareSize * 2
+      20
     ),
     new ShapeParticle(
       x,
@@ -135,7 +135,7 @@ function flash(x = 0, y = 0, opacity = 255, duration = 60, glareSize = 600) {
       glareSize * 2.5,
       0,
 
-      glareSize * 2
+      20
     ),
     // Doesn't really work outside of MA
     // new ShapeParticle(
@@ -171,7 +171,7 @@ function flash(x = 0, y = 0, opacity = 255, duration = 60, glareSize = 600) {
       glareSize / 5,
       0,
       0,
-      glareSize * 2
+      20
     ),
     new ShapeParticle(
       x,
@@ -188,8 +188,7 @@ function flash(x = 0, y = 0, opacity = 255, duration = 60, glareSize = 600) {
       (glareSize / 5) * 0.6,
       0,
       0,
-
-      glareSize * 2
+      20
     ),
     new ShapeParticle(
       x,
@@ -206,8 +205,7 @@ function flash(x = 0, y = 0, opacity = 255, duration = 60, glareSize = 600) {
       (glareSize / 5) * 0.3,
       0,
       0,
-
-      glareSize * 2
+      20
     )
   );
 }
@@ -566,7 +564,8 @@ class WaveEmissionEffect extends ParticleEmissionEffect {
           this.particle.colourFrom ?? [50, 50, 50, 100],
           this.particle.colourTo ?? [100, 100, 100, 0],
           this.particle.strokeFrom ?? 10,
-          this.particle.strokeTo ?? 0
+          this.particle.strokeTo ?? 0,
+          this.particle.light ?? 0
         )
       )
     );
@@ -744,8 +743,7 @@ class NuclearExplosionEffect extends ExplosionEffect {
             rad * 4 ** 0.6,
             rad * 4 ** 0.8,
             rad * 4 ** 0.6,
-            0,
-            200
+            0
           )
         );
         //for (let j = 0; j < 2; j++) {
@@ -766,8 +764,7 @@ class NuclearExplosionEffect extends ExplosionEffect {
             rad * 4 ** 0.4,
             rad * 4 ** 0.6,
             rad * 4 ** 0.4,
-            0,
-            200
+            0
           )
         );
         dir = rnd(0, TAU);
@@ -787,8 +784,7 @@ class NuclearExplosionEffect extends ExplosionEffect {
             rad * 4 ** 0.4,
             rad * 4 ** 0.6,
             rad * 4 ** 0.4,
-            0,
-            200
+            0
           )
         );
         //}

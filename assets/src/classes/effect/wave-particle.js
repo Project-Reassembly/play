@@ -22,6 +22,7 @@ class WaveParticle {
     this.colourTo = colourTo;
     this.maxLifetime = lifetime;
     this.strokeFrom = strokeFrom;
+    this.stroke = strokeFrom;
     this.strokeTo = strokeTo;
     this.light = light ?? 0;
   }
@@ -30,6 +31,9 @@ class WaveParticle {
       this.radius =
         this.fromRadius * this.calcLifeFract() +
         this.toRadius * (1 - this.calcLifeFract());
+      this.stroke =
+        this.strokeFrom * this.calcLifeFract() +
+        this.strokeTo * (1 - this.calcLifeFract());
       this.lifetime -= dt;
     } else {
       this.remove = true;
@@ -42,14 +46,17 @@ class WaveParticle {
     push();
     noFill();
     stroke(blendColours(this.colourFrom, this.colourTo, this.calcLifeFract()));
-    strokeWeight(
-      this.strokeFrom * this.calcLifeFract() +
-        this.strokeTo * (1 - this.calcLifeFract())
-    );
+    strokeWeight(this.stroke);
     circle(this.x, this.y, this.radius * 2);
     pop();
   }
   get size() {
     return this.radius * 2;
+  }
+  get uiX() {
+    return (this.x - ui.camera.x) * ui.camera.zoom;
+  }
+  get uiY() {
+    return (this.y - ui.camera.y) * ui.camera.zoom;
   }
 }

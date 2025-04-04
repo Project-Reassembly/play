@@ -18,9 +18,8 @@ function addLightingCircles(layer, size = 1, col) {
       } else if (particle instanceof WaveParticle) {
         layer.noFill();
         layer.stroke(col);
-        layer.strokeWeight(
-          particle.light * size * particle.calcLifeFract() ** 0.5
-        );
+        layer.strokeWeight(((particle.stroke * particle.light) / 10) * size);
+        layer.circle(particle.uiX, particle.uiY, particle.size);
         layer.noStroke();
         layer.fill(col);
       } else
@@ -68,9 +67,9 @@ function createLightingLayer(
   layer.rect(0, 0, width, height);
   layer.blendMode(REMOVE);
   layer.fill(lightColour);
+  addLightingCircles(layer, lightScale * 1.5 * ui.camera.zoom, lightColour);
   addLightingCircles(layer, lightScale * ui.camera.zoom, lightColour);
-  addLightingCircles(layer, lightScale * 0.8 * ui.camera.zoom, lightColour);
-  addLightingCircles(layer, lightScale * 0.6 * ui.camera.zoom, lightColour);
+  addLightingCircles(layer, lightScale * 0.67 * ui.camera.zoom, lightColour);
   layer.rectMode(CORNER);
 }
 function lighting(
