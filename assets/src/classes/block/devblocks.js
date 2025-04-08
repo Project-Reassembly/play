@@ -4,6 +4,7 @@ class StructureReaderBlock extends Block {
   _outTxt = "";
   _becomes = null;
   selectable = true;
+  title = "Reader";
   static unreadable = [
     "dev::structurereader",
     "dev::commandblock",

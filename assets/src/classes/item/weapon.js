@@ -226,3 +226,15 @@ function patternedBulletExpulsion(
     bulletToFire.oncreated();
   }
 }
+
+class ShootPattern{
+  spread = 0;
+  spacing = 0;
+  amount = 1;
+  interval = 0;
+  burst = 1;
+}
+class WeaponShootConfiguration{
+  bullet = {};
+  pattern = new ShootPattern();
+}

@@ -1,5 +1,5 @@
 //Part of an entity.
-class Component {
+class Component extends RegisteredItem{
   shape = "circle";
   fill = "red";
   image = "error";

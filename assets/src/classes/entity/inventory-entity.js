@@ -25,13 +25,13 @@ class InventoryEntity extends Entity {
 class EquippedEntity extends InventoryEntity {
   equipment = new Inventory(5);
   /**@type {Inventory} */
-  head;
+  head = null;
   /**@type {Inventory} */
-  rightHand;
+  rightHand = null;
   /**@type {Inventory} */
-  leftHand;
+  leftHand = null;
   /**@type {Inventory} */
-  body;
+  body = null;
 
   //Commonly used indices
   /**@type {Component} */

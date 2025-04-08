@@ -1,5 +1,5 @@
 //Struct, but that's not a thing here
-class StatusEffect {
+class StatusEffect extends RegisteredItem{
   damage = 0;
   healing = 0;
   damageType = "normal";

@@ -17,7 +17,7 @@
 ||   - name: Name of the structure. Used in world breakdown, and structure location.
 */
 
-class Generator {
+class Generator extends RegisteredItem{
   stageTitle = "Generating...";
   /** Runs this generator on the world. */
   generate(seed) {}
@@ -178,7 +178,7 @@ class OreGenerator extends Generator {
   }
 }
 
-class GenerationOptions {
+class GenerationOptions extends RegisteredItem{
   min = 0;
   max = 255;
   valid(level, x, y) {

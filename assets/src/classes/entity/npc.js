@@ -28,7 +28,7 @@ class NPC extends EquippedEntity {
    * }
    * ```
    */
-  store = [];
+  trades = [];
   //Relation modifiers
   violenceRelMod = 0.3; //-0.3% rel per damage
   violenceIncrease = 0.01; //+1% effect per positive rel (kind of) - like you more = more hurt when attacked

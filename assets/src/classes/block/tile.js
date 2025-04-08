@@ -5,6 +5,7 @@ class Tile extends Block {
   damage = 0;
   damageType = "normal";
   buildable = true;
+  drillSpeed = 1;
   tick() {}
   init() {
     PhysicalObject.prototype.init.call(this);

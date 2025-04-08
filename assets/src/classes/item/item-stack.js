@@ -5,7 +5,7 @@
  * @prop {[string, int][]} tags
  */
 /** */
-class ItemStack {
+class ItemStack extends RegisteredItem {
   item = "nothing";
   count = 1;
   //Non-copiable attributes
@@ -96,6 +96,7 @@ class ItemStack {
     return ist;
   }
   constructor(item = "nothing", count = 1) {
+    super();
     this.item = item;
     this.count = count;
   }

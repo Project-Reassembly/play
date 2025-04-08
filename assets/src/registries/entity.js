@@ -181,7 +181,7 @@ Registry.entities.add("iti-corporate-merchant", {
   height: 35,
   aiType: "passive",
   followRange: 400,
-  angryRange: 700,
+  angerRange: 700,
   defensiveRange: 400,
   targetRange: 300,
   rightHand: [

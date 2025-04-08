@@ -80,6 +80,8 @@ class Block extends ShootableObject {
   rotatable = false;
   direction = Block.direction.UP;
   explosiveness = 0.1;
+  dropItem = null;
+  name = "Block";
   /**@type {Chunk} */
   _chunk = null;
   set chunk(_) {
