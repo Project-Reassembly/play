@@ -77,7 +77,6 @@ Registry.vfx.add("explosion", {
 });
 Registry.vfx.add("laser-caster-explosion", {
   type: "explosion",
-  radius: 20,
   waveColour: [100, 255, 255, 100],
   sparkColour: [200, 255, 255],
   sparkColourTo: [0, 200, 255],

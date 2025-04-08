@@ -88,24 +88,22 @@ class Crafter extends Container {
     return true;
   }
   createCraftEffect() {
-    createEffect(
+    autoScaledEffect(
       this.craftEffect,
       this.world,
       this.x + Block.size / 2,
       this.y + Block.size / 2,
       this.direction,
-      1
     );
   }
   createTickEffect() {
     if (tru(this.tickEffectChance))
-      createEffect(
+      autoScaledEffect(
         this.tickEffect,
         this.world,
         this.x + Block.size / 2,
         this.y + Block.size / 2,
         this.direction,
-        1
       );
   }
   /**

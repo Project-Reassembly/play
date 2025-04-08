@@ -26,13 +26,12 @@ class Smelter extends Crafter {
   }
   createTickEffect() {
     if (tru(this.activeTickEffectChance))
-      createEffect(
+      autoScaledEffect(
         this.activeTickEffect,
         this.world,
         this.x + Block.size / 2,
         this.y + Block.size / 2,
         this.direction,
-        1
       );
   }
   serialise() {

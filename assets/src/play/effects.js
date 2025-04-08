@@ -370,7 +370,7 @@ function insanity() {
 
 //#### Actual Effect Classes ####
 /**Sort of abstract class for visual effects. */
-class VisualEffect {
+class VisualEffect extends RegisteredItem {
   parentise = false;
   create(world, x = 0, y = 0, direction = 0, scale = 1) {}
   execute(
@@ -832,6 +832,19 @@ function createEffect(effect, world, x, y, direction, scale, pos) {
   let fx = construct(Registry.vfx.get(effect), "visual-effect");
   fx.execute(world, x, y, direction, scale, pos);
   return fx;
+}
+
+function autoScaledEffect(effect, world, x, y, direction, pos) {
+  let effectparts = effect.split("~");
+  createEffect(
+    effectparts[0],
+    world,
+    x,
+    y,
+    direction,
+    effectparts[1] ?? 1,
+    pos
+  );
 }
 
 /**

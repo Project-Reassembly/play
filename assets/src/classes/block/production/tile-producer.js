@@ -47,13 +47,12 @@ class TileProducer extends Container {
   }
   createTickEffect() {
     if (tru(this.tickEffectChance))
-      createEffect(
+      autoScaledEffect(
         this.tickEffect,
         this.world,
         this.x + Block.size / 2,
         this.y + Block.size / 2,
         this.direction,
-        1
       );
   }
   stringifyRecipe() {

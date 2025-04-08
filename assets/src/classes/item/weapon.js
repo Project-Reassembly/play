@@ -1,23 +1,11 @@
 class Weapon extends Equippable {
   timer = new Timer();
-  reload = 30;
-  readyEffect = "none";
-  charge = 0;
-  chargeEffect = "none";
   ammoType = "none";
   ammoUse = 1;
   shootX = 15;
-  shoot = {
-    bullet: null,
-    pattern: {
-      spread: 0,
-      amount: 1,
-      spacing: 0,
-      burst: 1,
-      interval: 0,
-    },
-  };
-  fireEffect = "shoot";
+  shoot = new WeaponShootConfiguration();
+  hasAltFire = false;
+  altShoot = null;
 
   //Internal
   #delay = 0;
@@ -28,6 +16,16 @@ class Weapon extends Equippable {
   maxAccel = 2;
   #acceleration = 0;
   #accelerated = 0;
+  #lastReload = 0;
+  #lastCharge = 0;
+
+  init() {
+    super.init();
+    this.altShoot ??= structuredClone(this.shoot);
+    this.shoot = constructFromType(this.shoot, WeaponShootConfiguration);
+    this.altShoot = constructFromType(this.altShoot, WeaponShootConfiguration);
+  }
+
   /**@param {EquippedEntity} holder  */
   tick(holder) {
     super.tick(holder);
@@ -37,24 +35,23 @@ class Weapon extends Equippable {
       this.#cooldown--;
       if (this.#cooldown <= 0) {
         let pos = this._getShootPos(holder);
-        createEffect(
-          this.readyEffect,
+        autoScaledEffect(
+          this.shoot.readyEffect,
           holder.world,
           pos.x,
           pos.y,
-          pos.direction,
-          1
+          pos.direction
         );
       }
     }
   }
-  getAcceleratedReloadRate() {
+  getAcceleratedReloadRate(shoot) {
     if (this.#acceleration <= -1 || this.#acceleration > this.maxAccel)
-      return this.reload; //If bad acceleration then ignore it
-    return this.reload / (1 + this.#acceleration); //2 acceleration = 200% fire rate increase = 3x fire rate
+      return shoot.reload; //If bad acceleration then ignore it
+    return shoot.reload / (1 + this.#acceleration); //2 acceleration = 200% fire rate increase = 3x fire rate
   }
-  accelerate() {
-    this.#accelerated = this.getAcceleratedReloadRate() * 1.1; //Always wait for at least the reload time before deceling
+  accelerate(shoot) {
+    this.#accelerated = this.getAcceleratedReloadRate(shoot) * 1.1; //Always wait for at least the reload time before deceling
     if (this.#acceleration < this.maxAccel) {
       this.#acceleration += this.accel;
     }
@@ -85,24 +82,25 @@ class Weapon extends Equippable {
   /**
    * @param {EquippedEntity} holder
    */
-  fire(holder) {
+  fire(holder, shoot = this.shoot) {
     if (this.#cooldown <= 0) {
-      if (this.charge > 0) {
+      this.#lastReload = shoot.reload;
+      this.#lastCharge = shoot.charge;
+      if (shoot.charge > 0) {
         let pos = this._getShootPos(holder);
-        createEffect(
-          this.chargeEffect,
+        autoScaledEffect(
+          shoot.chargeEffect,
           holder.world,
           pos.x,
           pos.y,
           pos.direction,
-          1,
           () => this._getShootPos(holder)
         );
-        this.#cooldown = this.reload + this.charge;
+        this.#cooldown = shoot.reload + shoot.charge;
         this.timer.do(() => {
-          this._internalFire(holder, this.shoot);
-        }, this.charge);
-      } else this._internalFire(holder, this.shoot);
+          this._internalFire(holder, shoot);
+        }, shoot.charge);
+      } else this._internalFire(holder, shoot);
     }
   }
   _internalFire(holder, shoot = this.shoot) {
@@ -112,25 +110,18 @@ class Weapon extends Equippable {
       else return;
     }
 
-    this.#cooldown = this.getAcceleratedReloadRate();
-    this.accelerate(); //Apply acceleration effects
-    //Resolve nonexistent properties
-    shoot.pattern.spread ??= 0;
-    shoot.pattern.amount ??= 1;
-    shoot.pattern.spacing ??= 0;
-    shoot.pattern.burst ??= 1;
-    shoot.pattern.interval ??= 0;
+    this.#cooldown = this.getAcceleratedReloadRate(shoot);
+    this.accelerate(shoot); //Apply acceleration effects
 
     this.timer.repeat(
       () => {
         let pos = this._getShootPos(holder);
-        createEffect(
-          this.fireEffect,
+        autoScaledEffect(
+          shoot.effect,
           holder.world,
           pos.x,
           pos.y,
-          pos.direction,
-          1
+          pos.direction
         );
         patternedBulletExpulsion(
           pos.x,
@@ -144,18 +135,19 @@ class Weapon extends Equippable {
           holder
         );
         if (this.component instanceof WeaponComponent) {
-          this.component.trigger();
+          this.component.trigger(shoot.recoilScale, shoot.rotRecoilScale);
         }
       },
-      this.shoot.pattern.burst,
-      this.shoot.pattern.interval
+      shoot.pattern.burst,
+      shoot.pattern.interval
     );
   }
   /**@param {EquippedEntity} holder  */
   use(holder, isSecondary = false) {
     if (isSecondary) {
+      if (this.altShoot) this.fire(holder, this.altShoot);
     } else {
-      this.fire(holder);
+      this.fire(holder, this.shoot);
     }
     super.use(holder, isSecondary);
   }
@@ -177,14 +169,17 @@ class Weapon extends Equippable {
     );
   }
   createProgressBar() {
-    if (this.#cooldown <= this.reload)
+    if (this.#cooldown <= this.#lastReload)
       return ""
-        .padEnd((this.#cooldown / this.reload) * 15, "■")
+        .padEnd((this.#cooldown / this.#lastReload) * 15, "■")
         .padEnd(15, "□")
         .substring(0, 15);
     else
       return ""
-        .padEnd(15 - ((this.#cooldown - this.reload) / this.charge) * 15, "■")
+        .padEnd(
+          15 - ((this.#cooldown - this.#lastReload) / this.#lastCharge) * 15,
+          "■"
+        )
         .padEnd(15, "□")
         .substring(0, 15);
   }
@@ -227,14 +222,24 @@ function patternedBulletExpulsion(
   }
 }
 
-class ShootPattern{
+class ShootPattern {
   spread = 0;
   spacing = 0;
   amount = 1;
   interval = 0;
   burst = 1;
 }
-class WeaponShootConfiguration{
+class WeaponShootConfiguration {
   bullet = {};
   pattern = new ShootPattern();
+  charge = 0;
+  chargeEffect = "none";
+  reload = 30;
+  readyEffect = "none";
+  effect = "shoot";
+  recoilScale = 1;
+  rotRecoilScale = 1;
+  init() {
+    this.pattern = constructFromType(this.pattern, ShootPattern);
+  }
 }

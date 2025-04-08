@@ -1,5 +1,5 @@
 //Part of an entity.
-class Component extends RegisteredItem{
+class Component extends RegisteredItem {
   shape = "circle";
   fill = "red";
   image = "error";
@@ -117,9 +117,9 @@ class WeaponComponent extends Component {
       direction: facing,
     };
   }
-  trigger() {
-    this._recoiled = this.recoil;
-    this._rotRecoiled = this.rotationalRecoil;
+  trigger(recoilFactor = 1, rotationalRecoilFactor = 1) {
+    this._recoiled = this.recoil * recoilFactor;
+    this._rotRecoiled = this.rotationalRecoil * rotationalRecoilFactor;
   }
   tick(entity) {
     super.tick(entity);
