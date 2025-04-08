@@ -2,6 +2,7 @@ const effectTimer = new Timer();
 class Explosion {
   x = 0;
   y = 0;
+  /**@type {World} */
   world = null;
   knockback = NaN;
   radius = 0;
@@ -29,31 +30,56 @@ class Explosion {
     return this;
   }
   dealDamage() {
-    for (let e of this.world.entities) {
-      //If hit
-      if (
-        !e.dead &&
-        ((this.x - e.x) ** 2 + (this.y - e.y) ** 2) ** 0.5 <=
-          this.radius ** 0.95 + e.size
-      ) {
-        //If enemy, damage, and affect
-        if (e.team !== (this.source?.team ?? this.team)) {
-          e.damage(
-            this.type,
-            this.amount + rnd(-this.spread, this.spread),
-            this.source
-          );
-          if (this.status !== "none")
-            e.applyStatus(this.status, this.statusDuration);
-        }
-        //Knock regardless of team
-        e.knock(
-          !isNaN(this.knockback) ? this.knockback : this.amount,
-          degrees(createVector(e.x - this.x, e.y - this.y).heading()),
-          true
-        );
-      }
-    }
+    // Hit blocks
+    let damage = constructFromType(
+      {
+        x: this.x,
+        y: this.y,
+        damage: [
+          {
+            amount: this.amount,
+            spread: this.spread,
+            type: this.type,
+          },
+        ],
+        status: this.status,
+        statusDuration: this.statusDuration,
+        pierce: Infinity,
+        knockback: isNaN(this.knockback) ? this.amount : this.knockback,
+        despawnEffect: "none",
+        team: this.team,
+        hitSize: this.radius,
+      },
+      VirtualBullet
+    );
+    damage.entity = this.source;
+    this.world.bullets.push(damage);
+    // Hit entities
+    // for (let e of this.world.entities) {
+    //   //If hit
+    //   if (
+    //     !e.dead &&
+    //     ((this.x - e.x) ** 2 + (this.y - e.y) ** 2) ** 0.5 <=
+    //       this.radius ** 0.95 + e.size
+    //   ) {
+    //     //If enemy, damage, and affect
+    //     if (e.team !== (this.source?.team ?? this.team)) {
+    //       e.damage(
+    //         this.type,
+    //         this.amount + rnd(-this.spread, this.spread),
+    //         this.source
+    //       );
+    //       if (this.status !== "none")
+    //         e.applyStatus(this.status, this.statusDuration);
+    //     }
+    //     //Knock regardless of team
+    //     e.knock(
+    //       !isNaN(this.knockback) ? this.knockback : this.amount,
+    //       degrees(createVector(e.x - this.x, e.y - this.y).heading()),
+    //       true
+    //     );
+    //   }
+    // }
     return this;
   }
 }

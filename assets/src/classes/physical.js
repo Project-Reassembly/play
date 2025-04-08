@@ -403,7 +403,7 @@ class ShootableObject extends PhysicalObject {
         !bullet.remove &&
         this.team !== bullet.entity.team &&
         !bullet.damaged.includes(this) &&
-        (this.collidesWith(bullet) || bullet.collidesWith(this)) //check collisions last for performance reasons
+        (bullet.collidesWith(this)) //check collisions last for performance reasons
       ) {
         //Take all damage instances
         for (let instance of bullet.damage) {
@@ -427,7 +427,7 @@ class ShootableObject extends PhysicalObject {
           //     bullet.statusDuration
           //   );
           // else
-          if (!instance.area)
+          if (!instance.radius)
             this.damage(
               instance.type,
               instance.amount + rnd(instance.spread, -instance.spread),

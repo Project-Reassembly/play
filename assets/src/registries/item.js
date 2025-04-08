@@ -327,7 +327,7 @@ Registry.items.add("iti-energy-repeater", {
   hasAltFire: true,
   altShoot: {
     charge: 60,
-    reload: 120,
+    reload: 30,
     chargeEffect: "laser-caster-charge",
     effect: "laser-caster-explosion~15",
     recoilScale: 3,

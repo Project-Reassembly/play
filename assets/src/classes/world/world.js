@@ -90,6 +90,7 @@ class World {
             boom.x = bullet.x;
             boom.y = bullet.y;
             boom.world = bullet.world;
+            boom.source = bullet.entity;
             if (boom.status === "none") boom.status = bullet.status;
             if (boom.statusDuration === 0)
               boom.statusDuration = bullet.statusDuration;

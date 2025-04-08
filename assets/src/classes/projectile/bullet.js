@@ -103,11 +103,12 @@ class Bullet extends PhysicalObject {
   }
   spawnTrail(dt) {
     //This got too long
-    if (this.trailEffect === "default")
-      for (let e = 0; e < this.speed * dt; e++) {
-        this._trailCounter--;
-        if (this._trailCounter <= 0) {
-          if (this.world?.particles != null && this.trail) {
+
+    for (let e = 0; e < this.speed * dt; e++) {
+      this._trailCounter--;
+      if (this._trailCounter <= 0) {
+        if (this.world?.particles != null && this.trail) {
+          if (this.trailEffect === "default") {
             let trailparticle = new ShapeParticle(
               this.x - e * p5.Vector.fromAngle(this.directionRad).x,
               this.y - e * p5.Vector.fromAngle(this.directionRad).y,
@@ -126,11 +127,11 @@ class Bullet extends PhysicalObject {
             );
             trailparticle.light = this.trailLight;
             this.world.particles.push(trailparticle);
-          }
-          this._trailCounter = this.trailInterval;
+          } else this.emit(this.trailEffect);
         }
+        this._trailCounter = this.trailInterval;
       }
-    else this.emit(this.trailEffect);
+    }
   }
   draw() {
     if (!this.drawer.hidden)
