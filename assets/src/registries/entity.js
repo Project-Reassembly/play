@@ -23,6 +23,12 @@ Registry.entities.add("player", {
       height: 32,
     },
   ],
+  armType: {
+    width: 32,
+    height: 11,
+    yOffset: 13,
+    image: "generic.scrap-arm.component",
+  },
   team: "player",
   width: 25,
   height: 25,
@@ -72,6 +78,12 @@ Registry.entities.add("scavenger", {
       dropChance: 0.25,
     },
   ],
+  armType: {
+    width: 32,
+    height: 11,
+    yOffset: 13,
+    image: "generic.scrap-arm.component",
+  },
   inventory: [
     {
       item: "scrap-bullet",
@@ -141,6 +153,12 @@ Registry.entities.add("scrap-sentinel", {
       dropChance: 0.6,
     },
   ],
+  armType: {
+    width: 32,
+    height: 11,
+    yOffset: 13,
+    image: "generic.scrap-arm.component",
+  },
 });
 Registry.entities.add("iti-corporate-merchant", {
   type: "npc",
@@ -170,10 +188,10 @@ Registry.entities.add("iti-corporate-merchant", {
       items: [
         {
           item: "iti-laser-caster",
-          count: 1
-        }
-      ]
-    }
+          count: 1,
+        },
+      ],
+    },
   ],
   speed: 3,
   health: 1000,
@@ -196,4 +214,4 @@ Registry.entities.add("iti-corporate-merchant", {
       dropChance: 0.125,
     },
   ],
-})
+});

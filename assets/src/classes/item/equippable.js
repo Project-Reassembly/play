@@ -15,8 +15,8 @@ class Equippable extends Item {
     return this.component.rotationRadians;
   }
   init() {
+    super.init();
     this.component = construct(this.component, "component");
-    //this.component.tickListeners.push(this);
   }
   /** @param {Entity} holder The entity holding this item */
   tick(holder) {

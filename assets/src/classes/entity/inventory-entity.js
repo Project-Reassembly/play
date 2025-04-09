@@ -33,6 +33,8 @@ class EquippedEntity extends InventoryEntity {
   /**@type {Inventory} */
   body = null;
 
+  armType = new Component();
+
   //Commonly used indices
   /**@type {Component} */
   get headPart() {
@@ -73,6 +75,7 @@ class EquippedEntity extends InventoryEntity {
     this.leftHand = new Inventory(1, this.leftHand);
     this.body = new Inventory(1, this.body);
     this.head = new Inventory(1, this.head);
+    this.armType = construct(this.armType, "component");
   }
 
   onHealthZeroed(type, source) {
@@ -93,14 +96,20 @@ class EquippedEntity extends InventoryEntity {
       this.legsPart.draw(this.x, this.y, this.direction);
       this.legsPart.draw(this.x, this.y, this.direction, true);
     }
-    this.leftHand
-      .get(0)
-      ?.getItem()
-      ?.component?.draw(this.x, this.y, this.direction, true);
-    this.rightHand
-      .get(0)
-      ?.getItem()
-      ?.component?.draw(this.x, this.y, this.direction);
+    //Arms
+    if (this.leftHand.get(0)?.getItem()?.component)
+      this.leftHand
+        .get(0)
+        .getItem()
+        .component.draw(this.x, this.y, this.direction, true);
+    else this.armType.draw(this.x, this.y, this.direction, true);
+    if (this.rightHand.get(0)?.getItem()?.component)
+      this.rightHand
+        .get(0)
+        .getItem()
+        .component.draw(this.x, this.y, this.direction);
+    else this.armType.draw(this.x, this.y, this.direction);
+
     if (this.bodyPart) this.bodyPart.draw(this.x, this.y, this.direction);
     this.body.iterate((x) => {
       let item = x.getItem();

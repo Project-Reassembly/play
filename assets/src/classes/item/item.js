@@ -4,7 +4,8 @@ class Item extends RegisteredItem {
   description = "<no description>";
   rarity = 0;
   stackSize = 99;
-  /** Called every ticj while in inventory.
+  init(){}
+  /** Called every tick while in inventory.
    * @param {InventoryEntity} holder Entity holding this item.
    */
   tick(holder) {}

@@ -139,20 +139,10 @@ Object.defineProperties(
 );
 
 Object.defineProperty(
-  createUIInventoryComponent(
-    ["in-game"],
-    [],
-    -95,
-    250,
-    null,
-    null,
-    5,
-    undefined,
-    "equipment"
-  ),
-  "entity",
+  createUIInventoryComponent(["in-game"], [], -95, 250, null, null, 5),
+  "inventory",
   {
-    get: () => game.player,
+    get: () => game.player.equipment,
   }
 ).anchorBottom(30);
 
@@ -205,8 +195,7 @@ Object.defineProperty(
         ?.getItem()
         ?.getContextualisedInfo(game.player) ?? "",
   }
-)
-  .anchorBottom(45)
+).anchorBottom(45);
 UIComponent.setCondition("containerselected:false");
 // Selected block inventory controls
 //Yoink all
@@ -340,9 +329,9 @@ Object.defineProperty(
     null,
     10
   ),
-  "entity",
+  "inventory",
   {
-    get: () => game.player,
+    get: () => game.player.inventory,
   }
 );
 
@@ -453,13 +442,11 @@ Object.defineProperty(
     -200,
     null,
     null,
-    5,
-    undefined,
-    "equipment"
+    5
   ),
-  "entity",
+  "inventory",
   {
-    get: () => game.player,
+    get: () => game.player.equipment,
   }
 );
 
@@ -472,13 +459,11 @@ Object.defineProperty(
     25,
     null,
     null,
-    2,
-    undefined,
-    "rightHand"
+    2
   ),
-  "entity",
+  "inventory",
   {
-    get: () => game.player,
+    get: () => game.player.rightHand,
   }
 );
 Object.defineProperty(
@@ -489,13 +474,11 @@ Object.defineProperty(
     25,
     null,
     null,
-    2,
-    undefined,
-    "leftHand"
+    2
   ),
-  "entity",
+  "inventory",
   {
-    get: () => game.player,
+    get: () => game.player.leftHand,
   }
 );
 //Body parts
@@ -598,19 +581,28 @@ Object.defineProperties(
     image: {
       get: () =>
         game.player
-          ? game.player.leftHand.get(0)?.getItem()?.component?.image
+          ? (
+              game.player.leftHand.get(0)?.getItem()?.component ??
+              game.player.armType
+            )?.image
           : "error",
     },
     width: {
       get: () =>
         game.player
-          ? game.player.leftHand.get(0)?.getItem()?.component?.width * 3.33
+          ? (
+              game.player.leftHand.get(0)?.getItem()?.component ??
+              game.player.armType
+            )?.width * 3.33
           : 0,
     },
     height: {
       get: () =>
         game.player
-          ? game.player.leftHand.get(0)?.getItem()?.component?.height * 3.33
+          ? (
+              game.player.leftHand.get(0)?.getItem()?.component ??
+              game.player.armType
+            )?.height * 3.33
           : 0,
     },
   }
@@ -633,19 +625,28 @@ Object.defineProperties(
     image: {
       get: () =>
         game.player
-          ? game.player.rightHand.get(0)?.getItem()?.component?.image
+          ? (
+              game.player.rightHand.get(0)?.getItem()?.component ??
+              game.player.armType
+            )?.image
           : "error",
     },
     width: {
       get: () =>
         game.player
-          ? game.player.rightHand.get(0)?.getItem()?.component?.width * 3.33
+          ? (
+              game.player.rightHand.get(0)?.getItem()?.component ??
+              game.player.armType
+            )?.width * 3.33
           : 0,
     },
     height: {
       get: () =>
         game.player
-          ? game.player.rightHand.get(0)?.getItem()?.component?.height * 3.33
+          ? (
+              game.player.rightHand.get(0)?.getItem()?.component ??
+              game.player.armType
+            )?.height * 3.33
           : 0,
     },
   }

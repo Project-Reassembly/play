@@ -499,25 +499,23 @@ class ImageUIComponent extends UIComponent {
 
 class InventoryUIComponent extends UIComponent {
   /** @type {InventoryEntity} */
-  entity = null;
+  inventory = null;
   rows = 5;
   cols = null;
   itemSize = 40;
-  invName = false;
-  constructor(x, y, entity, rows, cols, itemSize, invName = "inventory") {
+  constructor(x, y, inv, rows, cols, itemSize) {
     super(x, y, 0, 0, "none", null, "", false, 0);
     this.x = x;
     this.y = y;
-    this.entity = entity;
+    this.inventory = inv;
     this.rows = rows;
     this.cols = cols;
     this.itemSize = itemSize;
-    this.invName = invName;
   }
   draw() {
-    if (!this.entity) return;
-    if (this.entity instanceof InventoryEntity) {
-      this.entity[this.invName].draw(
+    if (!this.inventory) return;
+    if (this.inventory instanceof Inventory) {
+      this.inventory.draw(
         this.x,
         this.y,
         this.rows,
@@ -927,18 +925,20 @@ function createUIInventoryComponent(
   conditions = [],
   x = 0,
   y = 0,
-  holder = null,
+  inv = null,
   rows = null,
   cols = null,
-  itemSize = 40,
-  invName = "inventory"
+  itemSize = 40
 ) {
   //Make component
-  const component = new (
-    holder instanceof Container
-      ? BlockInventoryUIComponent
-      : InventoryUIComponent
-  )(x, y, holder, rows, cols, itemSize, invName);
+  const component = new InventoryUIComponent(
+    x,
+    y,
+    inv,
+    rows,
+    cols,
+    itemSize
+  );
   component.conditions = conditions;
   //Set conditional things
   component.acceptedScreens = screens;

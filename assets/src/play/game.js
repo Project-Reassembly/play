@@ -639,7 +639,7 @@ function frame() {
     //Draw everything else
     if (ui.menuState === "in-game") {
       if (!generationStarted) {
-        if (genMode === "create") generateWorld(64927391); //2147483647
+        if (genMode === "create") generateWorld(); //2147483647
         else if (genMode === "load") {
           if (loadGame()) generationStarted = true;
           else genMode = "create";

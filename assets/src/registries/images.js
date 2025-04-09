@@ -7,6 +7,8 @@ Registry.images.add("entity.scrap-sentinel.legs", new ImageContainer("assets/tex
 Registry.images.add("npc.iti.corporate-merchant.head", new ImageContainer("assets/textures/entity/component/iti-corporate-merchant-head.png"))
 Registry.images.add("npc.iti.generic.body", new ImageContainer("assets/textures/entity/component/iti-npc-body.png"))
 Registry.images.add("npc.iti.generic.legs", new ImageContainer("assets/textures/entity/component/iti-npc-foot.png"))
+
+Registry.images.add("generic.scrap-arm.component",  new ImageContainer("assets/textures/entity/component/scrap-arm.png"))
 //Components > Weapons
 Registry.images.add("weapon.scrap-shooter.component", new ImageContainer("assets/textures/entity/weapon/scrap-shooter.png"))
 Registry.images.add("weapon.iti-laser-caster.component", new ImageContainer("assets/textures/entity/weapon/iti-laser-caster.png"))
