@@ -158,17 +158,23 @@ class Chunk {
         let stile = created.tiles[y][x];
         if (sblock) {
           //Block
-          let blk = chunk.addBlock(sblock.block, x, y, "blocks");
+          let blk = chunk.addBlock(
+            sblock.block ?? "scrap-wall",
+            x,
+            y,
+            "blocks"
+          );
           if (sblock.direction)
             blk.direction = Block.dir.fromEnum(sblock.direction);
-          if (sblock.health) blk.health = sblock.health;
-          if (sblock.team) blk.team = sblock.team;
+          if (sblock.health) blk.health = sblock.health ?? 0;
+          if (sblock.team) blk.team = sblock.team ?? "enemy";
+          if (sblock.power) blk.power = sblock.power ?? 0;
           //Specific saves
-          blk.constructor.applyExtraProps(blk, sblock)
+          blk.constructor.applyExtraProps(blk, sblock);
         }
         //Floor, Tile
-        if (sfloor) chunk.addBlock(sfloor.block, x, y, "floor");
-        if (stile) chunk.addBlock(stile.block, x, y, "tiles");
+        if (sfloor && sfloor.block) chunk.addBlock(sfloor.block, x, y, "floor");
+        if (stile) chunk.addBlock(stile.block ?? "stone", x, y, "tiles");
       }
     }
     return chunk;

@@ -4,6 +4,7 @@
  * @prop {int} y
  * @prop {string} block Registry name
  * @prop {number} direction
+ * @prop {number} power
  */
 /** */
 class Block extends ShootableObject {
@@ -82,6 +83,11 @@ class Block extends ShootableObject {
   explosiveness = 0.1;
   dropItem = null;
   name = "Block";
+  //power
+  power = 0;
+  powerDraw = 0;
+  maxPower = 0;
+  isProvider = false;
   /**@type {Chunk} */
   _chunk = null;
   set chunk(_) {
@@ -187,6 +193,20 @@ class Block extends ShootableObject {
     );
     pop();
   }
+
+  /**Tries to send power to this block. Returns the amount of power not sent due to overflow. */
+  sendPower(amount = 0) {
+    let tryTransfer = this.power + amount;
+    this.power = Math.min(tryTransfer, this.maxPower);
+    return Math.max(0, tryTransfer - this.power);
+  }
+  /**Tries to take power from the block. Returns the amount of power not taken. */
+  drawPower(amount = 0) {
+    let tryTransfer = this.power - amount;
+    this.power = Math.max(tryTransfer, 0);
+    return Math.max(0, -tryTransfer);
+  }
+
   get x() {
     return (this.blockX + this.chunk.i * Chunk.size) * Block.size;
   }
@@ -212,6 +232,7 @@ class Block extends ShootableObject {
       direction: Block.dir.toEnum(this.direction),
       health: this.health,
       team: this.team,
+      power: this.power,
     };
   }
   /**

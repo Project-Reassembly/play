@@ -784,3 +784,15 @@ createLinkedBlockAndItem(
       "Executes a pre-set command continuously on activation.\nActivation while running will stop execution.\nDEVELOPMENT ITEM",
   }
 );
+//## TEST ##
+Registry.blocks.add("test-provider", {
+  name: "Test Provider",
+  maxPower: 1000,
+  power: 1000,
+  isProvider: true
+})
+Registry.blocks.add("test-subscriber", {
+  name: "Test Subscriber",
+  maxPower: 1000,
+  powerDraw: 10
+})

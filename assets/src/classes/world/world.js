@@ -4,6 +4,7 @@
  * @prop {SerialisedEntity[]} entities
  * @prop {string} name
  * @prop {int} seed
+ * @prop {{positions: {x: int, y:int}[]}[]} networks
  */
 
 /** */
@@ -14,17 +15,17 @@ class World {
   /** The distance in chunks **outside the render distance** that will still tick. */
   static simulationDistance = 5;
   /**
-   * @type {Array<ImageParticle|ShapeParticle|TextParticle|WaveParticle>}
+   * @type {(ImageParticle|ShapeParticle|TextParticle|WaveParticle)[]}
    * Particles that will be drawn underneath normal blocks, but on top of floors and tiles.
    */
   floorParticles = [];
-  /** @type {Array<ImageParticle|ShapeParticle|TextParticle|WaveParticle>} */
+  /** @type {(ImageParticle|ShapeParticle|TextParticle|WaveParticle)[]} */
   particles = [];
-  /** @type {Array<Entity>} */
+  /** @type {Entity[]} */
   entities = [];
-  /** @type {Array<Bullet>} */
+  /** @type {Bullet[]} */
   bullets = [];
-  /** @type {Array<Array<Chunk>>} */
+  /** @type {Chunk[][]} */
   chunks = null;
   /**
    * @type {PhysicalObject[]} \
@@ -33,10 +34,12 @@ class World {
    * Use one of `particles`, `floorParticles`, `entities` or `bullets` instead of this where possible.
    */
   physobjs = [];
+  /** @type {PowerNetwork[]} */
+  networks = [];
   name = "World";
   seed = null;
   /**Chunks to render this frame.
-   * @type {Array<Chunk>} */
+   * @type {Chunk[]} */
   toRender = [];
   constructor(name = "World") {
     this.name = name;
@@ -312,15 +315,16 @@ class World {
       name: this.name,
       entities: this.entities.map((x) => x.serialise()),
       seed: this.seed,
+      networks: this.networks.map((x) => x.serialise()),
     };
   }
   /**@param {SerialisedWorld} created  */
   static deserialise(created) {
     let wrold = new this();
-    wrold.chunks = created.chunks.map((x) =>
+    wrold.chunks = created.chunks?.map((x) =>
       x.map((y) => Chunk.deserialise(y))
-    );
-    created.entities.forEach((entity) => {
+    ) ?? [[]];
+    created.entities?.forEach((entity) => {
       if (entity["-"]) {
         DroppedItemStack.create(
           ItemStack.deserialise(entity.stack),
@@ -338,15 +342,20 @@ class World {
         if (entity.isMainPlayer) createPlayer(ent);
       }
     });
-    wrold.seed = created.seed;
-    wrold.name = created.name;
-    //Set world properties
+    created.networks?.forEach((x) => {
+      let net = PowerNetwork.deserialise(x);
+      net.world = wrold;
+      wrold.networks.push(net);
+    });
     iterate2DArray(wrold.chunks, (chunk) => {
       chunk.world = wrold;
       iterate2DArray(chunk.blocks, (block) => {
         if (block) block.world = wrold;
       });
     });
+    //Set world properties
+    wrold.seed = created.seed;
+    wrold.name = created.name;
     return wrold;
   }
   /**Sets everything on this world possible to those values on a source world.

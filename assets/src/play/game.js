@@ -318,6 +318,9 @@ const propertyReplacements = [
   ['"equipment":', "ɛ"],
   ['"statuses":', "ʃ"],
   ['"body":', "β"],
+  ['"positions":', "ψ"],
+  ['"seed":', "σ"],
+  ['"name":', "ν"]
 ];
 const postDictReplacers = [
   ["},{", "⁺"],
