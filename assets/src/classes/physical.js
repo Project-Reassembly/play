@@ -35,6 +35,10 @@ class PhysicalObject extends RegisteredItem {
     );
   }
 
+  moveVct(vct, ignoresBlocks = false) {
+    this.move(vct.x, vct.y, ignoresBlocks);
+  }
+
   move(dx, dy, ignoresBlocks = false) {
     // this.x += dx;
     // this.y += dy;
@@ -235,32 +239,31 @@ class PhysicalObject extends RegisteredItem {
   }
 
   rotateTowards(x, y, amount) {
-    let maxRotateAmount = radians(amount); //use p5 to get radians
-    let delta = { x: x - this.x, y: y - this.y };
+    let delta = new Vector(x - this.x, y - this.y);
     //Define variables
-    let currentDirection = p5.Vector.fromAngle(this.directionRad).heading(); //Find current angle, standardised
-    let targetDirection = Math.atan2(delta.y, delta.x); //Find target angle, standardised
+    let currentDirection = Vector.fromAngle(this.direction).angle; //Find current angle, standardised
+    let targetDirection = delta.angle; //Find target angle, standardised
     if (targetDirection === currentDirection) return; //Do nothing if facing the right way
     let deltaRot = targetDirection - currentDirection;
     //Rotation correction
-    if (deltaRot < -PI) {
-      deltaRot += TWO_PI;
-    } else if (deltaRot > PI) {
-      deltaRot -= TWO_PI;
+    if (deltaRot < -180) {
+      deltaRot += 360;
+    } else if (deltaRot > 180) {
+      deltaRot -= 360;
     }
     let sign = deltaRot < 0 ? -1 : 1; //Get sign: -1 if negative, 1 if positive
     let deltaD = 0;
     let done = false;
     //Choose smaller turn
-    if (Math.abs(deltaRot) > maxRotateAmount) {
-      deltaD = maxRotateAmount * sign;
+    if (Math.abs(deltaRot) > amount) {
+      deltaD = amount * sign;
       done = true;
     } else {
       deltaD = deltaRot;
       done = false;
     }
     //Turn
-    this.direction += degrees(deltaD);
+    this.direction += deltaD;
     return done;
   }
 
@@ -269,21 +272,13 @@ class PhysicalObject extends RegisteredItem {
       let oldRot = this.direction;
       this.direction = this._previousRot;
       this.rotateTowards(x, y, turnSpeed);
-      this.move(
-        speed * Math.cos(radians(this.direction)), //Move in x-direction
-        speed * Math.sin(radians(this.direction)), // Move in y-direction
-        ignoreBlocks
-      );
+      this.moveVct(Vector.fromAngle(this.direction).scale(speed), ignoreBlocks);
       this._previousRot = this.direction;
       this.direction = oldRot;
       return true;
     } else {
       let done = this.rotateTowards(x, y, turnSpeed);
-      this.move(
-        speed * Math.cos(radians(this.direction)), //Move in x-direction
-        speed * Math.sin(radians(this.direction)), // Move in y-direction
-        ignoreBlocks
-      );
+      this.moveVct(Vector.fromAngle(this.direction).scale(speed), ignoreBlocks);
       return done;
     }
   }
@@ -376,19 +371,42 @@ class ShootableObject extends PhysicalObject {
     }
   }
   createDamageNumber(amount) {
+    this._baseDamageNumber(amount, this.x, this.y);
+  }
+  _baseDamageNumber(amount, x, y) {
     this.world.particles.push(
       new TextParticle(
-        this.x,
-        this.y,
+        x,
+        y,
         rnd(0, Math.PI * 2),
         60,
         this.size / 30,
         0.1,
-        roundNum(amount, 1),
-        [255, (10 * this.maxHealth) / amount, 0],
-        [255, (10 * this.maxHealth) / amount, 0],
-        20,
-        10,
+        roundNum(Math.abs(amount), 1),
+
+        createFlashingColourArray(
+          amount > 0
+            ? colinterp(
+                [
+                  [255, 255, 0],
+                  [255, 0, 0],
+                  [0, 0, 0],
+                ],
+                clamp(amount / this.maxHealth, 0, 1)
+              )
+            : colinterp(
+                [
+                  [200, 255, 0],
+                  [0, 255, 0],
+                  [255, 255, 255],
+                ],
+                clamp(amount / this.maxHealth, 0, 1)
+              ),
+          65
+        ),
+
+        (1 + amount / this.maxHealth / 2) * 20,
+        (1 + amount / this.maxHealth / 6) * 10,
         0,
         true
       )
@@ -403,7 +421,7 @@ class ShootableObject extends PhysicalObject {
         !bullet.remove &&
         this.team !== bullet.entity.team &&
         !bullet.damaged.includes(this) &&
-        (bullet.collidesWith(this)) //check collisions last for performance reasons
+        bullet.collidesWith(this) //check collisions last for performance reasons
       ) {
         //Take all damage instances
         for (let instance of bullet.damage) {
@@ -477,7 +495,14 @@ class ShootableObject extends PhysicalObject {
         5
       );
       fill(
-        ...blendColours([0, 255, 0], [255, 0, 0], this.health / this.maxHealth)
+        colinterp(
+          [
+            [255, 0, 0],
+            [255, 255, 0],
+            [0, 255, 0],
+          ],
+          this.health / this.maxHealth
+        )
       );
       noStroke();
       rect(
@@ -529,4 +554,9 @@ function rectanglesIntersect(ox, oy, odx, ody, cx, cy, dx, dy) {
     oy + ody >= cy - dy &&
     oy - ody <= cy + dy
   );
+}
+
+function createFlashingColourArray(basecol, lightness = 255) {
+  let lcol = basecol.map((x) => clamp(x + lightness, 0, 255));
+  return [basecol, lcol, basecol, lcol, basecol, lcol, basecol, lcol, basecol];
 }

@@ -5,8 +5,7 @@ class WaveParticle {
     lifetime,
     fromRadius,
     toRadius,
-    colourFrom,
-    colourTo,
+    colours,
     strokeFrom,
     strokeTo,
     light
@@ -18,8 +17,8 @@ class WaveParticle {
     this.toRadius = toRadius;
     this.radius = fromRadius;
     this.remove = false;
-    this.colourFrom = colourFrom;
-    this.colourTo = colourTo;
+    this.colours = colours;
+    this.colour = this.colours[0];
     this.maxLifetime = lifetime;
     this.strokeFrom = strokeFrom;
     this.stroke = strokeFrom;
@@ -28,12 +27,10 @@ class WaveParticle {
   }
   step(dt) {
     if (this.lifetime >= dt) {
-      this.radius =
-        this.fromRadius * this.calcLifeFract() +
-        this.toRadius * (1 - this.calcLifeFract());
-      this.stroke =
-        this.strokeFrom * this.calcLifeFract() +
-        this.strokeTo * (1 - this.calcLifeFract());
+      let lf = this.calcLifeFract();
+      this.radius = this.fromRadius * lf + this.toRadius * (1 - lf);
+      this.stroke = this.strokeFrom * lf + this.strokeTo * (1 - lf);
+      this.colour = colinterp(this.colours, 1-lf);
       this.lifetime -= dt;
     } else {
       this.remove = true;
@@ -45,7 +42,7 @@ class WaveParticle {
   draw() {
     push();
     noFill();
-    stroke(blendColours(this.colourFrom, this.colourTo, this.calcLifeFract()));
+    stroke(this.colour);
     strokeWeight(this.stroke);
     circle(this.x, this.y, this.radius * 2);
     pop();

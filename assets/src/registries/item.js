@@ -146,7 +146,7 @@ Registry.items.add("scrap-shooter", {
         height: 3,
         image: false,
       },
-      trailColour: [80, 62, 55, 100],
+      trailColours: [[80, 62, 55, 100]],
       damage: [
         {
           type: "ballistic",
@@ -190,7 +190,7 @@ Registry.items.add("iti-laser-caster", {
       trail: true,
       hitSize: 3,
       trailShape: "rhombus",
-      trailColour: [0, 200, 255, 200],
+      trailColours: [[0, 200, 255, 200]],
       trailLight: 70,
       knockback: 10,
       status: "plasma-burn",
@@ -241,8 +241,11 @@ Registry.items.add("iti-laser-caster", {
         trailShape: "rhombus",
         status: "plasma-burn",
         statusDuration: 60,
-        trailColour: [0, 200, 255, 255],
-        trailColourTo: [0, 200, 255, 0],
+        trailColours: [
+          [0, 255, 255, 255],
+          [0, 200, 255, 255],
+          [0, 0, 255, 100],
+        ],
         drawer: {
           shape: "rhombus",
           fill: "cyan", //[0, 255, 255],
@@ -276,7 +279,8 @@ Registry.items.add("iti-energy-repeater", {
   type: "weapon",
   name: "Energy Repeater",
   rarity: Item.rarity.ITI,
-  description: "Shoots quickfire bursts of laser bolts.\nAlt-fire to charge a larger explosive bolt.",
+  description:
+    "Shoots quickfire bursts of laser bolts.\nAlt-fire to charge a larger explosive bolt.",
   image: "weapon.iti-energy-repeater.item",
   ammoType: "none",
   shoot: {
@@ -295,8 +299,11 @@ Registry.items.add("iti-energy-repeater", {
       trail: true,
       hitSize: 3,
       trailShape: "rhombus",
-      trailColour: [0, 200, 255, 200],
-      trailColourTo: [0, 0, 255, 0],
+      trailColours: [
+        [0, 255, 255, 255],
+        [0, 200, 255, 200],
+        [0, 0, 255, 100],
+      ],
       trailLight: 50,
       trailWidth: 1,
       knockback: 10,
@@ -343,8 +350,11 @@ Registry.items.add("iti-energy-repeater", {
       trail: true,
       hitSize: 2.5,
       trailShape: "rhombus",
-      trailColour: [0, 200, 255, 200],
-      trailColourTo: [0, 0, 255, 0],
+      trailColours: [
+        [0, 255, 255, 255],
+        [0, 200, 255, 200],
+        [0, 0, 255, 100],
+      ],
       trailLight: 60,
       knockback: 7,
       status: "plasma-burn",
@@ -404,13 +414,6 @@ Registry.items.add("makeshift-explosive", {
     status: "burning",
     statusDuration: 360,
     trailEffect: "burning",
-    // trailShape: "ellipse",
-    // trailWidth: 5,
-    // trailLength: 5,
-    // trailInterval: 3,
-    // trailLife: 60,
-    // trailColour: [255, 255, 100],
-    // trailColourTo: [255, 0, 0, 0],
     damage: [
       {
         type: "explosion",
@@ -433,8 +436,11 @@ Registry.items.add("makeshift-explosive", {
         height: 3,
         image: false,
       },
-      trailColour: [255, 255, 100, 200],
-      trailColourTo: [120, -62, -55, 100],
+      trailColours: [
+        [255, 255, 100, 200],
+        [255, 0, 0, 100],
+        [75, 75, 75, 20],
+      ],
       trailLife: 30,
       damage: [
         {

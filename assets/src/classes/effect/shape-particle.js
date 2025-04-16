@@ -8,8 +8,7 @@ class ShapeParticle {
     speed,
     decel,
     shape,
-    colourFrom,
-    colourTo,
+    colours,
     sizeXFrom,
     sizeXTo,
     sizeYFrom,
@@ -25,8 +24,8 @@ class ShapeParticle {
     this.decel = decel;
     this.shape = shape;
     this.remove = false;
-    this.colourFrom = colourFrom;
-    this.colourTo = colourTo;
+    this.colours = colours;
+    this.colour = this.colours[0];
     this.maxLifetime = lifetime;
     this.sizeXFrom = sizeXFrom;
     this.sizeXTo = sizeXTo;
@@ -41,16 +40,18 @@ class ShapeParticle {
   step(dt) {
     if (this.lifetime >= dt) {
       //Interpolate size
+      let lf = this.calcLifeFract();
       this.sizeX =
-        this.sizeXFrom * this.calcLifeFract() +
-        this.sizeXTo * (1 - this.calcLifeFract());
+        this.sizeXFrom * lf +
+        this.sizeXTo * (1 - lf);
       this.sizeY =
-        this.sizeYFrom * this.calcLifeFract() +
-        this.sizeYTo * (1 - this.calcLifeFract());
+        this.sizeYFrom * lf +
+        this.sizeYTo * (1 - lf);
       //Move
-      this.moveTo(
-        this.x + this.speed * Vector.fromAngle(this.direction).x * dt,
-        this.y + this.speed * Vector.fromAngle(this.direction).y * dt
+      this.moveToVct(
+        new Vector(this.x, this.y).add(
+          Vector.fromAngleRad(this.direction).scale(this.speed * dt)
+        )
       );
       //Decelerate
       if (this.speed >= this.decel) {
@@ -61,6 +62,9 @@ class ShapeParticle {
       if (this.rotateSpeed) {
         this.#rotOffset += this.rotateSpeed * dt;
       }
+      //Colours
+      this.colour = colinterp(this.colours, 1-lf)
+      //Lifetime
       this.lifetime -= dt;
     } else {
       this.remove = true;
@@ -68,6 +72,9 @@ class ShapeParticle {
   }
   calcLifeFract() {
     return this.lifetime / this.maxLifetime;
+  }
+  moveToVct(vct) {
+    this.moveTo(vct.x, vct.y);
   }
   moveTo(x, y) {
     this.x = x;
@@ -78,7 +85,7 @@ class ShapeParticle {
     noStroke();
     fill(255);
     //Interpolate colour
-    fill(...blendColours(this.colourFrom, this.colourTo, this.calcLifeFract()));
+    fill(this.colour);
     //Draw the particle
     rotatedShape(
       this.shape,

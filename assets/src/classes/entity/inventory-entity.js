@@ -1,6 +1,6 @@
 class InventoryEntity extends Entity {
   /**@type {Inventory} */
-  inventory;
+  inventory = null;
   inventorySize = 30;
   init() {
     super.init();

@@ -10,8 +10,10 @@ Registry.vfx.add("crafter-smoke", {
     speed: 1,
     decel: 0.015,
     shape: "circle",
-    colourFrom: [50, 50, 50, 100],
-    colourTo: [100, 100, 100, 0],
+    colourFrom: [
+      [50, 50, 50, 100],
+      [100, 100, 100, 0],
+    ],
     widthFrom: 20,
     widthTo: 30,
     heightFrom: 20,
@@ -29,8 +31,10 @@ Registry.vfx.add("basic-drill-smoke", {
     speed: 1,
     decel: 0.015,
     shape: "circle",
-    colourFrom: [50, 50, 50, 100],
-    colourTo: [100, 100, 100, 0],
+    colourFrom: [
+      [50, 50, 50, 100],
+      [100, 100, 100, 0],
+    ],
     widthFrom: 5,
     widthTo: 7,
     heightFrom: 5,
@@ -47,14 +51,16 @@ Registry.vfx.add("smelter-sparks", {
     lifetime: 30,
     speed: 3,
     decel: 0.075,
-    colourFrom: [255, 255, 100],
-    colourTo: [255, 0, 0, 0],
+    colours: [
+      [255, 255, 100],
+      [255, 0, 0, 0],
+    ],
     widthFrom: 2,
     widthTo: 0,
     heightFrom: 8,
     heightTo: 8,
     shape: "rect",
-    light: 20
+    light: 20,
   },
 });
 Registry.vfx.add("crafter-craft", {
@@ -63,8 +69,10 @@ Registry.vfx.add("crafter-craft", {
     lifetime: 20,
     fromRadius: 0,
     toRadius: 60,
-    colourFrom: [255, 200, 0, 255],
-    colourTo: [255, 150, 0, 0],
+    colours: [
+      [255, 200, 0, 255],
+      [255, 150, 0, 0],
+    ],
     strokeFrom: 10,
     strokeTo: 0,
   },
@@ -77,9 +85,14 @@ Registry.vfx.add("explosion", {
 });
 Registry.vfx.add("laser-caster-explosion", {
   type: "explosion",
-  waveColour: [100, 255, 255, 100],
-  sparkColour: [200, 255, 255],
-  sparkColourTo: [0, 200, 255],
+  waveColours: [
+    [255, 255, 255],
+    [100, 255, 255, 100],
+  ],
+  sparkColours: [
+    [200, 255, 255],
+    [0, 200, 255],
+  ],
   smoke: false,
 });
 
@@ -98,8 +111,10 @@ Registry.vfx.add("shoot", {
         speed: 1,
         decel: 0.02,
         shape: "circle",
-        colourFrom: [50, 50, 50, 100],
-        colourTo: [100, 100, 100, 0],
+        colours: [
+          [50, 50, 50, 100],
+          [100, 100, 100, 0],
+        ],
         widthFrom: 5,
         widthTo: 10,
         heightFrom: 5,
@@ -117,8 +132,11 @@ Registry.vfx.add("shoot", {
         speed: 0,
         direction: -Math.PI / 2,
         shape: "moved-triangle",
-        colourFrom: [255, 255, 255],
-        colourTo: [255, 230, 175, 0],
+        colours: [
+          [255, 255, 255, 100],
+          [255, 240, 210],
+          [255, 230, 175, 0],
+        ],
         widthFrom: 25,
         widthTo: 20,
         heightFrom: 8,
@@ -142,9 +160,11 @@ Registry.vfx.add("laser-caster-frag", {
     widthTo: 0,
     heightFrom: 10,
     heightTo: 20,
-    colourFrom: [255, 255, 255],
-    colourTo: [0, 255, 255, 0],
-    light: 40
+    colours: [
+      [255, 255, 255],
+      [0, 255, 255, 0],
+    ],
+    light: 40,
   },
 });
 
@@ -168,10 +188,13 @@ Registry.vfx.add("fire", {
     widthTo: 10,
     heightFrom: 5,
     heightTo: 10,
-    colourFrom: [255, 255, 100],
-    colourTo: [255, 0, 0, 0],
+    colours: [
+      [255, 255, 100],
+      [255, 0, 0, 50],
+      [50, 50, 50, 0],
+    ],
     rotateSpeed: 0.2,
-    light: 80
+    light: 80,
   },
 });
 Registry.vfx.add("laser-caster-fire", {
@@ -186,10 +209,12 @@ Registry.vfx.add("laser-caster-fire", {
     widthTo: 10,
     heightFrom: 5,
     heightTo: 10,
-    colourFrom: [100, 255, 255],
-    colourTo: [0, 0, 255, 0],
+    colours: [
+      [100, 255, 255],
+      [0, 50, 255, 0],
+    ],
     rotateSpeed: 0.2,
-    light: 100
+    light: 100,
   },
 });
 
@@ -207,10 +232,13 @@ Registry.vfx.add("burning", {
     widthTo: 10,
     heightFrom: 5,
     heightTo: 10,
-    colourFrom: [255, 255, 100],
-    colourTo: [255, 0, 0, 0],
+    colours: [
+      [255, 255, 100],
+      [255, 0, 0, 0],
+      [50, 50, 50, 0],
+    ],
     rotateSpeed: 0.2,
-    light: 40
+    light: 40,
   },
 });
 Registry.vfx.add("plasma-burn", {
@@ -225,10 +253,12 @@ Registry.vfx.add("plasma-burn", {
     widthTo: 10,
     heightFrom: 5,
     heightTo: 10,
-    colourFrom: [100, 255, 255],
-    colourTo: [0, 0, 255, 0],
+    colours: [
+      [100, 255, 255],
+      [0, 50, 255, 0],
+    ],
     rotateSpeed: 0.2,
-    light: 50
+    light: 50,
   },
 });
 
@@ -245,9 +275,11 @@ Registry.vfx.add("laser-caster-charge", {
     radiusTo: 0,
     strokeFrom: 2,
     strokeTo: 5,
-    colourFrom: [0, 255, 255, 0],
-    colourTo: [255, 255, 255],
-    light: 30
+    colours: [
+      [0, 255, 255, 0],
+      [255, 255, 255],
+    ],
+    light: 30,
   },
 });
 Registry.vfx.add("energy-repeater-charge", {
@@ -258,8 +290,10 @@ Registry.vfx.add("energy-repeater-charge", {
     radiusTo: 0,
     strokeFrom: 2,
     strokeTo: 5,
-    colourFrom: [0, 255, 255, 0],
-    colourTo: [255, 255, 255],
-    light: 30
+    colours: [
+      [0, 255, 255, 0],
+      [255, 255, 255],
+    ],
+    light: 30,
   },
 });

@@ -21,9 +21,8 @@ class Weapon extends Equippable {
 
   init() {
     super.init();
-    this.altShoot ??= structuredClone(this.shoot);
     this.shoot = constructFromType(this.shoot, WeaponShootConfiguration);
-    this.altShoot = constructFromType(this.altShoot, WeaponShootConfiguration);
+    if(this.altShoot) this.altShoot = constructFromType(this.altShoot, WeaponShootConfiguration);
   }
 
   /**@param {EquippedEntity} holder  */

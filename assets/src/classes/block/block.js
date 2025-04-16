@@ -107,24 +107,12 @@ class Block extends ShootableObject {
     );
     super.draw();
   }
-  
+
   createDamageNumber(amount) {
-    this.world.particles.push(
-      new TextParticle(
-        this.x + Block.size/2,
-        this.y + Block.size/2,
-        rnd(0, Math.PI * 2),
-        60,
-        this.size / 15,
-        0.1,
-        roundNum(amount, 1),
-        [255, (10 * this.maxHealth) / amount, 0],
-        [255, (10 * this.maxHealth) / amount, 0],
-        20,
-        10,
-        0,
-        true
-      )
+    this._baseDamageNumber(
+      amount,
+      this.x + Block.size / 2,
+      this.y + Block.size / 2
     );
   }
   steppedOnBy(entity) {}

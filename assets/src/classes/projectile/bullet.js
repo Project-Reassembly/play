@@ -7,8 +7,7 @@ class Bullet extends PhysicalObject {
   hitSize = 5;
   collides = true;
   trail = true;
-  trailColour = [255, 255, 255, 200];
-  trailColourTo = null;
+  trailColours = [[255, 255, 255, 200]];
   trailShape = "rhombus";
   trailWidth = 0;
   trailLength = 0;
@@ -69,7 +68,9 @@ class Bullet extends PhysicalObject {
     super.init();
     this.maxLife = this.lifetime;
     this.trailInterval ??= this.hitSize * 4;
-    this.trailColourTo ??= this.trailColour;
+    if (this.trailColours.length === 1) {
+      this.trailColours[1] = this.trailColours[0].slice(0); //Copy colour
+    }
   }
   oncreated() {
     this.emit(this.spawnEffect);
@@ -117,8 +118,7 @@ class Bullet extends PhysicalObject {
               0,
               0,
               this.trailShape,
-              this.trailColour,
-              this.trailColourTo,
+              this.trailColours,
               this.trailWidth || this.hitSize * 1.9,
               0,
               (this.trailLength || this.hitSize) * this.trailInterval * 0.25,

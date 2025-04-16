@@ -73,7 +73,7 @@ class Explosion {
         // }
         //Knock regardless of team
         e.knock(
-          !isNaN(this.knockback) ? this.knockback : this.amount,
+          !isNaN(this.knockback) ? this.knockback : this.amount**0.5,
           degrees(createVector(e.x - this.x, e.y - this.y).heading()),
           true
         );
@@ -117,8 +117,10 @@ function flash(x = 0, y = 0, opacity = 255, duration = 60, glareSize = 600) {
       0,
       0,
       "ellipse",
-      [255, 255, 255, opacity],
-      [255, 255, 255, 0],
+      [
+        [255, 255, 255, opacity],
+        [255, 255, 255, 0],
+      ],
       0,
       glareSize * 1.5,
       0,
@@ -134,8 +136,10 @@ function flash(x = 0, y = 0, opacity = 255, duration = 60, glareSize = 600) {
       0,
       0,
       "ellipse",
-      [255, 255, 255, opacity],
-      [255, 255, 255, 0],
+      [
+        [255, 255, 255, opacity],
+        [255, 255, 255, 0],
+      ],
       0,
       glareSize * 2,
       0,
@@ -152,8 +156,10 @@ function flash(x = 0, y = 0, opacity = 255, duration = 60, glareSize = 600) {
       0,
       0,
       "ellipse",
-      [255, 255, 255, opacity],
-      [255, 255, 255, 0],
+      [
+        [255, 255, 255, opacity],
+        [255, 255, 255, 0],
+      ],
       0,
       glareSize * 2.5,
       0,
@@ -189,8 +195,10 @@ function flash(x = 0, y = 0, opacity = 255, duration = 60, glareSize = 600) {
       0,
       0,
       "rhombus",
-      [255, 255, 255, 150],
-      [255, 255, 255, 0],
+      [
+        [255, 255, 255, 150],
+        [255, 255, 255, 0],
+      ],
       glareSize / 3,
       glareSize * 2,
       glareSize / 5,
@@ -206,8 +214,10 @@ function flash(x = 0, y = 0, opacity = 255, duration = 60, glareSize = 600) {
       0,
       0,
       "rhombus",
-      [255, 255, 255, 200],
-      [255, 255, 255, 0],
+      [
+        [255, 255, 255, 200],
+        [255, 255, 255, 0],
+      ],
       glareSize / 6,
       glareSize * 1.5,
       (glareSize / 5) * 0.6,
@@ -223,8 +233,10 @@ function flash(x = 0, y = 0, opacity = 255, duration = 60, glareSize = 600) {
       0,
       0,
       "rhombus",
-      [255, 255, 255, 255],
-      [255, 255, 255, 0],
+      [
+        [255, 255, 255, 255],
+        [255, 255, 255, 0],
+      ],
       glareSize / 9,
       glareSize,
       (glareSize / 5) * 0.3,
@@ -271,8 +283,10 @@ function liquidDestructionBlast(
         rnd(0.02, 0.2) * (3 + smallerRootMHP * 4 ** 1.1),
         0.5,
         "circle",
-        colour.map((v, i) => v + delta[i]).concat([600]),
-        colourTo.map((v, i) => v + delta[i]).concat([0]),
+        [
+          colour.map((v, i) => v + delta[i]).concat([600]),
+          colourTo.map((v, i) => v + delta[i]).concat([0]),
+        ],
         blotSize,
         blotSize / 2,
         blotSize,
@@ -311,8 +325,10 @@ function liquidDestructionBlast(
                 rnd(0.5, 1),
                 0.1,
                 "circle",
-                colour.map((v, i) => v + delta[i]).concat([600]),
-                colourTo.map((v, i) => v + delta[i]).concat([0]),
+                [
+                  colour.map((v, i) => v + delta[i]).concat([600]),
+                  colourTo.map((v, i) => v + delta[i]).concat([0]),
+                ],
                 componentSize / 2,
                 componentSize / 4,
                 componentSize / 2,
@@ -365,8 +381,7 @@ function insanity() {
       0,
       0,
       "rhombus",
-      [0, 0, 0, 0],
-      [0, 0, 0, 0],
+      [[0, 0, 0, 0]],
       10,
       0,
       25,
@@ -469,8 +484,10 @@ class ParticleEmissionEffect extends EmissionEffect {
     heightFrom: 20,
     heightTo: 30,
     //Shape/Text/Wave
-    colourFrom: [50, 50, 50, 100],
-    colourTo: [100, 100, 100, 0],
+    colours: [
+      [50, 50, 50, 100],
+      [100, 100, 100, 0],
+    ],
     //Text
     text: "text",
     useOCR: true,
@@ -499,8 +516,10 @@ class ParticleEmissionEffect extends EmissionEffect {
           this.particle.speed ?? 1,
           this.particle.decel ?? 0.015,
           this.particle.shape ?? "circle",
-          this.particle.colourFrom ?? [50, 50, 50, 100],
-          this.particle.colourTo ?? [100, 100, 100, 0],
+          this.particle.colours ?? [
+            [50, 50, 50, 100],
+            [100, 100, 100, 0],
+          ],
           this.particle.widthFrom ?? 20,
           this.particle.widthTo ?? 30,
           this.particle.heightFrom ?? 20,
@@ -564,10 +583,12 @@ class TextParticleEmissionEffect extends ParticleEmissionEffect {
           this.particle.speed ?? 1,
           this.particle.decel ?? 0.015,
           this.particle.text,
-          this.particle.colourFrom ?? 20,
-          this.particle.colourTo ?? 30,
-          this.particle.colourFrom ?? [50, 50, 50, 100],
-          this.particle.colourTo ?? [100, 100, 100, 0],
+          this.particle.colours ?? [
+            [50, 50, 50, 100],
+            [100, 100, 100, 0],
+          ],
+          this.particle.sizeFrom ?? 20,
+          this.particle.sizeTo ?? 30,
           this.particle.rotateSpeed ?? 0,
           this.particle.useOCR ?? true
         )
@@ -586,8 +607,10 @@ class WaveEmissionEffect extends ParticleEmissionEffect {
           this.particle.lifetime ?? 60,
           this.particle.radiusFrom ?? 0,
           this.particle.radiusTo ?? 100,
-          this.particle.colourFrom ?? [50, 50, 50, 100],
-          this.particle.colourTo ?? [100, 100, 100, 0],
+          this.particle.colours ?? [
+            [50, 50, 50, 100],
+            [100, 100, 100, 0],
+          ],
           this.particle.strokeFrom ?? 10,
           this.particle.strokeTo ?? 0,
           this.particle.light ?? 0
@@ -598,11 +621,18 @@ class WaveEmissionEffect extends ParticleEmissionEffect {
 }
 
 class ExplosionEffect extends VisualEffect {
-  sparkColour = [255, 245, 215, 255]; //The colour the sparks start at
-  sparkColourTo = [255, 215, 0, 55]; //The colour the sparks go to
-  smokeColour = [100, 100, 100, 200]; //The colour the smoke starts at
-  smokeColourTo = [100, 100, 100, 0]; //The colour the smoke goes to
-  waveColour = [255, 128, 0, 0]; //The colour the wave ends at. It always starts white.
+  sparkColours = [
+    [255, 245, 215, 255],
+    [255, 215, 0, 55],
+  ]; //The colour the sparks go to
+  smokeColours = [
+    [100, 100, 100, 200],
+    [100, 100, 100, 0],
+  ]; //The colour the smoke starts at
+  waveColours = [
+    [255, 255, 255, 255],
+    [255, 128, 0, 0],
+  ]; //The colour the wave ends at. It always starts white.
   smoke = true;
   sparks = true;
   wave = true;
@@ -620,8 +650,7 @@ class ExplosionEffect extends VisualEffect {
             rnd(scale ** 0.25 * 0.3, scale ** 0.25 * 0.5),
             0.01,
             "circle",
-            this.smokeColour,
-            this.smokeColourTo,
+            this.smokeColours,
             scale ** 0.85,
             0,
             scale ** 0.85,
@@ -643,8 +672,7 @@ class ExplosionEffect extends VisualEffect {
             rnd(scale ** 0.25 * 0.1, scale ** 0.25 * 2),
             0.075,
             "rect",
-            this.sparkColour,
-            this.sparkColourTo,
+            this.sparkColours,
             scale ** 0.5,
             0,
             scale ** 0.75,
@@ -662,8 +690,7 @@ class ExplosionEffect extends VisualEffect {
           30,
           0,
           scale,
-          [255, 255, 255, 255],
-          this.waveColour,
+          this.waveColours,
           scale ** 0.75,
           0,
           20
@@ -677,11 +704,23 @@ class ExplosionEffect extends VisualEffect {
 }
 
 class NuclearExplosionEffect extends ExplosionEffect {
-  flashColour = [255, 255, 255];
-  flashColourToLight = [255, 255, 200, 0];
-  flashColourTo = [255, 255, 200, 0];
-  fireColour = [255, 255, 100, 100];
-  fireColourTo = [155, 0, 0, 0];
+  flashColours = [
+    [255, 255, 255],
+    [255, 255, 200, 0],
+  ];
+  flashColoursLight = [
+    [255, 255, 255],
+    [255, 255, 200, 0],
+  ];
+  fireColours = [
+    [255, 255, 100, 100],
+    [155, 0, 0, 0],
+  ];
+  _reverseFireColours = [];
+  init() {
+    this._reverseFireColours = this.fireColours.reverse();
+    this.fireColours.reverse();
+  }
   flash = true;
   mushroom = true;
   create(world, x = 0, y = 0, direction = 0, scale = 1) {
@@ -699,8 +738,7 @@ class NuclearExplosionEffect extends ExplosionEffect {
             0,
             0,
             "inverted-triangle",
-            this.flashColour,
-            this.flashColourTo,
+            this.flashColours,
             0,
             flashSize * 2,
             flashSize ** 0.95,
@@ -716,8 +754,7 @@ class NuclearExplosionEffect extends ExplosionEffect {
             0,
             0,
             "inverted-triangle",
-            this.flashColour,
-            this.flashColourToLight,
+            this.flashColoursLight,
             0,
             flashSize,
             flashSize ** 0.85,
@@ -736,8 +773,7 @@ class NuclearExplosionEffect extends ExplosionEffect {
           25 * size ** 0.5,
           0,
           size * 24,
-          this.smokeColour,
-          this.smokeColourTo,
+          this.smokeColours,
           size ** 0.8,
           size
         )
@@ -762,8 +798,7 @@ class NuclearExplosionEffect extends ExplosionEffect {
             (rad * 10 * progress) / life,
             0,
             "circle",
-            this.fireColourTo,
-            this.fireColour,
+            this._reverseFireColours,
             rad * 4 ** 0.8,
             rad * 4 ** 0.6,
             rad * 4 ** 0.8,
@@ -783,8 +818,7 @@ class NuclearExplosionEffect extends ExplosionEffect {
             rad ** 0.6,
             rad ** 0.6 / life ** 0.5 / 4,
             "circle",
-            this.fireColour,
-            this.fireColourTo,
+            this.fireColours,
             rad * 4 ** 0.6,
             rad * 4 ** 0.4,
             rad * 4 ** 0.6,
@@ -803,8 +837,7 @@ class NuclearExplosionEffect extends ExplosionEffect {
             rad ** 0.6,
             rad ** 0.6 / life ** 0.5 / 4,
             "circle",
-            this.fireColour,
-            this.fireColourTo,
+            this.fireColours,
             rad * 4 ** 0.6,
             rad * 4 ** 0.4,
             rad * 4 ** 0.6,
@@ -824,8 +857,7 @@ class NuclearExplosionEffect extends ExplosionEffect {
               rad ** 0.75,
               rad ** 0.75 / life ** 0.6,
               "circle",
-              this.fireColour,
-              this.fireColourTo,
+              this.fireColours,
               rad * 4 ** 0.9,
               rad * 4 ** 0.7,
               rad * 4 ** 0.9,

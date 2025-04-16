@@ -1,12 +1,11 @@
 class PointBullet extends Bullet {
   #moved = false; //If the bullet has teleported to the target entity or not.
-  hitColour = [255, 255, 0];
-  hitColourTo = -1;
+  hitColours = [[255, 255, 0]];
   init() {
     this.speed = 0; //Remove speed
-    if (this.hitColourTo === -1) {
-      this.hitColourTo = this.hitColour.slice(0); //Copy colour
-      this.hitColourTo[3] = 0; //Add alpha
+    if (this.hitColours.length === 1) {
+      this.hitColours[1] = this.hitColours[0].slice(0); //Copy colour
+      this.hitColours[1][3] = 0; //Add alpha
     }
   }
   step(dt) {
@@ -52,8 +51,7 @@ class PointBullet extends Bullet {
         0,
         0,
         "rect",
-        this.hitColour,
-        this.hitColourTo,
+        this.hitColours,
         this.hitSize,
         this.hitSize,
         distance,
@@ -75,8 +73,7 @@ class PointBullet extends Bullet {
         0,
         0,
         "rhombus",
-        this.hitColour,
-        this.hitColourTo,
+        this.hitColours,
         this.hitSize * 5,
         0,
         0,
@@ -92,8 +89,7 @@ class PointBullet extends Bullet {
         0,
         0,
         "rhombus",
-        this.hitColour,
-        this.hitColourTo,
+        this.hitColours,
         this.hitSize * 5,
         0,
         0,

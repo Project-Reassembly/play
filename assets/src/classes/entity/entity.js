@@ -224,7 +224,7 @@ class Entity extends ShootableObject {
     if (
       !this._generic_AttackerAI((ent) => ent instanceof DroppedItemStack, false)
     )
-      if (!this._generic_AttackerAI()) this._passiveAI();
+      this._hostileAI();
   }
 
   /**Guard AI

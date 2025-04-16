@@ -26,8 +26,7 @@ class Missile extends Bullet {
             0,
             0,
             this.trailShape, //flames
-            this.trailColour,
-            this.trailColourTo, //Lerp colour thing
+            this.trailColours,
             this.hitSize * 1.9,
             0,
             this.hitSize * 1.9,
@@ -62,7 +61,7 @@ class Missile extends Bullet {
         //If the bullet exists
         let minDist = Infinity;
         for (let entity of this.world.entities) {
-          if (entity.team !== this.entity.team && !entity.dead) {
+          if (!(entity instanceof DroppedItemStack) && entity.team !== this.entity.team && !entity.dead) {
             //Only select living entities
             let dist = this.distanceTo(entity);
             if (dist < this.trackingRange && dist < minDist) {
@@ -83,7 +82,7 @@ class Missile extends Bullet {
             ? game.mouse
             : null;
         for (let entity of this.world.entities) {
-          if (entity.team !== this.entity.team && !entity.dead) {
+          if (!(entity instanceof DroppedItemStack) && entity.team !== this.entity.team && !entity.dead) {
             //Only select living entities
             let dist = entity.distanceToPoint(game.mouse.x, game.mouse.y);
             if (dist < this.trackingRange && dist < minDist) {

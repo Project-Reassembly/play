@@ -7,8 +7,7 @@ class TextParticle extends ShapeParticle {
     speed,
     decel,
     text,
-    colourFrom,
-    colourTo,
+    colours,
     sizeFrom,
     sizeTo,
     rotateSpeed,
@@ -22,8 +21,7 @@ class TextParticle extends ShapeParticle {
       speed,
       decel,
       "rect",
-      colourFrom,
-      colourTo,
+      colours,
       sizeFrom,
       sizeTo,
       sizeFrom,
@@ -38,14 +36,15 @@ class TextParticle extends ShapeParticle {
   }
   step(dt) {
     if (this.lifetime >= dt) {
-      //Interpolate size
-      this.size =
-        this.sizeFrom * this.calcLifeFract() +
-        this.sizeTo * (1 - this.calcLifeFract());
+      let lf = this.calcLifeFract();
+      //Interpolate size & colour
+      this.size = this.sizeFrom * lf + this.sizeTo * (1 - lf);
+      this.colour = colinterp(this.colours, 1 - lf);
       //Move
-      this.moveTo(
-        this.x + this.speed * p5.Vector.fromAngle(this.direction).x * dt,
-        this.y + this.speed * p5.Vector.fromAngle(this.direction).y * dt
+      this.moveToVct(
+        new Vector(this.x, this.y).add(
+          Vector.fromAngleRad(this.direction).scale(this.speed * dt)
+        )
       );
       //Decelerate
       if (this.speed >= this.decel) {
@@ -66,9 +65,8 @@ class TextParticle extends ShapeParticle {
     //centre the text
     textAlign(CENTER, CENTER);
     noStroke();
-    fill(255);
     //Interpolate colour
-    fill(...blendColours(this.colourFrom, this.colourTo, this.calcLifeFract()));
+    fill(this.colour);
     //turn particle
     translate(this.x, this.y);
     rotate(this.direction + this._rotOffset);
