@@ -52,7 +52,7 @@ class TileProducer extends Container {
         this.world,
         this.x + Block.size / 2,
         this.y + Block.size / 2,
-        this.direction,
+        this.direction
       );
   }
   stringifyRecipe() {
@@ -87,5 +87,27 @@ class TileProducer extends Container {
       outlineColour,
       backgroundColour
     );
+  }
+  createExtendedTooltip() {
+    return [
+      "🟨 -------------------- ⬜",
+      "Allowed Floors:",
+      ...Object.keys(this.results)
+        .map((key) => ({ in: key, out: this.results[key] }))
+        .flatMap((res) => {
+          /**@type {Tile} */
+          let blk = construct(Registry.blocks.get(res.in), "tile");
+          return [
+            "  "+blk.name +
+              " ≈> " +
+              Registry.items.get(res.out).name +
+              (blk.drillSpeed !== 1 ? " (" + blk.drillSpeed + "× speed)" : ""),
+          ];
+        }),
+      "Base Production: " +
+        roundNum(this.amount * (60 / this.duration), 1) +
+        "/s",
+      "🟨 -------------------- ⬜",
+    ];
   }
 }

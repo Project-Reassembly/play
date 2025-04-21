@@ -96,6 +96,13 @@ class Conveyor extends Container {
   read() {
     return this.inventory.get(0).item;
   }
+  createExtendedTooltip() {
+    return [
+      "🟨 -------------------- ⬜",
+      roundNum(60/this.moveTime, 1) + " items/s",
+      "🟨 -------------------- ⬜",
+    ];
+  }
 }
 
 class Unloader extends Conveyor {

@@ -18,4 +18,12 @@ class PlaceableItem extends Item {
     }
     return false;
   }
+  createExtendedTooltip() {
+    /**@type {Block} */
+    let block = construct(Registry.blocks.get(this.block), "block");
+    let blocktooltip = block.createExtendedTooltip
+      ? block.createExtendedTooltip()
+      : [];
+    return blocktooltip;
+  }
 }

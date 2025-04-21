@@ -36,6 +36,7 @@ Registry.type.add("tile-gen-options", TileGenerationOptions);
 Registry.type.add("ore-gen-options", OreGenerationOptions);
 //Block
 Registry.type.add("block", Block);
+Registry.type.add("wall", Wall);
 Registry.type.add("tile", Tile);
 Registry.type.add("ore", Ore);
 Registry.type.add("container", Container);

@@ -505,10 +505,10 @@ class Inventory {
   ) {
     if (!this?.tooltip?.item) return;
 
-    let info = this.tooltip.item
-      .getInformativeTooltip()
-      .filter((x) => x.trim().length > 0)
-      .join("\n");
+    let itt = this.tooltip.item.getInformativeTooltip();
+    if (!Array.isArray(itt))
+      throw new TypeError("Tooltip " + itt + " is not an array!");
+    let info = itt.filter((x) => x.toString().trim().length > 0).join("\n");
 
     let tooltip = this.tooltip.item.description;
     let header =

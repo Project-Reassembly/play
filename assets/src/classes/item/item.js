@@ -4,6 +4,8 @@ class Item extends RegisteredItem {
   description = "<no description>";
   rarity = 0;
   stackSize = 99;
+
+  _cachedTooltip = null;
   init() {}
   /** Called every tick while in inventory.
    * @param {InventoryEntity} holder Entity holding this item.
@@ -49,6 +51,11 @@ class Item extends RegisteredItem {
   }
   getContextualisedInfo(entity) {}
   getInformativeTooltip() {
+    if (!this._cachedTooltip)
+      this._cachedTooltip = this.createExtendedTooltip();
+    return this._cachedTooltip;
+  }
+  createExtendedTooltip() {
     return [];
   }
   /**

@@ -19,9 +19,6 @@ class Weapon extends Equippable {
   #lastReload = 0;
   #lastCharge = 0;
 
-  //uhh
-  _cachedTooltip = "";
-
   init() {
     super.init();
     this.shoot = constructFromType(this.shoot, WeaponShootConfiguration);

@@ -2,31 +2,37 @@
 Registry.blocks.add("grass", {
   type: "tile",
   image: "tile.grass",
+  name: "Grass Floor",
 });
 Registry.blocks.add("stone", {
   type: "tile",
   image: "tile.stone",
   drillSpeed: 0.5,
+  name: "Stone Floor",
 });
 Registry.blocks.add("water", {
   type: "tile",
   image: "tile.water",
   speedMultiplier: 0.6,
   buildable: false,
+  name: "Water",
 });
 Registry.blocks.add("sand-water", {
   type: "tile",
   image: "tile.sand-water",
   speedMultiplier: 0.8,
   drillSpeed: 0.8,
+  name: "Sandy Water",
 });
 Registry.blocks.add("sand-grass", {
   type: "tile",
   image: "tile.sand-grass",
+  name: "Sandy Grass",
 });
 Registry.blocks.add("sand", {
   type: "tile",
   image: "tile.sand",
+  name: "Sand Floor",
 });
 //## FLOORS ##
 //Ores
@@ -35,16 +41,19 @@ Registry.blocks.add("copper-ore", {
   image: "ore.copper",
   stages: ["", ".exposed", ".weathered", ".oxidised"],
   drillSpeed: 0.75,
+  name: "Copper Ore",
 });
 Registry.blocks.add("iron-ore", {
   type: "ore",
   image: "ore.iron",
   drillSpeed: 0.65,
+  name: "Iron Ore",
 });
 Registry.blocks.add("electrum-ore", {
   type: "ore",
   image: "ore.electrum",
   drillSpeed: 0.45,
+  name: "Electrum Deposit",
 });
 //### BLOCKS ###
 //## DEFENSE ##
@@ -53,6 +62,7 @@ createLinkedBlockAndItem(
   "Stone Wall",
   "block.stone-wall",
   {
+    type: "wall",
     health: 150,
   },
   {
@@ -64,6 +74,7 @@ createLinkedBlockAndItem(
   "Sandstone Wall",
   "block.sandstone-wall",
   {
+    type: "wall",
     health: 90,
   },
   {
@@ -75,6 +86,7 @@ createLinkedBlockAndItem(
   "Scrap Wall",
   "base.scrap",
   {
+    type: "wall",
     health: 300,
   },
   {
@@ -86,6 +98,7 @@ createLinkedBlockAndItem(
   "Copper Wall",
   "base.copper",
   {
+    type: "wall",
     health: 400,
   },
   {
@@ -97,6 +110,7 @@ createLinkedBlockAndItem(
   "Iron Wall",
   "base.iron",
   {
+    type: "wall",
     health: 600,
   },
   {
@@ -109,7 +123,9 @@ createLinkedBlockAndItem(
   "Tungsten Wall",
   "base.tungsten",
   {
+    type: "wall",
     health: 1500,
+    armour: 25,
   },
   {
     description:
@@ -121,7 +137,9 @@ createLinkedBlockAndItem(
   "Titanium Wall",
   "base.titanium",
   {
+    type: "wall",
     health: 2000,
+    armour: 5,
   },
   {
     description: "A cube of titanium.\n\nCould be used as defense.",
@@ -789,10 +807,10 @@ Registry.blocks.add("test-provider", {
   name: "Test Provider",
   maxPower: 1000,
   power: 1000,
-  isProvider: true
-})
+  isProvider: true,
+});
 Registry.blocks.add("test-subscriber", {
   name: "Test Subscriber",
   maxPower: 1000,
-  powerDraw: 10
-})
+  powerDraw: 10,
+});

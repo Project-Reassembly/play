@@ -93,7 +93,7 @@ class Crafter extends Container {
       this.world,
       this.x + Block.size / 2,
       this.y + Block.size / 2,
-      this.direction,
+      this.direction
     );
   }
   createTickEffect() {
@@ -103,7 +103,7 @@ class Crafter extends Container {
         this.world,
         this.x + Block.size / 2,
         this.y + Block.size / 2,
-        this.direction,
+        this.direction
       );
   }
   /**
@@ -146,6 +146,28 @@ class Crafter extends Container {
   static applyExtraProps(deserialised, creator) {
     super.applyExtraProps(deserialised, creator);
     deserialised._recipe = creator.recipe;
+  }
+
+  createExtendedTooltip() {
+    return [
+      "🟨 -------------------- ⬜",
+      "Recipes:",
+      ...this.recipes.map(
+        (rec) =>
+          "  " +
+          rec.inputs
+            .map((stack) => stack.count + "× " + stack.getItem().name)
+            .join(", ") +
+          " => " +
+          rec.outputs
+            .map((stack) => stack.count + "× " + stack.getItem().name)
+            .join(", ") +
+          " (" +
+          roundNum(rec.time / 60, 1) +
+          "s)"
+      ),
+      "🟨 -------------------- ⬜",
+    ];
   }
 }
 
