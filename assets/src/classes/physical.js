@@ -426,25 +426,6 @@ class ShootableObject extends PhysicalObject {
         //Take all damage instances
         for (let instance of bullet.damage) {
           if (!instance.spread) instance.spread = 0;
-          // if (instance.area)
-          //   //If it explodes
-          //   splashDamageInstance(
-          //     bullet.x,
-          //     bullet.y,
-          //     instance.amount + rnd(instance.spread, -instance.spread),
-          //     instance.type,
-          //     instance.area,
-          //     bullet.entity,
-          //     instance.visual, //        \
-          //     instance.sparkColour, //   |
-          //     instance.sparkColourTo, // |
-          //     instance.smokeColour, //   |- These are optional, but can be set per instance
-          //     instance.smokeColourTo, // |
-          //     instance.waveColour, //     /
-          //     bullet.status,
-          //     bullet.statusDuration
-          //   );
-          // else
           if (!instance.radius)
             this.damage(
               instance.type,

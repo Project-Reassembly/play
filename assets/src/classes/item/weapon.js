@@ -19,10 +19,17 @@ class Weapon extends Equippable {
   #lastReload = 0;
   #lastCharge = 0;
 
+  //uhh
+  _cachedTooltip = "";
+
   init() {
     super.init();
     this.shoot = constructFromType(this.shoot, WeaponShootConfiguration);
-    if(this.altShoot) this.altShoot = constructFromType(this.altShoot, WeaponShootConfiguration);
+    if (this.altShoot)
+      this.altShoot = constructFromType(
+        this.altShoot,
+        WeaponShootConfiguration
+      );
   }
 
   /**@param {EquippedEntity} holder  */
@@ -158,10 +165,8 @@ class Weapon extends Equippable {
       (this.ammoType !== "none" ? holder.inventory.count(this.ammoType) : "∞") +
       "\n" +
       (this.ammoType !== "none"
-        ? Registry.items.get(this.ammoType).name
-        : "none") +
-      " x" +
-      this.ammoUse +
+        ? Registry.items.get(this.ammoType).name + " ×" + this.ammoUse
+        : " - ") +
       "\n" +
       this.createProgressBar() +
       " "
@@ -182,6 +187,106 @@ class Weapon extends Equippable {
         .padEnd(15, "□")
         .substring(0, 15);
   }
+  getInformativeTooltip() {
+    if (!this._cachedTooltip)
+      this._cachedTooltip = [
+        this.hasAltFire
+          ? "🟨 ------- Main ------- ⬜"
+          : "🟨 -------------------- ⬜",
+        ...Weapon.infoOfShootPattern(this.shoot),
+        this.hasAltFire ? "🟨 ------- Alt -------- ⬜" : "",
+        ...(this.hasAltFire ? Weapon.infoOfShootPattern(this.altShoot) : []),
+        "🟨 -------------------- ⬜",
+      ];
+    return this._cachedTooltip;
+  }
+  static infoOfShootPattern(shoot) {
+    return [
+      "Fire Rate: " +
+        (shoot.pattern.amount * shoot.pattern.burst > 1
+          ? shoot.pattern.amount * shoot.pattern.burst + "× "
+          : "") +
+        roundNum(60 / (shoot.reload + shoot.charge), 2) +
+        "/s",
+      shoot.pattern.spread ? shoot.pattern.spread + "° inaccuracy" : "",
+      shoot.pattern.spacing ? shoot.pattern.spacing + "° shot spacing" : "",
+      "Shot:",
+      ...Weapon.getBulletInfo(shoot.bullet, 1),
+    ];
+  }
+  static getBulletInfo(bullet = {}, idl = 0) {
+    /**@type {Bullet} */
+    let blt = construct(bullet, "bullet");
+    let time = Math.min(blt.lifetime, blt.speed / blt.decel);
+    return [
+      ind(idl) +
+        (blt instanceof PointBullet
+          ? "🟪instant⬜"
+          : blt instanceof LaserBullet
+          ? blt.length
+          : roundNum(
+              //s = ut + ½at²
+              (blt.speed * time - 0.5 * (blt.decel * time ** 2)) / 30,
+              1
+            ) + " blocks range"),
+      ...blt.damage.map(
+        (x) =>
+          ind(idl) +
+          (x.amount ?? 0) +
+          " " +
+          (x.type ?? (x.radius > 0 ? "explosion" : "unknown")) +
+          (x.radius > 0 ? " area" : "") +
+          " damage" +
+          (x.radius > 0 ? " ~ " + roundNum(x.radius / 30, 1) + " blocks" : "")
+      ),
+      ind(idl) + (blt.pierce > 0 ? "🟨" + blt.pierce + "× pierce⬜" : ""),
+      ind(idl) + (blt.fires > 0 ? "🟧incendiary: " : ""),
+      ind(idl + 1) +
+        (blt.fires > 0
+          ? ((blt.fireChance ?? 1) !== 1
+              ? blt.fireChance * 100 + "% chance for "
+              : "") + (blt.fires > 1 ? blt.fires + " fires " : "1 fire ")
+          : ""),
+      ind(idl + 1) +
+        (blt.fires > 0
+          ? (blt.fire.damage ?? 1) +
+            " " +
+            (blt.fire.type ?? "fire") +
+            " damage every " +
+            roundNum((blt.fire.interval ?? 10) / 60, 1) +
+            "s"
+          : ""),
+      ind(idl + 1) +
+        (blt.fires > 0
+          ? roundNum((blt.fire.lifetime ?? 600) / 60, 1) + "s lifetime⬜"
+          : ""),
+      ind(idl) + (blt instanceof Missile ? "🟦homing: " : ""),
+      ind(idl + 1) +
+        (blt instanceof Missile
+          ? roundNum(blt.trackingRange / 30, 1) + " blocks range"
+          : ""),
+      ind(idl + 1) +
+        (blt instanceof Missile
+          ? roundNum(blt.turnSpeed, 1) + " strength⬜"
+          : ""),
+      ind(idl) + (blt.fragNumber > 0 ? blt.fragNumber + " frags:" : ""),
+      ...(blt.fragNumber > 0
+        ? Weapon.getBulletInfo(blt.fragBullet, idl + 1)
+        : []),
+      ind(idl) +
+        (blt.intervalNumber > 0
+          ? blt.intervalNumber * roundNum(60 / blt.intervalSpacing, 1) +
+            " interval shots:"
+          : ""),
+      ...(blt.intervalNumber > 0
+        ? Weapon.getBulletInfo(blt.intervalBullet, idl + 1)
+        : []),
+    ];
+  }
+}
+
+function ind(lvl = 0) {
+  return "  ".repeat(lvl);
 }
 
 function patternedBulletExpulsion(

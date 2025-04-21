@@ -504,56 +504,78 @@ class Inventory {
     backgroundColour = [95, 100, 100, 160]
   ) {
     if (!this?.tooltip?.item) return;
-    push();
-    textAlign(LEFT);
-    textFont(fonts.ocr);
-    textSize(33);
-    strokeWeight(2);
+
+    let info = this.tooltip.item
+      .getInformativeTooltip()
+      .filter((x) => x.trim().length > 0)
+      .join("\n");
+
+    let tooltip = this.tooltip.item.description;
     let header =
       this.tooltip.item.name +
-      " (" +
-      this.tooltip.count +
-      "/" +
-      this.tooltip.stackSize +
-      ")";
-    let maxWidth = textWidth(header);
-    fill(...backgroundColour);
-    strokeWeight(5);
-    stroke(outlineColour);
+      (this.tooltip.stackSize !== 1
+        ? " (" + this.tooltip.count + "/" + this.tooltip.stackSize + ")"
+        : "");
 
-    let body = this.tooltip.item.description.split("\n");
-    let descLines = this.tooltip.item.description.split("\n").length + 2;
-    let lines = 2 + Math.ceil(descLines);
-    textSize(18);
-    for (let line of body) {
-      let lw = textWidth(line);
-      if (lw > maxWidth) maxWidth = lw + 12;
-    }
-    let displayX = ui.mouse.x + maxWidth / 2;
-    textSize(25);
-    let displayY = ui.mouse.y + (lines * 12) / 2;
-    //Stop vertical overflow
-    if (displayY + lines * 6 > height / 2) {
-      displayY = height / 2 - lines * 6;
-    }
-    //Stop horizontal overflow
-    if (displayX + maxWidth / 2 > width / 2) {
-      displayX = width / 2 - maxWidth / 2;
-    }
-    rect(displayX, displayY, maxWidth, lines * 12);
-    fill(Item.getColourFromRarity(this.tooltip.item.rarity, "light"));
-    stroke(Item.getColourFromRarity(this.tooltip.item.rarity, "light"));
-    strokeWeight(1);
-    let textX = displayX - maxWidth / 2 + 10;
-    let textY = displayY - lines * 6 + 28;
-    text(header, textX, textY - 5);
-    fill(Item.getColourFromRarity(0, "light"));
-    textSize(18);
-    noStroke();
-    for (let line = 0; line < lines; line++) {
-      text(body[line], textX, textY + 15 + line * 15);
-    }
-    pop();
+    drawMultilineText(
+      ui.mouse.x,
+      ui.mouse.y,
+      tooltip +
+        (info.length > 0
+          ? "\n" + (keyIsDown(SHIFT) ? info : "🟨 -< SHIFT for info >- ⬜")
+          : ""),
+      header,
+      Item.getColourFromRarity(0, "light"),
+      outlineColour,
+      backgroundColour,
+      20,
+      Item.getColourFromRarity(this.tooltip.item.rarity, "light")
+    );
+
+    // if (!this?.tooltip?.item) return;
+    // push();
+    // textAlign(LEFT);
+    // textFont(fonts.ocr);
+    // textSize(33);
+    // strokeWeight(2);
+    // let maxWidth = textWidth(header);
+    // fill(...backgroundColour);
+    // strokeWeight(5);
+    // stroke(outlineColour);
+    // let body = tooltip.split("\n");
+    // let descLines = tooltip.split("\n").length + 2;
+    // let lines = 2 + Math.ceil(descLines);
+    // textSize(18);
+    // for (let line of body) {
+    //   let lw = textWidth(line);
+    //   if (lw > maxWidth) maxWidth = lw + 12;
+    // }
+    // let displayX = ui.mouse.x + maxWidth / 2;
+    // textSize(25);
+    // let displayY = ui.mouse.y + (lines * 12) / 2;
+    // //Stop vertical overflow
+    // if (displayY + lines * 6 > height / 2) {
+    //   displayY = height / 2 - lines * 6;
+    // }
+    // //Stop horizontal overflow
+    // if (displayX + maxWidth / 2 > width / 2) {
+    //   displayX = width / 2 - maxWidth / 2;
+    // }
+    // rect(displayX, displayY, maxWidth, lines * 12);
+    // fill(Item.getColourFromRarity(this.tooltip.item.rarity, "light"));
+    // stroke(Item.getColourFromRarity(this.tooltip.item.rarity, "light"));
+    // strokeWeight(1);
+    // let textX = displayX - maxWidth / 2 + 10;
+    // let textY = displayY - lines * 6 + 28;
+    // text(header, textX, textY - 5);
+    // fill(Item.getColourFromRarity(0, "light"));
+    // textSize(18);
+    // noStroke();
+    // for (let line = 0; line < lines; line++) {
+    //   text(body[line], textX, textY + 15 + line * 15);
+    // }
+    // let startY = displayY + lines * 6;
+    // pop();
   }
 }
 
@@ -565,7 +587,8 @@ function drawMultilineText(
   colour = [0],
   outlineColour = [50, 50, 50],
   backgroundColour = [95, 100, 100, 160],
-  txtSize = 20
+  txtSize = 20,
+  headerColourOverride = null
 ) {
   push();
   //Setup
@@ -603,16 +626,62 @@ function drawMultilineText(
   stroke(outlineColour);
   //Box, with padding
   rect(displayX, displayY, maxWidth, boxH);
-  fill(colour);
-  stroke(colour);
+  fill(headerColourOverride ?? colour);
+  stroke(headerColourOverride ?? colour);
   strokeWeight(1);
   let textX = displayX - maxWidth / 2 + 10;
   let textY = displayY - boxH / 2 + (header ? txtSize * 1.5 : 0);
   if (header) text(header, textX, textY - 5);
   textSize(txtSize * 0.9);
+  fill(colour);
   noStroke();
   for (let line = 0; line < lines; line++) {
-    text(body[line], textX, textY + txtSize + line * txtSize * 0.9);
+    coltxt(body[line], textX, textY + txtSize + line * txtSize * 0.9, colour);
   }
   pop();
+}
+
+const textcolours = {
+  "🟥": [255, 60, 60],
+  "🟧": [255, 180, 80],
+  "🟨": [255, 220, 50],
+  "🟩": [50, 255, 50],
+  "🟦": [50, 220, 255],
+  "🟪": [200, 0, 255],
+  "🟫": [165, 105, 83],
+  "⬛": [0, 0, 0],
+  "⬜": "reset",
+};
+function findTextColourPrefix(str = "") {
+  for (let key of Object.getOwnPropertyNames(textcolours)) {
+    if (str.startsWith(key)) return key;
+  }
+  return "";
+}
+function findTextColourSuffix(str = "") {
+  for (let key of Object.getOwnPropertyNames(textcolours)) {
+    if (str.endsWith(key)) return key;
+  }
+  return "";
+}
+
+function coltxt(textToShow = "", x, y, defcolour) {
+  if (!textToShow) return;
+  let trimmed = textToShow.trim();
+  let colcode = findTextColourPrefix(trimmed);
+  let endcolcode = findTextColourSuffix(trimmed);
+  //Log.send(textToShow + " => " + colcode + ", " + endcolcode);
+  let colour = textcolours[colcode];
+  let endcolour = textcolours[endcolcode];
+  if (colour === "reset") fill(defcolour);
+  else if (colour) fill(colour);
+  text(
+    colour || endcolour
+      ? textToShow.replace(colcode, "").replace(endcolcode, "")
+      : textToShow,
+    x,
+    y
+  );
+  if (endcolour === "reset") fill(defcolour);
+  else if (endcolour) fill(endcolour);
 }

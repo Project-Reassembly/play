@@ -175,7 +175,7 @@ Registry.items.add("iti-laser-caster", {
   name: "Laser Caster",
   rarity: Item.rarity.ITI,
   description:
-    "Fires fast-moving incendiary bolts of explosive plasma.\nBolts deal secondary damage, with homing fragmentation.\n\nInfiniTech Industries are not responsible\nfor any damages to your factory\nas a result of using this weapon.",
+    "Fires fast-moving incendiary bolts of explosive plasma.\nBolts deal secondary damage, with homing fragmentation.",
   image: "weapon.iti-laser-caster.item",
   ammoType: "none",
   shoot: {

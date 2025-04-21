@@ -4,7 +4,7 @@ class Item extends RegisteredItem {
   description = "<no description>";
   rarity = 0;
   stackSize = 99;
-  init(){}
+  init() {}
   /** Called every tick while in inventory.
    * @param {InventoryEntity} holder Entity holding this item.
    */
@@ -34,8 +34,10 @@ class Item extends RegisteredItem {
             0,
             0,
             "rhombus",
-            [Item.getColourFromRarity(Item.rarity.SPECIAL, "light"),
-            Item.getColourFromRarity(Item.rarity.SPECIAL, "dark")],
+            [
+              Item.getColourFromRarity(Item.rarity.SPECIAL, "light"),
+              Item.getColourFromRarity(Item.rarity.SPECIAL, "dark"),
+            ],
             size,
             0,
             size,
@@ -46,6 +48,9 @@ class Item extends RegisteredItem {
       }
   }
   getContextualisedInfo(entity) {}
+  getInformativeTooltip() {
+    return [];
+  }
   /**
    *
    * @param {number} rarity Item rarity. Must be between 0 and 5 inclusive. Use of `Item.rarity` is recommended.

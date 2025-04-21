@@ -2,6 +2,7 @@ class Throwable extends Item {
   bullet = {};
   spread = 10;
   throwEffect = "none";
+  _cachedTooltip = "";
   useInAir(holder, stack) {
     this.throw(holder, stack);
     ui.waitingForMouseUp = true;
@@ -24,5 +25,15 @@ class Throwable extends Item {
       from.world,
       from
     );
+  }
+  getInformativeTooltip() {
+    if (!this._cachedTooltip)
+      this._cachedTooltip = [
+        "🟨 ---- Throwable ----- ⬜",
+        this.spread ? this.spread + "° inaccuracy" : "",
+        ...Weapon.getBulletInfo(this.bullet),
+        "🟨 -------------------- ⬜",
+      ];
+    return this._cachedTooltip;
   }
 }
