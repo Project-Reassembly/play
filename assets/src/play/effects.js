@@ -15,11 +15,7 @@ class Explosion {
   source = null;
   effect = "explosion";
   constructor(opts = {}) {
-    for (let key of Object.keys(opts)) {
-      if (this[key] !== undefined && typeof this[key] !== "function") {
-        this[key] = opts[key];
-      }
-    }
+    assign(this, opts);
   }
   //Basic explosion
   create() {
@@ -47,7 +43,7 @@ class Explosion {
         pierce: Infinity,
         despawnEffect: "none",
         team: this.team,
-        hitSize: this.radius,
+        hitSize: this.radius*2,
       },
       VirtualBullet
     );

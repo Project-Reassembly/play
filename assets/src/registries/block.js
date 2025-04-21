@@ -145,6 +145,38 @@ createLinkedBlockAndItem(
     description: "A cube of titanium.\n\nCould be used as defense.",
   }
 );
+//## OFFENSIVE ##
+createLinkedBlockAndItem(
+  "bomb",
+  "Bomb",
+  "bomb.basic",
+  {
+    type: "bomb",
+    health: 50,
+  },
+  {
+    description:
+      "Explodes violently when any enemy gets near.\nCan also be manually triggered.",
+  }
+);
+createLinkedBlockAndItem(
+  "landmine",
+  "Landmine",
+  "bomb.landmine",
+  {
+    type: "bomb",
+    health: 50,
+    hiddenImg: "bomb.landmine.hidden",
+    walkable: true,
+    autoDetonationRange: 20,
+    detonationDelay: 35
+  },
+  {
+    image: "bomb.landmine.item",
+    description:
+      "Explodes violently when any enemy gets near.\n(Mostly) hidden from enemy teams, and can be walked over.\nExplodes faster than normal bombs.\nDoes not indicate its fuse.",
+  }
+);
 //## CRAFTERS ##
 //Scrap Tier [0]
 createLinkedBlockAndItem(
@@ -460,6 +492,48 @@ createLinkedBlockAndItem(
           },
         ],
         time: 60,
+      },
+      {
+        inputs: [
+          {
+            item: "makeshift-explosive",
+            count: 4,
+          },
+          {
+            item: "scrap",
+            count: 1,
+          },
+        ],
+        outputs: [
+          {
+            item: "bomb",
+            count: 1,
+          },
+        ],
+        time: 180,
+      },
+      {
+        inputs: [
+          {
+            item: "bomb",
+            count: 1,
+          },
+          {
+            item: "wire",
+            count: 3,
+          },
+          {
+            item: "plate",
+            count: 1,
+          },
+        ],
+        outputs: [
+          {
+            item: "landmine",
+            count: 1,
+          },
+        ],
+        time: 360,
       },
       {
         inputs: [

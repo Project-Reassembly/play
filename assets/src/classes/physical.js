@@ -419,33 +419,38 @@ class ShootableObject extends PhysicalObject {
       //If colliding with a bullet on different team, that it hasn't already been hit by and that still exists
       if (
         !bullet.remove &&
-        this.team !== bullet.entity.team &&
         !bullet.damaged.includes(this) &&
         bullet.collidesWith(this) //check collisions last for performance reasons
       ) {
-        //Take all damage instances
-        for (let instance of bullet.damage) {
-          if (!instance.spread) instance.spread = 0;
-          if (!instance.radius)
-            this.damage(
-              instance.type,
-              instance.amount + rnd(instance.spread, -instance.spread),
-              bullet.entity
-            );
+        if (this.team !== bullet.entity.team) {
+          //Take all damage instances
+          for (let instance of bullet.damage) {
+            if (!instance.spread) instance.spread = 0;
+            if (!instance.radius)
+              this.damage(
+                instance.type,
+                instance.amount + rnd(instance.spread, -instance.spread),
+                bullet.entity
+              );
+          }
+          //Make the bullet know
+          bullet.damaged.push(this);
+          //Reduce pierce
+          bullet.pierce--;
+          //If exhausted
+          if (bullet.pierce < 0) {
+            //Delete
+            bullet.remove = true;
+          }
         }
         this.hitByBullet(bullet);
-        //Make the bullet know
-        bullet.damaged.push(this);
-        //Reduce pierce
-        bullet.pierce--;
-        //If exhausted
-        if (bullet.pierce < 0) {
-          //Delete
-          bullet.remove = true;
-        }
       }
     }
   }
+  /**
+   * Fired when a bullet hits this object, whatever team it's on.
+   * @param {Bullet} bullet 
+   */
   hitByBullet(bullet) {}
   /**Deals damage to this object. If health goes below zero, the object is removed.*/
   damage(type = "normal", amount = 0, source = null) {

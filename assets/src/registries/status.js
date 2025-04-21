@@ -1,6 +1,7 @@
 Registry.statuses.add(
   "burning",
   construct({
+    name: "Burning",
     damage: 5,
     interval: 30,
     damageType: "fire",
@@ -11,6 +12,7 @@ Registry.statuses.add(
 Registry.statuses.add(
   "plasma-burn",
   construct({
+    name: "Plasma Burn",
     damage: 6,
     interval: 20,
     damageType: "fire",

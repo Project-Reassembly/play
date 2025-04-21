@@ -226,6 +226,7 @@ class Weapon extends Equippable {
               (blt.speed * time - 0.5 * (blt.decel * time ** 2)) / 30,
               1
             ) + " blocks range"),
+
       ...blt.damage.map(
         (x) =>
           ind(idl) +
@@ -236,7 +237,17 @@ class Weapon extends Equippable {
           " damage" +
           (x.radius > 0 ? " ~ " + roundNum(x.radius / 30, 1) + " blocks" : "")
       ),
+
+      ind(idl) +
+        (blt.status !== "none"
+          ? "🟨"+Registry.statuses.get(blt.status).name +
+            " for " +
+            roundNum(blt.statusDuration / 60, 1) +
+            "s"
+          : ""),
+
       ind(idl) + (blt.pierce > 0 ? "🟨" + blt.pierce + "× pierce⬜" : ""),
+
       ind(idl) + (blt.fires > 0 ? "🟧incendiary: " : ""),
       ind(idl + 1) +
         (blt.fires > 0
@@ -257,6 +268,7 @@ class Weapon extends Equippable {
         (blt.fires > 0
           ? roundNum((blt.fire.lifetime ?? 600) / 60, 1) + "s lifetime⬜"
           : ""),
+
       ind(idl) + (blt instanceof Missile ? "🟦homing: " : ""),
       ind(idl + 1) +
         (blt instanceof Missile
@@ -266,10 +278,12 @@ class Weapon extends Equippable {
         (blt instanceof Missile
           ? roundNum(blt.turnSpeed, 1) + " strength⬜"
           : ""),
+
       ind(idl) + (blt.fragNumber > 0 ? blt.fragNumber + " frags:" : ""),
       ...(blt.fragNumber > 0
         ? Weapon.getBulletInfo(blt.fragBullet, idl + 1)
         : []),
+
       ind(idl) +
         (blt.intervalNumber > 0
           ? blt.intervalNumber * roundNum(60 / blt.intervalSpacing, 1) +

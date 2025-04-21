@@ -110,6 +110,11 @@ Registry.images.add("conveyor.basic-unloader.belt", new ImageContainer("assets/t
 Registry.images.add("conveyor.basic-unloader.ui", new ImageContainer("assets/textures/block/blocks/conveyor/basic-unloader.png"))
 //Blocks > Decoration
 Registry.images.add("block.message", new ImageContainer("assets/textures/block/blocks/deco/message.png"))
+//Blocks > Offense
+Registry.images.add("bomb.basic", new ImageContainer("assets/textures/block/blocks/defense/bomb-block.png"))
+Registry.images.add("bomb.landmine", new ImageContainer("assets/textures/block/blocks/defense/landmine.png"))
+Registry.images.add("bomb.landmine.hidden", new ImageContainer("assets/textures/block/blocks/defense/landmine-hidden.png"))
+Registry.images.add("bomb.landmine.item", new ImageContainer("assets/textures/block/blocks/defense/landmine-item.png"))
 //Icons
 Registry.images.add("icon.chest", new ImageContainer("assets/textures/icon/chest.png"))
 Registry.images.add("icon.cross", new ImageContainer("assets/textures/icon/cross.png"))

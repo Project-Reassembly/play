@@ -137,21 +137,20 @@ class Block extends ShootableObject {
     return true;
   }
   onHealthZeroed(type, source) {
-    if (this.break(BreakType.attack)) {
-      this.world.break(this.gridX, this.gridY, "blocks");
-      //Block go boom
-      createDestructionExplosion(
-        this.x + Block.size / 2,
-        this.y + Block.size / 2,
-        this
-      );
-    }
+    this.break(BreakType.attack);
+    //Block go boom
+    createDestructionExplosion(
+      this.x + Block.size / 2,
+      this.y + Block.size / 2,
+      this
+    );
   }
-  /** Fired when this block is attempted to be broken. Can specify the result of the break attempt.
+  /** Fired when a block should be broken. Should handle block breaking itself.
    * @param {symbol} [type=BreakType.entity] What broke this block. Should be a property of `BreakType`.
-   * @returns {Boolean} True if this block should break, false if not.
+   * @returns {Boolean} True if this block broke, false if not.
    */
   break(type = BreakType.delete) {
+    this.world.break(this.gridX, this.gridY, "blocks");
     if (type !== BreakType.deconstruct && type !== BreakType.replace)
       return true;
     if (!this.dropItem) return true;
@@ -282,49 +281,25 @@ function createLinkedBlockAndItem(
 ) {
   Registry.blocks.add(
     regname,
-    Object.assign(blockprops, {
-      name: displayname,
-      image: image,
-      dropItem: regname,
-    })
+    Object.assign(
+      {
+        name: displayname,
+        image: image,
+        dropItem: regname,
+      },
+      blockprops
+    )
   );
   Registry.items.add(
     regname,
-    Object.assign(itemprops, {
-      type: "placeable",
-      name: displayname,
-      block: regname,
-      image: image,
-    })
+    Object.assign(
+      {
+        type: "placeable",
+        name: displayname,
+        block: regname,
+        image: image,
+      },
+      itemprops
+    )
   );
-}
-
-//Does nothing special, just blocks shit
-class Wall extends Block {
-  explosiveness = 0;
-  /** Damage reduction. Less effective vs. higher damage values. */
-  armour = 0;
-  /** Increase this to decrease the amount by which higher values reduce damage. By a **lot**. _This is sensitive_, use carefully.*/
-  armourToughness = 5;
-  damage(type, amount, source) {
-    super.damage(
-      type,
-      amount * 1 -
-        ((1 - this.armourToughness / (this.armour + this.armourToughness)) **
-          0.3) **
-          Math.ceil(amount ** (this.armourToughness/10)),
-      source
-    );
-  }
-  createExtendedTooltip() {
-    return [
-      "🟨 -------------------- ⬜",
-      this.health + " health",
-      this.armour > 0 ? this.armour + " armour" : "",
-      this.explosiveness > 0
-        ? this.explosiveness * 100 + "% explosiveness"
-        : "",
-      "🟨 -------------------- ⬜",
-    ];
-  }
 }

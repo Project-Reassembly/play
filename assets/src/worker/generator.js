@@ -49,6 +49,8 @@ importScripts(
   "../classes/block/conveyor.js",
   "../classes/block/devblocks.js",
   "../classes/block/decoration.js",
+  "../classes/block/defense/bomb.js",
+  "../classes/block/defense/wall.js",
   "../play/effects.js",
   "../classes/effect/status-effect.js",
 );

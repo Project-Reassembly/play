@@ -48,6 +48,7 @@ Registry.type.add("drill", Drill);
 Registry.type.add("conveyor", Conveyor);
 Registry.type.add("unloader", Unloader);
 Registry.type.add("sign", SignBlock);
+Registry.type.add("bomb", Bomb);
 //Dev blocks
 Registry.type.add("dev::structurereader", StructureReaderBlock);
 Registry.type.add("dev::itemcatalog", ItemCatalogBlock);

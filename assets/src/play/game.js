@@ -320,7 +320,7 @@ const propertyReplacements = [
   ['"body":', "β"],
   ['"positions":', "ψ"],
   ['"seed":', "σ"],
-  ['"name":', "ν"]
+  ['"name":', "ν"],
 ];
 const postDictReplacers = [
   ["},{", "⁺"],
@@ -938,11 +938,8 @@ function secondaryInteract() {
       if (block.dropItem) {
         //Break breakables
 
-        if (!block.break(BreakType.deconstruct)) return;
-        world.break(game.mouse.blockX, game.mouse.blockY);
-        if (block === Container.selectedBlock) {
-          Container.selectedBlock = null;
-        }
+        if (block.break(BreakType.deconstruct))
+          if (block === Container.selectedBlock) Container.selectedBlock = null;
         return;
       }
     if (
@@ -1024,7 +1021,7 @@ function interact() {
       .useInAir(game.player, Inventory.mouseItemStack);
   if (Inventory.mouseItemStack?.isEmpty())
     Inventory.mouseItemStack = ItemStack.EMPTY;
-  
+
   if (ui.waitingForMouseUp) return;
   if (
     game.player.rightHand.get(0) instanceof ItemStack &&
