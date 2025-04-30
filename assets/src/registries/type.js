@@ -16,13 +16,16 @@ Registry.type.add("continuous-laser", ContinuousLaserBullet);
 Registry.type.add("missile", Missile);
 Registry.type.add("critical", CriticalBullet);
 Registry.type.add("point-bullet", PointBullet);
+Registry.type.add("block-bullet", BlockLaunchedBullet);
 //Items
 Registry.type.add("item", Item);
 Registry.type.add("placeable", PlaceableItem);
 Registry.type.add("itemstack", ItemStack);
 Registry.type.add("equippable", Equippable);
+//Weapons
 Registry.type.add("weapon", Weapon);
 Registry.type.add("throwable", Throwable);
+Registry.type.add("block-launcher", BlockLauncher);
 //World
 Registry.type.add("world", World);
 Registry.type.add("chunk", Chunk);
@@ -49,6 +52,7 @@ Registry.type.add("conveyor", Conveyor);
 Registry.type.add("unloader", Unloader);
 Registry.type.add("sign", SignBlock);
 Registry.type.add("bomb", Bomb);
+Registry.type.add("nuclear-bomb", NuclearBomb);
 //Dev blocks
 Registry.type.add("dev::structurereader", StructureReaderBlock);
 Registry.type.add("dev::itemcatalog", ItemCatalogBlock);

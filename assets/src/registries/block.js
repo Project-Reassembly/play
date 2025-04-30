@@ -153,6 +153,7 @@ createLinkedBlockAndItem(
   {
     type: "bomb",
     health: 50,
+    fuseEffect: "burning"
   },
   {
     description:
@@ -175,6 +176,64 @@ createLinkedBlockAndItem(
     image: "bomb.landmine.item",
     description:
       "Explodes violently when any enemy gets near.\n(Mostly) hidden from enemy teams, and can be walked over.\nExplodes faster than normal bombs.\nDoes not indicate its fuse.",
+  }
+);
+createLinkedBlockAndItem(
+  "mini-nuke",
+  "Mini Nuke",
+  "bomb.basic",
+  {
+    type: "nuclear-bomb",
+    health: 50,
+    explosion: {
+      radius: 180,
+      amount: 1500
+    },
+    fuseEffect: {
+      type: "particle-emission",
+      amount: 2,
+      particle: {
+        shape: "rhombus",
+        lifetime: 30,
+        speed: 0.7,
+        decel: 0.05,
+        widthFrom: 5,
+        widthTo: 10,
+        heightFrom: 5,
+        heightTo: 10,
+        colours: [
+          [255, 255, 255],
+          [255, 255, 0],
+          [0, 255, 0]
+        ],
+        rotateSpeed: 0.2,
+        light: 50,
+      },
+    },
+    detonationDelay: 120,
+    autoDetonationRange: 400,
+    triggerEffect: {
+      type: "wave-emission",
+      particle: {
+        lifetime: 120,
+        radiusFrom: 35,
+        radiusTo: 35,
+        colours: [
+          [0, 255, 0, 100],
+          [255, 255, 0, 100],
+          [255, 0, 0, 100]
+        ],
+        light: 50,
+        strokeFrom: 10,
+        strokeTo: 10
+      },
+    },
+    accelerable: false
+  },
+  {
+    description:
+      "A Bomb powered by a runaway chain reaction of decaying Uranium.",
+    rarity: Item.rarity.BLUE
   }
 );
 //## CRAFTERS ##

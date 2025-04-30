@@ -106,12 +106,16 @@ class Weapon extends Equippable {
       } else this._internalFire(holder, shoot);
     }
   }
-  _internalFire(holder, shoot = this.shoot) {
+  _useAmmo(holder) {
     if (this.ammoType !== "none") {
       if (holder.inventory.hasItem(this.ammoType, this.ammoUse))
         holder.inventory.removeItem(this.ammoType, this.ammoUse);
-      else return;
+      else return false;
     }
+    return true;
+  }
+  _internalFire(holder, shoot = this.shoot) {
+    if (!this._useAmmo(holder)) return;
 
     this.#cooldown = this.getAcceleratedReloadRate(shoot);
     this.accelerate(shoot); //Apply acceleration effects
@@ -184,18 +188,16 @@ class Weapon extends Equippable {
         .padEnd(15, "□")
         .substring(0, 15);
   }
-  getInformativeTooltip() {
-    if (!this._cachedTooltip)
-      this._cachedTooltip = [
-        this.hasAltFire
-          ? "🟨 ------- Main ------- ⬜"
-          : "🟨 -------------------- ⬜",
-        ...Weapon.infoOfShootPattern(this.shoot),
-        this.hasAltFire ? "🟨 ------- Alt -------- ⬜" : "",
-        ...(this.hasAltFire ? Weapon.infoOfShootPattern(this.altShoot) : []),
-        "🟨 -------------------- ⬜",
-      ];
-    return this._cachedTooltip;
+  createExtendedTooltip() {
+    return [
+      this.hasAltFire
+        ? "🟨 ------- Main ------- ⬜"
+        : "🟨 -------------------- ⬜",
+      ...Weapon.infoOfShootPattern(this.shoot),
+      this.hasAltFire ? "🟨 ------- Alt -------- ⬜" : "",
+      ...(this.hasAltFire ? Weapon.infoOfShootPattern(this.altShoot) : []),
+      "🟨 -------------------- ⬜",
+    ];
   }
   static infoOfShootPattern(shoot) {
     return [
@@ -240,7 +242,8 @@ class Weapon extends Equippable {
 
       ind(idl) +
         (blt.status !== "none"
-          ? "🟨"+Registry.statuses.get(blt.status).name +
+          ? "🟨" +
+            Registry.statuses.get(blt.status).name +
             " for " +
             roundNum(blt.statusDuration / 60, 1) +
             "s"
@@ -251,9 +254,13 @@ class Weapon extends Equippable {
       ind(idl) + (blt.fires > 0 ? "🟧incendiary: " : ""),
       ind(idl + 1) +
         (blt.fires > 0
-          ? ((blt.fireChance ?? 1) !== 1
-              ? blt.fireChance * 100 + "% chance for "
-              : "") + (blt.fires > 1 ? blt.fires + " fires " : "1 fire ")
+          ? blt.isFireBinomial
+            ? blt.fireChance * 100 +
+              "% chance for a fire " +
+              (blt.fires > 1 ? blt.fires + " times" : "")
+            : ((blt.fireChance ?? 1) !== 1
+                ? blt.fireChance * 100 + "% chance for "
+                : "") + (blt.fires > 1 ? blt.fires + " fires " : "1 fire ")
           : ""),
       ind(idl + 1) +
         (blt.fires > 0
@@ -286,8 +293,8 @@ class Weapon extends Equippable {
 
       ind(idl) +
         (blt.intervalNumber > 0
-          ? blt.intervalNumber * roundNum(60 / blt.intervalSpacing, 1) +
-            " interval shots:"
+          ? roundNum(blt.intervalNumber * 60 / blt.intervalTime, 1) +
+            "/s interval shots:"
           : ""),
       ...(blt.intervalNumber > 0
         ? Weapon.getBulletInfo(blt.intervalBullet, idl + 1)

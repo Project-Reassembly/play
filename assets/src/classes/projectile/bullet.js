@@ -75,6 +75,9 @@ class Bullet extends PhysicalObject {
   oncreated() {
     this.emit(this.spawnEffect);
   }
+  ondestroyed(){
+    this.emit(this.despawnEffect);
+  }
   step(dt) {
     this.spawnTrail(dt);
     //Not if dead

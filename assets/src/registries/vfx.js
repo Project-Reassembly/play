@@ -67,8 +67,8 @@ Registry.vfx.add("crafter-craft", {
   type: "wave-emission",
   particle: {
     lifetime: 20,
-    fromRadius: 0,
-    toRadius: 60,
+    radiusFrom: 0,
+    radiusTo: 60,
     colours: [
       [255, 200, 0, 255],
       [255, 150, 0, 0],
@@ -82,6 +82,18 @@ Registry.vfx.add("crafter-craft", {
 
 Registry.vfx.add("explosion", {
   type: "explosion",
+});
+Registry.vfx.add("construction-hit", {
+  type: "explosion",
+  waveColours: [
+    [255, 255, 100],
+    [255, 200, 50, 100],
+  ],
+  smokeColours: [
+    [100, 100, 100],
+    [50, 50, 50, 0],
+  ],
+  sparks: false,
 });
 Registry.vfx.add("laser-caster-explosion", {
   type: "explosion",

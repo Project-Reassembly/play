@@ -934,7 +934,7 @@ function mouseInteraction() {
 function secondaryInteract() {
   if (Inventory.mouseItemStack.item === "nothing") {
     let block = world.getBlock(game.mouse.blockX, game.mouse.blockY);
-    if (block && block.team === game.player.team)
+    if (block && block.team === game.player.team && !keyIsDown(SHIFT))
       if (block.dropItem) {
         //Break breakables
 

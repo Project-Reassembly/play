@@ -25,7 +25,7 @@ class Explosion {
     this.dealDamage();
     return this;
   }
-  dealDamage() {
+  dealDamage(kbrm = 1) {
     // Hit blocks
     let damage = constructFromType(
       {
@@ -43,7 +43,7 @@ class Explosion {
         pierce: Infinity,
         despawnEffect: "none",
         team: this.team,
-        hitSize: this.radius*2,
+        hitSize: this.radius * 2,
       },
       VirtualBullet
     );
@@ -55,7 +55,7 @@ class Explosion {
       if (
         !e.dead &&
         ((this.x - e.x) ** 2 + (this.y - e.y) ** 2) ** 0.5 <=
-          this.radius ** 0.95 + e.size
+          this.radius ** 0.95 * kbrm + e.size
       ) {
         // //If enemy, damage, and affect
         // if (e.team !== (this.source?.team ?? this.team)) {
@@ -69,8 +69,8 @@ class Explosion {
         // }
         //Knock regardless of team
         e.knock(
-          !isNaN(this.knockback) ? this.knockback : this.amount**0.5,
-          degrees(createVector(e.x - this.x, e.y - this.y).heading()),
+          !isNaN(this.knockback) ? this.knockback : this.amount ** 0.5,
+          new Vector(e.x - this.x, e.y - this.y).angle,
           true
         );
       }
@@ -88,12 +88,12 @@ class NuclearExplosion extends Explosion {
         this[key] = opts[key];
       }
     }
-    this.amount /= (this.radius / 3) * 10;
+    this.amount /= (this.radius / 4.5) * 10;
   }
   dealDamage() {
     effectTimer.repeat((i) => {
-      super.dealDamage();
-    }, (this.radius / 3) * 10);
+      super.dealDamage(2);
+    }, (this.radius / 4.5) * 10);
     return this;
   }
 }
@@ -244,6 +244,17 @@ function flash(x = 0, y = 0, opacity = 255, duration = 60, glareSize = 600) {
 }
 
 function createDestructionExplosion(x, y, source) {
+  if (source.explosiveness === 0) {
+    new Explosion({
+      x: x,
+      y: y,
+      amount: source.maxHealth * 0.1,
+      radius: (source.width + source.height) * 0.5,
+      source: source,
+      world: source.world,
+    }).create();
+    return;
+  }
   new Explosion({
     x: x,
     y: y,
@@ -722,7 +733,7 @@ class NuclearExplosionEffect extends ExplosionEffect {
   create(world, x = 0, y = 0, direction = 0, scale = 1) {
     let flashSize = scale ** 1.6;
     let flashAmount = scale ** 0.6;
-    let size = scale / 3;
+    let size = scale / 4.5;
     if (this.flash)
       for (let i = 0; i < flashAmount; i++) {
         world.particles.push(
@@ -872,7 +883,7 @@ function repeat(n, func, ...params) {
 
 /**
  * Creates an effect, independently of any objects.
- * @param {string} effect Registry name of the visual effect
+ * @param {string | Object} effect Registry name of the visual effect, or a constructible visual effect.
  * @param {float} x X position of the effect's origin
  * @param {float} y Y position of the effect's origin
  * @param {float} direction Direction *in radians* of the effect. ONly for directed effects, such as `ParticleEmissionEffect`
@@ -882,7 +893,10 @@ function repeat(n, func, ...params) {
  */
 function createEffect(effect, world, x, y, direction, scale, pos) {
   /**@type {VisualEffect} */
-  let fx = construct(Registry.vfx.get(effect), "visual-effect");
+  let fx = construct(
+    typeof effect === "object" ? effect : Registry.vfx.get(effect),
+    "visual-effect"
+  );
   fx.execute(world, x, y, direction, scale, pos);
   return fx;
 }
@@ -909,14 +923,23 @@ function autoScaledEffect(effect, world, x, y, direction, pos) {
  * @param {number} [offY=0] Y offset
  */
 function emitEffect(effect, source, offX = 0, offY = 0) {
-  let effectparts = effect.split("~");
-  createEffect(
-    effectparts[0],
-    source.world,
-    source.x + offX,
-    source.y + offY,
-    radians(source.direction),
-    effectparts[1] ?? 1,
-    () => ({ x: source.x, y: source.y, direction: source.directionRad })
-  );
+  if (typeof effect === "string")
+    autoScaledEffect(
+      effect,
+      source.world,
+      source.x + offX,
+      source.y + offY,
+      radians(source.direction),
+      () => ({ x: source.x, y: source.y, direction: source.directionRad })
+    );
+  else
+    createEffect(
+      effect,
+      source.world,
+      source.x + offX,
+      source.y + offY,
+      radians(source.direction),
+      effect.scale,
+      () => ({ x: source.x, y: source.y, direction: source.directionRad })
+    );
 }

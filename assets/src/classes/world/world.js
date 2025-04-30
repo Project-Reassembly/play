@@ -110,7 +110,7 @@ class World {
           }
           bullet.emit(instance.effect ?? "none");
         }
-        bullet.emit(bullet.despawnEffect);
+        bullet.ondestroyed();
         bullet.frag();
         bullet.incend();
         //Delete the bullet

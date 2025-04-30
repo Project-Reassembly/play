@@ -387,6 +387,152 @@ Registry.items.add("iti-energy-repeater", {
     recoilSpeed: 0.15,
   },
 });
+
+Registry.items.add("construction-gun", {
+  type: "block-launcher",
+  name: "Construction Gun",
+  description:
+    "Fires blocks to place them and deal damage.\nAlt-fire to select ammo type, Main to launch.\nVolatile blocks will explode if unplaceable.\n\nTip: Use shift to avoid deconstructing blocks.",
+  image: "weapon.scrap-shooter.item",
+  shoot: {
+    reload: 20,
+    bullet: {
+      speed: 15,
+      light: 30,
+      trail: true,
+      hitSize: 2.5,
+      hitColours: [
+        [255, 250, 100],
+        [255, 200, 50, 100],
+      ],
+      damage: [
+        {
+          type: "impact",
+          amount: 1,
+          radius: 25,
+        },
+      ],
+      despawnEffect: "construction-hit~25",
+    },
+    pattern: {
+      spread: 0.5,
+    },
+  },
+  component: {
+    type: "weapon-component",
+    width: 32,
+    height: 11,
+    yOffset: 13,
+    image: "weapon.scrap-shooter.component",
+    recoil: 4,
+    rotationalRecoil: 4,
+    recoilSpeed: 0.2,
+  },
+});
+
+Registry.items.add("scrap-cannon", {
+  type: "weapon",
+  name: "Scrap Cannon",
+  description: "Hurls 3 large clumps of scrap, which break apart\nin the air and on impact.",
+  image: "weapon.scrap-shooter.item",
+  ammoType: "scrap",
+  ammoUse: 3,
+  shoot: {
+    effect: "explosion~10",
+    reload: 90,
+    bullet: {
+      lifetime: 18,
+      speed: 10,
+      decel: 0.5,
+      light: 30,
+      trail: true,
+      hitSize: 5,
+      trailShape: "rhombus",
+      drawer: {
+        shape: "rhombus",
+        fill: "#cd9f8b",
+        width: 14,
+        height: 9,
+        image: false,
+      },
+      trailColours: [[80, 62, 55, 100]],
+      damage: [
+        {
+          type: "ballistic",
+          amount: 30,
+          spread: 7.5,
+          radius: 20
+        },
+      ],
+      despawnEffect: "explosion~20",
+      intervalNumber: 2,
+      intervalTime: 7,
+      intervalSpacing: 130,
+      intervalSpread: 15,
+      intervalBullet: {
+        speed: 9,
+        decel: 0.6,
+        lifetime: 12,
+        hitSize: 2.5,
+        trailColours: [[80, 62, 55, 100]],
+        damage: [
+          {
+            amount: 12,
+            type: "ballistic",
+            spread: 3,
+          },
+        ],
+        drawer: {
+          shape: "rhombus",
+          fill: "#cd9f8b",
+          width: 6,
+          height: 4,
+          image: false,
+        },
+      },
+      fragSpacing: 20,
+      fragNumber: 2,
+      fragSpread: 5,
+      fragBullet: {
+        speed: 10,
+        decel: 0.2,
+        lifetime: 12,
+        hitSize: 2.5,
+        trailColours: [[80, 62, 55, 100]],
+        damage: [
+          {
+            amount: 15,
+            type: "ballistic",
+            spread: 4
+          },
+        ],
+        drawer: {
+          shape: "rhombus",
+          fill: "#cd9f8b",
+          width: 8,
+          height: 4,
+          image: false,
+        },
+      },
+    },
+    pattern: {
+      spacing: 10,
+      spread: 5,
+      amount: 3
+    },
+  },
+  component: {
+    type: "weapon-component",
+    width: 32,
+    height: 11,
+    yOffset: 13,
+    image: "weapon.scrap-shooter.component",
+    recoil: 6,
+    rotationalRecoil: 12,
+    recoilSpeed: 0.2,
+  },
+});
+
 //Ammo
 Registry.items.add("scrap-bullet", {
   name: "Scrap Bullet",

@@ -30,7 +30,7 @@ class WaveParticle {
       let lf = this.calcLifeFract();
       this.radius = this.fromRadius * lf + this.toRadius * (1 - lf);
       this.stroke = this.strokeFrom * lf + this.strokeTo * (1 - lf);
-      this.colour = colinterp(this.colours, 1-lf);
+      this.colour = colinterp(this.colours, 1 - lf);
       this.lifetime -= dt;
     } else {
       this.remove = true;
