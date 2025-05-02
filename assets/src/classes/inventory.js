@@ -387,7 +387,7 @@ class Inventory {
               stackSize: invitem.stackSize,
             };
             noFill();
-            stroke(0, 255, 255);
+            stroke(255, 200, 0);
             strokeWeight(5);
             rect(displayX, displayY, itemSize, itemSize);
             if (selected && mouseIsPressed && !ui.waitingForMouseUp) {

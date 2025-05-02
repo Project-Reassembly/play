@@ -68,6 +68,7 @@ let worldSize = Block.size * Chunk.size * World.size;
 const borders = () => [0, 0, worldSize, worldSize];
 let preloadTicks = 100;
 let timePerFrame = 1000 / 60;
+let time = 0;
 let framesToDraw = 0;
 //Generation
 let generationStarted = false;
@@ -546,6 +547,7 @@ function draw() {
     //Draw the void
     background(128 + Math.sin(frameCount / 120) * 128, 255);
     if (!errored) frame();
+    if (keyIsDown(32)) errored = false;
   } catch (error) {
     errored = true;
     console.error(error);
@@ -559,7 +561,7 @@ function draw() {
       .slice(1)
       .forEach((el) => Log.send("  " + el, [255, 30, 30]));
     Log.send("Press [Space] to continue", [255, 50, 50]);
-    addEventListener("keydown", fixError);
+    //addEventListener("keydown", fixError);
     noLoop();
     loop();
   }
@@ -599,20 +601,27 @@ function fixError(ev) {
 }
 
 function frame() {
+  //Frameskip stuff
+  framesToDraw += deltaTime / timePerFrame;
   if (generating) {
+    push();
+    translate(width / 2, height / 2);
+    frameSkippingFunction(drawNeutralBackground);
+    pop();
     push();
     textFont(fonts.darktech);
     fill(0);
-    stroke(255);
-    strokeWeight(3);
+    stroke(255, 200, 0);
+    strokeWeight(6);
     textAlign(CENTER);
     textSize(40);
     text(genMsg, width / 2, height / 2);
+    strokeWeight(3);
     fill(0);
     rectMode(CENTER);
     rect(width / 2, height / 2 + 60, width * 0.6, 30);
     rect(width / 2, height / 2 + 120, width * 0.4, 20);
-    fill(255, 0, 0);
+    fill(230, 170, 0);
     let w = width * 0.6 * genProgress;
     let w2 = width * 0.4 * genStageProgress;
     rectMode(CORNER);
@@ -635,8 +644,6 @@ function frame() {
     );
     pop();
   } else {
-    //Frameskip stuff
-    framesToDraw += deltaTime / timePerFrame;
     push();
     translate(width / 2, height / 2);
     //Draw everything else
@@ -650,14 +657,45 @@ function frame() {
         return;
       }
       gameFrame();
+      if (effects.lighting)
+        lighting(effects.shadeColour, effects.lightColour, effects.lightScale);
+    } else if (ui.menuState === "title") {
+      drawNeutralBackground();
     }
-    if (effects.lighting)
-      lighting(effects.shadeColour, effects.lightColour, effects.lightScale);
     fpsUpdate();
     uiFrame();
     if (!ui.waitingForMouseUp) mouseInteraction();
     pop();
   }
+}
+
+function drawNeutralBackground() {
+  time ++;
+  let size = Math.max(width, height);
+  background(0);
+  noStroke();
+  strokeWeight(30);
+  fill(255, 200, 0);
+  // rotatedShape("square", 0, 0, size * 0.6, size * 0.6, frameCount / 100);
+  // rotatedShape("square", 0, 0, size * 0.8, size * 0.8, 2 + -frameCount / 100);
+  for (let offset = 0; offset < Math.ceil((width * 2) / 3); offset += 20) {
+    rotatedShape(
+      "rect",
+      -width + (((time + offset) * 3) % (width * 2)),
+      0,
+      20,
+      height * 1.43,
+      PI / 4
+    );
+  }
+  fill(40);
+  rotatedShape("rect", 0, 0, width, height * 0.85, 0);
+  noFill();
+  stroke(60);
+  strokeWeight(10);
+  rotatedShape("rect", 0, 0, width * 1.2, height, 0);
+  strokeWeight(5);
+  rotatedShape("rect", 0, 0, width * 1.2, height * 0.85, 0);
 }
 
 function fpsUpdate() {

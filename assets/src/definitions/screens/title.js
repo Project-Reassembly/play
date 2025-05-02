@@ -13,7 +13,10 @@ createUIComponent(
   "New",
   true,
   30
-);
+)
+  .setBackgroundColour([0, 0, 0])
+  .setOutlineColour([60, 60, 60])
+  .setTextColour([230, 170, 0]);
 createUIComponent(
   ["title"],
   [],
@@ -29,12 +32,15 @@ createUIComponent(
   "Load",
   true,
   30
-);
+)
+  .setBackgroundColour([0, 0, 0])
+  .setOutlineColour([60, 60, 60])
+  .setTextColour([230, 170, 0]);
 createUIComponent(
   ["title"],
   [],
   0,
-  -200,
+  -140,
   0,
   0,
   "none",
@@ -42,4 +48,4 @@ createUIComponent(
   ">>> Project: <<<\n< Reassembly >",
   false,
   50
-).setTextColour([100, 100, 100]);
+).setTextColour([230, 170, 0]);

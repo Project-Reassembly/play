@@ -70,6 +70,7 @@ class UIComponent {
   }
   setOutlineColour(colour = null) {
     this.outlineColour = colour;
+    this.defOutlCol = colour;
     return this;
   }
   setTextColour(colour = null) {
@@ -155,6 +156,7 @@ class UIComponent {
   outline = true;
   backgroundColour = null;
   rotation = Block.direction.RIGHT;
+  defOutlCol = [60, 60, 60];
   updateActivity() {
     //It's active if it should show *and* all the conditions are met
     this.active =
@@ -325,7 +327,7 @@ class UIComponent {
     ) {
       //And mouse is down
       if (mouseIsPressed) {
-        this.outlineColour = [0, 255, 255];
+        this.outlineColour = [255, 200, 0];
         //And the UI isn't waiting
         if (!ui.waitingForMouseUp) {
           //Click
@@ -334,10 +336,10 @@ class UIComponent {
           ui.waitingForMouseUp = true;
         }
       } else {
-        this.outlineColour = [0, 128, 128];
+        this.outlineColour = [180, 130, 0];
       }
     } else {
-      this.outlineColour = [50, 50, 50];
+      this.outlineColour = this.defOutlCol;
     }
   }
 }
