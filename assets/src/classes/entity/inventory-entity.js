@@ -1,3 +1,11 @@
+import { construct } from "../../core/constructor.js";
+import { tru } from "../../core/number.js";
+import { Inventory } from "../inventory.js";
+import { DroppedItemStack } from "../item/dropped-itemstack.js";
+import { Equippable } from "../item/equippable.js";
+import { PhysicalObject } from "../physical.js";
+import { Component } from "./component.js";
+import { Entity } from "./entity.js";
 class InventoryEntity extends Entity {
   /**@type {Inventory} */
   inventory = null;
@@ -19,6 +27,9 @@ class InventoryEntity extends Entity {
     let e = super.serialise();
     e.inventory = this.inventory.serialise();
     return e;
+  }
+  static applyExtraProps(entity, created) {
+    entity.inventory = Inventory.deserialise(created.inventory);
   }
 }
 
@@ -159,4 +170,12 @@ class EquippedEntity extends InventoryEntity {
     e.body = this.body.serialise();
     return e;
   }
+  static applyExtraProps(entity, created) {
+    entity.equipment = Inventory.deserialise(created.equipment);
+    entity.leftHand = Inventory.deserialise(created.leftHand);
+    entity.rightHand = Inventory.deserialise(created.rightHand);
+    entity.head = Inventory.deserialise(created.head);
+    entity.body = Inventory.deserialise(created.body);
+  }
 }
+export { EquippedEntity, InventoryEntity };

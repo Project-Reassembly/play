@@ -1,3 +1,5 @@
+import { Vector, colinterp } from "../../core/number.js";
+import { rotatedShape } from "../../core/ui.js";
 class ShapeParticle {
   #rotOffset;
   constructor(
@@ -41,12 +43,8 @@ class ShapeParticle {
     if (this.lifetime >= dt) {
       //Interpolate size
       let lf = this.calcLifeFract();
-      this.sizeX =
-        this.sizeXFrom * lf +
-        this.sizeXTo * (1 - lf);
-      this.sizeY =
-        this.sizeYFrom * lf +
-        this.sizeYTo * (1 - lf);
+      this.sizeX = this.sizeXFrom * lf + this.sizeXTo * (1 - lf);
+      this.sizeY = this.sizeYFrom * lf + this.sizeYTo * (1 - lf);
       //Move
       this.moveToVct(
         new Vector(this.x, this.y).add(
@@ -63,7 +61,7 @@ class ShapeParticle {
         this.#rotOffset += this.rotateSpeed * dt;
       }
       //Colours
-      this.colour = colinterp(this.colours, 1-lf)
+      this.colour = colinterp(this.colours, 1 - lf);
       //Lifetime
       this.lifetime -= dt;
     } else {
@@ -104,3 +102,4 @@ class ShapeParticle {
     return (this.y - ui.camera.y) * ui.camera.zoom;
   }
 }
+export { ShapeParticle };

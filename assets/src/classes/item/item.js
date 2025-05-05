@@ -1,3 +1,5 @@
+import { RegisteredItem } from "../../core/registered-item.js";
+import { tru } from "../../core/number.js";
 class Item extends RegisteredItem {
   image = "error";
   name = "<unnamed item>";
@@ -122,3 +124,4 @@ class Item extends RegisteredItem {
     BLUE: 6, //What?
   };
 }
+export { Item };

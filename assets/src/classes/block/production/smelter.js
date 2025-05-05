@@ -1,3 +1,5 @@
+import { autoScaledEffect } from "../../../play/effects.js";
+import { Crafter } from "./crafter.js";
 /**Extended Crafter which uses fuel items. */
 class Smelter extends Crafter {
   activeTickEffect = "smelter-sparks";
@@ -31,7 +33,7 @@ class Smelter extends Crafter {
         this.world,
         this.x + Block.size / 2,
         this.y + Block.size / 2,
-        this.direction,
+        this.direction
       );
   }
   serialise() {
@@ -64,3 +66,4 @@ class Smelter extends Crafter {
     return r;
   }
 }
+export { Smelter };

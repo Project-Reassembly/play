@@ -1,3 +1,11 @@
+import { ItemStack } from "./item-stack.js";
+import { Entity } from "../entity/entity.js";
+import { EquippedEntity, InventoryEntity } from "../entity/inventory-entity.js";
+import { rnd } from "../../core/number.js";
+import { Block } from "../block/block.js";
+import { drawImg } from "../../core/ui.js";
+import { game } from "../../play/game.js";
+import { Log } from "../../play/messaging.js";
 class DroppedItemStack extends Entity {
   item = ItemStack.EMPTY;
   delay = 30;
@@ -93,3 +101,4 @@ class DroppedItemStack extends Entity {
     };
   }
 }
+export { DroppedItemStack };

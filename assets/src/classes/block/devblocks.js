@@ -1,3 +1,10 @@
+import { Block } from "./block.js";
+import { Container } from "./container.js";
+import { Registries } from "../../core/registry.js";
+import { ExecutionContext } from "../../lib/isl.js";
+import { Inventory } from "../inventory.js";
+import { ItemStack } from "../item/item-stack.js";
+import { drawImg } from "../../core/ui.js";
 class StructureReaderBlock extends Block {
   _range = 1;
   _output = [];
@@ -46,16 +53,18 @@ class StructureReaderBlock extends Block {
   interaction(ent, istack) {
     if (keyIsDown(SHIFT)) {
       this._output = this.outputStructure();
-      this._outTxt = this._output.map(
-        (x) =>
-          x.block +
-          ": " +
-          (x.x < 0 ? "" : "+") +
-          x.x +
-          ", " +
-          (x.y < 0 ? "" : "+") +
-          x.y
-      ).join("\n");
+      this._outTxt = this._output
+        .map(
+          (x) =>
+            x.block +
+            ": " +
+            (x.x < 0 ? "" : "+") +
+            x.x +
+            ", " +
+            (x.y < 0 ? "" : "+") +
+            x.y
+        )
+        .join("\n");
       ui.waitingForMouseUp = true;
       return true;
     }
@@ -111,8 +120,10 @@ class StructureReaderBlock extends Block {
             0,
             0,
             "rect",
-            [unreadable ? [255, 255, 0] : exists ? [0, 255, 0] : [255, 0, 0],
-            [255, 255, 255, 0]],
+            [
+              unreadable ? [255, 255, 0] : exists ? [0, 255, 0] : [255, 0, 0],
+              [255, 255, 255, 0],
+            ],
             Block.size,
             Block.size,
             Block.size,
@@ -176,13 +187,13 @@ class StructureReaderBlock extends Block {
 }
 class ItemCatalogBlock extends Container {
   init() {
-    this.inventorySize = Registry.items.size;
+    this.inventorySize = Registries.items.size;
     super.init();
   }
   tick() {
     let slot = 0;
-    Registry.items.forEach((name) => {
-      this.inventory.set(slot, new ItemStack(Registry.items.at(slot)));
+    Registries.items.forEach((name) => {
+      this.inventory.set(slot, new ItemStack(Registries.items.at(slot)));
       slot++;
     });
   }
@@ -196,7 +207,7 @@ class ItemCatalogBlock extends Container {
     return c;
   }
   static applyExtraProps(deser, creator) {
-    deser.inventory = new Inventory(Registry.items.size);
+    deser.inventory = new Inventory(Registries.items.size);
   }
   read() {
     return "";
@@ -310,7 +321,8 @@ class CommandExecutorBlock extends Block {
   read() {
     return this._command;
   }
-  write(txt){
+  write(txt) {
     this._message = txt;
   }
 }
+export { StructureReaderBlock, CommandExecutorBlock, ItemCatalogBlock };

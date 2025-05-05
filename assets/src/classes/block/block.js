@@ -1,3 +1,9 @@
+import { ShootableObject } from "../physical.js";
+import { Registries } from "../../core/registry.js";
+import { Chunk } from "../world/chunk.js";
+import { Direction } from "../../scaling.js";
+import { drawImg, ui } from "../../core/ui.js";
+import { createDestructionExplosion } from "../../play/effects.js";
 /**
  * @typedef SerialisedBlock
  * @prop {int} x
@@ -11,66 +17,7 @@ class Block extends ShootableObject {
   static size = 30;
   selectable = false;
   /**@readonly @enum*/
-  static direction = {
-    /**@readonly */
-    UP: -Math.PI / 2,
-    /**@readonly */
-    DOWN: Math.PI / 2,
-    /**@readonly */
-    LEFT: Math.PI,
-    /**@readonly */
-    RIGHT: 0,
-    rotateClockwise(dir) {
-      if (dir === Block.direction.UP) return Block.direction.RIGHT;
-      if (dir === Block.direction.RIGHT) return Block.direction.DOWN;
-      if (dir === Block.direction.DOWN) return Block.direction.LEFT;
-      return Block.direction.UP;
-    },
-    rotateAntiClockwise(dir) {
-      if (dir === Block.direction.UP) return Block.direction.LEFT;
-      if (dir === Block.direction.LEFT) return Block.direction.DOWN;
-      if (dir === Block.direction.DOWN) return Block.direction.RIGHT;
-      return Block.direction.UP;
-    },
-    oppositeOf(dir) {
-      if (dir === Block.direction.UP) return Block.direction.DOWN;
-      if (dir === Block.direction.LEFT) return Block.direction.RIGHT;
-      if (dir === Block.direction.RIGHT) return Block.direction.LEFT;
-      return Block.direction.UP;
-    },
-    vectorOf(direction) {
-      return { x: Math.cos(direction), y: Math.sin(direction) };
-    },
-    /**@param {0|1|2|3} */
-    fromEnum(en) {
-      switch (en) {
-        case 0:
-          return Block.dir.UP;
-        case 1:
-          return Block.dir.DOWN;
-        case 2:
-          return Block.dir.LEFT;
-        case 3:
-          return Block.dir.RIGHT;
-        default:
-          return Block.dir.UP;
-      }
-    },
-    toEnum(en) {
-      switch (en) {
-        case Block.dir.UP:
-          return 0;
-        case Block.dir.DOWN:
-          return 1;
-        case Block.dir.LEFT:
-          return 2;
-        case Block.dir.RIGHT:
-          return 3;
-        default:
-          return 0;
-      }
-    },
-  };
+  static direction = Direction;
   /**@readonly */
   static dir = this.direction;
   disabled = false;
@@ -79,7 +26,7 @@ class Block extends ShootableObject {
   blockX = 0;
   blockY = 0;
   rotatable = false;
-  direction = Block.direction.UP;
+  direction = Direction.UP;
   explosiveness = 0.1;
   dropItem = null;
   name = "Block";
@@ -279,7 +226,7 @@ function createLinkedBlockAndItem(
   blockprops,
   itemprops
 ) {
-  Registry.blocks.add(
+  Registries.blocks.add(
     regname,
     Object.assign(
       {
@@ -290,7 +237,7 @@ function createLinkedBlockAndItem(
       blockprops
     )
   );
-  Registry.items.add(
+  Registries.items.add(
     regname,
     Object.assign(
       {
@@ -303,3 +250,5 @@ function createLinkedBlockAndItem(
     )
   );
 }
+
+export { Block, BreakType, PlaceType, createLinkedBlockAndItem };

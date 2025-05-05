@@ -1,3 +1,6 @@
+import { PhysicalObject } from "../physical.js";
+import { tru } from "../../core/number.js";
+import { Block } from "../block/block.js";
 class Fire extends PhysicalObject {
   damage = 1;
   type = "fire";
@@ -51,3 +54,4 @@ class Fire extends PhysicalObject {
     return fire;
   }
 }
+export { Fire };

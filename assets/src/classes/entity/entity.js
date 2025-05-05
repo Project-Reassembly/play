@@ -1,3 +1,15 @@
+import { ShootableObject } from "../physical.js";
+import { construct } from "../../core/constructor.js";
+import { Registries } from "../../core/registry.js";
+import { World } from "../world/world.js";
+import { rnd, tru, roundNum } from "../../core/number.js";
+import { PhysicalObject } from "../physical.js";
+import {
+  liquidDestructionBlast,
+  createDestructionExplosion,
+} from "../../play/effects.js";
+import { blockSize } from "../../scaling.js";
+import { game } from "../../play/game.js";
 /**
  * @typedef SerialisedEntity
  * @prop {number} health
@@ -278,23 +290,23 @@ class Entity extends ShootableObject {
 
   tickGroundEffects() {
     let blockIn = this.world.getBlock(
-      Math.floor(this.x / Block.size),
-      Math.floor(this.y / Block.size),
+      Math.floor(this.x / blockSize),
+      Math.floor(this.y / blockSize),
       "blocks"
     );
     let blockOn =
       this.world.getBlock(
-        Math.floor(this.x / Block.size),
-        Math.floor(this.y / Block.size),
+        Math.floor(this.x / blockSize),
+        Math.floor(this.y / blockSize),
         "floor"
       ) ??
       this.world.getBlock(
-        Math.floor(this.x / Block.size),
-        Math.floor(this.y / Block.size),
+        Math.floor(this.x / blockSize),
+        Math.floor(this.y / blockSize),
         "tiles"
       );
     if (blockIn && blockIn.walkable) blockIn.steppedOnBy(this);
-    else if (blockOn instanceof Tile)
+    else if (blockOn?.speedMultiplier)
       this.speed = this.baseSpeed * blockOn.speedMultiplier;
   }
   draw() {
@@ -348,7 +360,7 @@ class Entity extends ShootableObject {
     for (let status in this.statuses) {
       let time = this.statuses[status];
       /**@type {StatusEffect} */
-      let effect = Registry.statuses.get(status);
+      let effect = Registries.statuses.get(status);
       if (tru(effect.effectChance))
         this.emit(
           effect.effect,
@@ -415,19 +427,10 @@ class Entity extends ShootableObject {
   /**@param {SerialisedEntity} created  */
   static deserialise(created, inFull = true) {
     /**@type {Entity} */
-    let entity = construct(Registry.entities.get(created.entity), "entity");
+    let entity = construct(Registries.entities.get(created.entity), "entity");
     entity.statuses = created.statuses;
     entity.health = created.health;
-    if (entity instanceof InventoryEntity) {
-      entity.inventory = Inventory.deserialise(created.inventory);
-    }
-    if (entity instanceof EquippedEntity) {
-      entity.equipment = Inventory.deserialise(created.equipment);
-      entity.leftHand = Inventory.deserialise(created.leftHand);
-      entity.rightHand = Inventory.deserialise(created.rightHand);
-      entity.head = Inventory.deserialise(created.head);
-      entity.body = Inventory.deserialise(created.body);
-    }
+    entity.constructor.applyExtraProps(entity, created);
     //Rest handled in-chunk, but here it is:
     if (!inFull) return entity;
     entity.spawnX = created.spawnX;
@@ -436,4 +439,6 @@ class Entity extends ShootableObject {
     entity.y = created.y;
     return entity;
   }
+  static applyExtraProps(entity, created) {}
 }
+export { Entity };

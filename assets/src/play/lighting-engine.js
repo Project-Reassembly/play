@@ -84,3 +84,4 @@ function lighting(
   image(layer, -width / 2, -height / 2, width, height);
   pop();
 }
+export { lighting };

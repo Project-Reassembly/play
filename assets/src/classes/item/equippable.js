@@ -1,3 +1,5 @@
+import { construct } from "../../core/constructor.js";
+import { Item } from "./item.js";
 class Equippable extends Item {
   //Shown offsets
   posX = 0;
@@ -25,3 +27,4 @@ class Equippable extends Item {
   /** @param {Entity} holder The entity using this item */
   use(holder, isSecondary = false) {}
 }
+export { Equippable };

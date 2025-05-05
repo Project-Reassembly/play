@@ -1,3 +1,10 @@
+import { ItemStack } from "../classes/item/item-stack.js";
+import { Registries } from "../core/registry.js";
+import { construct } from "../core/constructor.js";
+import { drawImg, ui } from "../core/ui.js";
+import { fonts } from "../play/game.js";
+import { Item } from "./item/item.js";
+import { dynamicSort } from "../core/number.js";
 /**
  * @typedef SerialisedInventory
  * @prop {SerialisedItemStack[]} storage
@@ -35,7 +42,7 @@ class Inventory {
   addItem(item, number = 1, stack = true) {
     let toAdd = number;
     /**@type {Item} */
-    let ritem = construct(Registry.items.get(item), "item");
+    let ritem = construct(Registries.items.get(item), "item");
     //Check for any stacks that can be filled
     this.iterate((content, slot, stop) => {
       if (content.item === item && stack && this.canPlaceInSlot(slot)) {
@@ -685,3 +692,5 @@ function coltxt(textToShow = "", x, y, defcolour) {
   if (endcolour === "reset") fill(defcolour);
   else if (endcolour) fill(endcolour);
 }
+
+export { Inventory, drawMultilineText };

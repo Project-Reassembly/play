@@ -1,3 +1,9 @@
+import { RegisteredItem } from "../core/registered-item.js";
+import { Block } from "./block/block.js";
+import { Vector, rnd, colinterp, roundNum, clamp } from "../core/number.js";
+import { emitEffect } from "../play/effects.js";
+import { TextParticle } from "./effect/text-particle.js";
+import { game } from "../play/game.js";
 class PhysicalObject extends RegisteredItem {
   static debug = false;
   x = 0;
@@ -449,7 +455,7 @@ class ShootableObject extends PhysicalObject {
   }
   /**
    * Fired when a bullet hits this object, whatever team it's on.
-   * @param {Bullet} bullet 
+   * @param {Bullet} bullet
    */
   hitByBullet(bullet) {}
   /**Deals damage to this object. If health goes below zero, the object is removed.*/
@@ -546,3 +552,4 @@ function createFlashingColourArray(basecol, lightness = 255) {
   let lcol = basecol.map((x) => clamp(x + lightness, 0, 255));
   return [basecol, lcol, basecol, lcol, basecol, lcol, basecol, lcol, basecol];
 }
+export { ShootableObject, PhysicalObject };

@@ -1,3 +1,6 @@
+import { ShapeParticle } from "./shape-particle.js";
+import { fonts } from "../../play/game.js";
+import { colinterp, Vector } from "../../core/number.js";
 class TextParticle extends ShapeParticle {
   constructor(
     x,
@@ -79,3 +82,4 @@ class TextParticle extends ShapeParticle {
     pop();
   }
 }
+export { TextParticle };

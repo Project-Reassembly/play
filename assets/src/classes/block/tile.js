@@ -1,3 +1,7 @@
+import { Block } from "./block.js";
+import { PhysicalObject } from "../physical.js";
+import { tru } from "../../core/number.js";
+import { drawImg } from "../../core/ui.js";
 class Tile extends Block {
   speedMultiplier = 1;
   appliedStatus = "none";
@@ -46,7 +50,7 @@ class Ore extends Tile {
   _stage = 0;
   tick() {
     if (this._stage < this.stages.length - 1)
-      if (rnd(0, 1) < this.stageChance) {
+      if (tru(this.stageChance)) {
         this._stage++;
       }
   }
@@ -60,3 +64,4 @@ class Ore extends Tile {
     );
   }
 }
+export { Ore, Tile };

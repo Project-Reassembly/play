@@ -1,4 +1,6 @@
-Registry.statuses.add(
+import { Registries } from "../core/registry.js";
+import { construct } from "../core/constructor.js";
+Registries.statuses.add(
   "burning",
   construct({
     name: "Burning",
@@ -9,7 +11,7 @@ Registry.statuses.add(
     effectChance: 0.5
   }, "status-effect")
 );
-Registry.statuses.add(
+Registries.statuses.add(
   "plasma-burn",
   construct({
     name: "Plasma Burn",

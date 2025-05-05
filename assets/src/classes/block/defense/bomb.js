@@ -1,3 +1,12 @@
+import { Block, BreakType } from "../block.js";
+import { drawImg } from "../../../core/ui.js";
+import { autoScaledEffect, Explosion, NuclearExplosion } from "../../../play/effects.js";
+import { DroppedItemStack } from "../../item/dropped-itemstack.js";
+import { Registries } from "../../../core/registry.js";
+import { VirtualBullet } from "../../projectile/virtual-bullet.js";
+import { Timer } from "../../timer.js";
+import { game } from "../../../play/game.js";
+import { rnd, roundNum } from "../../../core/number.js";
 class Bomb extends Block {
   explosion = {
     radius: 100,
@@ -117,7 +126,7 @@ class Bomb extends Block {
       "  " +
         (this.explosion.status
           ? "🟨" +
-            Registry.statuses.get(this.explosion.status).name +
+            Registries.statuses.get(this.explosion.status).name +
             " for " +
             roundNum((this.explosion.statusDuration ?? 0) / 60, 1) +
             "s⬜"
@@ -192,7 +201,7 @@ class NuclearBomb extends Bomb {
       "  " +
         (this.explosion.status
           ? "🟨" +
-            Registry.statuses.get(this.explosion.status).name +
+            Registries.statuses.get(this.explosion.status).name +
             " for " +
             roundNum((this.explosion.statusDuration ?? 0) / 60, 1) +
             "s⬜"
@@ -213,3 +222,5 @@ class NuclearBomb extends Bomb {
     ];
   }
 }
+
+export { Bomb, NuclearBomb };

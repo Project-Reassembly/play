@@ -2,7 +2,7 @@
 class PowerNetwork {
   static debug = false;
   /** All block positions which provide power to or require power from this network.
-   * @type {Vector[]} 
+   * @type {Vector[]}
    */
   positions = [];
   /**@type {World} */
@@ -91,3 +91,4 @@ class PowerNetwork {
     return net;
   }
 }
+export { PowerNetwork };

@@ -1,3 +1,6 @@
+import { Item } from "./item.js";
+import { Weapon } from "./weapon.js";
+import { patternedBulletExpulsion } from "../projectile/bullet.js";
 class Throwable extends Item {
   bullet = {};
   spread = 10;
@@ -34,3 +37,4 @@ class Throwable extends Item {
     ];
   }
 }
+export { Throwable };

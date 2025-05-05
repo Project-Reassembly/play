@@ -1,3 +1,16 @@
+import { Equippable } from "./equippable.js";
+import { Timer } from "../timer.js";
+import { constructFromType } from "../../core/constructor.js";
+import { EquippedEntity } from "../entity/inventory-entity.js";
+import { autoScaledEffect } from "../../play/effects.js";
+import { construct } from "../../core/constructor.js";
+import { WeaponComponent } from "../entity/component.js";
+import { roundNum } from "../../core/number.js";
+import { PointBullet } from "../projectile/point-bullet.js";
+import { LaserBullet } from "../projectile/laser-bullet.js";
+import { patternedBulletExpulsion } from "../projectile/bullet.js";
+import { Missile } from "../projectile/missile.js";
+import { Registries } from "../../core/registry.js";
 class Weapon extends Equippable {
   timer = new Timer();
   ammoType = "none";
@@ -166,7 +179,7 @@ class Weapon extends Equippable {
       (this.ammoType !== "none" ? holder.inventory.count(this.ammoType) : "∞") +
       "\n" +
       (this.ammoType !== "none"
-        ? Registry.items.get(this.ammoType).name + " ×" + this.ammoUse
+        ? Registries.items.get(this.ammoType).name + " ×" + this.ammoUse
         : " - ") +
       "\n" +
       this.createProgressBar() +
@@ -243,7 +256,7 @@ class Weapon extends Equippable {
       ind(idl) +
         (blt.status !== "none"
           ? "🟨" +
-            Registry.statuses.get(blt.status).name +
+            Registries.statuses.get(blt.status).name +
             " for " +
             roundNum(blt.statusDuration / 60, 1) +
             "s"
@@ -293,7 +306,7 @@ class Weapon extends Equippable {
 
       ind(idl) +
         (blt.intervalNumber > 0
-          ? roundNum(blt.intervalNumber * 60 / blt.intervalTime, 1) +
+          ? roundNum((blt.intervalNumber * 60) / blt.intervalTime, 1) +
             "/s interval shots:"
           : ""),
       ...(blt.intervalNumber > 0
@@ -305,43 +318,6 @@ class Weapon extends Equippable {
 
 function ind(lvl = 0) {
   return "  ".repeat(lvl);
-}
-
-function patternedBulletExpulsion(
-  x,
-  y,
-  bulletToSpawn,
-  amount,
-  direction,
-  spread,
-  spacing,
-  world,
-  entity
-) {
-  //Max difference in direction
-  let diff = (spacing * (amount - 1)) / 2;
-  //Current angle
-  let currentAngle = -diff;
-  //For each bullet to fire
-  for (let index = 0; index < amount; index++) {
-    /** @type {Bullet} */
-    let bulletToFire = construct(bulletToSpawn, "bullet");
-    //Put the bullet in position
-    bulletToFire.x = x;
-    bulletToFire.y = y;
-    bulletToFire.direction = direction; //do the offset
-    //Apply uniform spread
-    bulletToFire.direction += currentAngle;
-    currentAngle += spacing;
-    //Apply random spread
-    bulletToFire.direction += random(spread, -spread);
-    //Add entity and world
-    bulletToFire.entity = entity;
-    bulletToFire.world = world;
-    //Spawn it in
-    world.bullets.push(bulletToFire);
-    bulletToFire.oncreated();
-  }
 }
 
 class ShootPattern {
@@ -365,3 +341,4 @@ class WeaponShootConfiguration {
     this.pattern = constructFromType(this.pattern, ShootPattern);
   }
 }
+export { Weapon };

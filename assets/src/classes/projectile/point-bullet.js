@@ -1,3 +1,4 @@
+import { Bullet } from "./bullet.js";
 class PointBullet extends Bullet {
   lifetime = 1;
   #moved = false; //If the bullet has teleported to the target entity or not.
@@ -116,3 +117,4 @@ class PointBullet extends Bullet {
     }
   }
 }
+export { PointBullet };

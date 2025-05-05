@@ -1,3 +1,4 @@
+import { RegisteredItem } from "../../core/registered-item.js";
 /*
 || LIST OF WORLDGEN MESSAGE TYPES
 || "genstage", "progress-stage", "finish": Don't use, internal.
@@ -17,7 +18,7 @@
 ||   - name: Name of the structure. Used in world breakdown, and structure location.
 */
 
-class Generator extends RegisteredItem{
+class Generator extends RegisteredItem {
   stageTitle = "Generating...";
   /** Runs this generator on the world. */
   generate(seed) {}
@@ -178,7 +179,7 @@ class OreGenerator extends Generator {
   }
 }
 
-class GenerationOptions extends RegisteredItem{
+class GenerationOptions extends RegisteredItem {
   min = 0;
   max = 255;
   valid(level, x, y) {
@@ -251,3 +252,14 @@ function doNoise(
     }
   }
 }
+export {
+  Generator,
+  NoiseGenerator,
+  TileGenerationOptions,
+  TileGenerator,
+  BlockGenerator,
+  OreGenerationOptions,
+  OreGenerator,
+  GenerationOptions,
+  doNoise,
+};

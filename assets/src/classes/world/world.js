@@ -1,3 +1,16 @@
+import { Chunk, create2DArray, iterate2DArray } from "./chunk.js";
+import { Entity } from "../entity/entity.js";
+import { createPlayer } from "../../play/game.js";
+import { DroppedItemStack } from "../item/dropped-itemstack.js";
+import { ItemStack } from "../item/item-stack.js";
+import { ui } from "../../core/ui.js";
+import { Block } from "../block/block.js";
+import { InventoryEntity } from "../entity/inventory-entity.js";
+import { EquippedEntity } from "../entity/inventory-entity.js";
+import { tru } from "../../core/number.js";
+import { worldSize } from "../../scaling.js";
+import { Explosion, NuclearExplosion } from "../../play/effects.js";
+
 /**
  * @typedef SerialisedWorld
  * @prop {SerialisedChunk[][]} chunks
@@ -9,7 +22,9 @@
 
 /** */
 class World {
-  static size = 16;
+  static get size() {
+    return worldSize;
+  }
   /** The chance for a *chunk* to random tick. */
   static randomTick = 0.01;
   /** The distance in chunks **outside the render distance** that will still tick. */
@@ -364,3 +379,4 @@ class World {
     Object.assign(this, world);
   }
 }
+export { World };

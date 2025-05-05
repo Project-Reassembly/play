@@ -1,130 +1,132 @@
-Registry.items.add("nothing", {});
+import { Registries } from "../core/registry.js";
+import { Item } from "../classes/item/item.js";
+Registries.items.add("nothing", {});
 //Materials
-Registry.items.add("scrap", {
+Registries.items.add("scrap", {
   name: "Scrap Metal",
   description:
     "A small piece of scrap,\nrecovered from remains\nof destroyed machines.",
   image: "item.scrap",
 });
-Registry.items.add("plate", {
+Registries.items.add("plate", {
   name: "Metal Plate",
   description: "Sturdy metal plate, better than unrefined scrap.",
   image: "item.plate",
 });
 
-Registry.items.add("raw-copper", {
+Registries.items.add("raw-copper", {
   name: "Raw Copper (Malachite)",
   description:
     "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-copper",
 });
-Registry.items.add("copper-ingot", {
+Registries.items.add("copper-ingot", {
   name: "Copper Ingot",
   description: "A material widely used in electronics.",
   image: "item.copper-ingot",
 });
-Registry.items.add("wire", {
+Registries.items.add("wire", {
   name: "Copper Wire",
   description:
     "Basic wire, used for circuitry\n and low-power energy transmission.",
   image: "item.wire",
 });
 
-Registry.items.add("raw-iron", {
+Registries.items.add("raw-iron", {
   name: "Raw Iron (Hematite)",
   description:
     "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-iron",
 });
-Registry.items.add("iron-ingot", {
+Registries.items.add("iron-ingot", {
   name: "Iron Ingot",
   description: "Strong material, but easily oxidises and corrodes.",
   image: "item.iron-ingot",
 });
 
-Registry.items.add("raw-electrum", {
+Registries.items.add("raw-electrum", {
   name: "Natural Electrum",
   description:
     "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-electrum",
 });
-Registry.items.add("electrum-ingot", {
+Registries.items.add("electrum-ingot", {
   name: "Electrum Ingot",
   description: "An alloy of expensive metals.",
   image: "item.electrum-ingot",
 });
-Registry.items.add("silver-ingot", {
+Registries.items.add("silver-ingot", {
   name: "Silver Ingot",
   description: "Reflective metal that tarnishes quickly.",
   image: "item.silver-ingot",
 });
-Registry.items.add("gold-ingot", {
+Registries.items.add("gold-ingot", {
   name: "Gold Ingot",
   description: "A great electrical conductor, but very soft.",
   image: "item.gold-ingot",
 });
 
-Registry.items.add("raw-titanium", {
+Registries.items.add("raw-titanium", {
   name: "Raw Titanium (Ilmenite)",
   description:
     "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-titanium",
 });
-Registry.items.add("titanium-ingot", {
+Registries.items.add("titanium-ingot", {
   name: "Titanium Ingot",
   description: "Strong, corrosion resistant metal.",
   image: "item.titanium-ingot",
 });
 
-Registry.items.add("raw-aluminium", {
+Registries.items.add("raw-aluminium", {
   name: "Raw Aluminium (Bauxite)",
   description:
     "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-aluminium",
 });
-Registry.items.add("aluminium-ingot", {
+Registries.items.add("aluminium-ingot", {
   name: "Aluminium Ingot",
   description:
     "Strong and light metal.\nYes, 'Aluminium'. Not my fault you can't spell.",
   image: "item.aluminium-ingot",
 });
 
-Registry.items.add("raw-tungsten", {
+Registries.items.add("raw-tungsten", {
   name: "Raw Tungsten (Wolframite)",
   description:
     "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-tungsten",
 });
-Registry.items.add("tungsten-ingot", {
+Registries.items.add("tungsten-ingot", {
   name: "Tungsten Ingot",
   description: "Extremely dense but brittle metal.",
   image: "item.tungsten-ingot",
 });
 
-Registry.items.add("stone", {
+Registries.items.add("stone", {
   name: "Stone",
   description: "A piece of rock.\nUsed in primitive construction.",
   image: "item.stone",
 });
-Registry.items.add("sand", {
+Registries.items.add("sand", {
   name: "Sand",
   description: "A pile of sand.",
   image: "item.sand",
 });
-Registry.items.add("sandstone", {
+Registries.items.add("sandstone", {
   name: "Sandstone",
   description: "A pile of sand, compressed into a hard ball.",
   image: "item.sandstone",
 });
 
-Registry.items.add("coal", {
+Registries.items.add("coal", {
   name: "Coal",
   description:
     "A small chunk of coal.\nUsed as fuel in smelters.\nYay, pollution!",
   image: "item.coal",
 });
 //Weapons
-Registry.items.add("scrap-shooter", {
+Registries.items.add("scrap-shooter", {
   type: "weapon",
   name: "Scrap Shooter",
   description: "Shoots low-damage bullets quickly.\nSlightly inaccurate.",
@@ -170,7 +172,7 @@ Registry.items.add("scrap-shooter", {
     recoilSpeed: 0.2,
   },
 });
-Registry.items.add("iti-laser-caster", {
+Registries.items.add("iti-laser-caster", {
   type: "weapon",
   name: "Laser Caster",
   rarity: Item.rarity.ITI,
@@ -275,7 +277,7 @@ Registry.items.add("iti-laser-caster", {
     recoilSpeed: 0.15,
   },
 });
-Registry.items.add("iti-energy-repeater", {
+Registries.items.add("iti-energy-repeater", {
   type: "weapon",
   name: "Energy Repeater",
   rarity: Item.rarity.ITI,
@@ -388,7 +390,7 @@ Registry.items.add("iti-energy-repeater", {
   },
 });
 
-Registry.items.add("construction-gun", {
+Registries.items.add("construction-gun", {
   type: "block-launcher",
   name: "Construction Gun",
   description:
@@ -430,7 +432,7 @@ Registry.items.add("construction-gun", {
   },
 });
 
-Registry.items.add("scrap-cannon", {
+Registries.items.add("scrap-cannon", {
   type: "weapon",
   name: "Scrap Cannon",
   description: "Hurls 3 large clumps of scrap, which break apart\nin the air and on impact.",
@@ -534,14 +536,14 @@ Registry.items.add("scrap-cannon", {
 });
 
 //Ammo
-Registry.items.add("scrap-bullet", {
+Registries.items.add("scrap-bullet", {
   name: "Scrap Bullet",
   description: "A tiny piece of scrap,\nfashioned into a sharp bullet.",
   image: "item.scrap-bullet",
   stackSize: 9999,
 });
 //Throwables
-Registry.items.add("makeshift-explosive", {
+Registries.items.add("makeshift-explosive", {
   type: "throwable",
   name: "Makeshift Explosive",
   description:

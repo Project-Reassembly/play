@@ -1,3 +1,4 @@
+import { Block } from "../block.js";
 //Does nothing special, just blocks shit
 class Wall extends Block {
   explosiveness = 0;
@@ -8,10 +9,11 @@ class Wall extends Block {
   damage(type, amount, source) {
     super.damage(
       type,
-      amount * (1 -
-        ((1 - this.armourToughness / (this.armour + this.armourToughness)) **
-          0.3) **
-          Math.ceil(amount ** (this.armourToughness / 10))),
+      amount *
+        (1 -
+          ((1 - this.armourToughness / (this.armour + this.armourToughness)) **
+            0.3) **
+            Math.ceil(amount ** (this.armourToughness / 10))),
       source
     );
   }
@@ -21,9 +23,11 @@ class Wall extends Block {
       this.health + " health",
       this.armour > 0 ? this.armour + " armour" : "",
       this.explosiveness > 0
-        ? "🟥"+this.explosiveness * 100 + "% explosiveness⬜"
+        ? "🟥" + this.explosiveness * 100 + "% explosiveness⬜"
         : "",
       "🟨 -------------------- ⬜",
     ];
   }
 }
+
+export { Wall };

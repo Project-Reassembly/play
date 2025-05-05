@@ -1,3 +1,7 @@
+import { Block } from "../classes/block/block.js";
+import { fonts } from "../play/game.js";
+import { Registries } from "./registry.js";
+import { Inventory, drawMultilineText } from "../classes/inventory.js";
 const ui = {
   menuState: "title",
   waitingForMouseUp: false,
@@ -592,7 +596,7 @@ function drawImg(
   ...otherParameters //IDK what else p5 image takes
 ) {
   //Get from registry if it exists
-  img = Registry.images.has(img) ? Registry.images.get(img) : img;
+  img = Registries.images.has(img) ? Registries.images.get(img) : img;
   noSmooth();
   if (img instanceof ImageContainer) {
     if (!img.image) return; //Cancel if no image loaded yet
@@ -933,14 +937,7 @@ function createUIInventoryComponent(
   itemSize = 40
 ) {
   //Make component
-  const component = new InventoryUIComponent(
-    x,
-    y,
-    inv,
-    rows,
-    cols,
-    itemSize
-  );
+  const component = new InventoryUIComponent(x, y, inv, rows, cols, itemSize);
   component.conditions = conditions;
   //Set conditional things
   component.acceptedScreens = screens;
@@ -1062,36 +1059,18 @@ function createSliderComponent(
   return component;
 }
 
-function blendColours(col1, col2, col1Factor) {
-  col1[3] ??= 255;
-  col2[3] ??= 255;
-  let col2Factor = 1 - col1Factor;
-  let newCol1 = [
-    col1[0] * col1Factor,
-    col1[1] * col1Factor,
-    col1[2] * col1Factor,
-    col1[3] * col1Factor,
-  ];
-  let newCol2 = [
-    col2[0] * col2Factor,
-    col2[1] * col2Factor,
-    col2[2] * col2Factor,
-    col2[3] * col2Factor,
-  ];
-  let newCol = [
-    newCol1[0] + newCol2[0],
-    newCol1[1] + newCol2[1],
-    newCol1[2] + newCol2[2],
-    newCol1[3] + newCol2[3],
-  ];
-  if (newCol[0] > 255) {
-    newCol[0] = 255;
-  }
-  if (newCol[1] > 255) {
-    newCol[1] = 255;
-  }
-  if (newCol[2] > 255) {
-    newCol[2] = 255;
-  }
-  return newCol;
-}
+export {
+  ui,
+  drawImg,
+  rotatedImg,
+  rotatedShape,
+  rotatedShapeExt,
+  createGamePropertySelector,
+  createMultilineUIComponent,
+  createSliderComponent,
+  createUIComponent,
+  createUIImageComponent,
+  createUIInventoryComponent,
+  UIComponent,
+  ImageContainer
+};

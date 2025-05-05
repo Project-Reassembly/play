@@ -1,3 +1,4 @@
+import { colinterp } from "../../core/number.js";
 class WaveParticle {
   constructor(
     x,
@@ -57,3 +58,4 @@ class WaveParticle {
     return (this.y - ui.camera.y) * ui.camera.zoom;
   }
 }
+export { WaveParticle };

@@ -42,8 +42,7 @@ function dynamicSort(property) {
     property = property.substring(1);
   }
   return (a, b) =>
-    (result =
-      a[property] < b[property] ? -1 : a[property] > b[property] ? 1 : 0) *
+    (a[property] < b[property] ? -1 : a[property] > b[property] ? 1 : 0) *
     sortOrder;
 }
 
@@ -206,3 +205,13 @@ class Vector {
     return new this();
   }
 }
+export {
+  shortenedNumber,
+  clamp,
+  roundNum,
+  rnd,
+  tru,
+  dynamicSort,
+  colinterp,
+  Vector,
+};

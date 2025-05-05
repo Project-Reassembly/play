@@ -1,3 +1,7 @@
+import { RegisteredItem } from "../../core/registered-item.js";
+import { Item } from "./item.js";
+import { construct } from "../../core/constructor.js";
+import { Registries } from "../../core/registry.js";
 /**
  * @typedef SerialisedItemStack
  * @prop {string} item
@@ -35,7 +39,7 @@ class ItemStack extends RegisteredItem {
    */
   getItem() {
     if (this.isEmpty()) return null;
-    this.#itemCache ??= construct(Registry.items.get(this.item), "item");
+    this.#itemCache ??= construct(Registries.items.get(this.item), "item");
     if (this.item !== this.#itemCache.registryName) {
       this.#itemCache = null;
       return this.getItem();
@@ -130,3 +134,5 @@ class ItemStack extends RegisteredItem {
     this.tags.set(name, value);
   }
 }
+
+export { ItemStack };

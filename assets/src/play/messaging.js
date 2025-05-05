@@ -1,3 +1,4 @@
+import { fonts } from "./game.js";
 class InGameMessageBox {
   x = 0;
   y = -100;
@@ -88,3 +89,4 @@ class InGameMessageBox {
   }
 }
 const Log = new InGameMessageBox(0, -100, 600, 20);
+export { Log, InGameMessageBox };

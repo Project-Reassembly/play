@@ -1,8 +1,9 @@
-Registry.vfx.add("none", {});
+import { Registries } from "../core/registry.js";
+Registries.vfx.add("none", {});
 
 //Block effects
 
-Registry.vfx.add("crafter-smoke", {
+Registries.vfx.add("crafter-smoke", {
   type: "particle-emission",
   cone: 10,
   particle: {
@@ -22,7 +23,7 @@ Registry.vfx.add("crafter-smoke", {
     light: 0,
   },
 });
-Registry.vfx.add("basic-drill-smoke", {
+Registries.vfx.add("basic-drill-smoke", {
   type: "particle-emission",
   cone: 30,
   amount: 3,
@@ -43,7 +44,7 @@ Registry.vfx.add("basic-drill-smoke", {
     light: 0,
   },
 });
-Registry.vfx.add("smelter-sparks", {
+Registries.vfx.add("smelter-sparks", {
   type: "particle-emission",
   amount: 4,
   cone: 360,
@@ -63,7 +64,7 @@ Registry.vfx.add("smelter-sparks", {
     light: 20,
   },
 });
-Registry.vfx.add("crafter-craft", {
+Registries.vfx.add("crafter-craft", {
   type: "wave-emission",
   particle: {
     lifetime: 20,
@@ -80,10 +81,10 @@ Registry.vfx.add("crafter-craft", {
 
 //Explosions
 
-Registry.vfx.add("explosion", {
+Registries.vfx.add("explosion", {
   type: "explosion",
 });
-Registry.vfx.add("construction-hit", {
+Registries.vfx.add("construction-hit", {
   type: "explosion",
   waveColours: [
     [255, 255, 100],
@@ -95,7 +96,7 @@ Registry.vfx.add("construction-hit", {
   ],
   sparks: false,
 });
-Registry.vfx.add("laser-caster-explosion", {
+Registries.vfx.add("laser-caster-explosion", {
   type: "explosion",
   waveColours: [
     [255, 255, 255],
@@ -110,7 +111,7 @@ Registry.vfx.add("laser-caster-explosion", {
 
 //Firing effects
 
-Registry.vfx.add("shoot", {
+Registries.vfx.add("shoot", {
   type: "multi-effect",
   effects: [
     {
@@ -160,7 +161,7 @@ Registry.vfx.add("shoot", {
   ],
 });
 
-Registry.vfx.add("laser-caster-frag", {
+Registries.vfx.add("laser-caster-frag", {
   type: "particle-emission",
   amount: 4,
   cone: 20,
@@ -182,13 +183,13 @@ Registry.vfx.add("laser-caster-frag", {
 
 //Nuclear
 
-Registry.vfx.add("nuke", {
+Registries.vfx.add("nuke", {
   type: "nuclear-explosion",
 });
 
 //Fire
 
-Registry.vfx.add("fire", {
+Registries.vfx.add("fire", {
   type: "particle-emission",
   amount: 4,
   particle: {
@@ -209,7 +210,7 @@ Registry.vfx.add("fire", {
     light: 80,
   },
 });
-Registry.vfx.add("laser-caster-fire", {
+Registries.vfx.add("laser-caster-fire", {
   type: "particle-emission",
   amount: 4,
   particle: {
@@ -232,7 +233,7 @@ Registry.vfx.add("laser-caster-fire", {
 
 //Status
 
-Registry.vfx.add("burning", {
+Registries.vfx.add("burning", {
   type: "particle-emission",
   amount: 2,
   particle: {
@@ -253,7 +254,7 @@ Registry.vfx.add("burning", {
     light: 40,
   },
 });
-Registry.vfx.add("plasma-burn", {
+Registries.vfx.add("plasma-burn", {
   type: "particle-emission",
   amount: 2,
   particle: {
@@ -276,7 +277,7 @@ Registry.vfx.add("plasma-burn", {
 
 //Charge
 
-Registry.vfx.add("laser-caster-charge", {
+Registries.vfx.add("laser-caster-charge", {
   type: "wave-emission",
   emissions: 4,
   interval: 10,
@@ -294,7 +295,7 @@ Registry.vfx.add("laser-caster-charge", {
     light: 30,
   },
 });
-Registry.vfx.add("energy-repeater-charge", {
+Registries.vfx.add("energy-repeater-charge", {
   type: "wave-emission",
   particle: {
     lifetime: 20,

@@ -1,3 +1,7 @@
+import { Bullet } from "./bullet.js";
+import { game } from "../../play/game.js";
+import { DroppedItemStack } from "../item/dropped-itemstack.js";
+import { ShapeParticle } from "../effect/shape-particle.js";
 class Missile extends Bullet {
   target = null;
   trailColour = [255, 255, 100];
@@ -61,7 +65,11 @@ class Missile extends Bullet {
         //If the bullet exists
         let minDist = Infinity;
         for (let entity of this.world.entities) {
-          if (!(entity instanceof DroppedItemStack) && entity.team !== this.entity.team && !entity.dead) {
+          if (
+            !(entity instanceof DroppedItemStack) &&
+            entity.team !== this.entity.team &&
+            !entity.dead
+          ) {
             //Only select living entities
             let dist = this.distanceTo(entity);
             if (dist < this.trackingRange && dist < minDist) {
@@ -82,7 +90,11 @@ class Missile extends Bullet {
             ? game.mouse
             : null;
         for (let entity of this.world.entities) {
-          if (!(entity instanceof DroppedItemStack) && entity.team !== this.entity.team && !entity.dead) {
+          if (
+            !(entity instanceof DroppedItemStack) &&
+            entity.team !== this.entity.team &&
+            !entity.dead
+          ) {
             //Only select living entities
             let dist = entity.distanceToPoint(game.mouse.x, game.mouse.y);
             if (dist < this.trackingRange && dist < minDist) {
@@ -101,3 +113,4 @@ class Missile extends Bullet {
     this.target = selected;
   }
 }
+export { Missile };

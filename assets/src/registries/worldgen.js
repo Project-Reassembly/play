@@ -1,4 +1,5 @@
-Registry.worldgen.add("base-generator", {
+import { Registries } from "../core/registry.js";
+Registries.worldgen.add("base-generator", {
   type: "tile-generator",
   noiseScale: 1,
   noiseLevel: 255,
@@ -33,7 +34,7 @@ Registry.worldgen.add("base-generator", {
     },
   ],
 });
-Registry.worldgen.add("ore-generator", {
+Registries.worldgen.add("ore-generator", {
   type: "ore-generator",
   stageTitle: "Exposing Resources...",
   ores: [
@@ -56,7 +57,7 @@ Registry.worldgen.add("ore-generator", {
     },
   ],
 });
-Registry.worldgen.add("ruins-generator", {
+Registries.worldgen.add("ruins-generator", {
   type: "block-generator",
   name: "Scrap Ruins",
   stageTitle: "Destroying Buildings...",

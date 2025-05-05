@@ -1,3 +1,4 @@
+import { rotatedImg } from "../../core/ui.js";
 class ImageParticle {
   #rotOffset;
   constructor(
@@ -89,3 +90,4 @@ class ImageParticle {
     pop();
   }
 }
+export { ImageParticle };

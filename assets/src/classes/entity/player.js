@@ -1,3 +1,10 @@
+import { rnd } from "../../core/number.js";
+import { Registries } from "../../core/registry.js";
+import { flash } from "../../play/effects.js";
+import { Log } from "../../play/messaging.js";
+import { Timer } from "../timer.js";
+import { EquippedEntity } from "./inventory-entity.js";
+import { world } from "../../play/game.js";
 const respawnTimer = new Timer();
 
 class Player extends EquippedEntity {
@@ -12,8 +19,8 @@ class Player extends EquippedEntity {
   }
   onHealthZeroed(type, source) {
     super.onHealthZeroed(type, source);
-    let messagearray = Registry.deathmsg.has(type)
-      ? Registry.deathmsg.get(type)[source ? 1 : 0]
+    let messagearray = Registries.deathmsg.has(type)
+      ? Registries.deathmsg.get(type)[source ? 1 : 0]
       : ["(1) died"];
     Log.send(
       (messagearray[Math.floor(rnd(0, messagearray.length))] ?? "(1) died")
@@ -43,3 +50,4 @@ class Player extends EquippedEntity {
     }
   }
 }
+export { Player, respawnTimer };

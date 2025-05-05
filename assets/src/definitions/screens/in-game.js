@@ -1,3 +1,15 @@
+import {
+  createUIComponent,
+  UIComponent,
+  createUIImageComponent,
+  createUIInventoryComponent,
+  createMultilineUIComponent,
+} from "../../core/ui.js";
+import { Block } from "../../classes/block/block.js";
+import { ui } from "../../core/ui.js";
+import { game, world } from "../../play/game.js";
+import { Container } from "../../classes/block/container.js";
+import { DroppedItemStack } from "../../classes/item/dropped-itemstack.js";
 //##############################################################
 
 //                        INDICATORS
@@ -658,7 +670,6 @@ Object.defineProperties(
 
 //##############################################################
 let cmdHistory = [];
-let histIndex = 0;
 //Command Line Input
 Object.defineProperties(
   createUIComponent(
@@ -719,3 +730,5 @@ Object.defineProperties(
     },
   }
 );
+
+export { cmdHistory };

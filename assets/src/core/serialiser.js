@@ -216,3 +216,4 @@ function iterateStorage(storage, callback) {
     if (key) void callback(key, storage.getItem(key));
   }
 }
+export { Serialiser };

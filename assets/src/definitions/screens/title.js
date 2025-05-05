@@ -1,3 +1,8 @@
+import {
+  createUIComponent,
+} from "../../core/ui.js";
+import { gen } from "../../play/game.js";
+import { ui } from "../../core/ui.js";
 createUIComponent(
   ["title"],
   [],
@@ -7,7 +12,7 @@ createUIComponent(
   50,
   "none",
   () => {
-    genMode = "create";
+    gen.mode = "create";
     ui.menuState = "in-game";
   },
   "New",
@@ -26,7 +31,7 @@ createUIComponent(
   50,
   "none",
   () => {
-    genMode = "load";
+    gen.mode = "load";
     ui.menuState = "in-game";
   },
   "Load",

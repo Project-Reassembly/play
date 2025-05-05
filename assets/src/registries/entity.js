@@ -1,7 +1,8 @@
-Registry.entities.add("player", {
+import { Registries } from "../core/registry.js";
+Registries.entities.add("player", {
   type: "player",
-  x: (World.size * Chunk.size * Block.size) / 2,
-  y: (World.size * Chunk.size * Block.size) / 2,
+  // x: (World.size * Chunk.size * Block.size) / 2,
+  // y: (World.size * Chunk.size * Block.size) / 2,
   name: "Player",
   health: 100,
   light: 100,
@@ -34,7 +35,7 @@ Registry.entities.add("player", {
   height: 25,
   speed: 3,
 });
-Registry.entities.add("scavenger", {
+Registries.entities.add("scavenger", {
   name: "Scavenger",
   type: "equipped-entity",
   health: 150,
@@ -99,7 +100,7 @@ Registry.entities.add("scavenger", {
     },
   ],
 });
-Registry.entities.add("scrap-sentinel", {
+Registries.entities.add("scrap-sentinel", {
   name: "Scrap Sentinel",
   type: "equipped-entity",
   health: 400,
@@ -160,7 +161,7 @@ Registry.entities.add("scrap-sentinel", {
     image: "generic.scrap-arm.component",
   },
 });
-Registry.entities.add("iti-corporate-merchant", {
+Registries.entities.add("iti-corporate-merchant", {
   type: "npc",
   name: "InfiniTech Industries Corporate Merchant",
   inventorySize: 1,

@@ -1,3 +1,14 @@
+import { Timer } from "../classes/timer.js";
+import { RegisteredItem } from "../core/registered-item.js";
+import { construct } from "../core/constructor.js";
+import { Registries } from "../core/registry.js";
+import { ShapeParticle } from "../classes/effect/shape-particle.js";
+import { WaveParticle } from "../classes/effect/wave-particle.js";
+import { ImageParticle } from "../classes/effect/image-particle.js";
+import { assign } from "../core/constructor.js";
+import { Vector, rnd, tru } from "../core/number.js";
+import { ExecutorParticle } from "../classes/effect/extra-particles.js";
+import { world, effects } from "../play/game.js";
 const effectTimer = new Timer();
 class Explosion {
   x = 0;
@@ -27,7 +38,7 @@ class Explosion {
   }
   dealDamage(kbrm = 1) {
     // Hit blocks
-    let damage = constructFromType(
+    let damage = construct(
       {
         x: this.x,
         y: this.y,
@@ -45,7 +56,7 @@ class Explosion {
         team: this.team,
         hitSize: this.radius * 2,
       },
-      VirtualBullet
+      "virtual"
     );
     damage.entity = this.source;
     this.world.bullets.push(damage);
@@ -894,7 +905,7 @@ function repeat(n, func, ...params) {
 function createEffect(effect, world, x, y, direction, scale, pos) {
   /**@type {VisualEffect} */
   let fx = construct(
-    typeof effect === "object" ? effect : Registry.vfx.get(effect),
+    typeof effect === "object" ? effect : Registries.vfx.get(effect),
     "visual-effect"
   );
   fx.execute(world, x, y, direction, scale, pos);
@@ -913,6 +924,7 @@ function autoScaledEffect(effect, world, x, y, direction, pos) {
     pos
   );
 }
+
 
 /**
  * Helper function for effects created from a source `PhysicalObject` such as bullet trails, or block smoke effects.\
@@ -943,3 +955,25 @@ function emitEffect(effect, source, offX = 0, offY = 0) {
       () => ({ x: source.x, y: source.y, direction: source.directionRad })
     );
 }
+
+export {
+  Explosion,
+  ExplosionEffect,
+  NuclearExplosion,
+  NuclearExplosionEffect,
+  effectTimer,
+  emitEffect,
+  createDestructionExplosion,
+  createEffect,
+  liquidDestructionBlast,
+  flash,
+  VisualEffect,
+  EmissionEffect,
+  MultiEffect,
+  ParticleEmissionEffect,
+  ImageParticleEmissionEffect,
+  TextParticleEmissionEffect,
+  WaveEmissionEffect,
+  autoScaledEffect,
+  repeat
+};

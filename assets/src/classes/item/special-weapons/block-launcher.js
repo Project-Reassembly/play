@@ -1,3 +1,6 @@
+import { Weapon } from "../weapon.js";
+import { PointBullet } from "../../projectile/point-bullet.js";
+import { constructFromType } from "../../../core/constructor.js";
 class BlockLauncher extends Weapon {
   ammoType = "none";
   places = true;
@@ -109,7 +112,9 @@ class BlockLaunchedBullet extends PointBullet {
           this.y,
           0
         );
-        let ex = new (rblk instanceof NuclearBomb?NuclearExplosion:Explosion)(rblk.explosion);
+        let ex = new (
+          rblk instanceof NuclearBomb ? NuclearExplosion : Explosion
+        )(rblk.explosion);
         ex.x = this.x;
         ex.y = this.y;
         ex.world = this.world;
@@ -137,3 +142,4 @@ class BlockLauncherScaling {
   areaFromExplosivenessAndMHP = 2;
   slowdownFromMHP = 0.05;
 }
+export { BlockLauncher, BlockLaunchedBullet };

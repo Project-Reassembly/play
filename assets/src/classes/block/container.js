@@ -1,3 +1,7 @@
+import { Block } from "./block.js";
+import { Inventory } from "../inventory.js";
+import { blockSize } from "../../scaling.js";
+import { DroppedItemStack } from "../item/dropped-itemstack.js";
 class Container extends Block {
   /** @type {Inventory} */
   inventory = null;
@@ -29,8 +33,8 @@ class Container extends Block {
         DroppedItemStack.create(
           stack,
           this.world,
-          this.x + Block.size / 2,
-          this.y + Block.size / 2
+          this.x + blockSize / 2,
+          this.y + blockSize / 2
         );
       }, true);
     return true;
@@ -59,8 +63,9 @@ class Container extends Block {
   createExtendedTooltip() {
     return [
       "🟨 -------------------- ⬜",
-      this.inventorySize+" slots",
+      this.inventorySize + " slots",
       "🟨 -------------------- ⬜",
     ];
   }
 }
+export { Container };

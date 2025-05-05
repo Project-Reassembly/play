@@ -1,3 +1,5 @@
+import { EquippedEntity } from "./inventory-entity.js";
+import { tru } from "../../core/number.js";
 /** Character that the player can interact with.
  * Technically enemies should be classed as NPCs too, but this class is used for specifically *friendly* NPCs which the player can talk to.
  * Can have trades
@@ -64,8 +66,7 @@ class NPC extends EquippedEntity {
       let relchange =
         (this.maxHealth / 250) *
         amount *
-        (this.violenceRelMod *
-          (1 + this.violenceIncrease) ** this.relation);
+        (this.violenceRelMod * (1 + this.violenceIncrease) ** this.relation);
       this.relation -= relchange || 0.1;
     }
   }
@@ -121,3 +122,4 @@ class NPC extends EquippedEntity {
     super.postDraw();
   }
 }
+export { NPC };

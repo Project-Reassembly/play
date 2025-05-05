@@ -1,3 +1,9 @@
+import { Container } from "../container.js";
+import { tru, roundNum } from "../../../core/number.js";
+import { autoScaledEffect } from "../../../play/effects.js";
+import { blockSize } from "../../../scaling.js";
+import { construct } from "../../../core/constructor.js";
+import { Registries } from "../../../core/registry.js";
 class TileProducer extends Container {
   results = {};
   amount = 0;
@@ -50,8 +56,8 @@ class TileProducer extends Container {
       autoScaledEffect(
         this.tickEffect,
         this.world,
-        this.x + Block.size / 2,
-        this.y + Block.size / 2,
+        this.x + blockSize / 2,
+        this.y + blockSize / 2,
         this.direction
       );
   }
@@ -59,8 +65,8 @@ class TileProducer extends Container {
     return (
       (this.results[this._blockOn]
         ? "--> " +
-          (Registry.items.has(this.results[this._blockOn])
-            ? Registry.items.get(this.results[this._blockOn])
+          (Registries.items.has(this.results[this._blockOn])
+            ? Registries.items.get(this.results[this._blockOn])
             : { name: "Unknown" }
           )?.name +
           " x" +
@@ -96,11 +102,12 @@ class TileProducer extends Container {
         .map((key) => ({ in: key, out: this.results[key] }))
         .flatMap((res) => {
           /**@type {Tile} */
-          let blk = construct(Registry.blocks.get(res.in), "tile");
+          let blk = construct(Registries.blocks.get(res.in), "tile");
           return [
-            "  "+blk.name +
+            "  " +
+              blk.name +
               " ≈> " +
-              Registry.items.get(res.out).name +
+              Registries.items.get(res.out).name +
               (blk.drillSpeed !== 1 ? " (" + blk.drillSpeed + "× speed)" : ""),
           ];
         }),
@@ -111,3 +118,4 @@ class TileProducer extends Container {
     ];
   }
 }
+export { TileProducer };

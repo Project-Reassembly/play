@@ -1,3 +1,8 @@
+import { construct } from "../../core/constructor.js";
+import { Registries } from "../../core/registry.js";
+import { blockSize, chunkSize, Direction } from "../../scaling.js";
+import { tru } from "../../core/number.js";
+import { World } from "./world.js";
 /**
  * @typedef SerialisedChunk
  * @prop {SerialisedBlock[][]} blocks
@@ -18,7 +23,9 @@ class Chunk {
     /** @readonly */
     floor: "floor",
   };
-  static size = 16;
+  static get size() {
+    return chunkSize;
+  }
   tiles = create2DArray(Chunk.size);
   blocks = create2DArray(Chunk.size);
   floor = create2DArray(Chunk.size);
@@ -50,7 +57,7 @@ class Chunk {
       throw new Error(
         "Can't place block outside of chunk (at " + x + ", " + y + " in chunk)"
       );
-    let blockToAdd = construct(Registry.blocks.get(block), "block");
+    let blockToAdd = construct(Registries.blocks.get(block), "block");
     blockToAdd.blockX = x;
     blockToAdd.blockY = y;
     blockToAdd.chunk = this;
@@ -119,20 +126,20 @@ class Chunk {
   }
   drawFloorsOnly() {
     push();
-    translate(Block.size / 2, Block.size / 2);
+    translate(blockSize / 2, blockSize / 2);
     iterate2DArray(this.tiles, (tile) => tile && tile.draw());
     iterate2DArray(this.floor, (floor) => floor && floor.draw());
     pop();
   }
   drawBlocksOnly() {
     push();
-    translate(Block.size / 2, Block.size / 2);
+    translate(blockSize / 2, blockSize / 2);
     iterate2DArray(this.blocks, (block) => block && block.draw());
     pop();
   }
   postDrawBlocksOnly() {
     push();
-    translate(Block.size / 2, Block.size / 2);
+    translate(blockSize / 2, blockSize / 2);
     iterate2DArray(this.blocks, (block) => block && block.postDraw());
     pop();
   }
@@ -165,7 +172,7 @@ class Chunk {
             "blocks"
           );
           if (sblock.direction)
-            blk.direction = Block.dir.fromEnum(sblock.direction);
+            blk.direction = Direction.fromEnum(sblock.direction);
           if (sblock.health) blk.health = sblock.health ?? 0;
           if (sblock.team) blk.team = sblock.team ?? "enemy";
           if (sblock.power) blk.power = sblock.power ?? 0;
@@ -202,3 +209,4 @@ function create2DArray(size = 1) {
   }
   return array;
 }
+export { Chunk, create2DArray, iterate2DArray };

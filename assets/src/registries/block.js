@@ -1,55 +1,58 @@
+import { Registries } from "../core/registry.js";
+import { createLinkedBlockAndItem } from "../classes/block/block.js";
+import { Item } from "../classes/item/item.js";
 //## TILES ##
-Registry.blocks.add("grass", {
+Registries.blocks.add("grass", {
   type: "tile",
   image: "tile.grass",
   name: "Grass Floor",
 });
-Registry.blocks.add("stone", {
+Registries.blocks.add("stone", {
   type: "tile",
   image: "tile.stone",
   drillSpeed: 0.5,
   name: "Stone Floor",
 });
-Registry.blocks.add("water", {
+Registries.blocks.add("water", {
   type: "tile",
   image: "tile.water",
   speedMultiplier: 0.6,
   buildable: false,
   name: "Water",
 });
-Registry.blocks.add("sand-water", {
+Registries.blocks.add("sand-water", {
   type: "tile",
   image: "tile.sand-water",
   speedMultiplier: 0.8,
   drillSpeed: 0.8,
   name: "Sandy Water",
 });
-Registry.blocks.add("sand-grass", {
+Registries.blocks.add("sand-grass", {
   type: "tile",
   image: "tile.sand-grass",
   name: "Sandy Grass",
 });
-Registry.blocks.add("sand", {
+Registries.blocks.add("sand", {
   type: "tile",
   image: "tile.sand",
   name: "Sand Floor",
 });
 //## FLOORS ##
 //Ores
-Registry.blocks.add("copper-ore", {
+Registries.blocks.add("copper-ore", {
   type: "ore",
   image: "ore.copper",
   stages: ["", ".exposed", ".weathered", ".oxidised"],
   drillSpeed: 0.75,
   name: "Copper Ore",
 });
-Registry.blocks.add("iron-ore", {
+Registries.blocks.add("iron-ore", {
   type: "ore",
   image: "ore.iron",
   drillSpeed: 0.65,
   name: "Iron Ore",
 });
-Registry.blocks.add("electrum-ore", {
+Registries.blocks.add("electrum-ore", {
   type: "ore",
   image: "ore.electrum",
   drillSpeed: 0.45,
@@ -936,13 +939,13 @@ createLinkedBlockAndItem(
   }
 );
 //## TEST ##
-Registry.blocks.add("test-provider", {
+Registries.blocks.add("test-provider", {
   name: "Test Provider",
   maxPower: 1000,
   power: 1000,
   isProvider: true,
 });
-Registry.blocks.add("test-subscriber", {
+Registries.blocks.add("test-subscriber", {
   name: "Test Subscriber",
   maxPower: 1000,
   powerDraw: 10,

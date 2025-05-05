@@ -1,3 +1,6 @@
+import { RegisteredItem } from "../../core/registered-item.js";
+import { rotatedImg } from "../../core/ui.js";
+import { EquippedEntity } from "../entity/inventory-entity.js";
 //Part of an entity.
 class Component extends RegisteredItem {
   shape = "circle";
@@ -131,3 +134,4 @@ class WeaponComponent extends Component {
     }
   }
 }
+export { Component, LegComponent, WeaponComponent };

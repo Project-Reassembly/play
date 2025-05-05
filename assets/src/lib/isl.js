@@ -5,6 +5,14 @@ import {
   ISLError,
 } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@main/core/interpreter.js";
 import { ISLExtension } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@main/core/extensions.js";
+import { saveGame, loadGame } from "../play/game.js";
+import { Entity } from "../classes/entity/entity.js";
+import { Block } from "../classes/block/block.js";
+import { Registries } from "../core/registry.js";
+import { Log } from "../play/messaging.js";
+import { Explosion, NuclearExplosion } from "../play/effects.js";
+import { EquippedEntity } from "../classes/entity/inventory-entity.js";
+import { world } from "../play/game.js";
 //Util
 let quietMode = false;
 function feedback(msg) {
@@ -55,17 +63,17 @@ const positionType = "number|relpos|identifier";
 const cle = new ISLExtension("pr-cmd");
 cle.addType(
   "rloc-item",
-  (val) => Registry.items.has(val) && !Registry.blocks.has(val)
+  (val) => Registries.items.has(val) && !Registries.blocks.has(val)
 );
 cle.addType(
   "rloc-block",
-  (val) => Registry.blocks.has(val) && !Registry.items.has(val)
+  (val) => Registries.blocks.has(val) && !Registries.items.has(val)
 );
 cle.addType(
   "rloc-placeable",
-  (val) => Registry.blocks.has(val) && Registry.items.has(val)
+  (val) => Registries.blocks.has(val) && Registries.items.has(val)
 );
-cle.addType("rloc-entity", (val) => Registry.entities.has(val));
+cle.addType("rloc-entity", (val) => Registries.entities.has(val));
 cle.addType("entity", () => false);
 cle.addType("nonentity-ctx", () => false);
 window["_self"] = cle.addVariable("self", new Entity(), "entity");
@@ -86,7 +94,7 @@ cle.addKeyword(
       "Given " +
         ((amount?.value ?? 1) - notgiven) +
         " " +
-        Registry.items.get(item?.value).name +
+        Registries.items.get(item?.value).name +
         " to " +
         target.name
     );
@@ -137,7 +145,7 @@ cle.addKeyword(
 cle.addKeyword(
   "spawn",
   (interp, labels, entity, x, y) => {
-    let ent = construct(Registry.entities.get(entity?.value), "entity");
+    let ent = construct(Registries.entities.get(entity?.value), "entity");
     let pos = getPos(x, y);
     ent.addToWorld(world, pos.x, pos.y);
     _ce.value = ent;
@@ -174,11 +182,11 @@ cle.addKeyword(
         TypeError
       );
     else {
+      give(ctx.self, "dev::itemcatalog", 1);
       give(ctx.self, "dev::commandblock", 99);
       give(ctx.self, "dev::commandblock.chain", 99);
       give(ctx.self, "dev::commandblock.loop", 99);
-      give(ctx.self, "message", 99);
-      give(ctx.self, "dev::itemcatalog", 1);
+      give(ctx.self, "dev::structurereader", 99);
     }
   },
   []
@@ -544,11 +552,10 @@ const commandLine = new ISLInterpreter({
 commandLine.extend(cle);
 let ctx = new ExecutionContext(0, 0, null);
 
-window["ExecutionContext"] = ExecutionContext;
-window["islinterface"] = {
-  do: (isl, context) =>
-    isl.split(/[\n\;]/g).forEach((line) => runCommand(line, context)),
-};
+function exec(isl, context) {
+  isl.split(/[\n\;]/g).forEach((line) => runCommand(line, context));
+}
+
 /**
  *
  * @param {string} cmd Command to execute.
@@ -566,3 +573,4 @@ function runCommand(cmd, context) {
 }
 
 console.log("ISL ready.");
+export { commandLine, ExecutionContext, runCommand, exec };

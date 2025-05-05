@@ -1,3 +1,6 @@
+import { Bullet } from "./bullet.js";
+import { PhysicalObject } from "../physical.js";
+import { Block } from "../block/block.js";
 class VirtualBullet extends Bullet {
   team = "neutral";
   _ent = null;
@@ -34,3 +37,4 @@ class VirtualBullet extends Bullet {
     );
   }
 }
+export { VirtualBullet };

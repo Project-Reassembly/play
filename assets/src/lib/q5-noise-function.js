@@ -98,24 +98,24 @@ const noise = function (x, y, z) {
   return r;
 };
 
-
-const Shr3 = function(){
+const Shr3 = function () {
   let jsr, seed;
   let m = 4294967295;
   return {
-    setSeed(val){
+    setSeed(val) {
       jsr = seed = (val == null ? Math.random() * m : val) >>> 0;
     },
     getSeed() {
       return seed;
     },
     rand() {
-      jsr^=(jsr<<17);
-      jsr^=(jsr>>13);
-      jsr^=(jsr<<5);
-      return (jsr>>>0)/m;
-    }
-  }
-}
+      jsr ^= jsr << 17;
+      jsr ^= jsr >> 13;
+      jsr ^= jsr << 5;
+      return (jsr >>> 0) / m;
+    },
+  };
+};
 let rng1 = Shr3();
 rng1.setSeed();
+export { setNoiseParams, noise, noiseSeed };

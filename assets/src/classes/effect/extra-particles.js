@@ -56,6 +56,4 @@ class ExecutorParticle {
 //   }
 // }
 
-class Pseudo3DParticle{
-
-}
+export { ExecutorParticle };

@@ -1,3 +1,4 @@
+import { Block } from "./block.js";
 class SignBlock extends Block {
   _message = "";
   drawTooltip(x, y, outline, background) {
@@ -36,10 +37,11 @@ class SignBlock extends Block {
   static applyExtraProps(deserialised, creator) {
     deserialised._message = creator.message;
   }
-  read(){
+  read() {
     return this._message;
   }
-  write(txt){
+  write(txt) {
     this._message = txt;
   }
 }
+export { SignBlock };

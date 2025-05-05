@@ -1,3 +1,4 @@
+import { Bullet } from "./bullet.js";
 class LaserBullet extends Bullet {
   //Length of the beam. Replaces speed.
   length = 0;
@@ -93,3 +94,4 @@ class LaserBullet extends Bullet {
     return false;
   }
 }
+export { LaserBullet };

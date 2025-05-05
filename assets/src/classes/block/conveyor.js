@@ -1,3 +1,9 @@
+import { Container } from "./container.js";
+import { drawImg, rotatedImg } from "../../core/ui.js";
+import { blockSize, Direction } from "../../scaling.js";
+import { DroppedItemStack } from "../item/dropped-itemstack.js";
+import { ShootableObject } from "../physical.js";
+import { roundNum } from "../../core/number.js";
 class Conveyor extends Container {
   moveTime = 10;
   _progress = 0;
@@ -11,7 +17,7 @@ class Conveyor extends Container {
   tick() {
     super.tick();
     if (!this.inventory.get(0) || this.inventory.get(0).isEmpty()) return;
-    let vct = Block.direction.vectorOf(this.direction);
+    let vct = Direction.vectorOf(this.direction);
     let target =
       this.world.getBlock(this.gridX + vct.x, this.gridY + vct.y) ??
       this.world.getBlock(
@@ -27,8 +33,8 @@ class Conveyor extends Container {
         DroppedItemStack.create(
           this.inventory.get(0),
           this.world,
-          (posX + 0.5) * Block.size,
-          (posY + 0.5) * Block.size,
+          (posX + 0.5) * blockSize,
+          (posY + 0.5) * blockSize,
           100 / this.moveTime,
           degrees(this.direction)
         );
@@ -53,44 +59,44 @@ class Conveyor extends Container {
       this.baseImg,
       this.x,
       this.y,
-      this.tileSize * Block.size,
-      this.tileSize * Block.size
+      this.tileSize * blockSize,
+      this.tileSize * blockSize
     );
     rotatedImg(
       this.beltImg,
       this.x,
       this.y,
-      this.tileSize * Block.size,
-      this.tileSize * Block.size,
+      this.tileSize * blockSize,
+      this.tileSize * blockSize,
       this.direction
     );
     ShootableObject.prototype.draw.call(this);
   }
   postDraw() {
-    let vct = Block.direction.vectorOf(this.direction);
+    let vct = Direction.vectorOf(this.direction);
     let amt = this._progress / this.moveTime;
     if (this.inventory.get(0) && !this.inventory.get(0).isEmpty()) {
       if (this.shape === "straight")
         drawImg(
           this.inventory.get(0).getItem().image,
-          this.x + vct.x * (amt - 0.5) * Block.size,
-          this.y + vct.y * (amt - 0.5) * Block.size,
+          this.x + vct.x * (amt - 0.5) * blockSize,
+          this.y + vct.y * (amt - 0.5) * blockSize,
           20,
           20
         );
     }
-    super.postDraw()
+    super.postDraw();
   }
   /**
    * @param {Entity} entity
    */
   steppedOnBy(entity) {
-    if (entity instanceof DroppedItemStack){
+    if (entity instanceof DroppedItemStack) {
       this.inventory.set(0, entity.item);
       entity.dead = true;
     }
-    let vct = Block.direction.vectorOf(this.direction);
-    let speed = Block.size / this.moveTime;
+    let vct = Direction.vectorOf(this.direction);
+    let speed = blockSize / this.moveTime;
     entity.move(vct.x * speed, vct.y * speed);
   }
   read() {
@@ -99,7 +105,7 @@ class Conveyor extends Container {
   createExtendedTooltip() {
     return [
       "🟨 -------------------- ⬜",
-      roundNum(60/this.moveTime, 1) + " items/s",
+      roundNum(60 / this.moveTime, 1) + " items/s",
       "🟨 -------------------- ⬜",
     ];
   }
@@ -108,7 +114,7 @@ class Conveyor extends Container {
 class Unloader extends Conveyor {
   filter = "nothing";
   tick() {
-    let vct = Block.direction.vectorOf(this.direction);
+    let vct = Direction.vectorOf(this.direction);
     let extractFrom = this.world.getBlock(
       this.gridX - vct.x,
       this.gridY - vct.y
@@ -166,3 +172,4 @@ class Unloader extends Conveyor {
     return this.filter;
   }
 }
+export { Conveyor, Unloader };

@@ -1,3 +1,10 @@
+import { construct } from "../../../core/constructor.js";
+import { tru, roundNum } from "../../../core/number.js";
+import { Registries } from "../../../core/registry.js";
+import { autoScaledEffect } from "../../../play/effects.js";
+import { drawMultilineText } from "../../inventory.js";
+import { Item } from "../../item/item.js";
+import { Container } from "../container.js";
 /**
  * @typedef {Object} Recipe A definition for a crafting recipe.
  * @property {ItemStack[]} inputs Array of input itemstacks
@@ -183,7 +190,7 @@ class Uncrafter extends Crafter {
     strokeTo: 0,
   };
   init() {
-    this.recipes = (Registry.blocks.get(this.counterpart).recipes ?? []).map(
+    this.recipes = (Registries.blocks.get(this.counterpart).recipes ?? []).map(
       (recipe) => ({
         outputs: recipe.inputs,
         inputs: recipe.outputs,
@@ -193,3 +200,4 @@ class Uncrafter extends Crafter {
     super.init();
   }
 }
+export { Crafter, Uncrafter };

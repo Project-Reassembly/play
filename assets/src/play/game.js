@@ -1,3 +1,29 @@
+import { Block } from "../classes/block/block.js";
+import { Container } from "../classes/block/container.js";
+import { Chunk } from "../classes/world/chunk.js";
+import { World } from "../classes/world/world.js";
+import { Registries } from "../core/registry.js";
+import { Log } from "./messaging.js";
+import { ui, rotatedShape } from "../core/ui.js";
+import { Inventory } from "../classes/inventory.js";
+import { UIComponent } from "../core/ui.js";
+import {} from "../lib/isl.js";
+import { Serialiser } from "../core/serialiser.js";
+import { effectTimer } from "./effects.js";
+import { respawnTimer } from "../classes/entity/player.js";
+import { WaveParticle } from "../classes/effect/wave-particle.js";
+import { rnd, roundNum } from "../core/number.js";
+import { PlaceableItem } from "../classes/item/placeable.js";
+import { ItemStack } from "../classes/item/item-stack.js";
+import { Equippable } from "../classes/item/equippable.js";
+import { construct } from "../core/constructor.js";
+//Make the ui exist
+import { cmdHistory } from "../definitions/screens/in-game.js";
+import {} from "../definitions/screens/title.js";
+//is integration time
+import {} from "../lib/int-setup.js";
+import { ExecutionContext, exec } from "../lib/isl.js";
+let histIndex = 0;
 const game = {
   saveslot: 1,
   //Control type
@@ -63,7 +89,6 @@ const effects = {
     ui.camera.y += rnd(-intensity, intensity);
   },
 };
-const contentScale = 1;
 let worldSize = Block.size * Chunk.size * World.size;
 const borders = () => [0, 0, worldSize, worldSize];
 let preloadTicks = 100;
@@ -71,12 +96,14 @@ let timePerFrame = 1000 / 60;
 let time = 0;
 let framesToDraw = 0;
 //Generation
-let generationStarted = false;
-let generating = false;
-let genMsg = "Generating World...";
-let genProgress = 0;
-let genStageProgress = 0;
-let genMode = "create";
+const gen = {
+  started: false,
+  inprogress: false,
+  msg: "Generating World...",
+  progress: 0,
+  stageProgress: 0,
+  mode: "create",
+};
 //
 let freecam = false;
 let freecamReturn = 0;
@@ -93,15 +120,14 @@ let worldGenWorker = null;
 try {
   worldGenWorker = new Worker("assets/src/worker/generator.js", {
     name: "[World Gen]",
+    type: "module",
   });
 } catch (error) {
   console.error("Could not create worker:", error);
   Log.send("World generation could not be started.", [255, 0, 0]);
 }
-let createdChunks = [[]];
-let waitingForWorker = false;
 //
-let fonts = {};
+const fonts = {};
 
 //Worldgen analysis
 let stats = {
@@ -117,12 +143,12 @@ const world = new World();
 worldGenWorker.onmessage = (ev) => {
   if (ev.data === "finish") {
     console.log("Generation finished.");
-    genMsg = "Entering World";
+    gen.msg = "Entering World";
     createPlayer();
     ui.camera.x = game.player.x;
     ui.camera.y = game.player.y;
     for (let tick = 0; tick < preloadTicks; tick++) world.tickAll();
-    generating = false;
+    gen.inprogress = false;
     worldGenWorker.terminate();
     //Worldgen stats
     let log = "\n";
@@ -161,13 +187,13 @@ worldGenWorker.onmessage = (ev) => {
     console.log(log);
   } else if (typeof ev.data === "object") {
     if (ev.data.type === "genstage") {
-      genMsg = ev.data.stage;
+      gen.msg = ev.data.stage;
     }
     if (ev.data.type === "progress") {
-      genProgress = ev.data.progress;
+      gen.progress = ev.data.progress;
     }
     if (ev.data.type === "progress-stage") {
-      genStageProgress = ev.data.progress;
+      gen.stageProgress = ev.data.progress;
     }
     if (ev.data.type === "chunk") {
       let def = ev.data.def;
@@ -274,14 +300,16 @@ worldGenWorker.onerror = (ev) => {
     ev.lineno +
     ":" +
     ev.colno;
-  console.error(errmsg);
-  if (ev instanceof Event) ev.preventDefault();
+  console.error(errmsg, ev);
+  ev.preventDefault();
   Log.send(errmsg, [255, 0, 0]);
 };
 
 worldGenWorker.onmessageerror = (ev) => {
   console.warn("Message could not be deserialised.");
+  Log.send("Message could not be deserialised.", [255, 255, 0]);
 };
+
 const propertyReplacements = [
   ['"health":', "ḣ"],
   ['"direction":', "ḋ"],
@@ -365,17 +393,17 @@ function saveGame(name) {
   //Dictionary replacement:
   let dict = [];
   let num = 0;
-  Registry.blocks.forEach((name) => {
+  Registries.blocks.forEach((name) => {
     dict.push([num, name]);
     num++;
   });
-  Registry.items.forEach((name) => {
+  Registries.items.forEach((name) => {
     if (!hasNameInDictArray(name, dict)) {
       dict.push([num, name]);
       num++;
     }
   });
-  Registry.entities.forEach((name) => {
+  Registries.entities.forEach((name) => {
     dict.push([num, name]);
     num++;
   });
@@ -490,13 +518,13 @@ function sizeKB(string) {
   return string ? string.length / 512 : 0;
 }
 
-async function preload() {
-  Registry.images.forEachAsync((name, el) => el.load());
+window.preload = async function () {
+  Registries.images.forEachAsync((name, el) => el.load());
   fonts.ocr = loadFont("assets/font/ocr_a_extended.ttf");
   fonts.darktech = loadFont("assets/font/darktech_ldr.ttf");
-}
+};
 //Set up the canvas, using the previous function
-function setup() {
+window.setup = function () {
   let cnv = createCanvas(windowWidth, windowHeight);
   cnv.addEventListener("contextmenu", (event) => event.preventDefault());
   rectMode(CENTER);
@@ -504,7 +532,7 @@ function setup() {
   colorMode("rgb", 255);
   textFont(fonts.darktech);
   textStyle("normal");
-}
+};
 
 async function delay(ms) {
   return new Promise((resolve, reject) => {
@@ -513,10 +541,10 @@ async function delay(ms) {
 }
 
 async function generateWorld(seed) {
-  generationStarted = true;
-  generating = true;
-  genProgress = 0;
-  genMsg = "Generating World...";
+  gen.started = true;
+  gen.inprogress = true;
+  gen.progress = 0;
+  gen.msg = "Generating World...";
   world.prepareForGeneration();
   console.log("Generation started");
   worldGenWorker.postMessage({ type: "generate", seed: seed });
@@ -524,9 +552,9 @@ async function generateWorld(seed) {
 }
 
 //Change the size if the screen size changes
-function windowResized() {
+window.windowResized = function () {
   resizeCanvas(windowWidth, windowHeight);
-}
+};
 
 function frameSkippingFunction(func) {
   if (framesToDraw > 1000) {
@@ -541,7 +569,7 @@ function frameSkippingFunction(func) {
 }
 
 let errored = false;
-function draw() {
+window.draw = function () {
   Log.tick();
   try {
     //Draw the void
@@ -566,9 +594,9 @@ function draw() {
     loop();
   }
   Log.draw();
-}
+};
 
-function postProcess() {
+window.postProcess = function () {
   push();
   //Corruption/glitch effect
   imageMode(CORNER);
@@ -590,20 +618,12 @@ function postProcess() {
         );
     }
   pop();
-}
-
-/**@param {KeyboardEvent} ev  */
-function fixError(ev) {
-  if (ev.key === " ") {
-    errored = false;
-    removeEventListener("keydown", fixError);
-  }
-}
+};
 
 function frame() {
   //Frameskip stuff
   framesToDraw += deltaTime / timePerFrame;
-  if (generating) {
+  if (gen.inprogress) {
     push();
     translate(width / 2, height / 2);
     frameSkippingFunction(drawNeutralBackground);
@@ -615,15 +635,15 @@ function frame() {
     strokeWeight(6);
     textAlign(CENTER);
     textSize(40);
-    text(genMsg, width / 2, height / 2);
+    text(gen.msg, width / 2, height / 2);
     strokeWeight(3);
     fill(0);
     rectMode(CENTER);
     rect(width / 2, height / 2 + 60, width * 0.6, 30);
     rect(width / 2, height / 2 + 120, width * 0.4, 20);
     fill(230, 170, 0);
-    let w = width * 0.6 * genProgress;
-    let w2 = width * 0.4 * genStageProgress;
+    let w = width * 0.6 * gen.progress;
+    let w2 = width * 0.4 * gen.stageProgress;
     rectMode(CORNER);
     rect(width * 0.2, height / 2 + 45, w, 30);
     rect(width * 0.3, height / 2 + 110, w2, 20);
@@ -632,13 +652,13 @@ function frame() {
     fill(255);
     noStroke();
     textSize(18);
-    text((genProgress * 100).toFixed(2) + "%", width / 2, height / 2 + 60);
+    text((gen.progress * 100).toFixed(2) + "%", width / 2, height / 2 + 60);
     textSize(12);
     text(
       "Stage " +
-        Registry.worldgen.size * genStageProgress +
+        Registries.worldgen.size * gen.stageProgress +
         "/" +
-        Registry.worldgen.size,
+        Registries.worldgen.size,
       width / 2,
       height / 2 + 120
     );
@@ -648,11 +668,11 @@ function frame() {
     translate(width / 2, height / 2);
     //Draw everything else
     if (ui.menuState === "in-game") {
-      if (!generationStarted) {
-        if (genMode === "create") generateWorld(); //2147483647
-        else if (genMode === "load") {
-          if (loadGame()) generationStarted = true;
-          else genMode = "create";
+      if (!gen.started) {
+        if (gen.mode === "create") generateWorld(); //2147483647
+        else if (gen.mode === "load") {
+          if (loadGame()) gen.started = true;
+          else gen.mode = "create";
         } else throw new Error("No generation mode! Use 'create' or 'load'.");
         return;
       }
@@ -670,7 +690,7 @@ function frame() {
 }
 
 function drawNeutralBackground() {
-  time ++;
+  time++;
   let size = Math.max(width, height);
   background(0);
   noStroke();
@@ -723,7 +743,7 @@ function uiFrame() {
   //Reset mouse held status
   if (ui.waitingForMouseUp && !mouseIsPressed) ui.waitingForMouseUp = false;
   //Draw UI and mouse pos
-  if (generationStarted && !generating && ui.menuState === "in-game") {
+  if (gen.started && !gen.inprogress && ui.menuState === "in-game") {
     ui.hoveredBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
     if (ui.hoveredBlock) ui.hoveredBlock.highlight();
     let conblock = Container.selectedBlock;
@@ -926,7 +946,7 @@ function showMousePos() {
 function createPlayer(player = null) {
   /** @type {Player} */
   if (!player) {
-    player = construct(Registry.entities.get("player"));
+    player = construct(Registries.entities.get("player"));
     player.inventory.addItem("scrap", 35);
     player.inventory.addItem("stone", 99);
     player.inventory.addItem("scrap-assembler");
@@ -1073,12 +1093,6 @@ function interact() {
     game.player.leftHand.get(0).getItem().use(game.player);
 }
 
-function playerDies() {
-  ui.menuState = "you-died";
-  //Reset world and game
-  reset();
-}
-
 function reset() {
   world.entities.splice(0);
   world.particles.splice(0);
@@ -1097,7 +1111,7 @@ function reset() {
 /**Triggers on any key press
  * @param {KeyboardEvent} ev
  */
-function keyPressed(ev) {
+window.keyPressed = function (ev) {
   //CAPS LOCK doesn't matter
   key = key.toString().toLowerCase();
   if (ui.texteditor.active) {
@@ -1159,14 +1173,14 @@ function keyPressed(ev) {
   ev.stopPropagation();
   ev.stopImmediatePropagation();
   return false;
-}
+};
 
 function openCommandLine() {
   ui.texteditor.active = true;
   ui.texteditor.title = "Command Line";
   ui.texteditor.isCommandLine = true;
   ui.texteditor.save = (command) => {
-    islinterface.do(
+    exec(
       command,
       new ExecutionContext(game.player.x, game.player.y, game.player)
     );
@@ -1175,7 +1189,7 @@ function openCommandLine() {
   };
 }
 /**@param {KeyboardEvent} ev  */
-function keyTyped(ev) {
+window.keyTyped = function (ev) {
   if (!ui.texteditor.active) return false;
   if (key !== "/") {
     ui.texteditor.text +=
@@ -1184,7 +1198,7 @@ function keyTyped(ev) {
         : key.toLowerCase();
   }
   return false;
-}
+};
 
 //Show dialog box if game in progress
 onbeforeunload = (ev) => {
@@ -1193,10 +1207,10 @@ onbeforeunload = (ev) => {
     ev.preventDefault();
   }
 };
-
+let selectedDirection = 0;
 const zoomSpeed = 0.0125;
 /**@param {WheelEvent} ev  */
-function mouseWheel(ev) {
+window.mouseWheel = function (ev) {
   //CTRL + scroll to zoom
   if (ev.ctrlKey)
     ui.camera.zoom = roundNum(
@@ -1209,7 +1223,7 @@ function mouseWheel(ev) {
       ev.delta > 0 ? Block.dir.rotateAntiClockwise : Block.dir.rotateClockwise
     )(selectedDirection);
   return false;
-}
+};
 
 function nextRecipe() {
   let block = ui.hoveredBlock ?? Container.selectedBlock;
@@ -1238,6 +1252,8 @@ function togglePause() {
     pause();
   }
 }
-function mousePressed() {
+window.mousePressed = function () {
   return false;
-}
+};
+
+export { game, effects, createPlayer, world, fonts, loadGame, saveGame, gen };

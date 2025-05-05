@@ -169,3 +169,5 @@ class RepeatedTimerOperation extends TimerOperation {
     }
   }
 }
+
+export { Timer };
