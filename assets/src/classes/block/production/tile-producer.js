@@ -4,6 +4,7 @@ import { autoScaledEffect } from "../../../play/effects.js";
 import { blockSize } from "../../../scaling.js";
 import { construct } from "../../../core/constructor.js";
 import { Registries } from "../../../core/registry.js";
+import { drawMultilineText } from "../../inventory.js";
 class TileProducer extends Container {
   results = {};
   amount = 0;

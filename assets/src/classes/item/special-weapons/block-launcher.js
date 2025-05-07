@@ -1,6 +1,17 @@
 import { Weapon } from "../weapon.js";
 import { PointBullet } from "../../projectile/point-bullet.js";
-import { constructFromType } from "../../../core/constructor.js";
+import { constructFromType, construct } from "../../../core/constructor.js";
+import { game } from "../../../play/game.js";
+import { Log } from "../../../play/messaging.js";
+import { WeaponShootConfiguration } from "../weapon.js";
+import { Registries } from "../../../core/registry.js";
+import { Wall } from "../../block/defense/wall.js";
+import { ui } from "../../../core/ui.js";
+import { Bomb, NuclearBomb } from "../../block/defense/bomb.js";
+import { autoScaledEffect, Explosion, NuclearExplosion } from "../../../play/effects.js";
+import { DroppedItemStack } from "../dropped-itemstack.js";
+import { Block } from "../../block/block.js";
+import { ItemStack } from "../item-stack.js";
 class BlockLauncher extends Weapon {
   ammoType = "none";
   places = true;
@@ -31,10 +42,10 @@ class BlockLauncher extends Weapon {
     }
   }
   modifyBullet() {
-    let item = Registry.items.get(this.ammoType);
+    let item = Registries.items.get(this.ammoType);
     if (!item || !item.block) return;
     /**@type {Block} */
-    let block = construct(Registry.blocks.get(item.block), "block");
+    let block = construct(Registries.blocks.get(item.block), "block");
     if (this.places) {
       this.shoot.bullet.type = "block-bullet";
       this.shoot.bullet.block = item.block;
@@ -74,7 +85,7 @@ class BlockLauncher extends Weapon {
       .concat([
         (this.ammoType === "none"
           ? "🟥Not loaded"
-          : "🟪Shooting " + Registry.blocks.get(this.ammoType).name) + "⬜",
+          : "🟪Shooting " + Registries.blocks.get(this.ammoType).name) + "⬜",
       ])
       .concat(wtt.slice(1));
   }
@@ -85,7 +96,7 @@ class BlockLaunchedBullet extends PointBullet {
   ondestroyed() {
     super.ondestroyed();
     /**@type {Block} */
-    let rblk = construct(Registry.blocks.get(this.block), "block");
+    let rblk = construct(Registries.blocks.get(this.block), "block");
     let blkitem = rblk.dropItem;
     if (!blkitem) return;
     if (

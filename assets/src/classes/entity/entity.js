@@ -223,8 +223,7 @@ class Entity extends ShootableObject {
    * - Acts as Passive when no entity can be found.
    */
   _hostileAI() {
-    if (!this._generic_AttackerAI((ent) => !(ent instanceof DroppedItemStack)))
-      this._passiveAI();
+    if (!this._generic_AttackerAI((ent) => !ent.item)) this._passiveAI();
   }
 
   /**Scavenger AI
@@ -233,9 +232,7 @@ class Entity extends ShootableObject {
    * - Acts as Passive when no entity can be found.
    */
   _scavengerAI() {
-    if (
-      !this._generic_AttackerAI((ent) => ent instanceof DroppedItemStack, false)
-    )
+    if (!this._generic_AttackerAI((ent) => !!ent.item, false))
       this._hostileAI();
   }
 
@@ -248,7 +245,7 @@ class Entity extends ShootableObject {
     if (
       !this._generic_AttackerAI(
         (ent) =>
-          !(ent instanceof DroppedItemStack) &&
+          !ent.item &&
           ent.distanceToPoint(this.spawnX, this.spawnY) < this.targetRange
       )
     )
@@ -269,24 +266,15 @@ class Entity extends ShootableObject {
     );
     if (this.target) {
       if (shoots && this.distanceTo(this.target) < this.followRange)
-        if (this instanceof EquippedEntity) {
-          if (
-            this.rightHand.get(0) instanceof ItemStack &&
-            this.rightHand.get(0).getItem() instanceof Equippable
-          )
-            this.rightHand.get(0).getItem().use(this);
-          if (
-            this.leftHand.get(0) instanceof ItemStack &&
-            this.leftHand.get(0).getItem() instanceof Equippable
-          )
-            this.leftHand.get(0).getItem().use(this);
-        }
+        this.attack();
       return true;
     } else {
       this.target = tempTarget;
       return false;
     }
   }
+
+  attack() {}
 
   tickGroundEffects() {
     let blockIn = this.world.getBlock(

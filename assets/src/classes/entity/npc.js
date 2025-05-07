@@ -1,5 +1,6 @@
 import { EquippedEntity } from "./inventory-entity.js";
-import { tru } from "../../core/number.js";
+import { colinterp, roundNum, tru } from "../../core/number.js";
+import { game } from "../../play/game.js";
 /** Character that the player can interact with.
  * Technically enemies should be classed as NPCs too, but this class is used for specifically *friendly* NPCs which the player can talk to.
  * Can have trades
@@ -113,7 +114,7 @@ class NPC extends EquippedEntity {
     strokeWeight(1);
     stroke(0);
     fill(
-      ...blendColours([0, 255, 0], [255, 0, 0], (this.relation + 100) / 200)
+      ...colinterp([[0, 255, 0], [255, 255, 0], [255, 0, 0]], (this.relation + 100) / 200)
     );
     textAlign(CENTER);
     textSize(10);

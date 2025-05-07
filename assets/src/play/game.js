@@ -1,4 +1,4 @@
-import { Block } from "../classes/block/block.js";
+import { Block, BreakType, PlaceType } from "../classes/block/block.js";
 import { Container } from "../classes/block/container.js";
 import { Chunk } from "../classes/world/chunk.js";
 import { World } from "../classes/world/world.js";
@@ -12,7 +12,7 @@ import { Serialiser } from "../core/serialiser.js";
 import { effectTimer } from "./effects.js";
 import { respawnTimer } from "../classes/entity/player.js";
 import { WaveParticle } from "../classes/effect/wave-particle.js";
-import { rnd, roundNum } from "../core/number.js";
+import { clamp, rnd, roundNum } from "../core/number.js";
 import { PlaceableItem } from "../classes/item/placeable.js";
 import { ItemStack } from "../classes/item/item-stack.js";
 import { Equippable } from "../classes/item/equippable.js";
@@ -23,6 +23,7 @@ import {} from "../definitions/screens/title.js";
 //is integration time
 import {} from "../lib/int-setup.js";
 import { ExecutionContext, exec } from "../lib/isl.js";
+import { DroppedItemStack } from "../classes/item/dropped-itemstack.js";
 let histIndex = 0;
 const game = {
   saveslot: 1,

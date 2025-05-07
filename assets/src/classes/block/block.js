@@ -4,6 +4,8 @@ import { Chunk } from "../world/chunk.js";
 import { Direction } from "../../scaling.js";
 import { drawImg, ui } from "../../core/ui.js";
 import { createDestructionExplosion } from "../../play/effects.js";
+import { DroppedItemStack } from "../item/dropped-itemstack.js";
+import { ItemStack } from "../item/item-stack.js";
 /**
  * @typedef SerialisedBlock
  * @prop {int} x
@@ -125,19 +127,15 @@ class Block extends ShootableObject {
     return true;
   }
   highlight(emphasised = false) {
-    push();
-    noFill();
-    let othercol = (emphasised ? 50 : 200) + 55 * Math.sin(frameCount / 30);
-    stroke(emphasised ? 255 : othercol, othercol, othercol);
-    strokeWeight((emphasised ? 2 : 1) * ui.camera.zoom);
-    rectMode(CORNER);
-    rect(
-      this.uiX,
-      this.uiY,
-      Block.size * ui.camera.zoom,
-      Block.size * ui.camera.zoom
-    );
-    pop();
+    drawHighlight(emphasised, () => {
+      rectMode(CORNER);
+      rect(
+        this.uiX,
+        this.uiY,
+        Block.size * ui.camera.zoom,
+        Block.size * ui.camera.zoom
+      );
+    });
   }
 
   /**Tries to send power to this block. Returns the amount of power not sent due to overflow. */
@@ -250,5 +248,14 @@ function createLinkedBlockAndItem(
     )
   );
 }
+function drawHighlight(emphasised, drawfn) {
+  push();
+  noFill();
+  let othercol = (emphasised ? 50 : 200) + 55 * Math.sin(frameCount / 30);
+  stroke(emphasised ? 255 : othercol, othercol, othercol);
+  strokeWeight((emphasised ? 2 : 1) * ui.camera.zoom);
+  drawfn();
+  pop();
+}
 
-export { Block, BreakType, PlaceType, createLinkedBlockAndItem };
+export { Block, BreakType, PlaceType, createLinkedBlockAndItem, drawHighlight };

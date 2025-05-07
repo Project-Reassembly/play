@@ -1,6 +1,6 @@
 import { Registries } from "../core/registry.js";
 import { RegisteredItem } from "../core/registered-item.js";
-import { Component, LegComponent, WeaponComponent } from "../classes/entity/component.js";
+import { Component, LegComponent, WeaponComponent, WeaponisedComponent } from "../classes/entity/component.js";
 import { Entity } from "../classes/entity/entity.js";
 import { EquippedEntity, InventoryEntity } from "../classes/entity/inventory-entity.js";
 import { NPC } from "../classes/entity/npc.js";
@@ -35,17 +35,21 @@ import { CommandExecutorBlock, ItemCatalogBlock, StructureReaderBlock } from "..
 import { StatusEffect } from "../classes/effect/status-effect.js";
 import { ExplosionEffect, ImageParticleEmissionEffect, MultiEffect, NuclearExplosionEffect, ParticleEmissionEffect, TextParticleEmissionEffect, VisualEffect, WaveEmissionEffect } from "../play/effects.js";
 import { VirtualBullet } from "../classes/projectile/virtual-bullet.js";
+import { ModularTankEntity } from "../classes/entity/modular-tank.js";
+import { TankAssemblyBay } from "../classes/block/tonq/tank-assembly-bay.js";
 //Basic
 Registries.type.add("generic", RegisteredItem);
 //Entities and parts
 Registries.type.add("component", Component);
 Registries.type.add("leg-component", LegComponent);
 Registries.type.add("weapon-component", WeaponComponent);
+Registries.type.add("weaponised-component", WeaponisedComponent);
 Registries.type.add("entity", Entity);
 Registries.type.add("inventory-entity", InventoryEntity);
 Registries.type.add("equipped-entity", EquippedEntity);
 Registries.type.add("npc", NPC);
 Registries.type.add("player", Player);
+Registries.type.add("modular-tank", ModularTankEntity);
 //Projectiles
 Registries.type.add("bullet", Bullet);
 Registries.type.add("laser", LaserBullet);
@@ -91,6 +95,7 @@ Registries.type.add("unloader", Unloader);
 Registries.type.add("sign", SignBlock);
 Registries.type.add("bomb", Bomb);
 Registries.type.add("nuclear-bomb", NuclearBomb);
+Registries.type.add("tank-assembler", TankAssemblyBay);
 //Dev blocks
 Registries.type.add("dev::structurereader", StructureReaderBlock);
 Registries.type.add("dev::itemcatalog", ItemCatalogBlock);

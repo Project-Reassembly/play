@@ -4,7 +4,16 @@ import { Registries } from "../../core/registry.js";
 import { ExecutionContext } from "../../lib/isl.js";
 import { Inventory } from "../inventory.js";
 import { ItemStack } from "../item/item-stack.js";
-import { drawImg } from "../../core/ui.js";
+import { drawImg, rotatedShape } from "../../core/ui.js";
+import { ui } from "../../core/ui.js";
+import { drawMultilineText } from "../inventory.js";
+import { Item } from "../item/item.js";
+import { PlaceableItem } from "../item/placeable.js";
+import { Log } from "../../play/messaging.js";
+import { ShapeParticle } from "../effect/shape-particle.js";
+import { TextParticle } from "../effect/text-particle.js";
+import { Direction } from "../../scaling.js";
+import { ImageParticle } from "../effect/image-particle.js";
 class StructureReaderBlock extends Block {
   _range = 1;
   _output = [];
@@ -166,7 +175,7 @@ class StructureReaderBlock extends Block {
                 x: x,
                 y: y,
                 block: block.registryName,
-                direction: Block.dir.toEnum(block.direction),
+                direction: Direction.toEnum(block.direction),
               });
             else
               blocks.push({
@@ -254,7 +263,7 @@ class CommandExecutorBlock extends Block {
     islinterface.do(this._command, new ExecutionContext(ex, ey, this));
     //Activate next block
     if (this.chaining) {
-      let vct = Block.direction.vectorOf(this.direction);
+      let vct = Direction.vectorOf(this.direction);
       let nextblock = this.world.getBlock(
         this.gridX + vct.x,
         this.gridY + vct.y

@@ -5,6 +5,7 @@ import { drawImg, ui } from "../core/ui.js";
 import { fonts } from "../play/game.js";
 import { Item } from "./item/item.js";
 import { dynamicSort } from "../core/number.js";
+import { roundNum, shortenedNumber } from "../core/number.js";
 /**
  * @typedef SerialisedInventory
  * @prop {SerialisedItemStack[]} storage

@@ -341,4 +341,4 @@ class WeaponShootConfiguration {
     this.pattern = constructFromType(this.pattern, ShootPattern);
   }
 }
-export { Weapon };
+export { Weapon, WeaponShootConfiguration };

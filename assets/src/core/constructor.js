@@ -17,6 +17,7 @@ function constructFromRegistry(object, registry) {
 }
 
 function constructFromType(object, type) {
+  if (!object) return;
   //Constructs an instance using type from registry, if it exists. If not, the error will throw.
   let instantiated = new type();
   let cloned = {};
@@ -36,6 +37,7 @@ function constructFromType(object, type) {
  * Mutates the original object, and returns it.
  */
 function assign(target, source) {
+  if (!target || !source) return;
   for (let key of Object.getOwnPropertyNames(source)) {
     let value = source[key];
     let replace = target[key];

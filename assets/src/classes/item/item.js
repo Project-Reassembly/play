@@ -1,5 +1,6 @@
 import { RegisteredItem } from "../../core/registered-item.js";
-import { tru } from "../../core/number.js";
+import { tru, rnd } from "../../core/number.js";
+import { ShapeParticle } from "../effect/shape-particle.js";
 class Item extends RegisteredItem {
   image = "error";
   name = "<unnamed item>";

@@ -868,6 +868,20 @@ createLinkedBlockAndItem(
     description: "A small digital storage device for holding messages.",
   }
 );
+//## TONK ##
+createLinkedBlockAndItem(
+  "tank-assembly-bay",
+  "Tank Assembly Bay",
+  "block.message",
+  {
+    type: "tank-assembler",
+    range: 1,
+  },
+  {
+    description: "Assembles a tank out of blocks.\nThe blocks are real and can be destroyed and interacted with,\nbut may produce odd results.",
+    rarity: Item.rarity.SPECIAL
+  }
+)
 //## DEV ##
 createLinkedBlockAndItem(
   "dev::structurereader",

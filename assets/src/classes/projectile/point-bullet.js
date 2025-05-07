@@ -1,3 +1,6 @@
+import { Vector } from "../../core/number.js";
+import { ShapeParticle } from "../effect/shape-particle.js";
+import { WaveParticle } from "../effect/wave-particle.js";
 import { Bullet } from "./bullet.js";
 class PointBullet extends Bullet {
   lifetime = 1;
@@ -20,12 +23,7 @@ class PointBullet extends Bullet {
           let tx = this.entity.target.x,
             ty = this.entity.target.y;
           //Point towards it, like a weapon
-          this.direction = degrees(
-            p5.Vector.sub(
-              createVector(tx, ty), //Target pos 'B'
-              createVector(this.x, this.y) //This pos 'A'
-            ).heading() //'A->B' = 'B' - 'A'
-          );
+          this.direction = new Vector(tx, ty).subXY(this.x, this.y).angle;
           //Create line to it
           this.createTrailTo(tx, ty);
           //Teleport to it

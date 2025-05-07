@@ -171,11 +171,24 @@ class EquippedEntity extends InventoryEntity {
     return e;
   }
   static applyExtraProps(entity, created) {
+    super.applyExtraProps(entity, created);
     entity.equipment = Inventory.deserialise(created.equipment);
     entity.leftHand = Inventory.deserialise(created.leftHand);
     entity.rightHand = Inventory.deserialise(created.rightHand);
     entity.head = Inventory.deserialise(created.head);
     entity.body = Inventory.deserialise(created.body);
+  }
+  attack(){
+    if (
+      this.rightHand.get(0) instanceof ItemStack &&
+      this.rightHand.get(0).getItem() instanceof Equippable
+    )
+      this.rightHand.get(0).getItem().use(this);
+    if (
+      this.leftHand.get(0) instanceof ItemStack &&
+      this.leftHand.get(0).getItem() instanceof Equippable
+    )
+      this.leftHand.get(0).getItem().use(this);
   }
 }
 export { EquippedEntity, InventoryEntity };

@@ -1,4 +1,8 @@
 import { Block } from "./block.js";
+import { ui } from "../../core/ui.js";
+import { drawMultilineText } from "../inventory.js";
+import { Item } from "../item/item.js";
+import { Log } from "../../play/messaging.js";
 class SignBlock extends Block {
   _message = "";
   drawTooltip(x, y, outline, background) {
@@ -9,6 +13,9 @@ class SignBlock extends Block {
       null,
       Item.getColourFromRarity(0, "light")
     );
+  }
+  getMsg(){
+    return this._message;
   }
   highlight(emphasised) {
     super.highlight(emphasised),

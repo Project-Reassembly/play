@@ -1,3 +1,5 @@
+import { Vector } from "../../core/number.js";
+import { World } from "./world.js";
 /**Represents a set of virtual power connections between blocks. */
 class PowerNetwork {
   static debug = false;

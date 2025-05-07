@@ -1,6 +1,8 @@
+import { construct } from "../../core/constructor.js";
 import { RegisteredItem } from "../../core/registered-item.js";
 import { rotatedImg } from "../../core/ui.js";
 import { EquippedEntity } from "../entity/inventory-entity.js";
+import { Weapon } from "../item/weapon.js";
 //Part of an entity.
 class Component extends RegisteredItem {
   shape = "circle";
@@ -134,4 +136,26 @@ class WeaponComponent extends Component {
     }
   }
 }
-export { Component, LegComponent, WeaponComponent };
+
+class WeaponisedComponent extends WeaponComponent {
+  /**@type {Weapon} */
+  weapon = {};
+  _ticked = false;
+  init() {
+    this.weapon = construct(this.weapon, "weapon");
+    this.weapon.component = this;
+  }
+  tick(entity) {
+    super.tick(entity);
+    if (!this._ticked) {
+      this._ticked = true;
+      this.weapon.tick(entity);
+    }
+    this._ticked = false;
+  }
+  fire(entity) {
+    this.weapon.fire(entity, this.weapon.shoot);
+  }
+}
+
+export { Component, LegComponent, WeaponComponent, WeaponisedComponent };

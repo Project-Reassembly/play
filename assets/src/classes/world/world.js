@@ -10,6 +10,7 @@ import { EquippedEntity } from "../entity/inventory-entity.js";
 import { tru } from "../../core/number.js";
 import { worldSize } from "../../scaling.js";
 import { Explosion, NuclearExplosion } from "../../play/effects.js";
+import { PowerNetwork } from "./power-network.js";
 
 /**
  * @typedef SerialisedWorld
@@ -299,6 +300,15 @@ class World {
     } catch (error) {
       return null;
     }
+  }
+  blocksInSquare(x, y, size, layer = "blocks") {
+    let arr = [];
+    for (let i = -size; i <= size; i++) {
+      for (let j = -size; j <= size; j++) {
+        arr.push(this.getBlock(x + i, y + j, layer));
+      }
+    }
+    return arr;
   }
   /** Similar to `getBlock`, but will always return a block, or throw an error otherwise. */
   getBlockErroring(x, y, layer = "blocks") {

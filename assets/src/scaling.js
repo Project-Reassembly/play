@@ -1,3 +1,5 @@
+import { Vector } from "./core/number.js";
+
 const blockSize = 30;
 const chunkSize = 16;
 const worldSize = 16;
@@ -29,7 +31,7 @@ const Direction = {
     return Direction.UP;
   },
   vectorOf(direction) {
-    return { x: Math.cos(direction), y: Math.sin(direction) };
+    return Vector.fromAngleRad(direction);
   },
   /**@param {0|1|2|3} */
   fromEnum(en) {

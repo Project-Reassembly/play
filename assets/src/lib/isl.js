@@ -13,6 +13,7 @@ import { Log } from "../play/messaging.js";
 import { Explosion, NuclearExplosion } from "../play/effects.js";
 import { EquippedEntity } from "../classes/entity/inventory-entity.js";
 import { world } from "../play/game.js";
+import { construct } from "../core/constructor.js";
 //Util
 let quietMode = false;
 function feedback(msg) {

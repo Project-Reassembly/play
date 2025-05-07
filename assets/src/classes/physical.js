@@ -552,4 +552,7 @@ function createFlashingColourArray(basecol, lightness = 255) {
   let lcol = basecol.map((x) => clamp(x + lightness, 0, 255));
   return [basecol, lcol, basecol, lcol, basecol, lcol, basecol, lcol, basecol];
 }
+
+window.debug = () => (PhysicalObject.debug = !PhysicalObject.debug);
+
 export { ShootableObject, PhysicalObject };
