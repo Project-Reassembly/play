@@ -6,6 +6,7 @@ import { construct } from "../../core/constructor.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
 import { Fire } from "../effect/fire.js";
 class Bullet extends PhysicalObject {
+  extraUpdates = 0;
   direction = 0;
   damage = [];
   speed = 20;
@@ -84,6 +85,9 @@ class Bullet extends PhysicalObject {
   }
   ondestroyed() {
     this.emit(this.despawnEffect);
+  }
+  tick() {
+    repeat(this.extraUpdates + 1, () => this.step(1));
   }
   step(dt) {
     this.spawnTrail(dt);

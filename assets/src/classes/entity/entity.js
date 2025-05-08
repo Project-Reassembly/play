@@ -310,7 +310,7 @@ class Entity extends ShootableObject {
     noFill();
     stroke(this.target instanceof ShootableObject ? [255, 0, 0] : [0, 255, 0]);
     strokeWeight(4);
-    square(this.target.x, this.target.y, this.size);
+    if(this.target) square(this.target.x, this.target.y, this.size);
     line(this.x, this.y, this.target.x, this.target.y);
     if (this.aiType === "hostile" || this.aiType === "guard") {
       stroke(

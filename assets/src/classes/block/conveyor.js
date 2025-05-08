@@ -1,9 +1,12 @@
 import { Container } from "./container.js";
-import { drawImg, rotatedImg } from "../../core/ui.js";
+import { drawImg, rotatedImg, ui } from "../../core/ui.js";
 import { blockSize, Direction } from "../../scaling.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { ShootableObject } from "../physical.js";
 import { roundNum } from "../../core/number.js";
+import { Log } from "../../play/messaging.js";
+import { ItemStack } from "../item/item-stack.js";
+import { Registries } from "../../core/registry.js";
 class Conveyor extends Container {
   moveTime = 10;
   _progress = 0;
@@ -91,8 +94,11 @@ class Conveyor extends Container {
    * @param {Entity} entity
    */
   steppedOnBy(entity) {
-    if (entity instanceof DroppedItemStack) {
-      this.inventory.set(0, entity.item);
+    if (
+      entity instanceof DroppedItemStack &&
+      this.inventory.canAddItem(entity.item.item, entity.item.count)
+    ) {
+      this.inventory.addItem(entity.item.item, entity.item.count);
       entity.dead = true;
     }
     let vct = Direction.vectorOf(this.direction);
@@ -146,7 +152,7 @@ class Unloader extends Conveyor {
   highlight(emphasised) {
     super.highlight(emphasised);
     if (this.filter && this.filter !== "nothing") {
-      let img = Registry.items.get(this.filter).image;
+      let img = Registries.items.get(this.filter).image;
       drawImg(
         img ?? "error",
         this.uiX + 9,
@@ -166,6 +172,7 @@ class Unloader extends Conveyor {
    * @param {object} creator
    */
   static applyExtraProps(deserialised, creator) {
+    super.applyExtraProps(deserialised, creator);
     deserialised.filter = creator.filter;
   }
   read() {

@@ -1,6 +1,6 @@
 import { Registries } from "../core/registry.js";
 import { RegisteredItem } from "../core/registered-item.js";
-import { Component, LegComponent, WeaponComponent, WeaponisedComponent } from "../classes/entity/component.js";
+import { Component, DestructibleComponent, LegComponent, WeaponComponent, WeaponisedComponent } from "../classes/entity/component.js";
 import { Entity } from "../classes/entity/entity.js";
 import { EquippedEntity, InventoryEntity } from "../classes/entity/inventory-entity.js";
 import { NPC } from "../classes/entity/npc.js";
@@ -44,6 +44,7 @@ Registries.type.add("component", Component);
 Registries.type.add("leg-component", LegComponent);
 Registries.type.add("weapon-component", WeaponComponent);
 Registries.type.add("weaponised-component", WeaponisedComponent);
+Registries.type.add("destructible-component", DestructibleComponent);
 Registries.type.add("entity", Entity);
 Registries.type.add("inventory-entity", InventoryEntity);
 Registries.type.add("equipped-entity", EquippedEntity);

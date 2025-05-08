@@ -130,6 +130,7 @@ createUIComponent(["in-game"], [], -295, 0, 80, 50, "both", () => {
 }).anchorBottom();
 
 let selectedDirection = Block.direction.UP;
+export { selectedDirection };
 Object.defineProperties(
   createUIImageComponent(
     ["in-game"],

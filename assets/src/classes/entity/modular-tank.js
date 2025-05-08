@@ -4,6 +4,7 @@ import { Log } from "../../play/messaging.js";
 import { blockSize } from "../../scaling.js";
 import { Block } from "../block/block.js";
 import { Container } from "../block/container.js";
+import { Conveyor } from "../block/conveyor.js";
 import { SignBlock } from "../block/decoration.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
 import { Weapon } from "../item/weapon.js";
@@ -28,7 +29,7 @@ class ModularTankEntity extends InventoryEntity {
             element.x + blockSize / 2,
             element.y + blockSize / 2,
             0,
-            300,
+            60,
             0,
             0,
             "square",
@@ -46,6 +47,7 @@ class ModularTankEntity extends InventoryEntity {
         );
     });
     let ent = new ModularTankEntity();
+    //Visuals
     blocks.forEach((block) => {
       if (block) {
         world.break(block.gridX, block.gridY);
@@ -64,24 +66,23 @@ class ModularTankEntity extends InventoryEntity {
       }
     });
     ent.inventory = [];
+    ent.name = "Tank";
+    //Capabilities
     blocks.forEach((block) => {
       if (block instanceof Container) {
         ent.inventorySize += block.inventorySize;
         block.inventory.iterate((stack) => {
           if (stack.getItem() instanceof Weapon) {
             let itemwep = Registries.items.get(stack.item);
-            let weapon = itemwep.component;
-            weapon.xOffset ??= 0;
-            weapon.yOffset ??= 0;
-            weapon.xOffset += (block.gridX - centreX) * blockSize;
-            weapon.yOffset += (block.gridY - centreY) * blockSize;
+            let weapon = structuredClone(itemwep.component);
+            weapon.xOffset = (block.gridX - centreX) * blockSize;
+            weapon.yOffset = (block.gridY - centreY) * blockSize;
             weapon.type = "weaponised-component";
             weapon.weapon = itemwep;
-            console.log(weapon);
-            Log.send("Tank equipped item: " + stack.toString(true));
+            ent.followRange = Math.max(ent.followRange, itemwep.range ?? 0)
+            ent.targetRange = Math.max(ent.targetRange, itemwep.range ?? 0)
             ent.components.push(weapon);
           } else {
-            Log.send("Tank inherited item: " + stack.toString(true));
             ent.inventory.push({
               item: stack.item,
               count: stack.count,
@@ -90,19 +91,17 @@ class ModularTankEntity extends InventoryEntity {
           }
         }, true);
       }
-      if(block instanceof SignBlock) ent.name = block.getMsg();
+      if (block instanceof Conveyor) ent.speed += 20 / block.moveTime;
+      if (block instanceof SignBlock) ent.name = block.getMsg();
     });
-    ent.name = "Tank";
     ent.aiType = "hostile";
     ent.addToWorld(
       world,
       centreX * blockSize + blockSize / 2,
       centreY * blockSize + blockSize / 2
     );
-    ent.speed = 10 / ent.components.length;
+    ent.speed /= ent.components.length;
     ent.init();
-    console.log(blocks);
-    console.log(ent);
     return ent;
   }
   tick() {

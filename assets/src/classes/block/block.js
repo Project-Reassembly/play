@@ -46,6 +46,9 @@ class Block extends ShootableObject {
   get chunk() {
     return this._chunk;
   }
+  get directionRad() {
+    return this.direction;
+  }
   tileSize = 1;
   init() {
     super.init();

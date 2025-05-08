@@ -9,6 +9,8 @@ import { assign } from "../core/constructor.js";
 import { Vector, rnd, tru } from "../core/number.js";
 import { ExecutorParticle } from "../classes/effect/extra-particles.js";
 import { world, effects } from "../play/game.js";
+import { TextParticle } from "../classes/effect/text-particle.js";
+import { PhysicalObject } from "../classes/physical.js";
 const effectTimer = new Timer();
 class Explosion {
   x = 0;
@@ -528,8 +530,10 @@ class ParticleEmissionEffect extends EmissionEffect {
           x,
           y,
           direction +
-            (this.particle.direction ?? 0) +
-            radians(rnd(-(this.cone ?? 360) / 2, (this.cone ?? 360) / 2)),
+            radians(
+              (this.particle.direction ?? 0) +
+                rnd(-(this.cone ?? 360) / 2, (this.cone ?? 360) / 2)
+            ),
           this.particle.lifetime ?? 60,
           this.particle.speed ?? 1,
           this.particle.decel ?? 0.015,
@@ -542,7 +546,7 @@ class ParticleEmissionEffect extends EmissionEffect {
           this.particle.widthTo ?? 30,
           this.particle.heightFrom ?? 20,
           this.particle.heightTo ?? 30,
-          this.particle.rotateSpeed ?? 0,
+          radians(this.particle.rotateSpeed ?? 0),
           this.particle.light ?? 0
         )
       )
@@ -558,12 +562,12 @@ class ImageParticleEmissionEffect extends ParticleEmissionEffect {
           x,
           y,
           direction +
-            (this.particle.direction ?? 0) +
             radians(
-              rnd(
-                -(this.particle.cone ?? 360) / 2,
-                (this.particle.cone ?? 360) / 2
-              )
+              (this.particle.direction ?? 0) +
+                rnd(
+                  -(this.particle.cone ?? 360) / 2,
+                  (this.particle.cone ?? 360) / 2
+                )
             ),
           this.particle.lifetime ?? 60,
           this.particle.speed ?? 1,
@@ -575,7 +579,7 @@ class ImageParticleEmissionEffect extends ParticleEmissionEffect {
           this.particle.widthTo ?? 30,
           this.particle.heightFrom ?? 20,
           this.particle.heightTo ?? 30,
-          this.particle.rotateSpeed ?? 0
+          radians(this.particle.rotateSpeed ?? 0)
         )
       )
     );
@@ -590,12 +594,12 @@ class TextParticleEmissionEffect extends ParticleEmissionEffect {
           x,
           y,
           direction +
-            (this.particle.direction ?? 0) +
             radians(
-              rnd(
-                -(this.particle.cone ?? 360) / 2,
-                (this.particle.cone ?? 360) / 2
-              )
+              (this.particle.direction ?? 0) +
+                rnd(
+                  -(this.particle.cone ?? 360) / 2,
+                  (this.particle.cone ?? 360) / 2
+                )
             ),
           this.particle.lifetime ?? 60,
           this.particle.speed ?? 1,
@@ -607,7 +611,7 @@ class TextParticleEmissionEffect extends ParticleEmissionEffect {
           ],
           this.particle.sizeFrom ?? 20,
           this.particle.sizeTo ?? 30,
-          this.particle.rotateSpeed ?? 0,
+          radians(this.particle.rotateSpeed ?? 0),
           this.particle.useOCR ?? true
         )
       )
@@ -925,7 +929,6 @@ function autoScaledEffect(effect, world, x, y, direction, pos) {
   );
 }
 
-
 /**
  * Helper function for effects created from a source `PhysicalObject` such as bullet trails, or block smoke effects.\
  * Uses an angle in *degrees*.
@@ -941,7 +944,7 @@ function emitEffect(effect, source, offX = 0, offY = 0) {
       source.world,
       source.x + offX,
       source.y + offY,
-      radians(source.direction),
+      source.directionRad,
       () => ({ x: source.x, y: source.y, direction: source.directionRad })
     );
   else
@@ -950,7 +953,7 @@ function emitEffect(effect, source, offX = 0, offY = 0) {
       source.world,
       source.x + offX,
       source.y + offY,
-      radians(source.direction),
+      source.directionRad,
       effect.scale,
       () => ({ x: source.x, y: source.y, direction: source.directionRad })
     );
@@ -975,5 +978,5 @@ export {
   TextParticleEmissionEffect,
   WaveEmissionEffect,
   autoScaledEffect,
-  repeat
+  repeat,
 };

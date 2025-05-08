@@ -69,7 +69,7 @@ class World {
     //Tick *everything*
     this.physobjs.forEach((p) => p.tick());
     this.floorParticles.forEach((p) => p.step(1));
-    this.bullets.forEach((b) => b.step(1));
+    this.bullets.forEach((b) => b.tick());
     this.particles.forEach((p) => p.step(1));
     this.entities.forEach((entity) => {
       entity.tick();

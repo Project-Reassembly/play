@@ -2,6 +2,7 @@ import { Item } from "./item.js";
 import { construct } from "../../core/constructor.js";
 import { Registries } from "../../core/registry.js";
 import { world, game } from "../../play/game.js";
+import { selectedDirection } from "../../definitions/screens/in-game.js";
 class PlaceableItem extends Item {
   layer = "blocks";
   block = "none";

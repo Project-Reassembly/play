@@ -2,6 +2,7 @@ import { RegisteredItem } from "../../core/registered-item.js";
 import { Item } from "./item.js";
 import { construct } from "../../core/constructor.js";
 import { Registries } from "../../core/registry.js";
+import { roundNum, rnd } from "../../core/number.js";
 /**
  * @typedef SerialisedItemStack
  * @prop {string} item

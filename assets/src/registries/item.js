@@ -132,6 +132,7 @@ Registries.items.add("scrap-shooter", {
   description: "Shoots low-damage bullets quickly.\nSlightly inaccurate.",
   image: "weapon.scrap-shooter.item",
   ammoType: "scrap-bullet",
+  range: 225,
   shoot: {
     reload: 10,
     bullet: {
@@ -180,6 +181,7 @@ Registries.items.add("iti-laser-caster", {
     "Fires fast-moving incendiary bolts of explosive plasma.\nBolts deal secondary damage, with homing fragmentation.",
   image: "weapon.iti-laser-caster.item",
   ammoType: "none",
+  range: 400,
   shoot: {
     charge: 60,
     reload: 180,
@@ -285,6 +287,7 @@ Registries.items.add("iti-energy-repeater", {
     "Shoots quickfire bursts of laser bolts.\nAlt-fire to charge a larger explosive bolt.",
   image: "weapon.iti-energy-repeater.item",
   ammoType: "none",
+  range: 300,
   shoot: {
     chargeEffect: "energy-repeater-charge",
     effect: "laser-caster-frag",
@@ -396,6 +399,7 @@ Registries.items.add("construction-gun", {
   description:
     "Fires blocks to place them and deal damage.\nAlt-fire to select ammo type, Main to launch.\nVolatile blocks will explode if unplaceable.\n\nTip: Use shift to avoid deconstructing blocks.",
   image: "weapon.scrap-shooter.item",
+  range: -1,
   shoot: {
     reload: 20,
     bullet: {
@@ -435,10 +439,11 @@ Registries.items.add("construction-gun", {
 Registries.items.add("scrap-cannon", {
   type: "weapon",
   name: "Scrap Cannon",
-  description: "Hurls 3 large clumps of scrap, which break apart\nin the air and on impact.",
+  description:
+    "Hurls 3 large clumps of scrap, which break apart\nin the air and on impact.",
   image: "weapon.scrap-shooter.item",
   ammoType: "scrap",
-  ammoUse: 3,
+  range: 200,
   shoot: {
     effect: "explosion~10",
     reload: 90,
@@ -463,7 +468,7 @@ Registries.items.add("scrap-cannon", {
           type: "ballistic",
           amount: 30,
           spread: 7.5,
-          radius: 20
+          radius: 20,
         },
       ],
       despawnEffect: "explosion~20",
@@ -479,7 +484,7 @@ Registries.items.add("scrap-cannon", {
         trailColours: [[80, 62, 55, 100]],
         damage: [
           {
-            amount: 12,
+            amount: 6,
             type: "ballistic",
             spread: 3,
           },
@@ -503,9 +508,9 @@ Registries.items.add("scrap-cannon", {
         trailColours: [[80, 62, 55, 100]],
         damage: [
           {
-            amount: 15,
+            amount: 8,
             type: "ballistic",
-            spread: 4
+            spread: 4,
           },
         ],
         drawer: {
@@ -520,7 +525,7 @@ Registries.items.add("scrap-cannon", {
     pattern: {
       spacing: 10,
       spread: 5,
-      amount: 3
+      amount: 3,
     },
   },
   component: {
@@ -531,6 +536,91 @@ Registries.items.add("scrap-cannon", {
     image: "weapon.scrap-shooter.component",
     recoil: 6,
     rotationalRecoil: 12,
+    recoilSpeed: 0.2,
+  },
+});
+
+Registries.items.add("tank-gun", {
+  type: "weapon",
+  name: "240mm Artillery Emplacement Gun",
+  description: "Pretty sure this goes on a tank.",
+  image: "weapon.tank-gun.item",
+  ammoType: "scrap",
+  ammoUse: 4,
+  shootX: 30,
+  range: 720,
+  shoot: {
+    effect: "tonk-shoot",
+    reload: 180,
+    bullet: {
+      lifetime: 72,
+      speed: 10,
+      extraUpdates: 2,
+      decel: 0.1,
+      light: 30,
+      trail: true,
+      hitSize: 10,
+      trailLife: 45,
+      trailShape: "rhombus",
+      trailWidth: 10,
+      drawer: {
+        shape: "rhombus",
+        fill: "#cd9f8b",
+        width: 28,
+        height: 12,
+        image: false,
+      },
+      trailColours: [
+        [255, 200, 75, 100],
+        [200, 200, 200, 50],
+        [80, 62, 55, 50],
+      ],
+      damage: [
+        {
+          type: "ballistic",
+          amount: 240,
+          spread: 90,
+          radius: 30,
+        },
+      ],
+      despawnEffect: "explosion~30",
+      fragSpacing: 4,
+      fragNumber: 9,
+      fragSpread: 1,
+      fragBullet: {
+        speed: 15,
+        decel: 0.2,
+        lifetime: 12,
+        hitSize: 2.5,
+        pierce: 1,
+        trailColours: [[80, 62, 55, 100]],
+        damage: [
+          {
+            amount: 20,
+            type: "ballistic",
+            spread: 7,
+          },
+        ],
+        drawer: {
+          shape: "rhombus",
+          fill: "#cd9f8b",
+          width: 8,
+          height: 4,
+          image: false,
+        },
+      },
+    },
+    pattern: {
+      spread: 2,
+    },
+  },
+  component: {
+    type: "weapon-component",
+    width: 102,
+    height: 32,
+    yOffset: 0,
+    image: "weapon.tank-gun.component",
+    recoil: 18,
     recoilSpeed: 0.2,
   },
 });

@@ -88,7 +88,7 @@ class Vector {
   }
   /** The length of the hypotenuse of the triangle formed by this vector's X- and Y-values as lengths. */
   get magnitude() {
-    return (x ** 2 + y ** 2) ** 0.5;
+    return (this.x ** 2 + this.y ** 2) ** 0.5;
   }
   /**
    * Adds 2 vectors.

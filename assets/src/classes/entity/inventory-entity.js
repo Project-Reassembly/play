@@ -3,6 +3,7 @@ import { tru } from "../../core/number.js";
 import { Inventory } from "../inventory.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { Equippable } from "../item/equippable.js";
+import { ItemStack } from "../item/item-stack.js";
 import { PhysicalObject } from "../physical.js";
 import { Component } from "./component.js";
 import { Entity } from "./entity.js";
@@ -10,6 +11,7 @@ class InventoryEntity extends Entity {
   /**@type {Inventory} */
   inventory = null;
   inventorySize = 30;
+  dropChance = 1;
   init() {
     super.init();
     this.inventory = new Inventory(this.inventorySize, this.inventory);

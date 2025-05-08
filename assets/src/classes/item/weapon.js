@@ -20,6 +20,8 @@ class Weapon extends Equippable {
   hasAltFire = false;
   altShoot = null;
 
+  range = 180;
+
   //Internal
   #delay = 0;
   #cooldown = 0;
