@@ -848,7 +848,7 @@ Registries.items.add("construction-gun", {
   name: "Construction Gun",
   description:
     "Fires blocks to place them and deal damage.\nAlt-fire to select ammo type, Main to launch.\nVolatile blocks will explode if unplaceable.\n\nTip: Use shift to avoid deconstructing blocks.",
-  image: "weapon.scrap-shooter.item",
+  image: "weapon.construction-gun.item",
   range: -1,
   base: {
     speed: 15,
@@ -877,9 +877,9 @@ Registries.items.add("construction-gun", {
   component: {
     type: "weapon-component",
     width: 32,
-    height: 11,
-    yOffset: 13,
-    image: "weapon.scrap-shooter.component",
+    height: 19,
+    yOffset: 17,
+    image: "weapon.construction-gun.component",
     recoil: 4,
     rotationalRecoil: 4,
     recoilSpeed: 0.2,
