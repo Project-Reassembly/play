@@ -85,13 +85,15 @@ Registries.entities.add("scavenger", {
     yOffset: 13,
     image: "generic.scrap-arm.component",
   },
-  inventory: [
+  equipment: [
     {
       item: "scrap-bullet",
       min: 100,
       max: 250,
       dropChance: 0.5,
     },
+  ],
+  inventory: [
     {
       item: "scrap",
       min: 10,
@@ -140,13 +142,15 @@ Registries.entities.add("scrap-sentinel", {
       dropChance: 0.25,
     },
   ],
-  inventory: [
+  equipment: [
     {
       item: "scrap-bullet",
       min: 200,
       max: 500,
       dropChance: 0.5,
     },
+  ],
+  inventory: [
     {
       item: "scrap",
       min: 20,
@@ -215,4 +219,12 @@ Registries.entities.add("iti-corporate-merchant", {
       dropChance: 0.125,
     },
   ],
+  equipment: [
+    {
+      item: "iti-energy-cell",
+      dropChance: 0.2,
+      min: 5,
+      max: 20
+    }
+  ]
 });

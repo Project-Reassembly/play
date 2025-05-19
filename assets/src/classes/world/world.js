@@ -184,25 +184,30 @@ class World {
   drawAll() {
     this.toRender.forEach((chunk) => chunk.drawFloorsOnly());
     for (let particle of this.floorParticles) {
-      if (!World.isInRenderDistance(particle)) continue;
+      if (!World.isInRenderDistance(particle, 1, 0, 0, 0, ui.camera.zoom))
+        continue;
       particle.draw();
     }
     this.toRender.forEach((chunk) => chunk.drawBlocksOnly());
     this.toRender.forEach((chunk) => chunk.postDrawBlocksOnly());
     for (let entity of this.entities) {
-      if (!World.isInRenderDistance(entity)) continue;
+      if (!World.isInRenderDistance(entity, 1, 0, 0, 0, ui.camera.zoom))
+        continue;
       entity.draw();
     }
     for (let entity of this.entities) {
-      if (!World.isInRenderDistance(entity)) continue;
+      if (!World.isInRenderDistance(entity, 1, 0, 0, 0, ui.camera.zoom))
+        continue;
       entity.postDraw();
     }
     for (let bullet of this.bullets) {
-      if (!World.isInRenderDistance(bullet)) continue;
+      if (!World.isInRenderDistance(bullet, 1, 0, 0, 0, ui.camera.zoom))
+        continue;
       bullet.draw();
     }
     for (let particle of this.particles) {
-      if (!World.isInRenderDistance(particle)) continue;
+      if (!World.isInRenderDistance(particle, 1, 0, 0, 0, ui.camera.zoom))
+        continue;
       particle.draw();
     }
   }

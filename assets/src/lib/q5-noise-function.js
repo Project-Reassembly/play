@@ -16,7 +16,7 @@ function setNoiseParams(scale = 1, octaves = 4, falloff = 0.5) {
 }
 
 const noiseSeed = function (seed) {
-  let iseed = seed == undefined ? Math.random() * 4294967295 : seed;
+  let iseed = (seed == undefined || isNaN(seed)) ? Math.random() * 4294967295 : seed;
   let jsr = iseed;
   if (!p_perlin) {
     p_perlin = new Float32Array(PERLIN_SIZE + 1);
@@ -118,4 +118,4 @@ const Shr3 = function () {
 };
 let rng1 = Shr3();
 rng1.setSeed();
-export { setNoiseParams, noise, noiseSeed };
+export { setNoiseParams, noise, noiseSeed, rng1};

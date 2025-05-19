@@ -1,7 +1,7 @@
 import { Block } from "./block.js";
 import { Container } from "./container.js";
 import { Registries } from "../../core/registry.js";
-import { ExecutionContext } from "../../lib/isl.js";
+import { commandLine, exec, ExecutionContext } from "../../lib/isl.js";
 import { Inventory } from "../inventory.js";
 import { ItemStack } from "../item/item-stack.js";
 import { drawImg, rotatedShape } from "../../core/ui.js";
@@ -101,7 +101,7 @@ class StructureReaderBlock extends Block {
     opacity(0.66);
     if (this._becomes)
       drawImg(
-        Registry.blocks.get(this._becomes).image,
+        Registries.blocks.get(this._becomes).image,
         this.x,
         this.y,
         Block.size,
@@ -260,7 +260,7 @@ class CommandExecutorBlock extends Block {
         0
       )
     );
-    islinterface.do(this._command, new ExecutionContext(ex, ey, this));
+    exec(this._command, new ExecutionContext(ex, ey, this));
     //Activate next block
     if (this.chaining) {
       let vct = Direction.vectorOf(this.direction);

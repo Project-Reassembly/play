@@ -5,6 +5,8 @@ import { blockSize } from "../../../scaling.js";
 import { construct } from "../../../core/constructor.js";
 import { Registries } from "../../../core/registry.js";
 import { drawMultilineText } from "../../inventory.js";
+import { Log } from "../../../play/messaging.js";
+import { Item } from "../../item/item.js";
 class TileProducer extends Container {
   results = {};
   amount = 0;
@@ -31,7 +33,7 @@ class TileProducer extends Container {
     )?.registryName;
     this._blockOn = !floor || floor === "null" ? tile : floor;
     if (!this._blockOn) {
-      Log.send("Drill is on air!");
+      Log.send("Tile-dependent block is on air!", [255, 100, 100]);
       this.chunk.removeBlock(this.blockX, this.blockY, "blocks");
     }
     if (this._blockOn in this.results) {

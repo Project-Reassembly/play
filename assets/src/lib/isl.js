@@ -173,7 +173,17 @@ cle.addKeyword(
     { name: "y", type: positionType, optional: true },
   ]
 );
-
+cle.addKeyword(
+  "team",
+  (interp, labels, target, team) => {
+    target.value.team = team.value;
+    feedback("Set the team of " + target.value.name + " to " + team.value);
+  },
+  [
+    { name: "target", type: "entity" },
+    { name: "team", type: "string" },
+  ]
+);
 cle.addKeyword(
   "devset",
   (interp, labels) => {
@@ -184,10 +194,10 @@ cle.addKeyword(
       );
     else {
       give(ctx.self, "dev::itemcatalog", 1);
-      give(ctx.self, "dev::commandblock", 99);
-      give(ctx.self, "dev::commandblock.chain", 99);
-      give(ctx.self, "dev::commandblock.loop", 99);
-      give(ctx.self, "dev::structurereader", 99);
+      give(ctx.self, "dev::commandblock", 100);
+      give(ctx.self, "dev::commandblock.chain", 100);
+      give(ctx.self, "dev::commandblock.loop", 100);
+      give(ctx.self, "dev::structurereader", 100);
     }
   },
   []
@@ -378,6 +388,7 @@ cle.addKeyword(
         s(" give");
         s(" spawn");
         s(" teleport");
+        s(" team");
         s(" explode");
         s(" devset");
         b("manipulation");
@@ -407,6 +418,12 @@ cle.addKeyword(
         b("Parameters:");
         s(" entity: Registry name of entity to spawn.");
         s(" (x, y): Position from top-left corner. 1 block = 30px.");
+      } else if (command === "team") {
+        b("utility > team");
+        s(" Changes an entity's team.");
+        b("Parameters:");
+        s(" entity: Registry name of entity to spawn.");
+        s(" team: String name of the target team.");
       } else if (command === "teleport") {
         b("utility > teleport");
         s(" Moves an entity to a location.");

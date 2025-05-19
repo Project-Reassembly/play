@@ -1,5 +1,7 @@
 import { autoScaledEffect } from "../../../play/effects.js";
 import { Crafter } from "./crafter.js";
+import { tru } from "../../../core/number.js";
+import { Block } from "../block.js";
 /**Extended Crafter which uses fuel items. */
 class Smelter extends Crafter {
   activeTickEffect = "smelter-sparks";

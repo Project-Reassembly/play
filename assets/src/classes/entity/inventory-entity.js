@@ -36,7 +36,8 @@ class InventoryEntity extends Entity {
 }
 
 class EquippedEntity extends InventoryEntity {
-  equipment = new Inventory(5);
+  /**@type {Inventory} */
+  equipment = null;
   /**@type {Inventory} */
   head = null;
   /**@type {Inventory} */
@@ -88,6 +89,7 @@ class EquippedEntity extends InventoryEntity {
     this.leftHand = new Inventory(1, this.leftHand);
     this.body = new Inventory(1, this.body);
     this.head = new Inventory(1, this.head);
+    this.equipment = new Inventory(5, this.equipment);
     this.armType = construct(this.armType, "component");
   }
 

@@ -6,7 +6,7 @@ class Item extends RegisteredItem {
   name = "<unnamed item>";
   description = "<no description>";
   rarity = 0;
-  stackSize = 99;
+  stackSize = 100;
 
   _cachedTooltip = null;
   init() {}

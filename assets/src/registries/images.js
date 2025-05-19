@@ -49,6 +49,9 @@ Registries.images.add("item.sandstone", new ImageContainer("assets/textures/item
 Registries.images.add("item.coal", new ImageContainer("assets/textures/item/coal.png"))
 //Items > Ammo
 Registries.images.add("item.scrap-bullet", new ImageContainer("assets/textures/item/scrap-bullet.png"))
+Registries.images.add("item.iti-energy-cell", new ImageContainer("assets/textures/item/iti-energy-cell.png"))
+Registries.images.add("item.iti-plasma-cell", new ImageContainer("assets/textures/item/iti-plasma-cell.png"))
+Registries.images.add("item.iti-destabilised-cell", new ImageContainer("assets/textures/item/iti-destabilised-cell.png"))
 //Items > Weapons
 Registries.images.add("weapon.scrap-shooter.item", new ImageContainer("assets/textures/item/scrap-shooter.png"))
 Registries.images.add("weapon.tank-gun.item", new ImageContainer("assets/textures/item/tank-gun.png"))

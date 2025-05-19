@@ -1,4 +1,5 @@
-import { fonts } from "./game.js";
+import { fonts } from "./font.js";
+
 class InGameMessageBox {
   x = 0;
   y = -100;

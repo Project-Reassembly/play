@@ -1,4 +1,14 @@
 import { RegisteredItem } from "../../core/registered-item.js";
+import { construct, constructFromRegistry } from "../../core/constructor.js";
+import { Integrate } from "../../lib/integrate.js";
+import { blockSize, chunkSize, worldSize } from "../../scaling.js";
+import {
+  noise,
+  noiseSeed,
+  setNoiseParams,
+  rng1,
+} from "../../lib/q5-noise-function.js";
+import { roundNum, tru, rnd } from "../../core/number.js";
 /*
 || LIST OF WORLDGEN MESSAGE TYPES
 || "genstage", "progress-stage", "finish": Don't use, internal.
@@ -35,7 +45,7 @@ class NoiseGenerator extends Generator {
   falloff = 0.5;
   generate(seed) {
     //Create grid
-    let maxProgress = World.size ** 2;
+    let maxProgress = worldSize ** 2;
     let progress = 0;
     let newChunk;
     doNoise(
@@ -66,7 +76,10 @@ class TileGenerator extends NoiseGenerator {
   /**@type {TileGenerationOptions[]} */
   tiles = [];
   init() {
-    this.tiles = this.tiles.map((x) => construct(x, "tile-gen-options"));
+    this.tiles = this.tiles.map((x) => {
+      x.type ??= "tile-gen-options";
+      return constructFromRegistry(x, wtype);
+    });
   }
   forEachPosition(level, x, y, constructing) {
     for (let optionsobj of this.tiles) {
@@ -96,8 +109,8 @@ class BlockGenerator extends Generator {
   generate(seed) {
     rng1.setSeed(seed);
     for (let i = 0; i < this.attempts; i++) {
-      let x = Math.floor(rng1.rand() * World.size * Chunk.size);
-      let y = Math.floor(rng1.rand() * World.size * Chunk.size);
+      let x = Math.floor(rng1.rand() * worldSize * chunkSize);
+      let y = Math.floor(rng1.rand() * worldSize * chunkSize);
       if (rng1.rand() < this.chance) this.forEachPosition(x, y);
       postMessage({ type: "progress", progress: i / this.attempts });
     }
@@ -143,15 +156,18 @@ class OreGenerator extends Generator {
   /** Multiplier for the world seed. */
   seedManipulator = 1.5;
   init() {
-    this.ores = this.ores.map((x) => construct(x, "ore-gen-options"));
+    this.ores = this.ores.map((x) => {
+      x.type ??= "ore-gen-options";
+      return constructFromRegistry(x, wtype);
+    });
   }
   generate(seed) {
-    let maxProgress = World.size ** 2 * this.ores.length;
+    let maxProgress = worldSize ** 2 * this.ores.length;
     let progress = 0;
     for (let o = 0; o < this.ores.length; o++) {
       let ore = this.ores[o];
       doNoise(
-        seed * this.seedManipulator * (o + 1),
+        (seed) * this.seedManipulator * (o + 1),
         100,
         ore.scale,
         ore.octaves,
@@ -165,8 +181,8 @@ class OreGenerator extends Generator {
             if (level > ore.threshold) {
               postMessage({
                 type: "place",
-                x: x + i * Chunk.size,
-                y: y + j * Chunk.size,
+                x: x + i * chunkSize,
+                y: y + j * chunkSize,
                 layer: "floor",
                 block: ore.tile,
                 target: ore.target,
@@ -200,6 +216,12 @@ class OreGenerationOptions extends GenerationOptions {
   target = null;
 }
 
+let wtype = new Integrate.Registry();
+
+wtype.add("gen-options", GenerationOptions);
+wtype.add("tile-gen-options", TileGenerationOptions);
+wtype.add("ore-gen-options", OreGenerationOptions);
+
 /**
  * Does stuff with a 2D Perlin noise function.
  * @param {int} seed Noise seed.
@@ -218,31 +240,31 @@ function doNoise(
   funcs
 ) {
   noiseSeed(seed);
-  perlin_octaves = octaves;
-  perlin_amp_falloff = falloff;
+  setNoiseParams(1, octaves, falloff);
   //Create grid
   //Procedural ground gen
   scale *= 0.001;
-  for (let i = 0; i < World.size; i++) {
+  for (let i = 0; i < worldSize; i++) {
     //Chunk coords
-    for (let j = 0; j < World.size; j++) {
+    for (let j = 0; j < worldSize; j++) {
       if (funcs.prechunk) funcs.prechunk(i, j);
-      for (let x = 0; x < Chunk.size; x++) {
+      for (let x = 0; x < chunkSize; x++) {
         //Block coords
-        for (let y = 0; y < Chunk.size; y++) {
+        for (let y = 0; y < chunkSize; y++) {
           let nx = roundNum(
             scale *
-              ((World.size / 2 + i) * Chunk.size * Block.size +
-                (x * Block.size + Block.size / 2)),
+              ((worldSize / 2 + i) * chunkSize * blockSize +
+                (x * blockSize + blockSize / 2)),
             2
           );
           let ny = roundNum(
             scale *
-              ((World.size / 2 + j) * Chunk.size * Block.size +
-                (y * Block.size + Block.size / 2)),
+              ((worldSize / 2 + j) * chunkSize * blockSize +
+                (y * blockSize + blockSize / 2)),
             2
           );
-          let c = level * noise(nx, ny);
+          let n = noise(nx, ny)
+          let c = level * n;
           ////////////////////////
           if (funcs.eachpos) funcs.eachpos(x, y, c, i, j);
           /////////////////////////

@@ -72,14 +72,14 @@ Registries.type.add("block-launcher", BlockLauncher);
 //World
 Registries.type.add("world", World);
 Registries.type.add("chunk", Chunk);
-Registries.type.add("generator", Generator);
-Registries.type.add("tile-generator", TileGenerator);
-Registries.type.add("ore-generator", OreGenerator);
-Registries.type.add("block-generator", BlockGenerator);
+// Registries.type.add("generator", Generator);
+// Registries.type.add("tile-generator", TileGenerator);
+// Registries.type.add("ore-generator", OreGenerator);
+// Registries.type.add("block-generator", BlockGenerator);
 
-Registries.type.add("gen-options", GenerationOptions);
-Registries.type.add("tile-gen-options", TileGenerationOptions);
-Registries.type.add("ore-gen-options", OreGenerationOptions);
+// Registries.type.add("gen-options", GenerationOptions);
+// Registries.type.add("tile-gen-options", TileGenerationOptions);
+// Registries.type.add("ore-gen-options", OreGenerationOptions);
 //Block
 Registries.type.add("block", Block);
 Registries.type.add("wall", Wall);

@@ -108,6 +108,30 @@ Registries.vfx.add("laser-caster-explosion", {
   ],
   smoke: false,
 });
+Registries.vfx.add("laser-caster-explosion-plasma", {
+  type: "explosion",
+  waveColours: [
+    [255, 255, 255],
+    [198, 51, 255, 100],
+  ],
+  sparkColours: [
+    [248, 101, 255],
+    [184, 0, 255],
+  ],
+  smoke: false,
+});
+Registries.vfx.add("laser-caster-explosion-destabilised", {
+  type: "explosion",
+  waveColours: [
+    [255, 100, 100],
+    [255, 0, 0, 0],
+  ],
+  sparkColours: [
+    [255, 255, 255],
+    [255, 0, 0, 100],
+  ],
+  smoke: false,
+});
 
 //Firing effects
 
@@ -251,6 +275,45 @@ Registries.vfx.add("laser-caster-frag", {
     light: 40,
   },
 });
+Registries.vfx.add("laser-caster-frag-plasma", {
+  type: "particle-emission",
+  amount: 4,
+  cone: 20,
+  particle: {
+    shape: "rhombus",
+    lifetime: 20,
+    speed: 3,
+    widthFrom: 2,
+    widthTo: 0,
+    heightFrom: 10,
+    heightTo: 20,
+    colours: [
+      [255, 255, 255],
+      [198, 51, 255, 128],
+      [184, 0, 255],
+    ],
+    light: 40,
+  },
+});
+Registries.vfx.add("laser-caster-frag-destabilised", {
+  type: "particle-emission",
+  amount: 4,
+  cone: 20,
+  particle: {
+    shape: "rhombus",
+    lifetime: 20,
+    speed: 3,
+    widthFrom: 2,
+    widthTo: 0,
+    heightFrom: 10,
+    heightTo: 20,
+    colours: [
+      [255, 100, 100],
+      [255, 0, 0],
+    ],
+    light: 40,
+  },
+});
 
 //Nuclear
 
@@ -301,6 +364,47 @@ Registries.vfx.add("laser-caster-fire", {
     light: 100,
   },
 });
+Registries.vfx.add("laser-caster-fire-plasma", {
+  type: "particle-emission",
+  amount: 4,
+  particle: {
+    shape: "rhombus",
+    lifetime: 30,
+    speed: 1,
+    decel: 0.03,
+    widthFrom: 5,
+    widthTo: 10,
+    heightFrom: 5,
+    heightTo: 10,
+    colours: [
+      [255, 255, 255],
+      [198, 51, 255, 128],
+      [184, 0, 255, 0],
+    ],
+    rotateSpeed: 0.2,
+    light: 100,
+  },
+});
+Registries.vfx.add("laser-caster-fire-destabilised", {
+  type: "particle-emission",
+  amount: 4,
+  particle: {
+    shape: "rhombus",
+    lifetime: 30,
+    speed: 1,
+    decel: 0.03,
+    widthFrom: 5,
+    widthTo: 10,
+    heightFrom: 5,
+    heightTo: 10,
+    colours: [
+      [255, 100, 100],
+      [255, 0, 0, 0],
+    ],
+    rotateSpeed: 0.2,
+    light: 100,
+  },
+});
 
 //Status
 
@@ -342,6 +446,43 @@ Registries.vfx.add("plasma-burn", {
       [0, 50, 255, 0],
     ],
     rotateSpeed: 0.2,
+    light: 50,
+  },
+});
+Registries.vfx.add("plasma-burn-boosted", {
+  type: "particle-emission",
+  amount: 2,
+  particle: {
+    shape: "rhombus",
+    lifetime: 30,
+    speed: 0.5,
+    decel: 0.05,
+    widthFrom: 5,
+    widthTo: 10,
+    heightFrom: 5,
+    heightTo: 10,
+    colours: [
+      [255, 255, 255],
+      [198, 51, 255, 128],
+      [184, 0, 255, 0],
+    ],
+    rotateSpeed: 0.2,
+    light: 50,
+  },
+});
+Registries.vfx.add("destabilised", {
+  type: "particle-emission",
+  particle: {
+    shape: "rect",
+    lifetime: 30,
+    widthFrom: 5,
+    widthTo: 0,
+    heightFrom: 20,
+    heightTo: 20,
+    colours: [
+      [255, 128, 128],
+      [255, 0, 0, 100],
+    ],
     light: 50,
   },
 });

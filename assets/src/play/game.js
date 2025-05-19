@@ -24,6 +24,7 @@ import {} from "../definitions/screens/title.js";
 import {} from "../lib/int-setup.js";
 import { ExecutionContext, exec } from "../lib/isl.js";
 import { DroppedItemStack } from "../classes/item/dropped-itemstack.js";
+import { fonts } from "./font.js";
 let histIndex = 0;
 const game = {
   saveslot: 1,
@@ -128,7 +129,6 @@ try {
   Log.send("World generation could not be started.", [255, 0, 0]);
 }
 //
-const fonts = {};
 
 //Worldgen analysis
 let stats = {
@@ -519,13 +519,12 @@ function sizeKB(string) {
   return string ? string.length / 512 : 0;
 }
 
-window.preload = async function () {
+globalThis.preload = async function () {
   Registries.images.forEachAsync((name, el) => el.load());
-  fonts.ocr = loadFont("assets/font/ocr_a_extended.ttf");
-  fonts.darktech = loadFont("assets/font/darktech_ldr.ttf");
+  fonts.load();
 };
 //Set up the canvas, using the previous function
-window.setup = function () {
+globalThis.setup = function () {
   let cnv = createCanvas(windowWidth, windowHeight);
   cnv.addEventListener("contextmenu", (event) => event.preventDefault());
   rectMode(CENTER);
@@ -761,12 +760,12 @@ function uiFrame() {
   Inventory.drawTooltip();
   showMousePos();
   //Off-screen box, for zooming
-  push();
-  noFill();
-  stroke(255);
-  strokeWeight(5);
-  rect(0, 0, width * ui.camera.zoom + 5, height * ui.camera.zoom + 5);
-  pop();
+  // push();
+  // noFill();
+  // stroke(255);
+  // strokeWeight(5);
+  // rect(0, 0, width * ui.camera.zoom + 5, height * ui.camera.zoom + 5);
+  // pop();
 }
 
 function tickTimers() {
@@ -951,6 +950,8 @@ function createPlayer(player = null) {
     player.inventory.addItem("scrap", 35);
     player.inventory.addItem("stone", 99);
     player.inventory.addItem("scrap-assembler");
+    player.x = worldSize / 2;
+    player.y = worldSize / 2;
     player.addToWorld(world);
     player.setSpawn();
   }
@@ -1215,7 +1216,7 @@ window.mouseWheel = function (ev) {
   //CTRL + scroll to zoom
   if (ev.ctrlKey)
     ui.camera.zoom = roundNum(
-      clamp(ui.camera.zoom - ev.delta * zoomSpeed, 1, 5),
+      clamp(ui.camera.zoom - ev.delta * zoomSpeed, 0.25, 5),
       2
     );
   //scroll normally to change block placement direction

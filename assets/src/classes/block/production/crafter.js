@@ -2,6 +2,7 @@ import { construct } from "../../../core/constructor.js";
 import { tru, roundNum } from "../../../core/number.js";
 import { Registries } from "../../../core/registry.js";
 import { autoScaledEffect } from "../../../play/effects.js";
+import { blockSize } from "../../../scaling.js";
 import { drawMultilineText } from "../../inventory.js";
 import { Item } from "../../item/item.js";
 import { Container } from "../container.js";
@@ -98,8 +99,8 @@ class Crafter extends Container {
     autoScaledEffect(
       this.craftEffect,
       this.world,
-      this.x + Block.size / 2,
-      this.y + Block.size / 2,
+      this.x + blockSize / 2,
+      this.y + blockSize / 2,
       this.direction
     );
   }
@@ -108,8 +109,8 @@ class Crafter extends Container {
       autoScaledEffect(
         this.tickEffect,
         this.world,
-        this.x + Block.size / 2,
-        this.y + Block.size / 2,
+        this.x + blockSize / 2,
+        this.y + blockSize / 2,
         this.direction
       );
   }

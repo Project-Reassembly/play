@@ -144,8 +144,8 @@ class Weapon extends Equippable {
   }
   _useAmmo(holder, ammoType) {
     if (ammoType === "none") return true;
-    if (holder.equipment.hasItem(ammoType, this.ammoUse))
-      holder.equipment.removeItem(ammoType, this.ammoUse);
+    if (entityHasAmmo(holder,ammoType, this.ammoUse))
+      entityAmmoUse(holder, ammoType, this.ammoUse);
     else return false;
     return true;
   }
@@ -278,10 +278,26 @@ class Weapon extends Equippable {
       shoot.pattern.spread ? shoot.pattern.spread + "° inaccuracy" : "",
       shoot.pattern.spacing ? shoot.pattern.spacing + "° shot spacing" : "",
       "🟨Shots:⬜",
-      ...Object.keys(bulletConfig.ammos).flatMap((x) => [
-        x == "none" ? " " : ind(1) + Registries.items.get(x).name + ":",
-        ...Weapon.getBulletInfo(bulletConfig.getAmmo(x), x == "none" ? 1 : 2),
-      ]),
+      ...Object.keys(bulletConfig.ammos).flatMap((x) =>
+        bulletConfig.unbrowsable.includes(bulletConfig.ammos[x])
+          ? [
+              x == "none"
+                ? " "
+                : ind(1) +
+                  "🟨" +
+                  Registries.items.get(x).name +
+                  ": variant⬜",
+            ]
+          : [
+              x == "none"
+                ? " "
+                : ind(1) + "🟨" + Registries.items.get(x).name + ":⬜",
+              ...Weapon.getBulletInfo(
+                bulletConfig.getAmmo(x),
+                x == "none" ? 1 : 2
+              ),
+            ]
+      ),
     ];
   }
   static getBulletInfo(bullet = {}, idl = 0) {
@@ -394,6 +410,14 @@ function entityAmmoCount(ent, ammoItem, ammoAmount) {
     : false;
 }
 
+function entityAmmoUse(ent, ammoItem, ammoAmount) {
+  return ent instanceof InventoryEntity
+    ? ent instanceof EquippedEntity
+      ? ent.equipment.removeItem(ammoItem, ammoAmount)
+      : ent.inventory.removeItem(ammoItem, ammoAmount)
+    : false;
+}
+
 function ind(lvl = 0) {
   return "  ".repeat(lvl);
 }
@@ -423,6 +447,8 @@ class WeaponBulletConfiguration {
   types = [];
   // Matches ammo items to bullets.
   ammos = {};
+  // Hide variations
+  unbrowsable = [];
   get(index) {
     if (index instanceof Array) return index.map((i) => this.get(i));
     else return this.types[index] ?? null;
