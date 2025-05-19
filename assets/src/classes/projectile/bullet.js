@@ -249,24 +249,28 @@ function patternedBulletExpulsion(
   //Current angle
   let currentAngle = -diff;
   //For each bullet to fire
-  for (let index = 0; index < amount; index++) {
-    /** @type {Bullet} */
-    let bulletToFire = construct(bulletToSpawn, "bullet");
-    //Put the bullet in position
-    bulletToFire.x = x;
-    bulletToFire.y = y;
-    bulletToFire.direction = direction; //do the offset
-    //Apply uniform spread
-    bulletToFire.direction += currentAngle;
-    currentAngle += spacing;
-    //Apply random spread
-    bulletToFire.direction += random(spread, -spread);
-    //Add entity and world
-    bulletToFire.entity = entity;
-    bulletToFire.world = world;
-    //Spawn it in
-    world.bullets.push(bulletToFire);
-    bulletToFire.oncreated();
-  }
+  let maek = (bulletToSpawn) => {
+    for (let index = 0; index < amount; index++) {
+      /** @type {Bullet} */
+      let bulletToFire = construct(bulletToSpawn, "bullet");
+      //Put the bullet in position
+      bulletToFire.x = x;
+      bulletToFire.y = y;
+      bulletToFire.direction = direction; //do the offset
+      //Apply uniform spread
+      bulletToFire.direction += currentAngle;
+      currentAngle += spacing;
+      //Apply random spread
+      bulletToFire.direction += random(spread, -spread);
+      //Add entity and world
+      bulletToFire.entity = entity;
+      bulletToFire.world = world;
+      //Spawn it in
+      world.bullets.push(bulletToFire);
+      bulletToFire.oncreated();
+    }
+  };
+  if (bulletToSpawn instanceof Array) bulletToSpawn.forEach(maek);
+  else maek(bulletToSpawn);
 }
 export { Bullet, patternedBulletExpulsion };

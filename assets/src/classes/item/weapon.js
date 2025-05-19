@@ -1,7 +1,7 @@
 import { Equippable } from "./equippable.js";
 import { Timer } from "../timer.js";
 import { constructFromType } from "../../core/constructor.js";
-import { EquippedEntity } from "../entity/inventory-entity.js";
+import { EquippedEntity, InventoryEntity } from "../entity/inventory-entity.js";
 import { autoScaledEffect } from "../../play/effects.js";
 import { construct } from "../../core/constructor.js";
 import { WeaponComponent } from "../entity/component.js";
@@ -13,12 +13,13 @@ import { Missile } from "../projectile/missile.js";
 import { Registries } from "../../core/registry.js";
 class Weapon extends Equippable {
   timer = new Timer();
-  ammoType = "none";
   ammoUse = 1;
   shootX = 15;
+  bullets = new WeaponBulletConfiguration();
   shoot = new WeaponShootConfiguration();
   hasAltFire = false;
   altShoot = null;
+  altBullets = null;
 
   range = 180;
 
@@ -37,10 +38,16 @@ class Weapon extends Equippable {
   init() {
     super.init();
     this.shoot = constructFromType(this.shoot, WeaponShootConfiguration);
+    this.bullets = constructFromType(this.bullets, WeaponBulletConfiguration);
     if (this.altShoot)
       this.altShoot = constructFromType(
         this.altShoot,
         WeaponShootConfiguration
+      );
+    if (this.altBullets)
+      this.altBullets = constructFromType(
+        this.altBullets,
+        WeaponBulletConfiguration
       );
   }
 
@@ -100,8 +107,22 @@ class Weapon extends Equippable {
   /**
    * @param {EquippedEntity} holder
    */
-  fire(holder, shoot = this.shoot) {
+  fire(holder, shoot = this.shoot, bulletConfig = this.bullets) {
     if (this.#cooldown <= 0) {
+      //choose ammo
+      let ammoType = "-";
+      for (let ammo in bulletConfig.ammos) {
+        if (
+          bulletConfig.getAmmo(ammo) !== null &&
+          entityHasAmmo(holder, ammo, this.ammoUse)
+        ) {
+          ammoType = ammo;
+          break;
+        }
+      }
+      // stop if no ammo type found
+      if (ammoType === "-") return;
+      // fire
       this.#lastReload = shoot.reload;
       this.#lastCharge = shoot.charge;
       if (shoot.charge > 0) {
@@ -116,21 +137,25 @@ class Weapon extends Equippable {
         );
         this.#cooldown = shoot.reload + shoot.charge;
         this.timer.do(() => {
-          this._internalFire(holder, shoot);
+          this._internalFire(holder, shoot, ammoType, bulletConfig);
         }, shoot.charge);
-      } else this._internalFire(holder, shoot);
+      } else this._internalFire(holder, shoot, ammoType, bulletConfig);
     }
   }
-  _useAmmo(holder) {
-    if (this.ammoType !== "none") {
-      if (holder.inventory.hasItem(this.ammoType, this.ammoUse))
-        holder.inventory.removeItem(this.ammoType, this.ammoUse);
-      else return false;
-    }
+  _useAmmo(holder, ammoType) {
+    if (ammoType === "none") return true;
+    if (holder.equipment.hasItem(ammoType, this.ammoUse))
+      holder.equipment.removeItem(ammoType, this.ammoUse);
+    else return false;
     return true;
   }
-  _internalFire(holder, shoot = this.shoot) {
-    if (!this._useAmmo(holder)) return;
+  _internalFire(
+    holder,
+    shoot = this.shoot,
+    ammoType,
+    bulletConfig = this.bullets
+  ) {
+    if (!this._useAmmo(holder, ammoType)) return;
 
     this.#cooldown = this.getAcceleratedReloadRate(shoot);
     this.accelerate(shoot); //Apply acceleration effects
@@ -148,7 +173,7 @@ class Weapon extends Equippable {
         patternedBulletExpulsion(
           pos.x,
           pos.y,
-          shoot.bullet,
+          bulletConfig.getAmmo(ammoType) ?? {},
           shoot.pattern.amount,
           degrees(pos.direction),
           shoot.pattern.spread,
@@ -167,22 +192,39 @@ class Weapon extends Equippable {
   /**@param {EquippedEntity} holder  */
   use(holder, isSecondary = false) {
     if (isSecondary) {
-      if (this.altShoot) this.fire(holder, this.altShoot);
+      if (this.altShoot)
+        this.fire(holder, this.altShoot, this.altBullets ?? this.bullets);
     } else {
-      this.fire(holder, this.shoot);
+      this.fire(holder, this.shoot, this.bullets);
     }
     super.use(holder, isSecondary);
   }
   /**@param {EquippedEntity} holder  */
   getContextualisedInfo(holder) {
+    let ammoType = "-";
+    for (let ammo in this.bullets.ammos) {
+      if (
+        this.bullets.getAmmo(ammo) !== null &&
+        entityHasAmmo(holder, ammo, this.ammoUse)
+      ) {
+        ammoType = ammo;
+        break;
+      }
+    }
     return (
-      this.name +
+      (this.name.length <= 15 ? this.name : this.name.substring(0, 14) + "…") +
       "\nAmmo: " +
-      (this.ammoType !== "none" ? holder.inventory.count(this.ammoType) : "∞") +
+      (ammoType !== "none"
+        ? ammoType === "-"
+          ? ""
+          : entityAmmoCount(holder, ammoType)
+        : "∞") +
       "\n" +
-      (this.ammoType !== "none"
-        ? Registries.items.get(this.ammoType).name + " ×" + this.ammoUse
-        : " - ") +
+      (ammoType !== "none"
+        ? ammoType === "-"
+          ? "None Available"
+          : Registries.items.get(ammoType).name + " ×" + this.ammoUse
+        : "Free") +
       "\n" +
       this.createProgressBar() +
       " "
@@ -208,13 +250,24 @@ class Weapon extends Equippable {
       this.hasAltFire
         ? "🟨 ------- Main ------- ⬜"
         : "🟨 -------------------- ⬜",
-      ...Weapon.infoOfShootPattern(this.shoot),
+      ...Weapon.infoOfShootPattern(this.shoot, this.bullets),
       this.hasAltFire ? "🟨 ------- Alt -------- ⬜" : "",
-      ...(this.hasAltFire ? Weapon.infoOfShootPattern(this.altShoot) : []),
+      ...(this.hasAltFire
+        ? Weapon.infoOfShootPattern(
+            this.altShoot,
+            this.altBullets ?? this.bullets
+          )
+        : []),
       "🟨 -------------------- ⬜",
     ];
   }
-  static infoOfShootPattern(shoot) {
+  /**
+   *
+   * @param {WeaponShootConfiguration} shoot
+   * @param {WeaponBulletConfiguration} bulletConfig
+   * @returns
+   */
+  static infoOfShootPattern(shoot, bulletConfig) {
     return [
       "Fire Rate: " +
         (shoot.pattern.amount * shoot.pattern.burst > 1
@@ -224,13 +277,18 @@ class Weapon extends Equippable {
         "/s",
       shoot.pattern.spread ? shoot.pattern.spread + "° inaccuracy" : "",
       shoot.pattern.spacing ? shoot.pattern.spacing + "° shot spacing" : "",
-      "Shot:",
-      ...Weapon.getBulletInfo(shoot.bullet, 1),
+      "🟨Shots:⬜",
+      ...Object.keys(bulletConfig.ammos).flatMap((x) => [
+        x == "none" ? " " : ind(1) + Registries.items.get(x).name + ":",
+        ...Weapon.getBulletInfo(bulletConfig.getAmmo(x), x == "none" ? 1 : 2),
+      ]),
     ];
   }
   static getBulletInfo(bullet = {}, idl = 0) {
-    /**@type {Bullet} */
+    if (Array.isArray(bullet))
+      return bullet.flatMap((b) => Weapon.getBulletInfo(b, idl));
     let blt = construct(bullet, "bullet");
+    if (!blt) return [ind(idl) + "🟥invalid: " + bullet + "⬜"];
     let time = Math.min(blt.lifetime, blt.speed / blt.decel);
     return [
       ind(idl) +
@@ -318,6 +376,24 @@ class Weapon extends Equippable {
   }
 }
 
+function entityHasAmmo(ent, ammoItem, ammoAmount) {
+  if (ammoItem === "none") return true;
+  return ent instanceof InventoryEntity
+    ? ent instanceof EquippedEntity
+      ? ent.equipment.hasItem(ammoItem, ammoAmount)
+      : ent.inventory.hasItem(ammoItem, ammoAmount)
+    : false;
+}
+
+function entityAmmoCount(ent, ammoItem, ammoAmount) {
+  if (ammoItem === "none") return -1;
+  return ent instanceof InventoryEntity
+    ? ent instanceof EquippedEntity
+      ? ent.equipment.count(ammoItem)
+      : ent.inventory.count(ammoItem)
+    : false;
+}
+
 function ind(lvl = 0) {
   return "  ".repeat(lvl);
 }
@@ -330,7 +406,6 @@ class ShootPattern {
   burst = 1;
 }
 class WeaponShootConfiguration {
-  bullet = {};
   pattern = new ShootPattern();
   charge = 0;
   chargeEffect = "none";
@@ -343,4 +418,22 @@ class WeaponShootConfiguration {
     this.pattern = constructFromType(this.pattern, ShootPattern);
   }
 }
-export { Weapon, WeaponShootConfiguration };
+class WeaponBulletConfiguration {
+  // Defines possible bullets.
+  types = [];
+  // Matches ammo items to bullets.
+  ammos = {};
+  get(index) {
+    if (index instanceof Array) return index.map((i) => this.get(i));
+    else return this.types[index] ?? null;
+  }
+  getAmmo(ammo) {
+    if (ammo instanceof Array) return ammo.map((i) => this.getAmmo(i));
+    else {
+      let def = this.ammos[ammo];
+      if (def instanceof Array) return def.map((d) => this.types[d] ?? null);
+      return this.types[def] ?? null;
+    }
+  }
+}
+export { Weapon, WeaponShootConfiguration, WeaponBulletConfiguration };

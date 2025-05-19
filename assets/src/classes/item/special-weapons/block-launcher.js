@@ -1,4 +1,4 @@
-import { Weapon } from "../weapon.js";
+import { Weapon, WeaponBulletConfiguration } from "../weapon.js";
 import { PointBullet } from "../../projectile/point-bullet.js";
 import { constructFromType, construct } from "../../../core/constructor.js";
 import { game } from "../../../play/game.js";
@@ -8,7 +8,11 @@ import { Registries } from "../../../core/registry.js";
 import { Wall } from "../../block/defense/wall.js";
 import { ui } from "../../../core/ui.js";
 import { Bomb, NuclearBomb } from "../../block/defense/bomb.js";
-import { autoScaledEffect, Explosion, NuclearExplosion } from "../../../play/effects.js";
+import {
+  autoScaledEffect,
+  Explosion,
+  NuclearExplosion,
+} from "../../../play/effects.js";
 import { DroppedItemStack } from "../dropped-itemstack.js";
 import { Block } from "../../block/block.js";
 import { ItemStack } from "../item-stack.js";
@@ -17,9 +21,12 @@ class BlockLauncher extends Weapon {
   places = true;
   /**@type {BlockLauncherScaling} */
   scaling = {};
-  modShoot = {};
+  current = {};
+  base = {};
+  baseShoot = {};
   init() {
-    this.modShoot = structuredClone(this.shoot);
+    this.baseShoot = structuredClone(this.shoot);
+    this.current = structuredClone(this.base);
     super.init();
     this.scaling = constructFromType(this.scaling, BlockLauncherScaling);
   }
@@ -34,7 +41,12 @@ class BlockLauncher extends Weapon {
       //Set ammo filter to clicked block
       Log.send("Set ammo type to " + block.name + " (" + block.dropItem + ")");
       this.ammoType = block.dropItem;
-      this.shoot = constructFromType(this.modShoot, WeaponShootConfiguration);
+      this.shoot = constructFromType(this.baseShoot, WeaponShootConfiguration);
+      this.current = structuredClone(this.base);
+      let reverseEngineering = new WeaponBulletConfiguration();
+      reverseEngineering.ammos[this.ammoType] = 0;
+      reverseEngineering.types = [this.current];
+      this.bullets = reverseEngineering;
       this.modifyBullet();
       ui.waitingForMouseUp = true;
     } else {
@@ -47,15 +59,15 @@ class BlockLauncher extends Weapon {
     /**@type {Block} */
     let block = construct(Registries.blocks.get(item.block), "block");
     if (this.places) {
-      this.shoot.bullet.type = "block-bullet";
-      this.shoot.bullet.block = item.block;
+      this.current.type = "block-bullet";
+      this.current.block = item.block;
     }
     this.shoot.reload /=
       (1 - this.scaling.slowdownFromMHP) **
       (block.maxHealth * this.scaling.slowdownFromMHP);
-    this.shoot.bullet.damage ??= [];
-    this.shoot.bullet.damage.forEach((x) => {
-      if (x.amount)
+    this.current.damage ??= [];
+    this.current.damage.forEach((x) => {
+      if (x.amount !== undefined)
         x.amount +=
           this.scaling.damageFromMHP *
           block.maxHealth *
@@ -63,14 +75,14 @@ class BlockLauncher extends Weapon {
             (block instanceof Wall
               ? this.scaling.damageFromArmour * block.armour
               : 0));
-      if (x.radius)
+      if (x.radius !== undefined)
         x.radius +=
           this.scaling.areaFromExplosivenessAndMHP *
           block.maxHealth *
           block.explosiveness;
     });
-    if (this.shoot.bullet.pierce !== undefined)
-      this.shoot.bullet.pierce +=
+    if (this.current.pierce !== undefined)
+      this.current.pierce +=
         this.scaling.pierceFromMHP * block.maxHealth +
         (1 +
           (block instanceof Wall
@@ -79,15 +91,14 @@ class BlockLauncher extends Weapon {
     this._cachedTooltip = null;
   }
   createExtendedTooltip() {
-    let wtt = super.createExtendedTooltip();
-    return wtt
-      .slice(0, 1)
-      .concat([
-        (this.ammoType === "none"
-          ? "🟥Not loaded"
-          : "🟪Shooting " + Registries.blocks.get(this.ammoType).name) + "⬜",
-      ])
-      .concat(wtt.slice(1));
+    return [
+      "🟨 -------------------- ⬜",
+      (this.ammoType === "none"
+        ? "🟥Not loaded"
+        : "🟨Shooting " + Registries.blocks.get(this.ammoType).name) + "⬜",
+      ...Weapon.infoOfShootPattern(this.shoot, this.bullets),
+      "🟨 -------------------- ⬜",
+    ];
   }
 }
 
