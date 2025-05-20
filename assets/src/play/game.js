@@ -9,8 +9,8 @@ import { Inventory } from "../classes/inventory.js";
 import { UIComponent } from "../core/ui.js";
 import {} from "../lib/isl.js";
 import { Serialiser } from "../core/serialiser.js";
-import { effectTimer } from "./effects.js";
-import { respawnTimer } from "../classes/entity/player.js";
+import { effectTimer, emitEffect, Explosion } from "./effects.js";
+import { Player, respawnTimer } from "../classes/entity/player.js";
 import { WaveParticle } from "../classes/effect/wave-particle.js";
 import { clamp, rnd, roundNum } from "../core/number.js";
 import { PlaceableItem } from "../classes/item/placeable.js";
@@ -146,9 +146,32 @@ worldGenWorker.onmessage = (ev) => {
     console.log("Generation finished.");
     gen.msg = "Entering World";
     createPlayer();
+    game.player.visible = false;
     ui.camera.x = game.player.x;
     ui.camera.y = game.player.y;
     for (let tick = 0; tick < preloadTicks; tick++) world.tickAll();
+    emitEffect("land-target", game.player, 0, 0)
+    effectTimer.do(() => {
+      new Explosion({
+        x: game.player.x,
+        y: game.player.y,
+        world: world,
+        team: "player",
+        radius: 150,
+        amount: 500,
+        knockback: 0
+      }).create().dealDamage();
+      for (let tick = 0; tick < 10; tick++)
+        DroppedItemStack.create(
+          new ItemStack("scrap", roundNum(rnd(2, 20))),
+          world,
+          game.player.x,
+          game.player.y,
+          rnd(4, 10),
+          rnd(0, 360)
+        );
+      game.player.visible = true;
+    }, 180);
     gen.inprogress = false;
     worldGenWorker.terminate();
     //Worldgen stats
@@ -810,7 +833,7 @@ function gameFrame() {
 
 function movePlayer() {
   if (ui.texteditor.active) return false;
-  if (keyIsDown(SHIFT) || game.player.dead) {
+  if (keyIsDown(SHIFT) || game.player.dead || !game.player.visible) {
     freecam = true;
     if (keyIsDown(87)) {
       ui.camera.y -= 5;

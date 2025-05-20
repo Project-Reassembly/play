@@ -191,12 +191,12 @@ class World {
     this.toRender.forEach((chunk) => chunk.drawBlocksOnly());
     this.toRender.forEach((chunk) => chunk.postDrawBlocksOnly());
     for (let entity of this.entities) {
-      if (!World.isInRenderDistance(entity, 1, 0, 0, 0, ui.camera.zoom))
+      if (!entity.visible || !World.isInRenderDistance(entity, 1, 0, 0, 0, ui.camera.zoom))
         continue;
       entity.draw();
     }
     for (let entity of this.entities) {
-      if (!World.isInRenderDistance(entity, 1, 0, 0, 0, ui.camera.zoom))
+      if (!entity.visible || !World.isInRenderDistance(entity, 1, 0, 0, 0, ui.camera.zoom))
         continue;
       entity.postDraw();
     }

@@ -453,6 +453,8 @@ class EmissionEffect extends VisualEffect {
   interval = 0;
   amount = 1;
   delay = 0;
+  x = 0;
+  y = 0;
   execute(
     world,
     x = 0,
@@ -527,8 +529,8 @@ class ParticleEmissionEffect extends EmissionEffect {
     repeat(this.amount, () =>
       world.particles.push(
         new ShapeParticle(
-          x,
-          y,
+          x + this.x,
+          y + this.y,
           direction +
             radians(
               (this.particle.direction ?? 0) +
@@ -559,8 +561,8 @@ class ImageParticleEmissionEffect extends ParticleEmissionEffect {
     repeat(this.amount, () =>
       world.particles.push(
         new ImageParticle(
-          x,
-          y,
+          x + this.x,
+          y + this.y,
           direction +
             radians(
               (this.particle.direction ?? 0) +
@@ -591,8 +593,8 @@ class TextParticleEmissionEffect extends ParticleEmissionEffect {
     repeat(this.amount, () =>
       world.particles.push(
         new TextParticle(
-          x,
-          y,
+          x + this.x,
+          y + this.y,
           direction +
             radians(
               (this.particle.direction ?? 0) +

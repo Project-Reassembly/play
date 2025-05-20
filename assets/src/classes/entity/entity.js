@@ -35,6 +35,8 @@ class Entity extends ShootableObject {
   turnSpeed = 10;
   target = null;
 
+  visible = true;
+
   //AI
   aiType = "passive";
   followRange = 100;

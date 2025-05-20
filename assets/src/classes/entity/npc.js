@@ -113,12 +113,37 @@ class NPC extends EquippedEntity {
     push();
     strokeWeight(1);
     stroke(0);
-    fill(
-      ...colinterp([[0, 255, 0], [255, 255, 0], [255, 0, 0]], (this.relation + 100) / 200)
-    );
+    //text
     textAlign(CENTER);
     textSize(10);
-    text(roundNum(this.relation, 1) + "%", this.x, this.y - this.height / 2);
+    //bar
+    fill(0);
+    rect(this.x, this.y - this.height / 2, this.width, 6);
+    //bar 2
+    fill(
+      ...colinterp(
+        [
+          [255, 0, 0],
+          [255, 255, 0],
+          [0, 255, 0],
+        ],
+        (this.relation + 100) / 200
+      )
+    );
+    rectMode(CORNER);
+    rect(
+      this.x,
+      this.y - this.height / 2 - 3,
+      (this.width * this.relation) / 200,
+      6
+    );
+    //text 2
+    let txt = roundNum(this.relation, 1) + "%";
+    text(
+      txt,
+      this.x - this.width / 2 + textWidth(txt) / 2,
+      this.y - this.height / 2 - 6
+    );
     pop();
     super.postDraw();
   }
