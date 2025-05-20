@@ -51,6 +51,20 @@ const ui = {
     this.texteditor.active = false;
     this.texteditor.isCommandLine = false;
   },
+  reset() {
+    this.menuState = "title";
+    this.waitingForMouseUp = false;
+    this.texteditor.text = "";
+    this.texteditor.active = false;
+    this.previousFPS = [];
+    this.hoveredBlock = null;
+    UIComponent.setCondition("paused:false");
+    UIComponent.setCondition("menu:none");
+    UIComponent.setCondition("containerselected:false");
+    UIComponent.setCondition("dead:no");
+    this.wasReset = true;
+  },
+  wasReset: false
 };
 
 class UIComponent {
@@ -1072,5 +1086,5 @@ export {
   createUIImageComponent,
   createUIInventoryComponent,
   UIComponent,
-  ImageContainer
+  ImageContainer,
 };

@@ -3,6 +3,7 @@ import { Vector } from "./core/number.js";
 const blockSize = 30;
 const chunkSize = 16;
 const worldSize = 16;
+const totalSize = worldSize * chunkSize * blockSize;
 const Direction = {
   /**@readonly */
   UP: -Math.PI / 2,
@@ -63,4 +64,4 @@ const Direction = {
     }
   },
 };
-export { blockSize, chunkSize, worldSize, Direction };
+export { blockSize, chunkSize, worldSize, totalSize, Direction };

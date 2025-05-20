@@ -1,14 +1,16 @@
 import { rnd } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
-import { flash } from "../../play/effects.js";
 import { Log } from "../../play/messaging.js";
 import { Timer } from "../timer.js";
 import { EquippedEntity } from "./inventory-entity.js";
-import { world } from "../../play/game.js";
-const respawnTimer = new Timer();
+import { game } from "../../play/game.js";
+import { DroppedItemStack } from "../item/dropped-itemstack.js";
+import { Inventory } from "../inventory.js";
+import { ui, UIComponent } from "../../core/ui.js";
 
 class Player extends EquippedEntity {
   respawnTime = 180;
+  controllable = true;
   setSpawn(x, y) {
     this.spawnX = x ?? this.x;
     this.spawnY = y ?? this.y;
@@ -28,21 +30,26 @@ class Player extends EquippedEntity {
         .replaceAll("(2)", source?.name ?? "something"),
       [255, 0, 0]
     );
-    let ticks = this.respawnTime / 60;
-    respawnTimer.repeat(
-      (iter) => Log.send("Respawning in: " + (ticks - iter)),
-      ticks,
-      60
+    DroppedItemStack.create(
+      Inventory.mouseItemStack,
+      this.world,
+      this.x,
+      this.y,
+      rnd(0, 360),
+      3
     );
-    respawnTimer.do(() => {
-      this.health = this.maxHealth;
-      this.statuses = {};
-      this.dead = false;
-      this.x = this.spawnX;
-      this.y = this.spawnY;
-      this.addToWorld(world);
-      flash(this.x, this.y, 255, 30, 400);
-    }, this.respawnTime);
+    Inventory.mouseItemStack.clear();
+    ui.waitingForMouseUp = true;
+    UIComponent.setCondition("dead:yes");
+    // respawnTimer.do(() => {
+    //   this.health = this.maxHealth;
+    //   this.statuses = {};
+    //   this.dead = false;
+    //   this.x = this.spawnX;
+    //   this.y = this.spawnY;
+    //   this.addToWorld(world);
+    //   flash(this.x, this.y, 255, 30, 400);
+    // }, this.respawnTime);
   }
   ai() {
     if (this.target) {
@@ -50,4 +57,4 @@ class Player extends EquippedEntity {
     }
   }
 }
-export { Player, respawnTimer };
+export { Player };

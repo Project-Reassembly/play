@@ -47,6 +47,9 @@ class Bullet extends PhysicalObject {
   fragDirection = 0;
   fragSpread = 0;
   fragSpacing = 0;
+
+  fragSpeedMin = 0.8;
+  fragSpeedMax = 1.2;
   //Intervals
   intervalBullet = {};
   intervalNumber = 0;
@@ -208,7 +211,9 @@ class Bullet extends PhysicalObject {
       this.fragSpread,
       this.fragSpacing,
       this.world,
-      this.entity
+      this.entity,
+      this.fragSpeedMin,
+      this.fragSpeedMax
     );
   }
   interval() {
@@ -242,7 +247,9 @@ function patternedBulletExpulsion(
   spread,
   spacing,
   world,
-  entity
+  entity,
+  speedMultMin = 1,
+  speedMultMax = 1
 ) {
   //Max difference in direction
   let diff = (spacing * (amount - 1)) / 2;
@@ -266,6 +273,7 @@ function patternedBulletExpulsion(
       bulletToFire.entity = entity;
       bulletToFire.world = world;
       //Spawn it in
+      bulletToFire.speed *= rnd(speedMultMin, speedMultMax);
       world.bullets.push(bulletToFire);
       bulletToFire.oncreated();
     }

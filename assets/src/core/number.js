@@ -26,8 +26,10 @@ function clamp(x, min, max) {
 function roundNum(number, dp = 0) {
   return Math.round(number * 10 ** dp) / 10 ** dp;
 }
-/**Returns a random number between `a` and `b`. */
+/**Returns a random number between `a` and `b`. If `b` is missing, `-a` will be substituted.*/
 function rnd(a, b) {
+  if (b == undefined) return rnd(a, -a);
+  if (a === b) return a;
   return a + Math.random() * (b - a);
 }
 /**Returns `true` with a specified chance. */

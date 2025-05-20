@@ -9,10 +9,10 @@ import { Inventory } from "../classes/inventory.js";
 import { UIComponent } from "../core/ui.js";
 import {} from "../lib/isl.js";
 import { Serialiser } from "../core/serialiser.js";
-import { effectTimer, emitEffect, Explosion } from "./effects.js";
-import { Player, respawnTimer } from "../classes/entity/player.js";
+import { createEffect, effectTimer, emitEffect, Explosion } from "./effects.js";
+import { Player } from "../classes/entity/player.js";
 import { WaveParticle } from "../classes/effect/wave-particle.js";
-import { clamp, rnd, roundNum } from "../core/number.js";
+import { clamp, rnd, roundNum, tru } from "../core/number.js";
 import { PlaceableItem } from "../classes/item/placeable.js";
 import { ItemStack } from "../classes/item/item-stack.js";
 import { Equippable } from "../classes/item/equippable.js";
@@ -25,6 +25,7 @@ import {} from "../lib/int-setup.js";
 import { ExecutionContext, exec } from "../lib/isl.js";
 import { DroppedItemStack } from "../classes/item/dropped-itemstack.js";
 import { fonts } from "./font.js";
+import { patternedBulletExpulsion } from "../classes/projectile/bullet.js";
 let histIndex = 0;
 const game = {
   saveslot: 1,
@@ -33,6 +34,7 @@ const game = {
   /** @type {Player | null} Player entity */
   player: null,
   paused: false,
+  money: 10000,
   get mouse() {
     return {
       x: ui.lastMousePos.x / ui.camera.zoom + ui.camera.x,
@@ -44,6 +46,11 @@ const game = {
         (ui.lastMousePos.y / ui.camera.zoom + ui.camera.y) / Block.size
       ),
     };
+  },
+  reset() {
+    this.player = null;
+    this.money = 0;
+    this.paused = false;
   },
 };
 //Slightly laggy effect stuff
@@ -105,6 +112,13 @@ const gen = {
   progress: 0,
   stageProgress: 0,
   mode: "create",
+  reset() {
+    this.started = false;
+    this.inprogress = false;
+    this.progress = 0;
+    this.stageProgress = 0;
+    this.mode = "create";
+  },
 };
 //
 let freecam = false;
@@ -145,33 +159,9 @@ worldGenWorker.onmessage = (ev) => {
   if (ev.data === "finish") {
     console.log("Generation finished.");
     gen.msg = "Entering World";
-    createPlayer();
-    game.player.visible = false;
-    ui.camera.x = game.player.x;
-    ui.camera.y = game.player.y;
     for (let tick = 0; tick < preloadTicks; tick++) world.tickAll();
-    emitEffect("land-target", game.player, 0, 0)
-    effectTimer.do(() => {
-      new Explosion({
-        x: game.player.x,
-        y: game.player.y,
-        world: world,
-        team: "player",
-        radius: 150,
-        amount: 500,
-        knockback: 0
-      }).create().dealDamage();
-      for (let tick = 0; tick < 10; tick++)
-        DroppedItemStack.create(
-          new ItemStack("scrap", roundNum(rnd(2, 20))),
-          world,
-          game.player.x,
-          game.player.y,
-          rnd(4, 10),
-          rnd(0, 360)
-        );
-      game.player.visible = true;
-    }, 180);
+    deliverPlayer(null, worldSize / 2, worldSize / 2, true, true);
+
     gen.inprogress = false;
     worldGenWorker.terminate();
     //Worldgen stats
@@ -374,6 +364,7 @@ const propertyReplacements = [
   ['"positions":', "ψ"],
   ['"seed":', "σ"],
   ['"name":', "ν"],
+  ['"money":', "⅘"],
 ];
 const postDictReplacers = [
   ["},{", "⁺"],
@@ -407,7 +398,9 @@ const escapeJSON = function (str) {
 function saveGame(name) {
   name ??= "save.game";
   //Create file
-  let file = JSON.stringify(world.serialise());
+  let wrld = world.serialise();
+  wrld.money = game.money ?? 0;
+  let file = JSON.stringify(wrld);
   //Minify the file
   //About 128(!) times smaller file size because of this
   //General find-and-replace:
@@ -521,9 +514,11 @@ function loadGame(name) {
   }
   console.log(file);
   effectTimer.cancel("*");
-  respawnTimer.cancel("*");
   effects.screenShakeInstances.splice(0);
-  world.become(World.deserialise(JSON.parse(file)));
+
+  let wrld = World.deserialise(JSON.parse(file));
+  game.money = wrld.money ?? 10000;
+  world.become(wrld);
   console.log("Game loaded.");
   Log.send("You are now playing on '" + world.name + "'.", [0, 255, 0]);
   return true;
@@ -792,7 +787,6 @@ function uiFrame() {
 }
 
 function tickTimers() {
-  respawnTimer.tick();
   effectTimer.tick();
 }
 
@@ -801,16 +795,18 @@ function gameFrame() {
   frameSkippingFunction(() => {
     if (!game.paused) {
       tickTimers();
-      movePlayer();
-      if (!freecam && freecamReturn <= 0) {
-        ui.camera.x = game.player.x;
-        ui.camera.y = game.player.y;
-      }
-      if (!freecam && freecamReturn >= 0) {
-        freecamReturn -= 0.05;
-        ui.camera.x -= camDiff.x * 0.05;
-        ui.camera.y -= camDiff.y * 0.05;
-      }
+      if (game.player) {
+        movePlayer();
+        if (!freecam && freecamReturn <= 0) {
+          ui.camera.x = game.player.x;
+          ui.camera.y = game.player.y;
+        }
+        if (!freecam && freecamReturn >= 0) {
+          freecamReturn -= 0.05;
+          ui.camera.x -= camDiff.x * 0.05;
+          ui.camera.y -= camDiff.y * 0.05;
+        }
+      } else UIComponent.setCondition("dead:yes");
       effects.applyShake();
       world.tickAll();
     }
@@ -833,7 +829,7 @@ function gameFrame() {
 
 function movePlayer() {
   if (ui.texteditor.active) return false;
-  if (keyIsDown(SHIFT) || game.player.dead || !game.player.visible) {
+  if (keyIsDown(SHIFT) || game.player.dead || !game.player.controllable) {
     freecam = true;
     if (keyIsDown(87)) {
       ui.camera.y -= 5;
@@ -911,6 +907,11 @@ function tickUI() {
   for (let component of ui.components) {
     if (component.active && component.isInteractive) {
       component.checkMouse();
+      if (ui.wasReset) {
+        ui.wasReset = false;
+        updateUIActivity();
+        break;
+      }
     }
   }
 }
@@ -965,41 +966,158 @@ function showMousePos() {
   line(ui.mouse.x, ui.mouse.y - mouseSize, ui.mouse.x, ui.mouse.y + mouseSize);
   pop();
 }
-
-function createPlayer(player = null) {
-  /** @type {Player} */
+/**
+ * @param {Player | null} player
+ */
+function createPlayer(player = null, x, y, arm = true) {
   if (!player) {
     player = construct(Registries.entities.get("player"));
-    player.inventory.addItem("scrap", 35);
-    player.inventory.addItem("stone", 99);
-    player.inventory.addItem("scrap-assembler");
-    player.x = worldSize / 2;
-    player.y = worldSize / 2;
-    player.addToWorld(world);
+    if (arm) {
+      player.equipment.addItem("scrap-assembler");
+      player.equipment.addItem("scrap-bullet", roundNum(rnd(4500, 5500)));
+      if (tru(1 / 11)) player.leftHand.addItem("scrap-shooter");
+      else player.rightHand.addItem("scrap-shooter");
+    }
+    player.addToWorld(world, x ?? worldSize / 2, y ?? worldSize / 2);
     player.setSpawn();
   }
   game.player = player;
+  if (x !== undefined) game.player.x = x;
+  if (y !== undefined) game.player.y = y;
   //For ISL
   _self.value = player;
 
   //Change to an accessor property
-  Object.defineProperty(player, "target", {
+  Object.defineProperty(game.player, "target", {
     get: () => game.mouse, //This way, I only have to set it once.
   });
+}
 
-  world.particles.push(
-    new WaveParticle(
-      player.x,
-      player.y,
-      120,
+// Makes a player with a bang
+function deliverPlayer(player = null, x, y, arm = true, moveCamera = false) {
+  createPlayer(player, x, y, arm);
+  game.player.health = game.player.maxHealth;
+  game.player.statuses = {};
+  if (game.player.dead) {
+    game.player.dead = false;
+    game.player.addToWorld(world);
+  }
+  game.player.visible = false;
+  game.player.controllable = false;
+  if (moveCamera) {
+    ui.camera.x = game.player.x;
+    ui.camera.y = game.player.y;
+  }
+  emitEffect("land-target", game.player);
+  effectTimer.do(() => {
+    let y = ui.camera.y - height / ui.camera.zoom;
+    let life = (game.player.y - y) / 20;
+    patternedBulletExpulsion(
+      game.player.x,
+      y,
+      {
+        lifetime: life - 1,
+        speed: 20,
+        trailEffect: "land-trail",
+        drawer: { hidden: true },
+        collides: false,
+        fires: 9,
+        fire: {
+          damage: 6,
+          lifetime: 2880,
+          interval: 20,
+          status: "burning",
+          statusDuration: 120,
+        },
+        fireSpread: 50,
+        fragNumber: 9,
+        fragSpacing: 40,
+        fragSpread: 40,
+        fragBullet: {
+          lifetime: 20,
+          speed: 30,
+          decel: 1.5,
+          pierce: 2,
+          trailEffect: "fire",
+          status: "burning",
+          statusDuration: 360,
+          drawer: {
+            shape: "rhombus",
+            fill: "gray",
+            width: 30,
+            height: 8,
+          },
+          damage: [
+            {
+              amount: 20,
+              type: "ballistic",
+            },
+            {
+              amount: 40,
+              type: "explosion",
+              radius: 30,
+            },
+          ],
+          despawnEffect: "explosion~30",
+          fires: 2,
+          fire: {
+            damage: 6,
+            lifetime: 1440,
+            interval: 20,
+            status: "burning",
+            statusDuration: 120,
+          },
+          fireSpread: 10,
+        },
+      },
+      1,
+      90,
       0,
-      1920,
-      [255, 0, 0],
-      [255, 0, 0, 0],
-      100,
-      0
-    )
-  );
+      0,
+      world,
+      game.player
+    );
+    effectTimer.do(() => {
+      new Explosion({
+        x: game.player.x,
+        y: game.player.y,
+        world: world,
+        team: "player",
+        radius: 150,
+        amount: 500,
+        knockback: 0,
+      })
+        .create()
+        .dealDamage();
+      createEffect(
+        "land-wave",
+        world,
+        game.player.x,
+        game.player.y,
+        -Math.PI / 2,
+        1
+      );
+      createEffect(
+        "land-scorch",
+        world,
+        game.player.x,
+        game.player.y,
+        -Math.PI / 2,
+        1
+      );
+      for (let tick = 0; tick < 10; tick++)
+        DroppedItemStack.create(
+          new ItemStack("scrap", roundNum(rnd(2, 20))),
+          world,
+          game.player.x,
+          game.player.y,
+          rnd(4, 10),
+          rnd(0, 360)
+        );
+      game.player.visible = true;
+      game.player.controllable = true;
+    }, life);
+  }, 180);
 }
 
 function mouseInteraction() {
@@ -1007,6 +1125,7 @@ function mouseInteraction() {
     ui.menuState === "in-game" &&
     mouseIsPressed &&
     !ui.waitingForMouseUp &&
+    game.player.controllable &&
     UIComponent.evaluateCondition("menu:none")
   ) {
     if (ui.mouseButton === "right") secondaryInteract();
@@ -1281,4 +1400,14 @@ window.mousePressed = function () {
   return false;
 };
 
-export { game, effects, createPlayer, world, fonts, loadGame, saveGame, gen };
+export {
+  game,
+  effects,
+  createPlayer,
+  world,
+  fonts,
+  loadGame,
+  saveGame,
+  gen,
+  deliverPlayer,
+};

@@ -454,7 +454,10 @@ class EmissionEffect extends VisualEffect {
   amount = 1;
   delay = 0;
   x = 0;
+  maxXOffset = 0;
   y = 0;
+  maxYOffset = 0;
+  isFloor = false;
   execute(
     world,
     x = 0,
@@ -463,11 +466,24 @@ class EmissionEffect extends VisualEffect {
     scale = 1,
     pos = () => ({ x: x, y: y, direction: direction })
   ) {
-    let fn = () => this.create(world, x, y, direction, scale);
+    let fn = () =>
+      this.create(
+        world,
+        x + rnd(this.maxXOffset, -this.maxXOffset),
+        y + rnd(this.maxYOffset, -this.maxYOffset),
+        direction,
+        scale
+      );
     if (this.parentise) {
       fn = () => {
         let p = pos();
-        this.create(world, p.x, p.y, p.direction, scale);
+        this.create(
+          world,
+          p.x + rnd(this.maxXOffset, -this.maxXOffset),
+          p.y + rnd(this.maxYOffset, -this.maxYOffset),
+          p.direction,
+          scale
+        );
       };
     }
     if (this.emissions > 1)
@@ -527,7 +543,7 @@ class ParticleEmissionEffect extends EmissionEffect {
   };
   create(world, x = 0, y = 0, direction = 0, scale = 1) {
     repeat(this.amount, () =>
-      world.particles.push(
+      (this.isFloor ? world.floorParticles : world.particles).push(
         new ShapeParticle(
           x + this.x,
           y + this.y,
@@ -559,7 +575,7 @@ class ParticleEmissionEffect extends EmissionEffect {
 class ImageParticleEmissionEffect extends ParticleEmissionEffect {
   create(world, x = 0, y = 0, direction = 0, scale = 1) {
     repeat(this.amount, () =>
-      world.particles.push(
+      (this.isFloor ? world.floorParticles : world.particles).push(
         new ImageParticle(
           x + this.x,
           y + this.y,
@@ -591,7 +607,7 @@ class ImageParticleEmissionEffect extends ParticleEmissionEffect {
 class TextParticleEmissionEffect extends ParticleEmissionEffect {
   create(world, x = 0, y = 0, direction = 0, scale = 1) {
     repeat(this.amount, () =>
-      world.particles.push(
+      (this.isFloor ? world.floorParticles : world.particles).push(
         new TextParticle(
           x + this.x,
           y + this.y,
@@ -624,7 +640,7 @@ class TextParticleEmissionEffect extends ParticleEmissionEffect {
 class WaveEmissionEffect extends ParticleEmissionEffect {
   create(world, x = 0, y = 0, direction = 0, scale = 1) {
     repeat(this.amount, () =>
-      world.particles.push(
+      (this.isFloor ? world.floorParticles : world.particles).push(
         new WaveParticle(
           x,
           y,

@@ -60,6 +60,16 @@ class World {
   constructor(name = "World") {
     this.name = name;
   }
+  reset() {
+    this.physobjs = [];
+    this.chunks = [];
+    this.bullets = [];
+    this.entities = [];
+    this.particles = [];
+    this.floorParticles = [];
+    this.networks = [];
+    this.toRender = [];
+  }
   tickAll() {
     this.#actualTick();
     this.#removeDead();
@@ -191,12 +201,18 @@ class World {
     this.toRender.forEach((chunk) => chunk.drawBlocksOnly());
     this.toRender.forEach((chunk) => chunk.postDrawBlocksOnly());
     for (let entity of this.entities) {
-      if (!entity.visible || !World.isInRenderDistance(entity, 1, 0, 0, 0, ui.camera.zoom))
+      if (
+        !entity.visible ||
+        !World.isInRenderDistance(entity, 1, 0, 0, 0, ui.camera.zoom)
+      )
         continue;
       entity.draw();
     }
     for (let entity of this.entities) {
-      if (!entity.visible || !World.isInRenderDistance(entity, 1, 0, 0, 0, ui.camera.zoom))
+      if (
+        !entity.visible ||
+        !World.isInRenderDistance(entity, 1, 0, 0, 0, ui.camera.zoom)
+      )
         continue;
       entity.postDraw();
     }

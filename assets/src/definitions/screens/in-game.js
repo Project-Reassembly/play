@@ -7,15 +7,25 @@ import {
 } from "../../core/ui.js";
 import { Block } from "../../classes/block/block.js";
 import { ui } from "../../core/ui.js";
-import { game, world } from "../../play/game.js";
+import {
+  createPlayer,
+  deliverPlayer,
+  game,
+  gen,
+  world,
+} from "../../play/game.js";
 import { Container } from "../../classes/block/container.js";
 import { DroppedItemStack } from "../../classes/item/dropped-itemstack.js";
+import { shortenedNumber } from "../../core/number.js";
+import { Log } from "../../play/messaging.js";
+import { blockSize, chunkSize, totalSize, worldSize } from "../../scaling.js";
+import { World } from "../../classes/world/world.js";
 //##############################################################
 
 //                        INDICATORS
 
 //##############################################################
-UIComponent.setCondition("paused:false");
+ui.reset();
 Object.defineProperty(
   createUIComponent(
     ["in-game"],
@@ -91,7 +101,6 @@ Object.defineProperty(
 //                          HOTBAR
 
 //##############################################################
-UIComponent.setCondition("menu:none");
 createUIComponent(
   ["in-game"],
   [],
@@ -155,7 +164,7 @@ Object.defineProperty(
   createUIInventoryComponent(["in-game"], [], -95, 250, null, null, 5),
   "inventory",
   {
-    get: () => game.player.equipment,
+    get: () => game.player?.equipment,
   }
 ).anchorBottom(30);
 
@@ -178,7 +187,7 @@ Object.defineProperty(
   "text",
   {
     get: () =>
-      game.player.leftHand
+      game.player?.leftHand
         .get(0)
         ?.getItem()
         ?.getContextualisedInfo(game.player) ?? "",
@@ -203,13 +212,77 @@ Object.defineProperty(
   "text",
   {
     get: () =>
-      game.player.rightHand
+      game.player?.rightHand
         .get(0)
         ?.getItem()
         ?.getContextualisedInfo(game.player) ?? "",
   }
 ).anchorBottom(45);
-UIComponent.setCondition("containerselected:false");
+
+// mone
+createUIComponent(
+  ["in-game"],
+  [],
+  0,
+  0,
+  300,
+  40,
+  "trapezium",
+  null,
+  "",
+  true,
+  20
+)
+  .invert()
+  .anchorBottom();
+Object.defineProperty(
+  createUIComponent(
+    ["in-game"],
+    [],
+    -100,
+    0,
+    0,
+    0,
+    "none",
+    null,
+    "",
+    true,
+    20
+  ).anchorTop(20),
+  "text",
+  { get: () => "$" + shortenedNumber(game.money) }
+);
+//health
+createUIComponent(["in-game"], [], 40, 0, 180, 20, "both")
+  .anchorTop(10)
+  .setBackgroundColour([0, 0, 0]);
+Object.defineProperties(
+  createUIComponent(["in-game"], [], 100, 0, 0, 20, "both")
+    .anchorTop(10)
+    .setBackgroundColour([255, 230, 0]),
+  {
+    width: { get: () => 180 * (game.player?.health / game.player?.maxHealth) },
+    x: { get: () => -50 + 90 * (game.player?.health / game.player?.maxHealth) },
+  }
+);
+createUIComponent(
+  ["in-game"],
+  [],
+  0,
+  0,
+  0,
+  0,
+  "none",
+  null,
+  "Integrity",
+  true,
+  12
+).anchorTop(20);
+//##############################################################
+
+//                       SELECTION
+
+//##############################################################
 // Selected block inventory controls
 //Yoink all
 Object.defineProperties(
@@ -223,8 +296,8 @@ Object.defineProperties(
     "left",
     () => {
       if (Container.selectedBlock instanceof Container) {
-        Container.selectedBlock.inventory.transfer(game.player.equipment);
-        Container.selectedBlock.inventory.transfer(game.player.inventory);
+        Container.selectedBlock.inventory.transfer(game.player?.equipment);
+        Container.selectedBlock.inventory.transfer(game.player?.inventory);
       }
     },
     "Loot",
@@ -248,8 +321,8 @@ Object.defineProperties(
     "left",
     () => {
       if (Container.selectedBlock instanceof Container) {
-        game.player.equipment.transfer(Container.selectedBlock.inventory);
-        game.player.inventory.transfer(Container.selectedBlock.inventory);
+        game.player?.equipment.transfer(Container.selectedBlock.inventory);
+        game.player?.inventory.transfer(Container.selectedBlock.inventory);
       }
     },
     "Store",
@@ -273,13 +346,13 @@ Object.defineProperties(
     "left",
     () => {
       if (Container.selectedBlock instanceof Container) {
-        game.player.equipment.transfer(
+        game.player?.equipment.transfer(
           Container.selectedBlock.inventory,
           true,
           (itemstack) =>
             Container.selectedBlock.inventory.hasItem(itemstack.item)
         );
-        game.player.inventory.transfer(
+        game.player?.inventory.transfer(
           Container.selectedBlock.inventory,
           true,
           (itemstack) =>
@@ -344,7 +417,7 @@ Object.defineProperty(
   ),
   "inventory",
   {
-    get: () => game.player.inventory,
+    get: () => game.player?.inventory,
   }
 );
 
@@ -357,7 +430,7 @@ createUIComponent(
   30,
   "both",
   () => {
-    game.player.inventory.autoStack();
+    game.player?.inventory.autoStack();
   },
   "Stack All",
   true,
@@ -373,7 +446,7 @@ createUIComponent(
   30,
   "both",
   () => {
-    game.player.inventory.sortByRegistryName();
+    game.player?.inventory.sortByRegistryName();
   },
   "Sort By: Name",
   true,
@@ -389,7 +462,7 @@ createUIComponent(
   30,
   "both",
   () => {
-    game.player.inventory.sortByCount();
+    game.player?.inventory.sortByCount();
   },
   "Sort By: Count",
   true,
@@ -405,7 +478,7 @@ createUIComponent(
   30,
   "both",
   () => {
-    game.player.equipment.transfer(game.player.inventory, true);
+    game.player?.equipment.transfer(game.player?.inventory, true);
   },
   "Store Equipment",
   true,
@@ -420,7 +493,7 @@ createUIComponent(
   30,
   "both",
   () => {
-    game.player.inventory.transfer(game.player.equipment, true);
+    game.player?.inventory.transfer(game.player?.equipment, true);
   },
   "Equip First",
   true,
@@ -435,12 +508,12 @@ createUIComponent(
   30,
   "both",
   () => {
-    game.player.inventory.iterate(
+    game.player?.inventory.iterate(
       (stack) =>
-        DroppedItemStack.create(stack, world, game.player.x, game.player.y, 5),
+        DroppedItemStack.create(stack, world, game.player?.x, game.player?.y, 5),
       true
     );
-    game.player.inventory.clear();
+    game.player?.inventory.clear();
   },
   "Dump",
   true,
@@ -459,7 +532,7 @@ Object.defineProperty(
   ),
   "inventory",
   {
-    get: () => game.player.equipment,
+    get: () => game.player?.equipment,
   }
 );
 
@@ -476,7 +549,7 @@ Object.defineProperty(
   ),
   "inventory",
   {
-    get: () => game.player.rightHand,
+    get: () => game.player?.rightHand,
   }
 );
 Object.defineProperty(
@@ -491,7 +564,7 @@ Object.defineProperty(
   ),
   "inventory",
   {
-    get: () => game.player.leftHand,
+    get: () => game.player?.leftHand,
   }
 );
 //Body parts
@@ -595,8 +668,8 @@ Object.defineProperties(
       get: () =>
         game.player
           ? (
-              game.player.leftHand.get(0)?.getItem()?.component ??
-              game.player.armType
+              game.player?.leftHand.get(0)?.getItem()?.component ??
+              game.player?.armType
             )?.image
           : "error",
     },
@@ -604,8 +677,8 @@ Object.defineProperties(
       get: () =>
         game.player
           ? (
-              game.player.leftHand.get(0)?.getItem()?.component ??
-              game.player.armType
+              game.player?.leftHand.get(0)?.getItem()?.component ??
+              game.player?.armType
             )?.width * 3.33
           : 0,
     },
@@ -613,8 +686,8 @@ Object.defineProperties(
       get: () =>
         game.player
           ? (
-              game.player.leftHand.get(0)?.getItem()?.component ??
-              game.player.armType
+              game.player?.leftHand.get(0)?.getItem()?.component ??
+              game.player?.armType
             )?.height * 3.33
           : 0,
     },
@@ -639,8 +712,8 @@ Object.defineProperties(
       get: () =>
         game.player
           ? (
-              game.player.rightHand.get(0)?.getItem()?.component ??
-              game.player.armType
+              game.player?.rightHand.get(0)?.getItem()?.component ??
+              game.player?.armType
             )?.image
           : "error",
     },
@@ -648,8 +721,8 @@ Object.defineProperties(
       get: () =>
         game.player
           ? (
-              game.player.rightHand.get(0)?.getItem()?.component ??
-              game.player.armType
+              game.player?.rightHand.get(0)?.getItem()?.component ??
+              game.player?.armType
             )?.width * 3.33
           : 0,
     },
@@ -657,8 +730,8 @@ Object.defineProperties(
       get: () =>
         game.player
           ? (
-              game.player.rightHand.get(0)?.getItem()?.component ??
-              game.player.armType
+              game.player?.rightHand.get(0)?.getItem()?.component ??
+              game.player?.armType
             )?.height * 3.33
           : 0,
     },
@@ -670,7 +743,7 @@ Object.defineProperties(
 //                        TEXT EDITOR
 
 //##############################################################
-let cmdHistory = [];
+export let cmdHistory = [];
 //Command Line Input
 Object.defineProperties(
   createUIComponent(
@@ -732,4 +805,110 @@ Object.defineProperties(
   }
 );
 
-export { cmdHistory };
+//##############################################################
+
+//                       DEATH SCREEN
+
+//##############################################################
+createUIComponent(["in-game"], ["dead:yes"], 0, 30, 600, 340, "none");
+createUIComponent(
+  ["in-game"],
+  ["dead:yes"],
+  0,
+  -170,
+  700,
+  60,
+  "both",
+  null,
+  "You Died",
+  false,
+  50
+);
+createUIComponent(
+  ["in-game"],
+  ["dead:yes"],
+  0,
+  -100,
+  0,
+  0,
+  "none",
+  null,
+  "Choose Respawn Option:",
+  true,
+  20
+);
+createUIComponent(
+  ["in-game"],
+  ["dead:yes"],
+  -175,
+  25,
+  150,
+  200,
+  "none",
+  () => {
+    if (game.money < 1000) return;
+    game.money -= 1000;
+    Log.send("Spent $1000 on [Basic Respawn]", [80, 200, 80]);
+    UIComponent.setCondition("dead:no");
+    deliverPlayer(null, totalSize / 2, totalSize / 2, true, false);
+  },
+  ">> New Player <<\nSend a new robot\nwith the basic\nscrap equipment\nto the drop\npoint.\n\n$1000",
+  true,
+  15
+);
+createUIComponent(
+  ["in-game"],
+  ["dead:yes"],
+  0,
+  25,
+  150,
+  200,
+  "none",
+  () => {
+    if (game.money < 5000) return;
+    game.money -= 5000;
+    Log.send("Spent $5000 on [Rebuild Respawn]", [80, 200, 80]);
+    UIComponent.setCondition("dead:no");
+    deliverPlayer(game.player, totalSize / 2, totalSize / 2, true, false);
+  },
+  ">> Fix Player <<\nRe-send a clone\nof your current\nrobot to the\ndrop point.\n\n$5000",
+  true,
+  15
+);
+createUIComponent(
+  ["in-game"],
+  ["dead:yes"],
+  175,
+  25,
+  150,
+  200,
+  "none",
+  () => {
+    if (game.money < 7500) return;
+    game.money -= 7500;
+    Log.send("Spent $7500 on [Convenience Respawn]", [80, 200, 80]);
+    UIComponent.setCondition("dead:no");
+    deliverPlayer(game.player, game.player?.x, game.player?.y, true, false);
+  },
+  "> Convenience <\n>>> Respawn <<<\nSend a new robot\nwith the basic\nscrap equipment\nto the point\nwhere you died.\n\n$7500",
+  true,
+  15
+);
+createUIComponent(
+  ["in-game"],
+  ["dead:yes"],
+  0,
+  175,
+  200,
+  30,
+  "none",
+  () => {
+    world.reset();
+    game.reset();
+    gen.reset();
+    ui.reset();
+  },
+  "End Game",
+  true,
+  15
+);
