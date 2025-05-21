@@ -37,6 +37,7 @@ import { ExplosionEffect, ImageParticleEmissionEffect, MultiEffect, NuclearExplo
 import { VirtualBullet } from "../classes/projectile/virtual-bullet.js";
 import { ModularTankEntity } from "../classes/entity/modular-tank.js";
 import { TankAssemblyBay } from "../classes/block/tonq/tank-assembly-bay.js";
+import { LaunchPad } from "../classes/block/capitalism/launch-pad.js";
 //Basic
 Registries.type.add("generic", RegisteredItem);
 //Entities and parts
@@ -97,6 +98,7 @@ Registries.type.add("sign", SignBlock);
 Registries.type.add("bomb", Bomb);
 Registries.type.add("nuclear-bomb", NuclearBomb);
 Registries.type.add("tank-assembler", TankAssemblyBay);
+Registries.type.add("launch-pad", LaunchPad);
 //Dev blocks
 Registries.type.add("dev::structurereader", StructureReaderBlock);
 Registries.type.add("dev::itemcatalog", ItemCatalogBlock);

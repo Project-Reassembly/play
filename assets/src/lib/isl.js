@@ -5,7 +5,7 @@ import {
   ISLError,
 } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@main/core/interpreter.js";
 import { ISLExtension } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@main/core/extensions.js";
-import { saveGame, loadGame } from "../play/game.js";
+import { saveGame, loadGame, clearData } from "../play/game.js";
 import { Entity } from "../classes/entity/entity.js";
 import { Block } from "../classes/block/block.js";
 import { Registries } from "../core/registry.js";
@@ -216,6 +216,13 @@ cle.addKeyword(
     loadGame(worldName?.value);
   },
   [{ type: "string", name: "name", optional: true }]
+);
+cle.addKeyword(
+  "clear",
+  (interp, labels) => {
+    clearData();
+  },
+  []
 );
 cle.addKeyword(
   "activate",

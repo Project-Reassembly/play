@@ -10,7 +10,7 @@ import { UIComponent } from "../core/ui.js";
 import {} from "../lib/isl.js";
 import { Serialiser } from "../core/serialiser.js";
 import { createEffect, effectTimer, emitEffect, Explosion } from "./effects.js";
-import { Player } from "../classes/entity/player.js";
+import { Player, respawnTimer } from "../classes/entity/player.js";
 import { WaveParticle } from "../classes/effect/wave-particle.js";
 import { clamp, rnd, roundNum, tru } from "../core/number.js";
 import { PlaceableItem } from "../classes/item/placeable.js";
@@ -516,9 +516,9 @@ function loadGame(name) {
   effectTimer.cancel("*");
   effects.screenShakeInstances.splice(0);
 
-  let wrld = World.deserialise(JSON.parse(file));
+  let wrld = JSON.parse(file);
   game.money = wrld.money ?? 10000;
-  world.become(wrld);
+  world.become(World.deserialise(wrld));
   console.log("Game loaded.");
   Log.send("You are now playing on '" + world.name + "'.", [0, 255, 0]);
   return true;
@@ -788,6 +788,7 @@ function uiFrame() {
 
 function tickTimers() {
   effectTimer.tick();
+  respawnTimer.tick();
 }
 
 function gameFrame() {
@@ -1408,6 +1409,7 @@ export {
   fonts,
   loadGame,
   saveGame,
+  clearData,
   gen,
   deliverPlayer,
 };

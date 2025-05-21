@@ -510,7 +510,13 @@ createUIComponent(
   () => {
     game.player?.inventory.iterate(
       (stack) =>
-        DroppedItemStack.create(stack, world, game.player?.x, game.player?.y, 5),
+        DroppedItemStack.create(
+          stack,
+          world,
+          game.player?.x,
+          game.player?.y,
+          5
+        ),
       true
     );
     game.player?.inventory.clear();
@@ -846,13 +852,13 @@ createUIComponent(
   200,
   "none",
   () => {
-    if (game.money < 1000) return;
-    game.money -= 1000;
-    Log.send("Spent $1000 on [Basic Respawn]", [80, 200, 80]);
+    if (game.money < 1200) return;
+    game.money -= 1200;
+    Log.send("Spent $1200 on [Basic Respawn]", [80, 200, 80]);
     UIComponent.setCondition("dead:no");
     deliverPlayer(null, totalSize / 2, totalSize / 2, true, false);
   },
-  ">> New Player <<\nSend a new robot\nwith the basic\nscrap equipment\nto the drop\npoint.\n\n$1000",
+  ">> New Player <<\nSend a new robot\nwith the basic\nscrap equipment\nto the drop\npoint.\n\n$1200",
   true,
   15
 );
@@ -865,13 +871,13 @@ createUIComponent(
   200,
   "none",
   () => {
-    if (game.money < 5000) return;
-    game.money -= 5000;
-    Log.send("Spent $5000 on [Rebuild Respawn]", [80, 200, 80]);
+    if (game.money < 1500) return;
+    game.money -= 1500;
+    Log.send("Spent $1000 on [Rebuild Respawn]", [80, 200, 80]);
     UIComponent.setCondition("dead:no");
     deliverPlayer(game.player, totalSize / 2, totalSize / 2, true, false);
   },
-  ">> Fix Player <<\nRe-send a clone\nof your current\nrobot to the\ndrop point.\n\n$5000",
+  ">> Fix Player <<\nRe-send a clone\nof your current\nrobot to the\ndrop point.\n\n$1000",
   true,
   15
 );
@@ -884,13 +890,13 @@ createUIComponent(
   200,
   "none",
   () => {
-    if (game.money < 7500) return;
-    game.money -= 7500;
-    Log.send("Spent $7500 on [Convenience Respawn]", [80, 200, 80]);
+    if (game.money < 2000) return;
+    game.money -= 2000;
+    Log.send("Spent $2000 on [Convenience Respawn]", [80, 200, 80]);
     UIComponent.setCondition("dead:no");
     deliverPlayer(game.player, game.player?.x, game.player?.y, true, false);
   },
-  "> Convenience <\n>>> Respawn <<<\nSend a new robot\nwith the basic\nscrap equipment\nto the point\nwhere you died.\n\n$7500",
+  "> Convenience <\n>>> Respawn <<<\nSend a new robot\nwith the basic\nscrap equipment\nto the point\nwhere you died.\n\n$2000",
   true,
   15
 );

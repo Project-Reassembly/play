@@ -7,6 +7,7 @@ import { game } from "../../play/game.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { Inventory } from "../inventory.js";
 import { ui, UIComponent } from "../../core/ui.js";
+export const respawnTimer = new Timer();
 
 class Player extends EquippedEntity {
   respawnTime = 180;
@@ -39,8 +40,10 @@ class Player extends EquippedEntity {
       3
     );
     Inventory.mouseItemStack.clear();
-    ui.waitingForMouseUp = true;
-    UIComponent.setCondition("dead:yes");
+    respawnTimer.do(() => {
+      ui.waitingForMouseUp = true;
+      UIComponent.setCondition("dead:yes");
+    }, this.respawnTime);
     // respawnTimer.do(() => {
     //   this.health = this.maxHealth;
     //   this.statuses = {};

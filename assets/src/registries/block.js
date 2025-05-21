@@ -70,6 +70,7 @@ createLinkedBlockAndItem(
   },
   {
     description: "A block of solid stone.\nCould be used as defense.",
+    marketValue: 2.5,
   }
 );
 createLinkedBlockAndItem(
@@ -82,6 +83,7 @@ createLinkedBlockAndItem(
   },
   {
     description: "A block of sandstone.\n\nCould be used as defense.",
+    marketValue: 1,
   }
 );
 createLinkedBlockAndItem(
@@ -94,6 +96,7 @@ createLinkedBlockAndItem(
   },
   {
     description: "A block of electrical scrap.\n\nCould be used as defense.",
+    marketValue: 5,
   }
 );
 createLinkedBlockAndItem(
@@ -106,6 +109,7 @@ createLinkedBlockAndItem(
   },
   {
     description: "A solid copper cube.\n\nCould be used as defense.",
+    marketValue: 15,
   }
 );
 createLinkedBlockAndItem(
@@ -119,6 +123,7 @@ createLinkedBlockAndItem(
   {
     description:
       "A solid iron cube.\nSomehow doesn't rust.\n\nCould be used as defense.",
+    marketValue: 52,
   }
 );
 createLinkedBlockAndItem(
@@ -133,6 +138,7 @@ createLinkedBlockAndItem(
   {
     description:
       "An extremely dense cube of tungsten.\nGood thing you're a robot.\n\nCould be used as defense.",
+    marketValue: 625,
   }
 );
 createLinkedBlockAndItem(
@@ -146,6 +152,7 @@ createLinkedBlockAndItem(
   },
   {
     description: "A cube of titanium.\n\nCould be used as defense.",
+    marketValue: 900,
   }
 );
 //## OFFENSIVE ##
@@ -161,6 +168,7 @@ createLinkedBlockAndItem(
   {
     description:
       "Explodes violently when any enemy gets near.\nCan also be manually triggered.",
+    marketValue: 15,
   }
 );
 createLinkedBlockAndItem(
@@ -179,6 +187,7 @@ createLinkedBlockAndItem(
     image: "bomb.landmine.item",
     description:
       "Explodes violently when any enemy gets near.\n(Mostly) hidden from enemy teams, and can be walked over.\nExplodes faster than normal bombs.\nDoes not indicate its fuse.",
+    marketValue: 25,
   }
 );
 createLinkedBlockAndItem(
@@ -236,7 +245,8 @@ createLinkedBlockAndItem(
   {
     description:
       "A Bomb powered by a runaway chain reaction of decaying Uranium.",
-    rarity: Item.rarity.BLUE
+    rarity: Item.rarity.BLUE,
+    marketValue: 2500,
   }
 );
 //## CRAFTERS ##
@@ -432,6 +442,7 @@ createLinkedBlockAndItem(
   {
     description:
       "A simple construction,\ncapable of crafting\nbasic machinery.\n\nCan reproduce.",
+    marketValue: 30,
   }
 );
 createLinkedBlockAndItem(
@@ -447,6 +458,7 @@ createLinkedBlockAndItem(
   {
     description:
       "A machine capable of reversing\nthe work of a Scrap Assembler.",
+    marketValue: 60,
   }
 );
 createLinkedBlockAndItem(
@@ -510,6 +522,7 @@ createLinkedBlockAndItem(
   },
   {
     description: "Smelts and casts basic ores into ingot form.",
+    marketValue: 40,
   }
 );
 createLinkedBlockAndItem(
@@ -646,6 +659,7 @@ createLinkedBlockAndItem(
   },
   {
     description: "Compresses low-tier resources into cubes.",
+    marketValue: 60,
   }
 );
 //Copper Tier [1]
@@ -719,6 +733,7 @@ createLinkedBlockAndItem(
   },
   {
     description: "Constructs machines for use in production and defense.",
+    marketValue: 140,
   }
 );
 //## DRILLS ##
@@ -746,6 +761,7 @@ createLinkedBlockAndItem(
   },
   {
     description: "Slowly collects resources from below it.",
+    marketValue: 15,
   }
 );
 //Copper Tier [1]
@@ -776,7 +792,7 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "Slowly collects resources from below it.\nCan drill Iron and Electrum.",
+      "Slowly collects resources from below it.\nCan drill Iron and Electrum."
   }
 );
 //## CONVEYOR ##
@@ -794,6 +810,7 @@ createLinkedBlockAndItem(
   {
     description:
       "A slow-moving belt.\nTransports items from one place to another.",
+    marketValue: 1.5,
   }
 );
 createLinkedBlockAndItem(
@@ -809,6 +826,7 @@ createLinkedBlockAndItem(
   {
     description:
       "A slow-moving belt.\nTransports items from one place to another.\nPulls selected items from the block behind it.",
+    marketValue: 2.5,
   }
 );
 //Copper Tier [1]
@@ -879,6 +897,19 @@ createLinkedBlockAndItem(
   },
   {
     description: "Assembles a tank out of blocks.\nThe blocks are real and can be destroyed and interacted with,\nbut may produce odd results.",
+    rarity: Item.rarity.SPECIAL
+  }
+)
+//## CAPITALISM ##
+createLinkedBlockAndItem(
+  "launch-pad",
+  "Launch Pad",
+  "base.iron",
+  {
+    type: "launch-pad",
+  },
+  {
+    description: "Launches batches of items to space,\nready to be collected by ITI.",
     rarity: Item.rarity.SPECIAL
   }
 )

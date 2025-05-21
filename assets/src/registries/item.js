@@ -4,29 +4,34 @@ Registries.items.add("nothing", {});
 //Materials
 Registries.items.add("scrap", {
   name: "Scrap Metal",
+  marketValue: 1,
   description:
     "A small piece of scrap,\nrecovered from remains\nof destroyed machines.",
   image: "item.scrap",
 });
 Registries.items.add("plate", {
   name: "Metal Plate",
+  marketValue: 5,
   description: "Sturdy metal plate, better than unrefined scrap.",
   image: "item.plate",
 });
 
 Registries.items.add("raw-copper", {
   name: "Raw Copper (Malachite)",
+  marketValue: 1,
   description:
     "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-copper",
 });
 Registries.items.add("copper-ingot", {
   name: "Copper Ingot",
+  marketValue: 3,
   description: "A material widely used in electronics.",
   image: "item.copper-ingot",
 });
 Registries.items.add("wire", {
   name: "Copper Wire",
+  marketValue: 0.5,
   description:
     "Basic wire, used for circuitry\n and low-power energy transmission.",
   image: "item.wire",
@@ -34,93 +39,108 @@ Registries.items.add("wire", {
 
 Registries.items.add("raw-iron", {
   name: "Raw Iron (Hematite)",
+  marketValue: 5,
   description:
     "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-iron",
 });
 Registries.items.add("iron-ingot", {
   name: "Iron Ingot",
+  marketValue: 12,
   description: "Strong material, but easily oxidises and corrodes.",
   image: "item.iron-ingot",
 });
 
 Registries.items.add("raw-electrum", {
   name: "Natural Electrum",
+  marketValue: 25,
   description:
     "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-electrum",
 });
 Registries.items.add("electrum-ingot", {
   name: "Electrum Ingot",
+  marketValue: 60,
   description: "An alloy of expensive metals.",
   image: "item.electrum-ingot",
 });
 Registries.items.add("silver-ingot", {
   name: "Silver Ingot",
+  marketValue: 40,
   description: "Reflective metal that tarnishes quickly.",
   image: "item.silver-ingot",
 });
 Registries.items.add("gold-ingot", {
   name: "Gold Ingot",
+  marketValue: 75,
   description: "A great electrical conductor, but very soft.",
   image: "item.gold-ingot",
 });
 
 Registries.items.add("raw-titanium", {
   name: "Raw Titanium (Ilmenite)",
+  marketValue: 85,
   description:
     "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-titanium",
 });
 Registries.items.add("titanium-ingot", {
   name: "Titanium Ingot",
+  marketValue: 200,
   description: "Strong, corrosion resistant metal.",
   image: "item.titanium-ingot",
 });
 
 Registries.items.add("raw-aluminium", {
   name: "Raw Aluminium (Bauxite)",
+  marketValue: 60,
   description:
     "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-aluminium",
 });
 Registries.items.add("aluminium-ingot", {
   name: "Aluminium Ingot",
-  description:
-    "Strong and light metal.\nYes, 'Aluminium'. Not my fault you can't spell.",
+  marketValue: 150,
+  description: "Strong and light metal.\nYes, 'Aluminium'. I will fight you.",
   image: "item.aluminium-ingot",
 });
 
 Registries.items.add("raw-tungsten", {
   name: "Raw Tungsten (Wolframite)",
+  marketValue: 50,
   description:
     "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-tungsten",
 });
 Registries.items.add("tungsten-ingot", {
   name: "Tungsten Ingot",
+  marketValue: 125,
   description: "Extremely dense but brittle metal.",
   image: "item.tungsten-ingot",
 });
 
 Registries.items.add("stone", {
   name: "Stone",
+  marketValue: 0.5,
   description: "A piece of rock.\nUsed in primitive construction.",
   image: "item.stone",
 });
 Registries.items.add("sand", {
   name: "Sand",
+  marketValue: 0.1,
   description: "A pile of sand.",
   image: "item.sand",
 });
 Registries.items.add("sandstone", {
   name: "Sandstone",
+  marketValue: 0.4,
   description: "A pile of sand, compressed into a hard ball.",
   image: "item.sandstone",
 });
 
 Registries.items.add("coal", {
   name: "Coal",
+  marketValue: 0.75,
   description:
     "A small chunk of coal.\nUsed as fuel in smelters.\nYay, pollution!",
   image: "item.coal",
@@ -128,6 +148,7 @@ Registries.items.add("coal", {
 //Weapons
 Registries.items.add("scrap-shooter", {
   type: "weapon",
+  marketValue: 40,
   name: "Scrap Shooter",
   description: "Shoots low-damage bullets quickly.\nSlightly inaccurate.",
   image: "weapon.scrap-shooter.item",
@@ -182,6 +203,7 @@ Registries.items.add("scrap-shooter", {
 Registries.items.add("iti-laser-caster", {
   type: "weapon",
   name: "Laser Caster",
+  marketValue: 25000,
   rarity: Item.rarity.ITI,
   description:
     "Fires fast-moving incendiary bolts of explosive plasma.\nBolts deal secondary damage, with homing fragmentation.",
@@ -567,6 +589,7 @@ Registries.items.add("iti-laser-caster", {
 Registries.items.add("iti-energy-repeater", {
   type: "weapon",
   name: "Energy Repeater",
+  marketValue: 22000,
   rarity: Item.rarity.ITI,
   description:
     "Shoots quickfire bursts of laser bolts.\nAlt-fire to charge a larger explosive bolt.",
@@ -929,6 +952,7 @@ Registries.items.add("iti-energy-repeater", {
 
 Registries.items.add("construction-gun", {
   type: "block-launcher",
+  marketValue: 1500,
   name: "Construction Gun",
   description:
     "Fires blocks to place them and deal damage.\nAlt-fire to select ammo type, Main to launch.\nVolatile blocks will explode if unplaceable.\n\nTip: Use shift to avoid deconstructing blocks.",
@@ -973,6 +997,7 @@ Registries.items.add("construction-gun", {
 Registries.items.add("scrap-cannon", {
   type: "weapon",
   name: "Scrap Cannon",
+  marketValue: 150,
   description:
     "Hurls 3 large clumps of scrap, which break apart\nin the air and on impact.",
   image: "weapon.scrap-shooter.item",
@@ -1083,6 +1108,7 @@ Registries.items.add("scrap-cannon", {
 Registries.items.add("tank-gun", {
   type: "weapon",
   name: "240mm Artillery Emplacement Gun",
+  marketValue: 1200,
   description: "Pretty sure this goes on a tank.",
   image: "weapon.tank-gun.item",
   ammoUse: 4,
@@ -1306,12 +1332,14 @@ Registries.items.add("tank-gun", {
 //Ammo
 Registries.items.add("scrap-bullet", {
   name: "Scrap Bullet",
+  marketValue: 0.01,
   description: "A tiny piece of scrap,\nfashioned into a sharp bullet.",
   image: "item.scrap-bullet",
   stackSize: 10000,
 });
 Registries.items.add("iti-energy-cell", {
   name: "Energy Cell",
+  marketValue: 1000,
   description:
     "A kind of battery manufactured by\nInfiniTech Industries.\nCan boost most energy weapons.",
   image: "item.iti-energy-cell",
@@ -1320,6 +1348,7 @@ Registries.items.add("iti-energy-cell", {
 });
 Registries.items.add("iti-plasma-cell", {
   name: "Plasma Cell",
+  marketValue: 2500,
   description:
     "More powerful version of the Energy Cell,\ndesigned for better weapon boosting.",
   image: "item.iti-plasma-cell",
@@ -1328,6 +1357,7 @@ Registries.items.add("iti-plasma-cell", {
 });
 Registries.items.add("iti-destabilised-cell", {
   name: "Destabilised Energy Cell",
+  marketValue: 7500,
   description: "Is this even ITI?",
   image: "item.iti-destabilised-cell",
   rarity: Item.rarity.ITI,
@@ -1338,6 +1368,7 @@ Registries.items.add("iti-destabilised-cell", {
 Registries.items.add("makeshift-explosive", {
   type: "throwable",
   name: "Makeshift Explosive",
+  marketValue: 5,
   description:
     "A small bomb made from coal dust and scrap.\n\nThat's got to be against some convention.",
   image: "item.coal",

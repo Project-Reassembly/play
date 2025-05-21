@@ -8,6 +8,8 @@ class Item extends RegisteredItem {
   rarity = 0;
   stackSize = 100;
 
+  marketValue = 1;
+
   _cachedTooltip = null;
   init() {}
   /** Called every tick while in inventory.
@@ -56,7 +58,7 @@ class Item extends RegisteredItem {
   getInformativeTooltip() {
     if (!this._cachedTooltip)
       this._cachedTooltip = this.createExtendedTooltip();
-    return this._cachedTooltip;
+    return this._cachedTooltip.concat("🟩Sell value: $" + this.marketValue+"⬜");
   }
   createExtendedTooltip() {
     return [];

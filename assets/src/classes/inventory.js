@@ -77,7 +77,7 @@ class Inventory {
   removeItem(item, number = 1) {
     let toRemove = number;
     this.iterate((content, slot, stop) => {
-      if (content.item === item && this.canPickupFromSlot(slot)) {
+      if ((content.item === item || item === "*") && this.canPickupFromSlot(slot)) {
         if (content.count > toRemove) {
           content.count -= toRemove;
           toRemove = 0;
@@ -88,7 +88,7 @@ class Inventory {
         }
       }
     }, true);
-    this.cleanInventory();
+    this.clean();
     return toRemove;
   }
 
@@ -121,7 +121,7 @@ class Inventory {
       this.addItem(item.item, item.count, true);
     }
   }
-  cleanInventory() {
+  clean() {
     for (let index = 0; index < this.storage.length; index++) {
       let item = this.storage[index];
       if (!item || !item instanceof ItemStack || item.isEmpty())
@@ -129,11 +129,11 @@ class Inventory {
     }
   }
   sortByRegistryName() {
-    this.cleanInventory();
+    this.clean();
     this.storage.sort(dynamicSort("item", ["nothing"]));
   }
   sortByCount() {
-    this.cleanInventory();
+    this.clean();
     this.storage.sort(dynamicSort("-count", ["nothing"]));
   }
   /**
@@ -229,7 +229,7 @@ class Inventory {
     let found = 0;
     this.iterate((slotContent, slot) => {
       if (excludedSlots.includes(slot)) return;
-      if (slotContent.item === item) found += slotContent.count;
+      if (slotContent.item === item || item === "*") found += slotContent.count;
     }, true);
     return found;
   }
@@ -339,7 +339,7 @@ class Inventory {
           ui.mouse.x > displayX - itemSize / 2 &&
           ui.mouse.y < displayY + itemSize / 2 &&
           ui.mouse.y > displayY - itemSize / 2;
-        if (invitemstack.item !== "nothing") {
+        if (invitemstack.item !== "nothing" && invitem) {
           if (selected) {
             if (
               Inventory.mouseItemStack.item !== "nothing" &&
@@ -433,7 +433,7 @@ class Inventory {
               }
             }
           }
-          drawImg(invitem.image, displayX, displayY, itemSize, itemSize);
+          drawImg(invitem?.image ?? "error", displayX, displayY, itemSize, itemSize);
           noStroke();
           fill(invitemstack.count > invitem.stackSize ? "red" : 255);
           textFont(fonts.ocr);

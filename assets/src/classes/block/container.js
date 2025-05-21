@@ -7,12 +7,13 @@ class Container extends Block {
   inventory = null;
   inventorySize = 30;
   selectable = true;
-  title = "Container";
+  title = "";
   /**@type {Block | null} */
   static selectedBlock = null;
   init() {
     super.init();
     this.inventory = new Inventory(this.inventorySize);
+    if (this.title.length === 0) this.title = this.name;
     // this.inventory = this.inventory.map((x) => construct(x, "itemstack"));
   }
   drawTooltip(x, y, outlineColour, backgroundColour, forceVReverse = false) {
