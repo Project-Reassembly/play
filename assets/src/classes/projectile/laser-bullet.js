@@ -1,3 +1,5 @@
+import { Vector } from "../../core/number.js";
+import { PhysicalObject } from "../physical.js";
 import { Bullet } from "./bullet.js";
 class LaserBullet extends Bullet {
   //Length of the beam. Replaces speed.
@@ -68,14 +70,16 @@ class LaserBullet extends Bullet {
       pop();
     }
   }
+  /**
+   * 
+   * @param {PhysicalObject} obj 
+   * @returns 
+   */
   collidesWith(obj) {
     let currentLength = this.length * this.#lengthFraction;
     let currentHitSize = this.hitSize * this.#widthFraction;
     if (currentHitSize <= 0) return false; //Catch problem where hitsize = 0 causes infinite loop
-    let offset = {
-      x: Math.cos(this.directionRad),
-      y: Math.sin(this.directionRad),
-    };
+    let offset = Vector.fromAngle(this.direction);
     //Try every hitsize px along current length
     for (let factor = 0; factor < currentLength; factor += currentHitSize) {
       //Return true if hitting the object
@@ -86,7 +90,7 @@ class LaserBullet extends Bullet {
           obj.x,
           obj.y
         ) <=
-        currentHitSize + obj.hitSize
+        currentHitSize + obj.size
       )
         return true;
     }

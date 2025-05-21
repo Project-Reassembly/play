@@ -7,7 +7,7 @@ class Wall extends Block {
   /** Increase this to decrease the amount by which higher values reduce damage. By a **lot**. _This is sensitive_, use carefully.*/
   armourToughness = 5;
   damage(type, amount, source) {
-    super.damage(
+    return super.damage(
       type,
       amount *
         (1 -

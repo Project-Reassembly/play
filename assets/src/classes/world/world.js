@@ -57,6 +57,9 @@ class World {
   /**Chunks to render this frame.
    * @type {Chunk[]} */
   toRender = [];
+  /**Chunks to tick this frame.
+   * @type {Chunk[]} */
+  toTick = [];
   constructor(name = "World") {
     this.name = name;
   }
@@ -69,13 +72,18 @@ class World {
     this.floorParticles = [];
     this.networks = [];
     this.toRender = [];
+    this.toTick = [];
   }
   tickAll() {
     this.#actualTick();
     this.#removeDead();
   }
-  #actualTick() {
+  resetRenderer() {
     this.toRender = this.getRenderedChunks(undefined, ui.camera.zoom);
+  }
+  #actualTick() {
+    this.resetRenderer();
+    this.toTick = this.getRenderedChunks(World.simulationDistance);
     //Tick *everything*
     this.physobjs.forEach((p) => p.tick());
     this.floorParticles.forEach((p) => p.step(1));
@@ -97,7 +105,7 @@ class World {
       }
     });
     //Only tick simulated chunks
-    this.getRenderedChunks(World.simulationDistance).forEach((chunk) => {
+    this.toTick.forEach((chunk) => {
       chunk.tick();
       if (tru(World.randomTick)) chunk.randomTick();
     });

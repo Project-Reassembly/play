@@ -1,10 +1,12 @@
-import { PhysicalObject } from "../physical.js";
+import { PhysicalObject, ShootableObject } from "../physical.js";
 import { rotatedImg, rotatedShape } from "../../core/ui.js";
 import { rnd, tru } from "../../core/number.js";
 import { repeat } from "../../play/effects.js";
 import { construct } from "../../core/constructor.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
 import { Fire } from "../effect/fire.js";
+import { blockSize } from "../../scaling.js";
+import { Log } from "../../play/messaging.js";
 class Bullet extends PhysicalObject {
   extraUpdates = 0;
   direction = 0;
@@ -13,7 +15,16 @@ class Bullet extends PhysicalObject {
   decel = 0;
   lifetime = 60;
   hitSize = 5;
+
+  //collision types
   collides = true;
+  collidesBlocks = true;
+  /**Does this bullet hit grounded entities? */
+  collidesGround = true;
+  /**Does this bullet hit airborne entities? */
+  collidesAir = true;
+
+  //trails
   trail = true;
   trailColours = [[255, 255, 255, 200]];
   trailShape = "rhombus";
@@ -21,8 +32,8 @@ class Bullet extends PhysicalObject {
   trailLength = 0;
   trailLife = 0;
   trailLight = 0;
+  //
   remove = false;
-  pierce = 0;
   light = 0;
   drawer = {
     shape: "circle",
@@ -32,10 +43,15 @@ class Bullet extends PhysicalObject {
     height: 10,
   };
   entity = null;
+  //bonc
   knockback = 0;
   kineticKnockback = false;
   controlledKnockback = false;
+  //pierce
   damaged = [];
+  pierce = 0;
+  conditionalPierce = false;
+  //internal
   _trailCounter = 20;
   trailInterval = null;
   //Statuseseseseses
@@ -79,9 +95,6 @@ class Bullet extends PhysicalObject {
     super.init();
     this.maxLife = this.lifetime;
     this.trailInterval ??= this.hitSize * 4;
-    if (this.trailColours.length === 1) {
-      this.trailColours[1] = this.trailColours[0].slice(0); //Copy colour
-    }
   }
   oncreated() {
     this.emit(this.spawnEffect);
@@ -93,9 +106,9 @@ class Bullet extends PhysicalObject {
     repeat(this.extraUpdates + 1, () => this.step(1));
   }
   step(dt) {
-    this.spawnTrail(dt);
     //Not if dead
     if (!this.remove) {
+    this.spawnTrail(dt);
       this.intervalTick();
       //Which way to move
       let moveVector = p5.Vector.fromAngle(this.directionRad);
@@ -103,6 +116,8 @@ class Bullet extends PhysicalObject {
       moveVector.mult(this.speed * dt);
       //Move
       this.move(moveVector.x, moveVector.y);
+      //hit
+      this.checkCollisions();
       //Speed change
       this.speed = Math.max(this.speed - dt * this.decel, 0);
       //Tick lifetime
@@ -112,9 +127,6 @@ class Bullet extends PhysicalObject {
         this.lifetime -= dt;
       }
     }
-  }
-  collidesWith(other) {
-    return this.collides && super.collidesWith(other);
   }
   move(x, y) {
     super.move(x, y, true);
@@ -236,6 +248,80 @@ class Bullet extends PhysicalObject {
     } else {
       this.#intervalCounter--;
     }
+  }
+  checkCollisions() {
+    if (this.remove || !this.collides) return;
+    //collide with blocks
+    if (this.collidesBlocks)
+      this.world
+        .blocksInSquare(
+          Math.floor(this.x / blockSize),
+          Math.floor(this.y / blockSize),
+          Math.ceil(this.hitSize / blockSize),
+          "blocks"
+        )
+        .forEach((block) => {
+          if (
+            !this.remove &&
+            this.collides &&
+            !this.damaged.includes(block) &&
+            this.collidesWith(block)
+          ) {
+            this.hit(block);
+          }
+        });
+    //collide with entities
+    this.world.entities.forEach((entity) => {
+      if (
+        !this.remove &&
+        this.collides &&
+        !this.damaged.includes(entity) &&
+        this.collidesWith(entity)
+      ) {
+        if (
+          (this.collidesGround && !entity.flying) ||
+          (this.collidesAir && entity.flying)
+        )
+          this.hit(entity);
+      }
+    });
+  }
+  isExhausted() {
+    return this.conditionalPierce ? false : this.pierce < 0;
+  }
+  hit(physobj) {
+    if (physobj.team !== this.entity.team) {
+      //Reduce pierce
+      this.pierce--;
+      //Take all damage instances
+      for (let instance of this.damage) {
+        if (!instance.spread) instance.spread = 0;
+        let todeal =
+          instance.amount + (this.conditionalPierce
+            ? 0
+            : rnd(instance.spread, -instance.spread));
+        let taken = Math.min(todeal, physobj.health);
+        if (!instance.radius) {
+          physobj.damage(instance.type, todeal, this.entity);
+          if (this.conditionalPierce) {
+            instance.amount -= taken || 0;
+            instance.spread = 0;
+            if (instance.amount <= 0) {
+              this.remove = true;
+            }
+          }
+        }
+      }
+      this.emit(this.hitEffect);
+      //Make the bullet know
+      this.damaged.push(physobj);
+      //If exhausted
+      if (this.isExhausted()) {
+        //Delete
+        this.remove = true;
+      }
+    }
+    physobj.hitByBullet(this);
   }
 }
 function patternedBulletExpulsion(

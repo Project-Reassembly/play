@@ -1113,6 +1113,7 @@ Registries.items.add("tank-gun", {
   image: "weapon.tank-gun.item",
   ammoUse: 4,
   shootX: 30,
+  recoil: 4,
   range: 720,
   bullets: {
     types: [
@@ -1133,6 +1134,7 @@ Registries.items.add("tank-gun", {
           trailLife: 45,
           trailShape: "rhombus",
           trailWidth: 10,
+          conditionalPierce: true,
           drawer: {
             shape: "rhombus",
             fill: "#cd9f8b",
@@ -1148,7 +1150,6 @@ Registries.items.add("tank-gun", {
             {
               type: "ballistic",
               amount: 75,
-              spread: 30,
               radius: 20,
             },
           ],
@@ -1202,11 +1203,11 @@ Registries.items.add("tank-gun", {
           [200, 200, 200, 50],
           [80, 62, 55, 50],
         ],
+        conditionalPierce: true,
         damage: [
           {
             type: "ballistic",
             amount: 200,
-            spread: 50,
             radius: 30,
           },
         ],
@@ -1248,7 +1249,7 @@ Registries.items.add("tank-gun", {
         trailLife: 45,
         trailShape: "rhombus",
         trailWidth: 10,
-        pierce: 1,
+        conditionalPierce: true,
         drawer: {
           shape: "rhombus",
           fill: [255, 188, 153],
@@ -1265,7 +1266,6 @@ Registries.items.add("tank-gun", {
           {
             type: "ballistic",
             amount: 320,
-            spread: 70,
           },
         ],
         despawnEffect: "explosion~60",
@@ -1281,7 +1281,7 @@ Registries.items.add("tank-gun", {
         trailLife: 45,
         trailShape: "rhombus",
         trailWidth: 10,
-        pierce: 2,
+        conditionalPierce: true,
         drawer: {
           shape: "rhombus",
           fill: [255, 188, 153],
@@ -1298,7 +1298,6 @@ Registries.items.add("tank-gun", {
           {
             type: "ballistic",
             amount: 350,
-            spread: 80,
           },
         ],
         despawnEffect: "explosion~60",
@@ -1326,6 +1325,64 @@ Registries.items.add("tank-gun", {
     image: "weapon.tank-gun.component",
     recoil: 18,
     recoilSpeed: 0.2,
+  },
+});
+
+Registries.items.add("peti-plasma-railgun", {
+  type: "weapon",
+  name: "Plasma Railgun",
+  marketValue: 25000,
+  rarity: Item.rarity.PETI,
+  description: "Pierces targets with a massive bolt of red plasma.",
+  image: "weapon.iti-laser-caster.item",
+  range: 1000,
+  recoil: 20,
+  bullets: {
+    types: [
+      {
+        lifetime: 100,
+        extraUpdates: 99,
+        light: 70,
+        speed: 10,
+        trail: true,
+        hitSize: 10,
+        conditionalPierce: true,
+        trailShape: "rhombus",
+        trailEffect: "plasma-railgun-trail",
+        hitEffect: "plasma-railgun-hit~45",
+        knockback: 50,
+        drawer: {
+          hidden: true,
+        },
+        damage: [
+          {
+            type: "laser",
+            amount: 2400,
+            spread: 300,
+          },
+        ],
+        despawnEffect: "plasma-railgun-impact~70",
+      },
+    ],
+    ammos: {
+      none: 0,
+    },
+  },
+  shoot: {
+    charge: 100,
+    reload: 360,
+    chargeEffect: "plasma-railgun-charge",
+    effect: "plasma-railgun-fire",
+  },
+  component: {
+    type: "weapon-component",
+    width: 32,
+    height: 11,
+    yOffset: 13,
+    image: "weapon.iti-laser-caster.component",
+    recoil: 4,
+    rotationalRecoil: 8,
+    recoilSpeed: 0.15,
   },
 });
 

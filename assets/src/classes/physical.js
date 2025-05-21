@@ -46,77 +46,6 @@ class PhysicalObject extends RegisteredItem {
   }
 
   move(dx, dy, ignoresBlocks = false) {
-    // this.x += dx;
-    // this.y += dy;
-    // if (ignoresBlocks) return;
-    // //COLLISION DETECTION AAAA
-    // let hx = Math.floor(this.x / Block.size);
-    // let hy = Math.floor(this.y / Block.size);
-    // //Blocks
-    // let up = this.world.getBlock(hx, hy - 1, "blocks");
-    // let upright = this.world.getBlock(hx + 1, hy - 1, "blocks");
-    // let down = this.world.getBlock(hx, hy + 1, "blocks");
-    // let downright = this.world.getBlock(hx + 1, hy + 1, "blocks");
-    // let left = this.world.getBlock(hx - 1, hy, "blocks");
-    // let upleft = this.world.getBlock(hx - 1, hy - 1, "blocks");
-    // let right = this.world.getBlock(hx + 1, hy, "blocks");
-    // let downleft = this.world.getBlock(hx - 1, hy + 1, "blocks");
-    // //Entity colliders
-    // let topcollision = this.y + this.height / 2;
-    // let bottomcollision = this.y - this.height / 2;
-    // let leftcollision = this.x - this.width / 2;
-    // let rightcollision = this.x + this.width / 2;
-    // //Intermediary
-    // let hitsupleft =
-    //   upleft &&
-    //   !upleft.walkable &&
-    //   bottomcollision < upleft.y + Block.size &&
-    //   leftcollision < upleft.x + Block.size;
-    // let hitsupright =
-    //   upright &&
-    //   !upright.walkable &&
-    //   bottomcollision < upright.y + Block.size &&
-    //   rightcollision > upright.x;
-    // let hitsdownleft =
-    //   downleft &&
-    //   !downleft.walkable &&
-    //   topcollision > downleft.y &&
-    //   leftcollision < downleft.x + Block.size;
-    // let hitsdownright =
-    //   downright &&
-    //   !downright.walkable &&
-    //   topcollision > downright.y &&
-    //   rightcollision > downright.x;
-    // //Movement
-    // let noup =
-    //   (up && !up.walkable && bottomcollision < up.y + Block.size) ||
-    //   hitsupleft ||
-    //   hitsupright;
-    // let nodown =
-    //   (down && !down.walkable && topcollision > down.y) ||
-    //   hitsdownright ||
-    //   hitsdownleft;
-    // let noleft =
-    //   (left && !left.walkable && leftcollision < left.x + Block.size) ||
-    //   hitsupleft ||
-    //   hitsdownleft;
-    // let noright =
-    //   (right && !right.walkable && rightcollision > right.x) ||
-    //   hitsdownright ||
-    //   hitsupright;
-    // //Final judgement
-    // if (noright) {
-    //   this.x = (right ?? upright ?? downright).x - this.width / 2;
-    // }
-    // if (noleft) {
-    //   this.x = (left ?? upleft ?? downleft).x + this.width / 2 + Block.size;
-    // }
-    // if (noup) {
-    //   this.y = (up ?? upleft ?? upright).y + this.height / 2 + Block.size;
-    // }
-    // if (nodown) {
-    //   this.y = (down ?? downleft ?? downright).y - this.height / 2;
-    // }
     let hx = Math.floor(this.x / Block.size);
     let hy = Math.floor(this.y / Block.size);
     this._moveX(dx, ignoresBlocks);
@@ -357,17 +286,18 @@ class ShootableObject extends PhysicalObject {
     this.maxHealth = this.health;
   }
   tick() {
-    this.checkBullets();
+    //this.checkBullets();
   }
   takeDamage(type, amount = 0, source = null) {
+    let oldHP = this.health;
     if (amount === 0) return;
     this.damageTaken +=
       Math.min(amount, this.health) * this.effectiveHealthMult;
     if (source)
       source.damageDealt +=
         Math.min(amount, this.health) * this.effectiveHealthMult; //Stats pretend health was higher
+    this.createDamageNumber(Math.min(amount, this.health));
     this.health -= amount;
-    this.createDamageNumber(amount);
     if (this.health <= 0) {
       this.health = 0;
       if (!this.dead) {
@@ -375,6 +305,7 @@ class ShootableObject extends PhysicalObject {
         this.onHealthZeroed(type, source);
       }
     }
+    return oldHP - this.health;
   }
   createDamageNumber(amount) {
     this._baseDamageNumber(amount, this.x, this.y);
@@ -419,6 +350,9 @@ class ShootableObject extends PhysicalObject {
     );
   }
   onHealthZeroed(type, source) {}
+  /**
+   * @deprecated Collisions are now in bullet classes themselves
+   * */
   checkBullets() {
     if (!this.world) return;
     for (let bullet of this.world.bullets) {
@@ -461,7 +395,7 @@ class ShootableObject extends PhysicalObject {
   /**Deals damage to this object. If health goes below zero, the object is removed.*/
   damage(type = "normal", amount = 0, source = null) {
     this._healthbarShowTime = 180;
-    this.takeDamage(type, Math.max(amount, 0), source);
+    return this.takeDamage(type, Math.max(amount, 0), source);
   }
   heal(amount) {
     this.health += amount;

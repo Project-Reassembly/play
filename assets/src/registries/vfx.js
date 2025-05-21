@@ -315,6 +315,193 @@ Registries.vfx.add("laser-caster-frag-destabilised", {
   },
 });
 
+Registries.vfx.add("plasma-railgun-fire", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      amount: 8,
+      cone: 150,
+      particle: {
+        shape: "moved-triangle",
+        lifetime: 40,
+        direction: -90,
+        speed: 0,
+        widthFrom: 60,
+        widthTo: 120,
+        heightFrom: 20,
+        heightTo: 0,
+        colours: [
+          [255, 100, 100],
+          [255, 0, 0, 128],
+          [255, 0, 0, 0],
+        ],
+        light: 60,
+      },
+    },
+    {
+      type: "particle-emission",
+      amount: 5,
+      cone: 50,
+      particle: {
+        shape: "moved-triangle",
+        lifetime: 40,
+        direction: -90,
+        speed: 0,
+        widthFrom: 120,
+        widthTo: 240,
+        heightFrom: 15,
+        heightTo: 0,
+        colours: [
+          [255, 200, 200],
+          [255, 0, 0, 128],
+          [255, 0, 0, 0],
+        ],
+        light: 60,
+      },
+    },
+    {
+      type: "particle-emission",
+      amount: 3,
+      cone: 30,
+      particle: {
+        shape: "moved-triangle",
+        lifetime: 40,
+        direction: 90,
+        speed: 0,
+        widthFrom: 90,
+        widthTo: 180,
+        heightFrom: 10,
+        heightTo: 0,
+        colours: [
+          [255, 200, 200],
+          [255, 0, 0, 128],
+          [255, 0, 0, 0],
+        ],
+        light: 60,
+      },
+    },
+    {
+      type: "particle-emission",
+      amount: 3,
+      cone: 50,
+      particle: {
+        shape: "moved-triangle",
+        lifetime: 40,
+        direction: 90,
+        speed: 0,
+        widthFrom: 45,
+        widthTo: 90,
+        heightFrom: 20,
+        heightTo: 0,
+        colours: [
+          [255, 100, 100],
+          [255, 0, 0, 128],
+          [255, 0, 0, 0],
+        ],
+        light: 60,
+      },
+    },
+  ],
+});
+Registries.vfx.add("plasma-railgun-impact", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      amount: 8,
+      cone: 45,
+      particle: {
+        shape: "moved-triangle",
+        lifetime: 20,
+        direction: -90,
+        speed: 0,
+        widthFrom: 60,
+        widthTo: 240,
+        heightFrom: 20,
+        heightTo: 0,
+        colours: [
+          [255, 100, 100],
+          [255, 0, 0, 128],
+          [255, 0, 0, 0],
+        ],
+        light: 60,
+      },
+    },
+    {
+      type: "explosion",
+      sparkColours: [
+        [255, 200, 200],
+        [255, 100, 100, 0],
+      ],
+      waveColours: [
+        [255, 200, 200],
+        [255, 100, 100, 0],
+      ],
+      smoke: false,
+    },
+  ],
+});
+Registries.vfx.add("plasma-railgun-trail", {
+  type: "particle-emission",
+  amount: 3,
+  cone: 0,
+  maxXOffset: 5,
+  maxYOffset: 5,
+  particle: {
+    shape: "rhombus",
+    lifetime: 30,
+    speed: 3,
+    widthFrom: 10,
+    widthTo: 0,
+    heightFrom: 60,
+    heightTo: 120,
+    colours: [
+      [255, 200, 200],
+      [255, 0, 0, 128],
+      [255, 0, 0, 0],
+    ],
+    light: 60,
+  },
+});
+Registries.vfx.add("plasma-railgun-hit", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      amount: 4,
+      cone: 45,
+      particle: {
+        shape: "rhombus",
+        lifetime: 30,
+        speed: 5,
+        widthFrom: 10,
+        widthTo: 0,
+        heightFrom: 30,
+        heightTo: 60,
+        colours: [
+          [255, 200, 200],
+          [255, 0, 0, 128],
+          [255, 0, 0, 0],
+        ],
+        light: 60,
+      },
+    },
+    {
+      type: "explosion",
+      sparkColours: [
+        [255, 200, 200],
+        [255, 100, 100, 0],
+      ],
+      waveColours: [
+        [255, 200, 200],
+        [255, 100, 100, 0],
+      ],
+      smoke: false,
+    },
+  ],
+});
+
 //Nuclear
 
 Registries.vfx.add("nuke", {
@@ -502,6 +689,25 @@ Registries.vfx.add("laser-caster-charge", {
     strokeTo: 5,
     colours: [
       [0, 255, 255, 0],
+      [255, 255, 255],
+    ],
+    light: 30,
+  },
+});
+Registries.vfx.add("plasma-railgun-charge", {
+  type: "wave-emission",
+  emissions: 4,
+  interval: 20,
+  parentise: true,
+  particle: {
+    lifetime: 30,
+    radiusFrom: 40,
+    radiusTo: 0,
+    strokeFrom: 0,
+    strokeTo: 5,
+    colours: [
+      [255, 0, 0, 0],
+      [255, 0, 0, 128],
       [255, 255, 255],
     ],
     light: 30,

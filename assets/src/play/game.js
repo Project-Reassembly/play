@@ -1353,15 +1353,18 @@ onbeforeunload = (ev) => {
   }
 };
 let selectedDirection = 0;
-const zoomSpeed = 0.0125;
+const zoomSpeed = 0.00125;
 /**@param {WheelEvent} ev  */
 window.mouseWheel = function (ev) {
   //CTRL + scroll to zoom
-  if (ev.ctrlKey)
+  if (ev.ctrlKey) {
     ui.camera.zoom = roundNum(
       clamp(ui.camera.zoom - ev.delta * zoomSpeed, 0.25, 5),
       2
     );
+    //fix zooming holes
+    world.resetRenderer();
+  }
   //scroll normally to change block placement direction
   else
     selectedDirection = (

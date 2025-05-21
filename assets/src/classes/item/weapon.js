@@ -8,7 +8,7 @@ import { WeaponComponent } from "../entity/component.js";
 import { roundNum } from "../../core/number.js";
 import { PointBullet } from "../projectile/point-bullet.js";
 import { LaserBullet } from "../projectile/laser-bullet.js";
-import { patternedBulletExpulsion } from "../projectile/bullet.js";
+import { Bullet, patternedBulletExpulsion } from "../projectile/bullet.js";
 import { Missile } from "../projectile/missile.js";
 import { Registries } from "../../core/registry.js";
 class Weapon extends Equippable {
@@ -34,6 +34,9 @@ class Weapon extends Equippable {
   #accelerated = 0;
   #lastReload = 0;
   #lastCharge = 0;
+
+  //wooooooooooooo recoil
+  recoil = 0;
 
   init() {
     super.init();
@@ -144,7 +147,7 @@ class Weapon extends Equippable {
   }
   _useAmmo(holder, ammoType) {
     if (ammoType === "none") return true;
-    if (entityHasAmmo(holder,ammoType, this.ammoUse))
+    if (entityHasAmmo(holder, ammoType, this.ammoUse))
       entityAmmoUse(holder, ammoType, this.ammoUse);
     else return false;
     return true;
@@ -162,6 +165,12 @@ class Weapon extends Equippable {
 
     this.timer.repeat(
       () => {
+        holder.knock(
+          this.recoil * 100 / holder.size,
+          holder.direction + 180,
+          false,
+          10
+        );
         let pos = this._getShootPos(holder);
         autoScaledEffect(
           shoot.effect,
@@ -283,10 +292,7 @@ class Weapon extends Equippable {
           ? [
               x == "none"
                 ? " "
-                : ind(1) +
-                  "🟨" +
-                  Registries.items.get(x).name +
-                  ": variant⬜",
+                : ind(1) + "🟨" + Registries.items.get(x).name + ": variant⬜",
             ]
           : [
               x == "none"
@@ -303,6 +309,7 @@ class Weapon extends Equippable {
   static getBulletInfo(bullet = {}, idl = 0) {
     if (Array.isArray(bullet))
       return bullet.flatMap((b) => Weapon.getBulletInfo(b, idl));
+    /**@type {Bullet} */
     let blt = construct(bullet, "bullet");
     if (!blt) return [ind(idl) + "🟥invalid: " + bullet + "⬜"];
     let time = Math.min(blt.lifetime, blt.speed / blt.decel);
@@ -322,6 +329,7 @@ class Weapon extends Equippable {
         (x) =>
           ind(idl) +
           (x.amount ?? 0) +
+          (x.spread && x.spread > 0 ? " (±" + x.spread + ")" : "") +
           " " +
           (x.type ?? (x.radius > 0 ? "explosion" : "unknown")) +
           (x.radius > 0 ? " area" : "") +
@@ -338,7 +346,12 @@ class Weapon extends Equippable {
             "s"
           : ""),
 
-      ind(idl) + (blt.pierce > 0 ? "🟨" + blt.pierce + "× pierce⬜" : ""),
+      ind(idl) +
+        (blt.pierce > 0
+          ? blt.conditionalPierce
+            ? "🟨continues if target destroyed⬜"
+            : "🟨" + blt.pierce + "× pierce⬜"
+          : ""),
 
       ind(idl) + (blt.fires > 0 ? "🟧incendiary: " : ""),
       ind(idl + 1) +

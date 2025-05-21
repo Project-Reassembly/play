@@ -27,7 +27,7 @@ class DroppedItemStack extends Entity {
     this.height = 10;
     this.team = "items";
   }
-  damage() {}
+  damage() {return 0}
   tick() {
     if (this.dead) return;
     if (this.item.isEmpty()) {
