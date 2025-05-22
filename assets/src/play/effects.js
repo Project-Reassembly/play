@@ -61,6 +61,7 @@ class Explosion {
       "virtual"
     );
     damage.entity = this.source;
+    damage.world = this.world;
     this.world.bullets.push(damage);
     // Hit entities
     for (let e of this.world.entities) {

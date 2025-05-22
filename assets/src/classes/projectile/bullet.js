@@ -95,6 +95,7 @@ class Bullet extends PhysicalObject {
     super.init();
     this.maxLife = this.lifetime;
     this.trailInterval ??= this.hitSize * 4;
+    this.world ??= this.entity?.world;
   }
   oncreated() {
     this.emit(this.spawnEffect);
@@ -275,6 +276,7 @@ class Bullet extends PhysicalObject {
       if (
         !this.remove &&
         this.collides &&
+        entity.tangible && 
         !this.damaged.includes(entity) &&
         this.collidesWith(entity)
       ) {

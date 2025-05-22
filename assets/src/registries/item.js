@@ -29,12 +29,12 @@ Registries.items.add("copper-ingot", {
   description: "A material widely used in electronics.",
   image: "item.copper-ingot",
 });
-Registries.items.add("wire", {
+Registries.items.add("copper-wire", {
   name: "Copper Wire",
   marketValue: 0.5,
   description:
     "Basic wire, used for circuitry\n and low-power energy transmission.",
-  image: "item.wire",
+  image: "item.copper-wire",
 });
 
 Registries.items.add("raw-iron", {
@@ -144,6 +144,79 @@ Registries.items.add("coal", {
   description:
     "A small chunk of coal.\nUsed as fuel in smelters.\nYay, pollution!",
   image: "item.coal",
+});
+//Throwables
+Registries.items.add("makeshift-explosive", {
+  type: "throwable",
+  name: "Makeshift Explosive",
+  marketValue: 5,
+  description:
+    "A small bomb made from coal dust and scrap.\n\nThat's got to be against some convention.",
+  image: "item.makeshift-explosive",
+  bullet: {
+    lifetime: 120,
+    speed: 8,
+    decel: 0.2,
+    collides: false,
+    drawer: {
+      image: "item.makeshift-explosive",
+      width: 10,
+      height: 10,
+    },
+    status: "burning",
+    statusDuration: 360,
+    trailEffect: "burning",
+    damage: [
+      {
+        type: "explosion",
+        amount: 30,
+        spread: 10,
+        radius: 30,
+      },
+    ],
+    fragBullet: {
+      lifetime: 10,
+      speed: 15,
+      light: 30,
+      trail: true,
+      hitSize: 2.5,
+      trailShape: "rhombus",
+      drawer: {
+        shape: "rhombus",
+        fill: "#cd9f8b",
+        width: 8,
+        height: 3,
+        image: false,
+      },
+      trailColours: [
+        [255, 255, 100, 200],
+        [255, 0, 0, 100],
+        [75, 75, 75, 20],
+      ],
+      trailLife: 30,
+      damage: [
+        {
+          type: "ballistic",
+          amount: 5,
+          spread: 3,
+        },
+      ],
+    },
+    fragNumber: 9,
+    fragSpread: 360,
+    despawnEffect: "explosion~50",
+    fires: 3,
+    isFireBinomial: true,
+    fire: {
+      damage: 3,
+      lifetime: 720,
+      interval: 20,
+      status: "burning",
+      statusDuration: 120,
+    },
+    fireChance: 0.5,
+    fireSpread: 20,
+  },
 });
 //Weapons
 Registries.items.add("scrap-shooter", {
@@ -1334,9 +1407,11 @@ Registries.items.add("peti-plasma-railgun", {
   marketValue: 25000,
   rarity: Item.rarity.PETI,
   description: "Pierces targets with a massive bolt of red plasma.",
-  image: "weapon.iti-laser-caster.item",
+  image: "weapon.peti-plasma-railgun.item",
   range: 1000,
   recoil: 20,
+  shootX: -6,
+  shootY: 3,
   bullets: {
     types: [
       {
@@ -1376,13 +1451,13 @@ Registries.items.add("peti-plasma-railgun", {
   },
   component: {
     type: "weapon-component",
-    width: 32,
-    height: 11,
-    yOffset: 13,
-    image: "weapon.iti-laser-caster.component",
+    width: 42,
+    height: 20,
+    yOffset: 18,
+    image: "weapon.peti-plasma-railgun.component",
     recoil: 4,
-    rotationalRecoil: 8,
-    recoilSpeed: 0.15,
+    rotationalRecoil: 10,
+    recoilSpeed: 0.1,
   },
 });
 
@@ -1421,76 +1496,4 @@ Registries.items.add("iti-destabilised-cell", {
   stackSize: 200,
 });
 
-//Throwables
-Registries.items.add("makeshift-explosive", {
-  type: "throwable",
-  name: "Makeshift Explosive",
-  marketValue: 5,
-  description:
-    "A small bomb made from coal dust and scrap.\n\nThat's got to be against some convention.",
-  image: "item.coal",
-  bullet: {
-    lifetime: 120,
-    speed: 8,
-    decel: 0.2,
-    collides: false,
-    drawer: {
-      image: "item.coal",
-      width: 10,
-      height: 10,
-    },
-    status: "burning",
-    statusDuration: 360,
-    trailEffect: "burning",
-    damage: [
-      {
-        type: "explosion",
-        amount: 30,
-        spread: 10,
-        radius: 30,
-      },
-    ],
-    fragBullet: {
-      lifetime: 10,
-      speed: 15,
-      light: 30,
-      trail: true,
-      hitSize: 2.5,
-      trailShape: "rhombus",
-      drawer: {
-        shape: "rhombus",
-        fill: "#cd9f8b",
-        width: 8,
-        height: 3,
-        image: false,
-      },
-      trailColours: [
-        [255, 255, 100, 200],
-        [255, 0, 0, 100],
-        [75, 75, 75, 20],
-      ],
-      trailLife: 30,
-      damage: [
-        {
-          type: "ballistic",
-          amount: 5,
-          spread: 3,
-        },
-      ],
-    },
-    fragNumber: 9,
-    fragSpread: 360,
-    despawnEffect: "explosion~50",
-    fires: 3,
-    isFireBinomial: true,
-    fire: {
-      damage: 3,
-      lifetime: 720,
-      interval: 20,
-      status: "burning",
-      statusDuration: 120,
-    },
-    fireChance: 0.5,
-    fireSpread: 20,
-  },
-});
+

@@ -4,11 +4,12 @@ import { Integrate } from "./integrate.js";
 import {} from "../registries/type.js";
 console.log("[Setup] Imported types");
 import {} from "../registries/images.js";
-import {} from "../registries/block.js";
-import {} from "../registries/images.js";
 import {} from "../registries/deathmsg.js";
-import {} from "../registries/entity.js";
+
 import {} from "../registries/item.js";
+import {} from "../registries/block.js";
+import {} from "../registries/entity.js";
+
 import {} from "../registries/status.js";
 import {} from "../registries/vfx.js";
 import {} from "../registries/worldgen.js";

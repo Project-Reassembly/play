@@ -39,6 +39,13 @@ Registries.worldgen.add("ore-generator", {
   stageTitle: "Exposing Resources...",
   ores: [
     {
+      threshold: 100,
+      scale: 6,
+      octaves: 3,
+      falloff: 0.8,
+      tile: "coal-ore",
+    },
+    {
       threshold: 70,
       scale: 4,
       tile: "copper-ore",
@@ -67,6 +74,18 @@ Registries.worldgen.add("ruins-generator", {
       weight: 1,
       defs: [
         {
+          x: -2,
+          y: -1,
+          entity: "scavenger",
+          direction: 0,
+        },
+        {
+          x: -1,
+          y: -2,
+          entity: "scavenger",
+          direction: 0,
+        },
+        {
           x: -1,
           y: -1,
           block: "scrap-wall",
@@ -83,6 +102,27 @@ Registries.worldgen.add("ruins-generator", {
           y: 1,
           block: "scrap-drill",
           direction: 1,
+        },
+        {
+          x: -1,
+          y: 1,
+          block: "copper-ore",
+          direction: 0,
+          layer: "floor",
+        },
+        {
+          x: 0,
+          y: 1,
+          block: "copper-ore",
+          direction: 0,
+          layer: "floor",
+        },
+        {
+          x: -1,
+          y: 0,
+          block: "copper-ore",
+          direction: 0,
+          layer: "floor",
         },
         {
           x: 0,
@@ -122,6 +162,13 @@ Registries.worldgen.add("ruins-generator", {
         {
           x: 2,
           y: -2,
+          block: "coal-ore",
+          direction: 0,
+          layer: "floor",
+        },
+        {
+          x: 2,
+          y: -2,
           block: "scrap-drill",
           direction: 0,
         },
@@ -135,6 +182,12 @@ Registries.worldgen.add("ruins-generator", {
           x: 2,
           y: 1,
           block: "scrap-wall",
+          direction: 0,
+        },
+        {
+          x: 2,
+          y: 2,
+          entity: "scavenger",
           direction: 0,
         },
       ],
@@ -162,6 +215,41 @@ Registries.worldgen.add("ruins-generator", {
           direction: 0,
         },
         {
+          x: -2,
+          y: -1,
+          block: "copper-ore",
+          direction: 0,
+          layer: "floor",
+        },
+        {
+          x: -1,
+          y: -1,
+          block: "copper-ore",
+          direction: 0,
+          layer: "floor",
+        },
+        {
+          x: 0,
+          y: -1,
+          block: "copper-ore",
+          direction: 0,
+          layer: "floor",
+        },
+        {
+          x: -1,
+          y: 0,
+          block: "copper-ore",
+          direction: 0,
+          layer: "floor",
+        },
+        {
+          x: 0,
+          y: 0,
+          block: "copper-ore",
+          direction: 0,
+          layer: "floor",
+        },
+        {
           x: -1,
           y: -1,
           block: "scrap-drill",
@@ -170,7 +258,22 @@ Registries.worldgen.add("ruins-generator", {
         {
           x: 0,
           y: 0,
-          block: "scrap-drill",
+          entity: "scavenger",
+        },
+        {
+          x: 0,
+          y: 0,
+          entity: "scavenger",
+        },
+        {
+          x: 0,
+          y: 0,
+          entity: "scavenger",
+        },
+        {
+          x: 0,
+          y: 0,
+          entity: "scavenger",
         },
         {
           x: 0,
@@ -207,6 +310,27 @@ Registries.worldgen.add("ruins-generator", {
           y: 0,
           block: "scrap-wall",
           direction: 0,
+        },
+        {
+          x: 2,
+          y: 0,
+          block: "coal-ore",
+          direction: 0,
+          layer: "floor",
+        },
+        {
+          x: 1,
+          y: 0,
+          block: "coal-ore",
+          direction: 0,
+          layer: "floor",
+        },
+        {
+          x: 2,
+          y: 1,
+          block: "coal-ore",
+          direction: 0,
+          layer: "floor",
         },
         {
           x: 2,

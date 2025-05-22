@@ -15,6 +15,7 @@ class Weapon extends Equippable {
   timer = new Timer();
   ammoUse = 1;
   shootX = 15;
+  shootY = 0;
   bullets = new WeaponBulletConfiguration();
   shoot = new WeaponShootConfiguration();
   hasAltFire = false;
@@ -103,8 +104,12 @@ class Weapon extends Equippable {
   }
   _getShootPos(holder) {
     let pos = this.component.getPosOn(holder);
-    pos.x += Math.cos(pos.direction) * this.shootX;
-    pos.y += Math.sin(pos.direction) * this.shootX;
+    pos.x +=
+      Math.cos(pos.direction) * this.shootX +
+      Math.sin(pos.direction) * this.shootY;
+    pos.y +=
+      Math.sin(pos.direction) * this.shootX +
+      Math.cos(pos.direction) * this.shootY;
     return pos;
   }
   /**
@@ -166,7 +171,7 @@ class Weapon extends Equippable {
     this.timer.repeat(
       () => {
         holder.knock(
-          this.recoil * 100 / holder.size,
+          (this.recoil * 100) / holder.size,
           holder.direction + 180,
           false,
           10

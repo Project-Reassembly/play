@@ -18,6 +18,10 @@ class PhysicalObject extends RegisteredItem {
   hitSize = 30;
   /** @type {World} */
   world = null;
+
+  visible = true;
+  tangible = true;
+
   get directionRad() {
     return (this.direction / 180) * Math.PI;
   }

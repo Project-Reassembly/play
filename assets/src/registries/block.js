@@ -46,6 +46,12 @@ Registries.blocks.add("copper-ore", {
   drillSpeed: 0.75,
   name: "Copper Ore",
 });
+Registries.blocks.add("coal-ore", {
+  type: "ore",
+  image: "ore.coal",
+  drillSpeed: 1,
+  name: "Coal Deposit",
+});
 Registries.blocks.add("iron-ore", {
   type: "ore",
   image: "ore.iron",
@@ -437,6 +443,25 @@ createLinkedBlockAndItem(
         ],
         time: 1080,
       },
+      {
+        inputs: [
+          {
+            item: "makeshift-explosive",
+            count: 4,
+          },
+          {
+            item: "scrap",
+            count: 1,
+          },
+        ],
+        outputs: [
+          {
+            item: "bomb",
+            count: 1,
+          },
+        ],
+        time: 180,
+      },
     ],
   },
   {
@@ -571,48 +596,6 @@ createLinkedBlockAndItem(
       {
         inputs: [
           {
-            item: "makeshift-explosive",
-            count: 4,
-          },
-          {
-            item: "scrap",
-            count: 1,
-          },
-        ],
-        outputs: [
-          {
-            item: "bomb",
-            count: 1,
-          },
-        ],
-        time: 180,
-      },
-      {
-        inputs: [
-          {
-            item: "bomb",
-            count: 1,
-          },
-          {
-            item: "wire",
-            count: 3,
-          },
-          {
-            item: "plate",
-            count: 1,
-          },
-        ],
-        outputs: [
-          {
-            item: "landmine",
-            count: 1,
-          },
-        ],
-        time: 360,
-      },
-      {
-        inputs: [
-          {
             item: "sandstone",
             count: 4,
           },
@@ -729,6 +712,29 @@ createLinkedBlockAndItem(
         ],
         time: 200,
       },
+      {
+        inputs: [
+          {
+            item: "bomb",
+            count: 1,
+          },
+          {
+            item: "copper-wire",
+            count: 3,
+          },
+          {
+            item: "plate",
+            count: 1,
+          },
+        ],
+        outputs: [
+          {
+            item: "landmine",
+            count: 1,
+          },
+        ],
+        time: 360,
+      },
     ],
   },
   {
@@ -751,6 +757,7 @@ createLinkedBlockAndItem(
       sand: "sand",
       "sand-water": "sand",
       stone: "stone",
+      "coal-ore":"coal",
       "copper-ore": "raw-copper",
     },
     amount: 1,
@@ -778,6 +785,7 @@ createLinkedBlockAndItem(
       sand: "sand",
       "sand-water": "sand",
       stone: "stone",
+      "coal-ore":"coal",
       "copper-ore": "raw-copper",
       "iron-ore": "raw-iron",
       "electrum-ore": "raw-electrum",

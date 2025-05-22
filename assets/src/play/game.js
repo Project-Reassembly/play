@@ -26,6 +26,7 @@ import { ExecutionContext, exec } from "../lib/isl.js";
 import { DroppedItemStack } from "../classes/item/dropped-itemstack.js";
 import { fonts } from "./font.js";
 import { patternedBulletExpulsion } from "../classes/projectile/bullet.js";
+import { blockSize } from "../scaling.js";
 let histIndex = 0;
 const game = {
   saveslot: 1,
@@ -247,28 +248,54 @@ worldGenWorker.onmessage = (ev) => {
               ev.data.y + block.y,
               "tiles"
             ) === (block.target ?? ev.data.target))
-        )
-          try {
-            let blk = world.placeAt(
-              block.block,
-              ev.data.x + block.x,
-              ev.data.y + block.y,
-              block.layer ?? "blocks"
-            );
-            Object.assign(blk, block.construction ?? {});
+        ) {
+          if (block.block)
+            try {
+              let blk = world.placeAt(
+                block.block,
+                ev.data.x + block.x,
+                ev.data.y + block.y,
+                block.layer ?? "blocks"
+              );
+              Object.assign(blk, block.construction ?? {});
 
-            blk.direction = Block.dir.fromEnum(block.direction);
+              blk.direction = Block.dir.fromEnum(block.direction);
 
-            stats.placed[block.block] ??= 0;
-            stats.placed[block.block]++;
-          } catch (e) {
-            console.warn("Worldgen Error:\n" + e);
-            successful = false;
-            stats.failed++;
+              stats.placed[block.block] ??= 0;
+              stats.placed[block.block]++;
+            } catch (e) {
+              console.warn("Worldgen Error:\n" + e);
+              successful = false;
+              stats.failed++;
 
-            stats.placed["(" + block.block + ")"] ??= 0;
-            stats.placed["(" + block.block + ")"]++;
-          }
+              stats.placed["(" + block.block + ")"] ??= 0;
+              stats.placed["(" + block.block + ")"]++;
+            }
+          else if (block.entity)
+            try {
+              let ent = construct(
+                Registries.entities.get(block.entity),
+                "entity"
+              );
+              ent.addToWorld(
+                world,
+                (ev.data.x + block.x + 0.5) * blockSize,
+                (ev.data.y + block.y + 0.5) * blockSize
+              );
+
+              ent.direction = Block.dir.fromEnum(block.direction);
+
+              stats.placed["{E}" + block.entity] ??= 0;
+              stats.placed["{E}" + block.entity]++;
+            } catch (e) {
+              console.warn("Worldgen Error:\n" + e);
+              successful = false;
+              stats.failed++;
+
+              stats.placed["(" + block.block + ")"] ??= 0;
+              stats.placed["(" + block.block + ")"]++;
+            }
+        }
       }
       stats.structures[
         successful ? ev.data.name : "(" + ev.data.name + ")"
@@ -1005,6 +1032,7 @@ function deliverPlayer(player = null, x, y, arm = true, moveCamera = false) {
   }
   game.player.visible = false;
   game.player.controllable = false;
+  game.player.tangible = false;
   if (moveCamera) {
     ui.camera.x = game.player.x;
     ui.camera.y = game.player.y;
@@ -1085,11 +1113,19 @@ function deliverPlayer(player = null, x, y, arm = true, moveCamera = false) {
         world: world,
         team: "player",
         radius: 150,
-        amount: 500,
+        amount: 5000,
         knockback: 0,
       })
-        .create()
-        .dealDamage();
+        .create();
+      new Explosion({
+        x: game.player.x,
+        y: game.player.y,
+        world: world,
+        team: "player",
+        radius: 600,
+        amount: 500,
+        knockback: 0,
+      }).dealDamage();
       createEffect(
         "land-wave",
         world,
@@ -1117,6 +1153,7 @@ function deliverPlayer(player = null, x, y, arm = true, moveCamera = false) {
         );
       game.player.visible = true;
       game.player.controllable = true;
+      game.player.tangible = true;
     }, life);
   }, 180);
 }

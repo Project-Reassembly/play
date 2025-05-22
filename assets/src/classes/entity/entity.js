@@ -2,7 +2,7 @@ import { ShootableObject } from "../physical.js";
 import { construct } from "../../core/constructor.js";
 import { Registries } from "../../core/registry.js";
 import { World } from "../world/world.js";
-import { rnd, tru, roundNum } from "../../core/number.js";
+import { rnd, tru, roundNum, Vector } from "../../core/number.js";
 import { PhysicalObject } from "../physical.js";
 import {
   liquidDestructionBlast,
@@ -34,8 +34,6 @@ class Entity extends ShootableObject {
   speed = 10;
   turnSpeed = 10;
   target = null;
-
-  visible = true;
 
   //AI
   aiType = "passive";
@@ -151,14 +149,13 @@ class Entity extends ShootableObject {
   }
 
   hitByBullet(bullet) {
+    if (bullet.entity.team === this.team) return;
     if (bullet.controlledKnockback) {
       //Get direction to the target
-      let direction = degrees(
-        p5.Vector.sub(
-          createVector(bullet.entity.target.x, bullet.entity.target.y), //Target pos 'B'
-          createVector(bullet.x, bullet.y) //Bullet pos 'A'
-        ).heading() //'A->B' = 'B' - 'A'
-      );
+      let direction = new Vector(
+        bullet.entity.target.x,
+        bullet.entity.target.y
+      ).subXY(bullet.x, bullet.y).angle;
       this.knock(bullet.knockback, direction, bullet.kineticKnockback); //Knock with default resolution
     } else {
       this.knock(bullet.knockback, bullet.direction, bullet.kineticKnockback); //Knock with default resolution
@@ -264,7 +261,7 @@ class Entity extends ShootableObject {
     this.target = this.closestFrom(
       this.world.entities,
       this.targetRange,
-      (ent) => !ent.dead && ent.team !== this.team && conditions(ent)
+      (ent) => !ent.dead && ent.team !== this.team && ent.visible && conditions(ent)
     );
     if (this.target) {
       if (shoots && this.distanceTo(this.target) < this.followRange)
@@ -312,7 +309,7 @@ class Entity extends ShootableObject {
     noFill();
     stroke(this.target instanceof ShootableObject ? [255, 0, 0] : [0, 255, 0]);
     strokeWeight(4);
-    if(this.target) square(this.target.x, this.target.y, this.size);
+    if (this.target) square(this.target.x, this.target.y, this.size);
     line(this.x, this.y, this.target.x, this.target.y);
     if (this.aiType === "hostile" || this.aiType === "guard") {
       stroke(

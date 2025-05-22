@@ -17,10 +17,11 @@ Registries.images.add("weapon.construction-gun.component", new ImageContainer("a
 Registries.images.add("weapon.tank-gun.component", new ImageContainer("assets/textures/entity/weapon/tank-gun.png"))
 Registries.images.add("weapon.iti-laser-caster.component", new ImageContainer("assets/textures/entity/weapon/iti-laser-caster.png"))
 Registries.images.add("weapon.iti-energy-repeater.component", new ImageContainer("assets/textures/entity/weapon/iti-energy-repeater.png"))
+Registries.images.add("weapon.peti-plasma-railgun.component", new ImageContainer("assets/textures/entity/weapon/peti-plasma-railgun.png"))
 //Items
 Registries.images.add("item.raw-copper", new ImageContainer("assets/textures/item/raw-copper.png"))
 Registries.images.add("item.copper-ingot", new ImageContainer("assets/textures/item/copper-ingot.png"))
-Registries.images.add("item.wire", new ImageContainer("assets/textures/item/wire.png"))
+Registries.images.add("item.copper-wire", new ImageContainer("assets/textures/item/copper-wire.png"))
 
 Registries.images.add("item.raw-iron", new ImageContainer("assets/textures/item/raw-iron.png"))
 Registries.images.add("item.iron-ingot", new ImageContainer("assets/textures/item/iron-ingot.png"))
@@ -29,6 +30,7 @@ Registries.images.add("item.raw-electrum", new ImageContainer("assets/textures/i
 Registries.images.add("item.electrum-ingot", new ImageContainer("assets/textures/item/electrum-ingot.png"))
 Registries.images.add("item.silver-ingot", new ImageContainer("assets/textures/item/silver-ingot.png"))
 Registries.images.add("item.gold-ingot", new ImageContainer("assets/textures/item/gold-ingot.png"))
+Registries.images.add("item.gold-wire", new ImageContainer("assets/textures/item/gold-wire.png"))
 
 Registries.images.add("item.raw-titanium", new ImageContainer("assets/textures/item/raw-titanium.png"))
 Registries.images.add("item.titanium-ingot", new ImageContainer("assets/textures/item/titanium-ingot.png"))
@@ -48,6 +50,7 @@ Registries.images.add("item.sand", new ImageContainer("assets/textures/item/sand
 Registries.images.add("item.sandstone", new ImageContainer("assets/textures/item/sandstone.png"))
 
 Registries.images.add("item.coal", new ImageContainer("assets/textures/item/coal.png"))
+Registries.images.add("item.makeshift-explosive", new ImageContainer("assets/textures/item/makeshift-explosive.png"))
 //Items > Ammo
 Registries.images.add("item.scrap-bullet", new ImageContainer("assets/textures/item/scrap-bullet.png"))
 Registries.images.add("item.iti-energy-cell", new ImageContainer("assets/textures/item/iti-energy-cell.png"))
@@ -59,6 +62,7 @@ Registries.images.add("weapon.construction-gun.item", new ImageContainer("assets
 Registries.images.add("weapon.tank-gun.item", new ImageContainer("assets/textures/item/tank-gun.png"))
 Registries.images.add("weapon.iti-laser-caster.item", new ImageContainer("assets/textures/item/iti-laser-caster.png"))
 Registries.images.add("weapon.iti-energy-repeater.item", new ImageContainer("assets/textures/item/iti-energy-repeater.png"))
+Registries.images.add("weapon.peti-plasma-railgun.item", new ImageContainer("assets/textures/item/peti-plasma-railgun.png"))
 //Tiles
 Registries.images.add("tile.grass", new ImageContainer("assets/textures/block/tile/grass.png"))
 Registries.images.add("tile.sand", new ImageContainer("assets/textures/block/tile/sand.png"))
@@ -73,6 +77,7 @@ Registries.images.add("ore.copper.weathered", new ImageContainer("assets/texture
 Registries.images.add("ore.copper.oxidised", new ImageContainer("assets/textures/block/ore/copper-ore-oxidised.png"))
 
 Registries.images.add("ore.iron", new ImageContainer("assets/textures/block/ore/iron-ore.png"))
+Registries.images.add("ore.coal", new ImageContainer("assets/textures/block/ore/coal-ore.png"))
 Registries.images.add("ore.electrum", new ImageContainer("assets/textures/block/ore/electrum-ore.png"))
 //Blocks
 Registries.images.add("base.scrap", new ImageContainer("assets/textures/block/blocks/scrap-block-base.png"))

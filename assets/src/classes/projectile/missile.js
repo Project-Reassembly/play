@@ -70,9 +70,9 @@ class Missile extends Bullet {
           if (
             !(entity instanceof DroppedItemStack) &&
             entity.team !== this.entity.team &&
-            !entity.dead
+            !entity.dead &&
+            entity.visible
           ) {
-            //Only select living entities
             let dist = this.distanceTo(entity);
             if (dist < this.trackingRange && dist < minDist) {
               //If closer
