@@ -273,6 +273,71 @@ Registries.items.add("scrap-shooter", {
     recoilSpeed: 0.2,
   },
 });
+
+Registries.items.add("iti-laser-pistol", {
+  type: "weapon",
+  name: "Laser Pistol",
+  marketValue: 0,
+  rarity: Item.rarity.ITI,
+  description: "Standard issue item.\nShoots medium-range small laser beams.",
+  image: "weapon.iti-laser-pistol.item",
+  range: 300,
+  shootX: 0,
+  bullets: {
+    types: [
+      {
+        lifetime: 30,
+        extraUpdates: 29,
+        light: 70,
+        speed: 10,
+        trail: true,
+        hitSize: 3,
+        conditionalPierce: true,
+        trailShape: "rhombus",
+        trailInterval: 4,
+        trailColours: [
+          [0, 255, 255],
+          [0, 0, 255, 0],
+        ],
+        hitEffect: "laser-caster-frag",
+        status: "plasma-burn",
+        statusDuration: 20,
+        trailLife: 30,
+        knockback: 5,
+        drawer: {
+          hidden: true,
+        },
+        damage: [
+          {
+            type: "laser",
+            amount: 10,
+          },
+        ],
+        despawnEffect: "none",
+      },
+    ],
+    ammos: {
+      none: 0,
+    },
+  },
+  shoot: {
+    reload: 10,
+    effect: "laser-caster-frag",
+    pattern: {
+      spread: 5,
+    },
+  },
+  component: {
+    type: "weapon-component",
+    width: 32,
+    height: 11,
+    yOffset: 13,
+    image: "weapon.iti-laser-pistol.component",
+    recoil: 2,
+    rotationalRecoil: 2,
+    recoilSpeed: 0.15,
+  },
+});
 Registries.items.add("iti-laser-caster", {
   type: "weapon",
   name: "Laser Caster",
@@ -665,7 +730,7 @@ Registries.items.add("iti-energy-repeater", {
   marketValue: 22000,
   rarity: Item.rarity.ITI,
   description:
-    "Shoots quickfire bursts of laser bolts.\nAlt-fire to charge a larger explosive bolt.",
+    "Shoots quickfire bursts of plasma bolts.\nAlt-fire to charge a larger explosive bolt.",
   image: "weapon.iti-energy-repeater.item",
   range: 300,
   bullets: {
@@ -1207,7 +1272,6 @@ Registries.items.add("tank-gun", {
           trailLife: 45,
           trailShape: "rhombus",
           trailWidth: 10,
-          conditionalPierce: true,
           drawer: {
             shape: "rhombus",
             fill: "#cd9f8b",
@@ -1276,7 +1340,6 @@ Registries.items.add("tank-gun", {
           [200, 200, 200, 50],
           [80, 62, 55, 50],
         ],
-        conditionalPierce: true,
         damage: [
           {
             type: "ballistic",
@@ -1495,5 +1558,3 @@ Registries.items.add("iti-destabilised-cell", {
   rarity: Item.rarity.ITI,
   stackSize: 200,
 });
-
-

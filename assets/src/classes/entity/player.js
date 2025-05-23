@@ -11,15 +11,6 @@ export const respawnTimer = new Timer();
 
 class Player extends EquippedEntity {
   respawnTime = 180;
-  controllable = true;
-  setSpawn(x, y) {
-    this.spawnX = x ?? this.x;
-    this.spawnY = y ?? this.y;
-    Log.send(
-      "Spawnpoint set to " + this.spawnX + ", " + this.spawnY,
-      [255, 255, 0]
-    );
-  }
   onHealthZeroed(type, source) {
     super.onHealthZeroed(type, source);
     let messagearray = Registries.deathmsg.has(type)

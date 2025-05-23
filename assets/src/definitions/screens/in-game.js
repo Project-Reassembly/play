@@ -277,7 +277,53 @@ createUIComponent(
   "Integrity",
   true,
   12
-).anchorTop(20);
+)
+  .anchorTop(20)
+  .setTextColour([255, 255, 255]);
+//##############################################################
+
+//                       BOSS BAR
+
+//##############################################################
+
+createUIComponent(["in-game"], ["boss:yes"], 0, 0, 180, 20, "both")
+  .anchorTop(40)
+  .setBackgroundColour([0, 0, 0]);
+Object.defineProperties(
+  createUIComponent(["in-game"], ["boss:yes"], 0, 0, 0, 20, "both")
+    .anchorTop(40)
+    .setBackgroundColour([255, 0, 0]),
+  {
+    width: {
+      get: () =>
+        180 * (world.firstBoss()?.health / world.firstBoss()?.maxHealth),
+    },
+    x: {
+      get: () =>
+        -90 + 90 * (world.firstBoss()?.health / world.firstBoss()?.maxHealth),
+    },
+  }
+);
+Object.defineProperty(
+  createUIComponent(
+    ["in-game"],
+    ["boss:yes"],
+    0,
+    0,
+    0,
+    0,
+    "none",
+    null,
+    "Boss HP",
+    true,
+    12
+  )
+    .anchorTop(50)
+    .setTextColour([255, 255, 255]),
+  "text",
+  { get: () => world.firstBoss()?.name }
+);
+
 //##############################################################
 
 //                       SELECTION
@@ -858,7 +904,7 @@ createUIComponent(
     UIComponent.setCondition("dead:no");
     deliverPlayer(null, totalSize / 2, totalSize / 2, true, false);
   },
-  ">> New Player <<\nSend a new robot\nwith the basic\nscrap equipment\nto the drop\npoint.\n\n$1200",
+  ">> New Player <<\nSend a new robot\nwith the basic\nITI equipment\nto the drop\npoint.\n\n$1200",
   true,
   15
 );
@@ -871,13 +917,17 @@ createUIComponent(
   200,
   "none",
   () => {
-    if (game.money < 1500) return;
-    game.money -= 1500;
-    Log.send("Spent $1000 on [Rebuild Respawn]", [80, 200, 80]);
     UIComponent.setCondition("dead:no");
-    deliverPlayer(game.player, totalSize / 2, totalSize / 2, true, false);
+    deliverPlayer(
+      null,
+      totalSize / 2,
+      totalSize / 2,
+      false,
+      false,
+      "scrap-player"
+    );
   },
-  ">> Fix Player <<\nRe-send a clone\nof your current\nrobot to the\ndrop point.\n\n$1000",
+  ">> Scrap Player <<\nSend a robot\nmade of scrap\nto the drop\npoint.\n\nFree",
   true,
   15
 );
@@ -894,9 +944,9 @@ createUIComponent(
     game.money -= 2000;
     Log.send("Spent $2000 on [Convenience Respawn]", [80, 200, 80]);
     UIComponent.setCondition("dead:no");
-    deliverPlayer(game.player, game.player?.x, game.player?.y, true, false);
+    deliverPlayer(null, game.player?.x, game.player?.y, true, false);
   },
-  "> Convenience <\n>>> Respawn <<<\nSend a new robot\nwith the basic\nscrap equipment\nto the point\nwhere you died.\n\n$2000",
+  "> Convenience <\n>>> Respawn <<<\nSend a new robot\nwith the basic\nITI equipment\nto the point\nwhere you died.\n\n$2000",
   true,
   15
 );

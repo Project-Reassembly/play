@@ -161,7 +161,19 @@ worldGenWorker.onmessage = (ev) => {
     console.log("Generation finished.");
     gen.msg = "Entering World";
     for (let tick = 0; tick < preloadTicks; tick++) world.tickAll();
-    deliverPlayer(null, worldSize / 2, worldSize / 2, true, true);
+    //make player
+    deliverPlayer(
+      null,
+      worldSize / 2,
+      worldSize / 2,
+      true,
+      true,
+      "player",
+      world
+    );
+
+    //make events
+    eventify(world);
 
     gen.inprogress = false;
     worldGenWorker.terminate();
@@ -546,6 +558,7 @@ function loadGame(name) {
   let wrld = JSON.parse(file);
   game.money = wrld.money ?? 10000;
   world.become(World.deserialise(wrld));
+  eventify(world);
   console.log("Game loaded.");
   Log.send("You are now playing on '" + world.name + "'.", [0, 255, 0]);
   return true;
@@ -839,6 +852,7 @@ function gameFrame() {
       world.tickAll();
     }
   });
+  UIComponent.setCondition("boss:" + (world.hasBoss() ? "yes" : "no"));
   scale(ui.camera.zoom);
   rotate(radians(ui.camera.rotation));
   translate(-ui.camera.x, -ui.camera.y);
@@ -997,17 +1011,15 @@ function showMousePos() {
 /**
  * @param {Player | null} player
  */
-function createPlayer(player = null, x, y, arm = true) {
+function createPlayer(player = null, x, y, arm = true, playerType = "player") {
   if (!player) {
-    player = construct(Registries.entities.get("player"));
+    player = construct(Registries.entities.get(playerType));
     if (arm) {
       player.equipment.addItem("scrap-assembler");
-      player.equipment.addItem("scrap-bullet", roundNum(rnd(4500, 5500)));
-      if (tru(1 / 11)) player.leftHand.addItem("scrap-shooter");
-      else player.rightHand.addItem("scrap-shooter");
+      if (tru(1 / 11)) player.leftHand.addItem("iti-laser-pistol");
+      else player.rightHand.addItem("iti-laser-pistol");
     }
     player.addToWorld(world, x ?? worldSize / 2, y ?? worldSize / 2);
-    player.setSpawn();
   }
   game.player = player;
   if (x !== undefined) game.player.x = x;
@@ -1022,27 +1034,40 @@ function createPlayer(player = null, x, y, arm = true) {
 }
 
 // Makes a player with a bang
-function deliverPlayer(player = null, x, y, arm = true, moveCamera = false) {
-  createPlayer(player, x, y, arm);
+function deliverPlayer(
+  player = null,
+  x,
+  y,
+  arm = true,
+  moveCamera = false,
+  playerType = "player",
+  iworld = world
+) {
+  createPlayer(player, x, y, arm, playerType);
   game.player.health = game.player.maxHealth;
   game.player.statuses = {};
   if (game.player.dead) {
     game.player.dead = false;
-    game.player.addToWorld(world);
+    game.player.addToWorld(iworld);
   }
-  game.player.visible = false;
-  game.player.controllable = false;
-  game.player.tangible = false;
   if (moveCamera) {
     ui.camera.x = game.player.x;
     ui.camera.y = game.player.y;
   }
-  emitEffect("land-target", game.player);
+  deliverEntity(game.player, false, iworld, true);
+}
+
+function deliverEntity(ent, add = false, world, clearArea = false) {
+  if (add) ent.addToWorld(world);
+  ent.visible = false;
+  ent.controllable = false;
+  ent.tangible = false;
+  emitEffect("land-target", ent);
   effectTimer.do(() => {
     let y = ui.camera.y - height / ui.camera.zoom;
-    let life = (game.player.y - y) / 20;
+    let life = (ent.y - y) / 20;
     patternedBulletExpulsion(
-      game.player.x,
+      ent.x,
       y,
       {
         lifetime: life - 1,
@@ -1104,56 +1129,42 @@ function deliverPlayer(player = null, x, y, arm = true, moveCamera = false) {
       0,
       0,
       world,
-      game.player
+      ent
     );
     effectTimer.do(() => {
       new Explosion({
-        x: game.player.x,
-        y: game.player.y,
+        x: ent.x,
+        y: ent.y,
         world: world,
-        team: "player",
+        team: ent.team,
         radius: 150,
         amount: 5000,
         knockback: 0,
-      })
-        .create();
-      new Explosion({
-        x: game.player.x,
-        y: game.player.y,
-        world: world,
-        team: "player",
-        radius: 600,
-        amount: 500,
-        knockback: 0,
-      }).dealDamage();
-      createEffect(
-        "land-wave",
-        world,
-        game.player.x,
-        game.player.y,
-        -Math.PI / 2,
-        1
-      );
-      createEffect(
-        "land-scorch",
-        world,
-        game.player.x,
-        game.player.y,
-        -Math.PI / 2,
-        1
-      );
+      }).create();
+      if (clearArea)
+        new Explosion({
+          x: ent.x,
+          y: ent.y,
+          world: world,
+          team: ent.team,
+          radius: 800,
+          amount: 500,
+          knockback: 0,
+        }).dealDamage();
+      createEffect("land-wave", world, ent.x, ent.y, -Math.PI / 2, 1);
+      createEffect("land-scorch", world, ent.x, ent.y, -Math.PI / 2, 1);
       for (let tick = 0; tick < 10; tick++)
         DroppedItemStack.create(
           new ItemStack("scrap", roundNum(rnd(2, 20))),
           world,
-          game.player.x,
-          game.player.y,
+          ent.x,
+          ent.y,
           rnd(4, 10),
           rnd(0, 360)
         );
-      game.player.visible = true;
-      game.player.controllable = true;
-      game.player.tangible = true;
+      ent.visible = true;
+      ent.controllable = true;
+      ent.tangible = true;
     }, life);
   }, 180);
 }
@@ -1409,6 +1420,30 @@ window.mouseWheel = function (ev) {
     )(selectedDirection);
   return false;
 };
+/**
+ * @param {World} world
+ */
+function eventify(world) {
+  //spawn an iti merchant in 5 mins
+  world.addEvent("iticorpspawn", 18000, (world) => {
+    Log.send("ITI have sent a merchant to trade", [0, 200, 255]);
+    let entiti = construct(
+      Registries.entities.get("iti-corporate-merchant"),
+      "entity"
+    );
+    entiti.x = game.player.x + rnd(300, 800) * (tru(0.5) ? -1 : 1);
+    entiti.y = game.player.y + rnd(300, 800) * (tru(0.5) ? -1 : 1);
+    deliverEntity(entiti, true, world);
+  });
+  //bossfight in 10 mins
+  world.addEvent("scrapboss", 36000, (world) => {
+    Log.send("The Scrapper is descending!", [255, 50, 50]);
+    let entiti = construct(Registries.entities.get("scrapper"), "entity");
+    entiti.x = game.player.x + rnd(300, 800) * (tru(0.5) ? -1 : 1);
+    entiti.y = game.player.y + rnd(300, 800) * (tru(0.5) ? -1 : 1);
+    deliverEntity(entiti, true, world);
+  });
+}
 
 function nextRecipe() {
   let block = ui.hoveredBlock ?? Container.selectedBlock;

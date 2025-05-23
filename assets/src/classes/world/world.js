@@ -11,6 +11,8 @@ import { tru } from "../../core/number.js";
 import { worldSize } from "../../scaling.js";
 import { Explosion, NuclearExplosion } from "../../play/effects.js";
 import { PowerNetwork } from "./power-network.js";
+import { Log } from "../../play/messaging.js";
+import { assign } from "../../core/constructor.js";
 
 /**
  * @typedef SerialisedWorld
@@ -60,6 +62,8 @@ class World {
   /**Chunks to tick this frame.
    * @type {Chunk[]} */
   toTick = [];
+  //saved events
+  events = [];
   constructor(name = "World") {
     this.name = name;
   }
@@ -75,6 +79,7 @@ class World {
     this.toTick = [];
   }
   tickAll() {
+    this.tickEvents();
     this.#actualTick();
     this.#removeDead();
   }
@@ -370,11 +375,21 @@ class World {
       entities: this.entities.map((x) => x.serialise()),
       seed: this.seed,
       networks: this.networks.map((x) => x.serialise()),
+      events: this.events.map((x) => ({
+        duration: x.time,
+        name: x.name,
+        full: x.full,
+      })),
     };
   }
   /**@param {SerialisedWorld} created  */
   static deserialise(created) {
     let wrold = new this();
+    wrold.events = created.events?.map((x) => ({
+      name: x.name,
+      time: x.duration,
+      full: x.full,
+    }));
     wrold.chunks = created.chunks?.map((x) =>
       x.map((y) => Chunk.deserialise(y))
     ) ?? [[]];
@@ -415,7 +430,37 @@ class World {
   /**Sets everything on this world possible to those values on a source world.
    * @param {World} world  */
   become(world) {
-    Object.assign(this, world);
+    assign(this, world);
+  }
+  tickEvents() {
+    this.events.forEach((x) => {
+      if (x.time === 0) if (this.evlisten[x.name]) this.evlisten[x.name](this);
+      if (x.time >= 0) x.time--;
+    });
+  }
+  addEvent(name, time, listener) {
+    if (!this.events.some((x) => x.name === name)) {
+      this.events.push({ name: name, time: time, full: time });
+    }
+    this.evlisten[name] = listener;
+  }
+  triggerEvent(name) {
+    this.events.forEach((x) => {
+      if (x.name === name) x.time = 0;
+    });
+  }
+  resetEvent(name) {
+    this.events.forEach((x) => {
+      if (x.name === name) x.time = x.full ?? 0;
+    });
+  }
+  evlisten = {};
+
+  hasBoss(){
+    return this.entities.some(x => x.isBoss)
+  }
+  firstBoss(){
+    return this.entities.find(x => x.isBoss)
   }
 }
 export { World };

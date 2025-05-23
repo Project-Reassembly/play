@@ -2,14 +2,15 @@ import { ShootableObject } from "../physical.js";
 import { construct } from "../../core/constructor.js";
 import { Registries } from "../../core/registry.js";
 import { World } from "../world/world.js";
-import { rnd, tru, roundNum, Vector } from "../../core/number.js";
+import { rnd, tru, roundNum, Vector, clamp } from "../../core/number.js";
 import { PhysicalObject } from "../physical.js";
 import {
   liquidDestructionBlast,
   createDestructionExplosion,
 } from "../../play/effects.js";
-import { blockSize } from "../../scaling.js";
+import { blockSize, totalSize, worldSize } from "../../scaling.js";
 import { game } from "../../play/game.js";
+import { Log } from "../../play/messaging.js";
 /**
  * @typedef SerialisedEntity
  * @prop {number} health
@@ -44,8 +45,11 @@ class Entity extends ShootableObject {
   _waiting = 0;
   spawnX = 0;
   spawnY = 0;
+  controllable = true;
   /** Multiplier for both range and movement speed while passive. */
   passiveIncentiveModifier = 0.75;
+
+  isBoss = false;
 
   //Status effects
   effectiveDamageMult = 1;
@@ -85,7 +89,7 @@ class Entity extends ShootableObject {
     if (!(world instanceof World))
       throw new TypeError(
         "Cannot add entity to non-world object of type '" +
-          world.constructor.name +
+          world?.constructor?.name +
           "'"
       );
     world.entities.push(this);
@@ -168,7 +172,7 @@ class Entity extends ShootableObject {
   tick() {
     this.components.forEach((c) => c.tick(this));
     this.tickGroundEffects();
-    this.ai();
+    if (this.controllable) this.ai();
     super.tick();
     this.tickStatuses();
     this._lastPos = { x: this.x, y: this.y };
@@ -197,6 +201,7 @@ class Entity extends ShootableObject {
   /**Passive AI
    * - Wanders aimlessly towards random points outside the follow range, but within target range.
    * - Used by Hostile to patrol and find entities to attack.
+   * - Won't go over the world edge.
    */
   _passiveAI() {
     if (!this.target || this.target instanceof PhysicalObject)
@@ -210,15 +215,15 @@ class Entity extends ShootableObject {
         rnd(this.targetRange, this.targetRange / 4) *
         (tru(0.5) ? -1 : 1) *
         this.passiveIncentiveModifier;
-      this.target.x += xOffset;
-      this.target.y += yOffset;
+      this.target.x = clamp(this.target.x + xOffset, 0, totalSize);
+      this.target.y = clamp(this.target.y + yOffset, 0, totalSize);
       this._waiting =
         this.waitTime + rnd(this.waitVariance, -this.waitVariance);
     }
   }
 
   /**Hostile AI
-   * - Follows entities within its taregt range.
+   * - Follows entities within its target range.
    * - Acts as Passive when no entity can be found.
    */
   _hostileAI() {
@@ -261,7 +266,8 @@ class Entity extends ShootableObject {
     this.target = this.closestFrom(
       this.world.entities,
       this.targetRange,
-      (ent) => !ent.dead && ent.team !== this.team && ent.visible && conditions(ent)
+      (ent) =>
+        !ent.dead && ent.team !== this.team && ent.visible && conditions(ent)
     );
     if (this.target) {
       if (shoots && this.distanceTo(this.target) < this.followRange)

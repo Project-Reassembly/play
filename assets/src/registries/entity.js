@@ -1,8 +1,6 @@
 import { Registries } from "../core/registry.js";
-Registries.entities.add("player", {
+Registries.entities.add("scrap-player", {
   type: "player",
-  // x: (World.size * Chunk.size * Block.size) / 2,
-  // y: (World.size * Chunk.size * Block.size) / 2,
   name: "Player",
   health: 100,
   light: 100,
@@ -28,12 +26,47 @@ Registries.entities.add("player", {
     width: 32,
     height: 11,
     yOffset: 13,
-    image: "generic.scrap-arm.component",
+    image: "arm.scrap",
   },
   team: "player",
   width: 25,
   height: 25,
   speed: 3,
+});
+Registries.entities.add("player", {
+  type: "player",
+  name: "Player",
+  health: 350,
+  light: 100,
+  components: [
+    {
+      image: "npc.iti.player.head",
+      width: 32,
+      height: 32,
+      xOffset: -3
+    },
+    {
+      image: "npc.iti.generic.body",
+      width: 32,
+      height: 32,
+    },
+    {
+      type: "leg-component",
+      image: "npc.iti.generic.legs",
+      width: 32,
+      height: 32,
+    },
+  ],
+  armType: {
+    width: 32,
+    height: 11,
+    yOffset: 13,
+    image: "arm.iti",
+  },
+  team: "player",
+  width: 25,
+  height: 25,
+  speed: 4,
 });
 Registries.entities.add("scavenger", {
   name: "Scavenger",
@@ -83,7 +116,7 @@ Registries.entities.add("scavenger", {
     width: 32,
     height: 11,
     yOffset: 13,
-    image: "generic.scrap-arm.component",
+    image: "arm.scrap",
   },
   equipment: [
     {
@@ -162,7 +195,7 @@ Registries.entities.add("scrap-sentinel", {
     width: 32,
     height: 11,
     yOffset: 13,
-    image: "generic.scrap-arm.component",
+    image: "arm.scrap",
   },
 });
 Registries.entities.add("iti-corporate-merchant", {
@@ -227,4 +260,88 @@ Registries.entities.add("iti-corporate-merchant", {
       max: 20
     }
   ]
+});
+
+
+Registries.entities.add("scrapper", {
+  name: "The Scrapper",
+  type: "equipped-entity",
+  health: 4000,
+  speed: 1.5,
+  isBoss: true,
+  components: [
+    {
+      image: "entity.scrap-sentinel.head",
+      width: 50,
+      height: 50,
+    },
+    {
+      image: "entity.scrap-sentinel.body",
+      width: 50,
+      height: 50,
+    },
+    {
+      type: "leg-component",
+      image: "entity.scrap-sentinel.legs",
+      width: 50,
+      height: 50,
+    },
+  ],
+  width: 50,
+  height: 50,
+  aiType: "hostile",
+  followRange: 400,
+  targetRange: 600,
+  rightHand: [
+    {
+      item: "scrap-cannon",
+      dropChance: 0.25,
+    },
+  ],
+  leftHand: [
+    {
+      item: "tank-gun",
+      dropChance: 0.25,
+    },
+  ],
+  equipment: [
+    {
+      item: "scrap",
+      min: 60,
+      max: 100,
+      dropChance: 0.5,
+    },
+    {
+      item: "scrap",
+      min: 60,
+      max: 100,
+      dropChance: 0.5,
+    },
+  ],
+  inventory: [
+    {
+      item: "scrap",
+      min: 20,
+      max: 100,
+      dropChance: 0.6,
+    },
+    {
+      item: "scrap",
+      min: 20,
+      max: 100,
+      dropChance: 0.6,
+    },
+    {
+      item: "scrap",
+      min: 20,
+      max: 100,
+      dropChance: 0.6,
+    },
+  ],
+  armType: {
+    width: 50,
+    height: 16,
+    yOffset: 16,
+    image: "arm.scrap",
+  },
 });

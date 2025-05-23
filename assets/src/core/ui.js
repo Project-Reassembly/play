@@ -62,6 +62,7 @@ const ui = {
     UIComponent.setCondition("menu:none");
     UIComponent.setCondition("containerselected:false");
     UIComponent.setCondition("dead:no");
+    UIComponent.setCondition("boss:no");
     this.wasReset = true;
   },
   wasReset: false
