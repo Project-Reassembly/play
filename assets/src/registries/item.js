@@ -310,7 +310,7 @@ Registries.items.add("iti-laser-pistol", {
         damage: [
           {
             type: "laser",
-            amount: 10,
+            amount: 6,
           },
         ],
         despawnEffect: "none",
@@ -321,10 +321,10 @@ Registries.items.add("iti-laser-pistol", {
     },
   },
   shoot: {
-    reload: 10,
+    reload: 13,
     effect: "laser-caster-frag",
     pattern: {
-      spread: 5,
+      spread: 3,
     },
   },
   component: {

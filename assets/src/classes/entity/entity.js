@@ -11,6 +11,7 @@ import {
 import { blockSize, totalSize, worldSize } from "../../scaling.js";
 import { game } from "../../play/game.js";
 import { Log } from "../../play/messaging.js";
+import { Block } from "../block/block.js";
 /**
  * @typedef SerialisedEntity
  * @prop {number} health
@@ -46,6 +47,7 @@ class Entity extends ShootableObject {
   spawnX = 0;
   spawnY = 0;
   controllable = true;
+  _aidelay = 6;
   /** Multiplier for both range and movement speed while passive. */
   passiveIncentiveModifier = 0.75;
 
@@ -179,21 +181,30 @@ class Entity extends ShootableObject {
   }
 
   ai() {
-    if (this.aiType === "passive") {
-      this._passiveAI();
-    } else if (this.aiType === "hostile") {
-      this._hostileAI();
-    } else if (this.aiType === "guard") {
-      this._guardAI();
-    } else if (this.aiType === "scavenger") {
-      this._scavengerAI();
+    if (this._aidelay > 0) {
+      this._aidelay--;
+    } else {
+      this._aidelay = 6;
+      if (this.aiType === "passive") {
+        this._passiveAI();
+      } else if (this.aiType === "hostile") {
+        this._hostileAI();
+      } else if (this.aiType === "guard") {
+        this._guardAI();
+      } else if (this.aiType === "scavenger") {
+        this._scavengerAI();
+      }
     }
     //Base AI
     if (this.target) {
       this._waiting--;
       if (this._waiting <= 0) {
         if (this.distanceToPoint(this.target.x, this.target.y) > this.size / 2)
-          this.moveTowards(this.target.x, this.target.y, true);
+          this.moveTowards(
+            (this.target instanceof Block ? blockSize / 2 : 0) + this.target.x,
+            (this.target instanceof Block ? blockSize / 2 : 0) + this.target.y,
+            true
+          );
       }
     }
   }
@@ -227,17 +238,29 @@ class Entity extends ShootableObject {
    * - Acts as Passive when no entity can be found.
    */
   _hostileAI() {
-    if (!this._generic_AttackerAI((ent) => !ent.item)) this._passiveAI();
+    if (!this._generic_AttackerAI((ent) => !ent.item, true, true))
+      this._passiveAI();
   }
 
   /**Scavenger AI
    * - Follows entities within its target range.
-   * - Prioritises dropped items.
+   * - Prioritises dropped items and containers.
    * - Acts as Passive when no entity can be found.
    */
   _scavengerAI() {
-    if (!this._generic_AttackerAI((ent) => !!ent.item, false))
-      this._hostileAI();
+    if (
+      !this.inventory ||
+      !this._generic_AttackerAI(
+        (ent) =>
+          !!ent.item,
+        false,
+        false
+      )
+    )
+      if (
+        !this._generic_AttackerAI((blk) => !!blk.inventory, true, true, false)
+      )
+        this._hostileAI();
   }
 
   /**Guard AI
@@ -261,14 +284,37 @@ class Entity extends ShootableObject {
    * @param {boolean} [shoots=true] Whether or not the entity should shoot at the new target.
    * @returns {boolean} `true` if an entity is being targeted, `false` if not.
    */
-  _generic_AttackerAI(conditions = () => true, shoots = true) {
+  _generic_AttackerAI(
+    conditions = () => true,
+    shoots = true,
+    attackBlocks = true,
+    attackEntities = true
+  ) {
     let tempTarget = this.target;
-    this.target = this.closestFrom(
-      this.world.entities,
-      this.targetRange,
-      (ent) =>
-        !ent.dead && ent.team !== this.team && ent.visible && conditions(ent)
-    );
+    let entity = attackEntities
+      ? this.closestFrom(
+          this.world.entities,
+          this.targetRange,
+          (ent) =>
+            !ent.dead &&
+            ent.team !== this.team &&
+            ent.visible &&
+            conditions(ent)
+        )
+      : null;
+    let block = attackBlocks
+      ? this.closestFrom(
+          this.world.blocksInSquare(
+            Math.floor(this.x / blockSize),
+            Math.floor(this.y / blockSize),
+            Math.floor(this.followRange / blockSize),
+            "blocks"
+          ),
+          this.followRange,
+          (blk) => blk.team !== this.team && conditions(blk)
+        )
+      : null;
+    this.target = this.closestFrom([entity, block], this.targetRange);
     if (this.target) {
       if (shoots && this.distanceTo(this.target) < this.followRange)
         this.attack();

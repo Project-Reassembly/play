@@ -251,10 +251,11 @@ class PhysicalObject extends RegisteredItem {
    * @param {(obj: PhysicalObject) => boolean} where Predicate for targeted objects.
    * @returns {PhysicalObject | null} The closest `PhysicalObject`, or `null` if the array had no `PhysicalObject`s
    */
-  closestFrom(array, maxDist, where) {
+  closestFrom(array, maxDist, where = () => true) {
     let mindist = Infinity;
     let chosen = null;
     for (let obj of array) {
+      if (!obj) continue;
       if (!where(obj)) continue;
       let dist = this.distanceTo(obj);
       if (dist > maxDist) continue;

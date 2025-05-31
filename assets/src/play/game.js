@@ -11,7 +11,6 @@ import {} from "../lib/isl.js";
 import { Serialiser } from "../core/serialiser.js";
 import { createEffect, effectTimer, emitEffect, Explosion } from "./effects.js";
 import { Player, respawnTimer } from "../classes/entity/player.js";
-import { WaveParticle } from "../classes/effect/wave-particle.js";
 import { clamp, rnd, roundNum, tru } from "../core/number.js";
 import { PlaceableItem } from "../classes/item/placeable.js";
 import { ItemStack } from "../classes/item/item-stack.js";
@@ -404,6 +403,7 @@ const propertyReplacements = [
   ['"seed":', "σ"],
   ['"name":', "ν"],
   ['"money":', "⅘"],
+  ['"world":', "ɰ"],
 ];
 const postDictReplacers = [
   ["},{", "⁺"],
@@ -437,9 +437,11 @@ const escapeJSON = function (str) {
 function saveGame(name) {
   name ??= "save.game";
   //Create file
+  let file = {};
   let wrld = world.serialise();
-  wrld.money = game.money ?? 0;
-  let file = JSON.stringify(wrld);
+  file.world = wrld;
+  file.money = game.money;
+  file = JSON.stringify(file);
   //Minify the file
   //About 128(!) times smaller file size because of this
   //General find-and-replace:
@@ -555,9 +557,9 @@ function loadGame(name) {
   effectTimer.cancel("*");
   effects.screenShakeInstances.splice(0);
 
-  let wrld = JSON.parse(file);
-  game.money = wrld.money ?? 10000;
-  world.become(World.deserialise(wrld));
+  file = JSON.parse(file);
+  game.money = file.money ?? 10000;
+  world.become(World.deserialise(file.world));
   eventify(world);
   console.log("Game loaded.");
   Log.send("You are now playing on '" + world.name + "'.", [0, 255, 0]);
@@ -620,7 +622,7 @@ function frameSkippingFunction(func) {
     return;
   }
   let st = framesToDraw;
-  for (let fr = 0; fr < st - 1; fr += 1) {
+  for (let fr = 0; fr < st - 1; fr++) {
     func();
     framesToDraw--;
   }

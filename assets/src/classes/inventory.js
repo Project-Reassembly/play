@@ -77,7 +77,10 @@ class Inventory {
   removeItem(item, number = 1) {
     let toRemove = number;
     this.iterate((content, slot, stop) => {
-      if ((content.item === item || item === "*") && this.canPickupFromSlot(slot)) {
+      if (
+        (content.item === item || item === "*") &&
+        this.canPickupFromSlot(slot)
+      ) {
         if (content.count > toRemove) {
           content.count -= toRemove;
           toRemove = 0;
@@ -253,10 +256,37 @@ class Inventory {
    * @returns True if the items could fit in this inventory, false if not.
    */
   canAddItem(item, number = 1, stack = true) {
-    let tempstor = this.storage.slice(0).map((x) => x.copy());
-    let remaining = this.addItem(item, number, stack);
-    this.storage = tempstor;
-    return !remaining;
+    let toAdd = number;
+    /**@type {Item} */
+    let ritem = construct(Registries.items.get(item), "item");
+    //Check for any stacks that can be filled
+    this.iterate((content, slot, stop) => {
+      if (content.item === item && stack && this.canPlaceInSlot(slot)) {
+        if (content.count < ritem.stackSize) {
+          let space = ritem.stackSize - content.count;
+          if (space < toAdd) {
+            toAdd -= space;
+          } else {
+            toAdd = 0;
+            stop();
+          }
+        }
+      }
+    }, true);
+    //If there are still items to add, add them to empty slots
+    if (toAdd <= 0) return true;
+    this.iterate((content, slot, stop) => {
+      if (!content) this.storage[slot] = ItemStack.EMPTY;
+      if (content.isEmpty() && this.canPlaceInSlot(slot)) {
+        toAdd -= Math.min(toAdd, ritem.stackSize);
+      }
+      if (toAdd <= 0) stop();
+    });
+    return toAdd === 0;
+    // let tempstor = this.storage.slice(0).map((x) => x.copy());
+    // let remaining = this.addItem(item, number, stack);
+    // this.storage = tempstor;
+    // return !remaining;
   }
   /**
    * Simulates adding multiple item stacks to this inventory, and checks whether or not this worked.
@@ -265,10 +295,7 @@ class Inventory {
    * @returns True if the items could fit in this inventory, false if not.
    */
   canAddItems(stacks, stack = true) {
-    let tempstor = this.storage.slice(0).map((x) => x.copy());
-    let remaining = this.addItems(stacks, stack);
-    this.storage = tempstor;
-    return !remaining;
+    return stacks.every((v, i, a) => this.canAddItem(v.item, v.count, stack));
   }
 
   //oh god i need this for everything
@@ -433,7 +460,13 @@ class Inventory {
               }
             }
           }
-          drawImg(invitem?.image ?? "error", displayX, displayY, itemSize, itemSize);
+          drawImg(
+            invitem?.image ?? "error",
+            displayX,
+            displayY,
+            itemSize,
+            itemSize
+          );
           noStroke();
           fill(invitemstack.count > invitem.stackSize ? "red" : 255);
           textFont(fonts.ocr);

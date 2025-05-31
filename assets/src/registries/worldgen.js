@@ -51,13 +51,13 @@ Registries.worldgen.add("ore-generator", {
       tile: "copper-ore",
     },
     {
-      threshold: 60,
+      threshold: 67,
       scale: 5,
       tile: "iron-ore",
       target: "stone",
     },
     {
-      threshold: 65,
+      threshold: 72,
       scale: 3,
       tile: "electrum-ore",
       target: "stone",
