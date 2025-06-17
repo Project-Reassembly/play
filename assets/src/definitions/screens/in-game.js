@@ -253,16 +253,27 @@ Object.defineProperty(
   { get: () => "$" + shortenedNumber(game.money) }
 );
 //health
-createUIComponent(["in-game"], [], 40, 0, 180, 20, "both")
+createUIComponent(["in-game"], [], 40, 0, 182, 20, "both")
   .anchorTop(10)
   .setBackgroundColour([0, 0, 0]);
 Object.defineProperties(
-  createUIComponent(["in-game"], [], 100, 0, 0, 20, "both")
-    .anchorTop(10)
-    .setBackgroundColour([255, 230, 0]),
+  createUIComponent(["in-game"], [], 94, 0, 0, 14, "both")
+    .anchorTop(13)
+    .setBackgroundColour([255, 230, 0])
+    .removeOutline(),
   {
-    width: { get: () => 180 * (game.player?.health / game.player?.maxHealth) },
-    x: { get: () => -50 + 90 * (game.player?.health / game.player?.maxHealth) },
+    width: { get: () => 174 * (game.player?.health / game.player?.maxHealth) },
+    x: { get: () => -47 + 87 * (game.player?.health / game.player?.maxHealth) },
+  }
+);
+Object.defineProperties(
+  createUIComponent(["in-game"], [], 94, 0, 0, 14, "both")
+    .anchorTop(13)
+    .setBackgroundColour([0, 230, 255, 150])
+    .removeOutline(),
+  {
+    width: { get: () => 174 * (game.player?.shield / game.player?._lastMaxShield) },
+    x: { get: () => -47 + 87 * (game.player?.shield / game.player?._lastMaxShield) },
   }
 );
 createUIComponent(

@@ -66,7 +66,7 @@ Registries.entities.add("player", {
   team: "player",
   width: 25,
   height: 25,
-  speed: 4,
+  speed: 4
 });
 Registries.entities.add("scavenger", {
   name: "Scavenger",
@@ -175,6 +175,12 @@ Registries.entities.add("scrap-sentinel", {
       dropChance: 0.25,
     },
   ],
+  armType: {
+    width: 35,
+    height: 12,
+    yOffset: 15,
+    image: "arm.scrap",
+  },
   equipment: [
     {
       item: "scrap-bullet",
@@ -240,6 +246,12 @@ Registries.entities.add("iti-corporate-merchant", {
   angerRange: 700,
   defensiveRange: 400,
   targetRange: 300,
+  armType: {
+    width: 35,
+    height: 12,
+    yOffset: 15,
+    image: "arm.iti",
+  },
   rightHand: [
     {
       item: "iti-laser-caster",
@@ -304,6 +316,12 @@ Registries.entities.add("scrapper", {
       dropChance: 0.25,
     },
   ],
+  armType: {
+    width: 50,
+    height: 17,
+    yOffset: 20,
+    image: "arm.scrap",
+  },
   equipment: [
     {
       item: "scrap",

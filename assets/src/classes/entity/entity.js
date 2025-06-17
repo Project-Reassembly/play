@@ -39,7 +39,7 @@ class Entity extends ShootableObject {
 
   //AI
   aiType = "passive";
-  followRange = 100;
+  attackRange = 100;
   targetRange = 1000;
   waitTime = 90;
   waitVariance = 60;
@@ -307,16 +307,16 @@ class Entity extends ShootableObject {
           this.world.blocksInSquare(
             Math.floor(this.x / blockSize),
             Math.floor(this.y / blockSize),
-            Math.floor(this.followRange / blockSize),
+            Math.floor(this.attackRange / blockSize),
             "blocks"
           ),
-          this.followRange,
+          this.attackRange,
           (blk) => blk.team !== this.team && conditions(blk)
         )
       : null;
     this.target = this.closestFrom([entity, block], this.targetRange);
     if (this.target) {
-      if (shoots && this.distanceTo(this.target) < this.followRange)
+      if (shoots && this.distanceTo(this.target) < this.attackRange)
         this.attack();
       return true;
     } else {
@@ -369,7 +369,7 @@ class Entity extends ShootableObject {
           ? [200, 0, 255, 100]
           : [255, 255, 0, 100]
       );
-      circle(this.x, this.y, this.followRange * 2);
+      circle(this.x, this.y, this.attackRange * 2);
     }
     if (this.aiType === "hostile" || this.aiType === "scavenger") {
       stroke(

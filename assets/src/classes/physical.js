@@ -4,6 +4,7 @@ import { Vector, rnd, colinterp, roundNum, clamp } from "../core/number.js";
 import { emitEffect } from "../play/effects.js";
 import { TextParticle } from "./effect/text-particle.js";
 import { game } from "../play/game.js";
+import { Log } from "../play/messaging.js";
 class PhysicalObject extends RegisteredItem {
   static debug = false;
   x = 0;
@@ -36,13 +37,14 @@ class PhysicalObject extends RegisteredItem {
    * @param {PhysicalObject} other
    */
   collidesWith(other) {
-    if (!other) return false;
-    return hitboxesIntersect(
-      this,
-      other,
-      this instanceof Block,
-      other instanceof Block
-    );
+    return !other
+      ? false
+      : hitboxesIntersect(
+          this,
+          other,
+          this instanceof Block,
+          other instanceof Block
+        );
   }
 
   moveVct(vct, ignoresBlocks = false) {
@@ -286,21 +288,28 @@ class ShootableObject extends PhysicalObject {
   dead = false;
   hasHealthbar = true;
   _healthbarShowTime = 0;
+  //defense
+  /** Extra healthbar, basically. */
+  shield = 0;
+  _lastMaxShield = 0;
+  _shieldShowTime = 0;
+  /** uh oh */
+  useYellowShield = false;
+  /** Damage reduction for shield health. More effective vs. higher damage values. Should use a similar scale to armour value.*/
+  shieldRating = 0;
+
+  /** Damage reduction. Less effective vs. higher damage values. */
+  armour = 0;
+  /** Increase this to decrease the amount by which higher values reduce damage. By a **lot**. _This is sensitive_, use carefully.*/
+  armourToughness = 0;
+  //
   init() {
     super.init();
     this.maxHealth = this.health;
   }
-  tick() {
-    //this.checkBullets();
-  }
   takeDamage(type, amount = 0, source = null) {
     let oldHP = this.health;
-    if (amount === 0) return;
-    this.damageTaken +=
-      Math.min(amount, this.health) * this.effectiveHealthMult;
-    if (source)
-      source.damageDealt +=
-        Math.min(amount, this.health) * this.effectiveHealthMult; //Stats pretend health was higher
+    if (amount === 0) return 0;
     this.createDamageNumber(Math.min(amount, this.health));
     this.health -= amount;
     if (this.health <= 0) {
@@ -400,7 +409,41 @@ class ShootableObject extends PhysicalObject {
   /**Deals damage to this object. If health goes below zero, the object is removed.*/
   damage(type = "normal", amount = 0, source = null) {
     this._healthbarShowTime = 180;
-    return this.takeDamage(type, Math.max(amount, 0), source);
+    this._shieldShowTime = 30;
+    if (this.shield > 0) {
+      let oldshield = this.shield;
+      this.shield -= Math.max(this.calcShield(amount), 0);
+      if (this.shield <= 0) {
+        this.breakShield();
+        amount -= oldshield;
+      } else return oldshield - this.shield;
+    }
+    return this.takeDamage(type, Math.max(this.calcArmour(amount), 0), source);
+  }
+  /** Calculate the damage to deal to this entity after applying armour. */
+  calcArmour(amount) {
+    return (
+      amount *
+      (1 -
+        ((1 -
+          (this.armourToughness + 1) /
+            (this.armour + this.armourToughness + 1)) **
+          0.3) **
+          (amount ** (1 - (this.armourToughness + 1) / 10)))
+    );
+  }
+  /** Calculate the damage to do to the entity's shield. */
+  calcShield(amount) {
+    return this.shield > 0 ? amount ** (1 / (this.shieldRating / 400 + 1)) : 0;
+  }
+  addShield(amount) {
+    if (this.shield == 0) this._lastMaxShield = amount;
+    else this._lastMaxShield += amount;
+    this.shield += amount;
+  }
+  breakShield() {
+    this.shield = 0;
+    this.emit(this.useYellowShield ? "shield-break-yellow" : "shield-break");
   }
   heal(amount) {
     this.health += amount;
@@ -444,6 +487,19 @@ class ShootableObject extends PhysicalObject {
       );
       pop();
       if (!game.paused) this._healthbarShowTime--;
+    }
+    if (this._shieldShowTime > 0 && this.shield > 0) {
+      push();
+      if (this.useYellowShield) {
+        fill(255, 255, 100, (this.shield / this._lastMaxShield) * 150);
+        stroke(255, 255, 100, (this.shield / this._lastMaxShield) * 255);
+      } else {
+        stroke(0, 255, 255, (this.shield / this._lastMaxShield) * 255);
+        fill(0, 255, 255, (this.shield / this._lastMaxShield) * 150);
+      }
+      ellipse(this.x, this.y, this.width * 1.5, this.height * 1.5);
+      pop();
+      if (!game.paused) this._shieldShowTime--;
     }
   }
 }

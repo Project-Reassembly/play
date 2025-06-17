@@ -1127,3 +1127,198 @@ Registries.vfx.add("land-scorch", {
     },
   ],
 });
+
+// combat
+Registries.vfx.add("shield-break", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      amount: 8,
+      cone: 360,
+      particle: {
+        lifetime: 30,
+        speed: 5,
+        decel: 0.075,
+        colours: [
+          [100, 255, 255, 200],
+          [0, 200, 255, 0],
+        ],
+        widthFrom: 4,
+        widthTo: 0,
+        heightFrom: 16,
+        heightTo: 16,
+        shape: "rect",
+        light: 20,
+      },
+    },
+    {
+      type: "wave-emission",
+      particle: {
+        lifetime: 30,
+        radiusFrom: 0,
+        radiusTo: 60,
+        strokeFrom: 2,
+        strokeTo: 10,
+        colours: [
+          [0, 255, 255, 200],
+          [0, 200, 255, 0],
+        ],
+        light: 30,
+      },
+    },
+  ],
+});
+Registries.vfx.add("shield-break-yellow", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      amount: 8,
+      cone: 360,
+      particle: {
+        lifetime: 30,
+        speed: 5,
+        decel: 0.075,
+        colours: [
+          [255, 255, 200, 200],
+          [255, 200, 0, 0],
+        ],
+        widthFrom: 4,
+        widthTo: 0,
+        heightFrom: 16,
+        heightTo: 16,
+        shape: "rect",
+        light: 20,
+      },
+    },
+    {
+      type: "wave-emission",
+      particle: {
+        lifetime: 30,
+        radiusFrom: 0,
+        radiusTo: 60,
+        strokeFrom: 2,
+        strokeTo: 10,
+        colours: [
+          [255, 255, 200, 200],
+          [255, 200, 0, 0],
+        ],
+        light: 30,
+      },
+    },
+  ],
+});
+
+// hmmmmmm
+
+// Registries.vfx.add("ui", {
+//   type: "multi-effect",
+//   effects: [
+//     {
+//       type: "particle-emission",
+//       isFloor: true,
+//       particle: {
+//         shape: "rhombus",
+//         lifetime: 45,
+//         speed: 1,
+//         decel: 0.05,
+//         widthFrom: 5,
+//         widthTo: 10,
+//         heightFrom: 10,
+//         heightTo: 20,
+//         colours: [
+//           [0, 255, 255, 20],
+//           [0, 255, 255, 0],
+//         ],
+//       },
+//     },
+//     {
+//       type: "particle-emission",
+//       isFloor: true,
+//       particle: {
+//         shape: "rhombus",
+//         lifetime: 45,
+//         speed: 1,
+//         decel: 0.05,
+//         widthFrom: 5,
+//         widthTo: 10,
+//         heightFrom: 10,
+//         heightTo: 20,
+//         colours: [
+//           [128, 128, 255, 20],
+//           [128, 128, 255, 0]
+//         ],
+//       },
+//     },
+//     {
+//       type: "particle-emission",
+//       isFloor: true,
+//       particle: {
+//         shape: "rhombus",
+//         lifetime: 45,
+//         speed: 1,
+//         decel: 0.05,
+//         widthFrom: 5,
+//         widthTo: 10,
+//         heightFrom: 10,
+//         heightTo: 20,
+//         colours: [
+//           [255, 0, 255, 20],
+//           [255, 0, 255, 0]
+//         ],
+//       },
+//     },
+//     {
+//       type: "particle-emission",
+//       particle: {
+//         shape: "rhombus",
+//         lifetime: 45,
+//         speed: 1,
+//         decel: 0.05,
+//         widthFrom: 5,
+//         widthTo: 10,
+//         heightFrom: 10,
+//         heightTo: 20,
+//         colours: [
+//           [0, 255, 255, 20],
+//           [0, 255, 255, 0],
+//         ],
+//       },
+//     },
+//     {
+//       type: "particle-emission",
+//       particle: {
+//         shape: "rhombus",
+//         lifetime: 45,
+//         speed: 1,
+//         decel: 0.05,
+//         widthFrom: 5,
+//         widthTo: 10,
+//         heightFrom: 10,
+//         heightTo: 20,
+//         colours: [
+//           [128, 128, 255, 20],
+//           [128, 128, 255, 0]
+//         ],
+//       },
+//     },
+//     {
+//       type: "particle-emission",
+//       particle: {
+//         shape: "rhombus",
+//         lifetime: 45,
+//         speed: 1,
+//         decel: 0.05,
+//         widthFrom: 5,
+//         widthTo: 10,
+//         heightFrom: 10,
+//         heightTo: 20,
+//         colours: [
+//           [255, 0, 255, 20],
+//           [255, 0, 255, 0]
+//         ],
+//       },
+//     },
+//   ],
+// });

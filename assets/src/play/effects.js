@@ -35,7 +35,7 @@ class Explosion {
     //Most of these powers are just to make it less insane at high radii
     //They are tested repeatedly to make sure they look good
     createEffect(this.effect, this.world, this.x, this.y, 0, this.radius);
-    this.dealDamage();
+    //this.dealDamage();
     return this;
   }
   dealDamage(kbrm = 1) {

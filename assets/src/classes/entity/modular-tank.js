@@ -79,7 +79,7 @@ class ModularTankEntity extends InventoryEntity {
             weapon.yOffset = (block.gridY - centreY) * blockSize;
             weapon.type = "weaponised-component";
             weapon.weapon = itemwep;
-            ent.followRange = Math.max(ent.followRange, itemwep.range ?? 0)
+            ent.attackRange = Math.max(ent.attackRange, itemwep.range ?? 0)
             ent.targetRange = Math.max(ent.targetRange, itemwep.range ?? 0)
             ent.components.push(weapon);
           } else {

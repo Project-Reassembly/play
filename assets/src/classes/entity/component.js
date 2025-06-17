@@ -14,36 +14,37 @@ class Component extends RegisteredItem {
   rotation = 0;
   xOffset = 0;
   yOffset = 0;
-  /** A list of tickables that listen to this component's tick() event. */
-  tickListeners = [];
   /**
    * Returns the position of this component, as if it were on an entity.
    * @param {Entity} entity
    */
   getPosOn(entity) {
     let mirrored = false;
+    let xoff = 0, yoff = 0;
     if (entity instanceof EquippedEntity) {
       if (entity.leftHand.get(0)?.getItem()?.component === this)
         mirrored = true;
+      xoff = entity.armType.xOffset;
+      yoff = entity.armType.yOffset;
     }
-    return this.getPosFrom(entity.x, entity.y, entity.direction, mirrored);
+    return this.getPosFrom(entity.x, entity.y, entity.direction, mirrored, xoff, yoff);
   }
-  getPosFrom(x, y, direction, mirrored = false) {
+  getPosFrom(x, y, direction, mirrored = false, xoff = 0, yoff = 0) {
     let facing = radians(direction + this.rotation * (mirrored ? -1 : 1));
     return {
       x:
         x +
-        this.xOffset * Math.cos(facing) -
-        this.yOffset * Math.sin(facing) * (mirrored ? -1 : 1),
+        (this.xOffset + xoff) * Math.cos(facing) -
+        (this.yOffset + yoff) * Math.sin(facing) * (mirrored ? -1 : 1),
       y:
         y +
-        this.xOffset * Math.sin(facing) +
-        this.yOffset * Math.cos(facing) * (mirrored ? -1 : 1),
+        (this.xOffset + xoff) * Math.sin(facing) +
+        (this.yOffset + yoff) * Math.cos(facing) * (mirrored ? -1 : 1),
       direction: facing,
     };
   }
-  draw(x, y, direction, mirrored = false) {
-    let pos = this.getPosFrom(x, y, direction, mirrored);
+  draw(x, y, direction, mirrored = false, xoff = 0, yoff = 0) {
+    let pos = this.getPosFrom(x, y, direction, mirrored, xoff, yoff);
     if (this.image) {
       rotatedImg(
         this.image,
@@ -67,18 +68,14 @@ class Component extends RegisteredItem {
       );
     }
   }
-  tick(entity) {
-    this.tickListeners.forEach((element) => {
-      element.tick();
-    });
-  }
+  tick(entity) {}
 }
 
 class LegComponent extends Component {
   cycleLength = 6;
   stepMagnitude = 2;
   _cycleAmount = 0;
-  getPosFrom(x, y, direction, mirrored = false) {
+  getPosFrom(x, y, direction, mirrored = false, xoff = 0, yoff = 0) {
     let facing = radians(direction + this.rotation * (mirrored ? -1 : 1));
     let offset =
       Math.sin(this._cycleAmount / (this.cycleLength * PI)) *
@@ -86,12 +83,12 @@ class LegComponent extends Component {
     return {
       x:
         x +
-        (this.xOffset + this.stepMagnitude * offset) * Math.cos(facing) -
-        this.yOffset * Math.sin(facing) * (mirrored ? -1 : 1),
+        (this.xOffset + this.stepMagnitude * offset + xoff) * Math.cos(facing) -
+        (this.yOffset + yoff) * Math.sin(facing) * (mirrored ? -1 : 1),
       y:
         y +
-        (this.xOffset + this.stepMagnitude * offset) * Math.sin(facing) +
-        this.yOffset * Math.cos(facing) * (mirrored ? -1 : 1),
+        (this.xOffset + this.stepMagnitude * offset + xoff) * Math.sin(facing) +
+        (this.yOffset + yoff) * Math.cos(facing) * (mirrored ? -1 : 1),
       direction: facing,
     };
   }
@@ -107,19 +104,19 @@ class WeaponComponent extends Component {
   recoilSpeed = 1;
   _recoiled = 0;
   _rotRecoiled = 0;
-  getPosFrom(x, y, direction, mirrored = false) {
+  getPosFrom(x, y, direction, mirrored = false, xoff = 0, yoff = 0) {
     let facing = radians(
       direction + (this.rotation + this._rotRecoiled) * (mirrored ? -1 : 1)
     );
     return {
       x:
         x +
-        (this.xOffset - this._recoiled) * Math.cos(facing) -
-        this.yOffset * Math.sin(facing) * (mirrored ? -1 : 1),
+        (this.xOffset - this._recoiled + xoff) * Math.cos(facing) -
+        (this.yOffset + yoff) * Math.sin(facing) * (mirrored ? -1 : 1),
       y:
         y +
-        (this.xOffset - this._recoiled) * Math.sin(facing) +
-        this.yOffset * Math.cos(facing) * (mirrored ? -1 : 1),
+        (this.xOffset - this._recoiled + xoff) * Math.sin(facing) +
+        (this.yOffset + yoff) * Math.cos(facing) * (mirrored ? -1 : 1),
       direction: facing,
     };
   }
@@ -221,4 +218,10 @@ class WeaponisedComponent extends WeaponComponent {
   }
 }
 
-export { Component, LegComponent, WeaponComponent, WeaponisedComponent, DestructibleComponent };
+export {
+  Component,
+  LegComponent,
+  WeaponComponent,
+  WeaponisedComponent,
+  DestructibleComponent,
+};

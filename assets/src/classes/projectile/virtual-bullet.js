@@ -12,9 +12,11 @@ class VirtualBullet extends Bullet {
     PhysicalObject.prototype.draw.call(this);
   }
   step(dt) {
-    if (!this.remove) this.intervalTick();
-    this.checkCollisions();
-    this.remove = true;
+    if (!this.remove) {
+      if (!this.remove) this.intervalTick();
+      this.checkCollisions();
+      this.remove = true;
+    }
   }
   get entity() {
     return this._ent ?? { team: this.team };

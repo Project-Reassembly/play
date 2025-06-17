@@ -74,6 +74,10 @@ cle.addType(
   "rloc-placeable",
   (val) => Registries.blocks.has(val) && Registries.items.has(val)
 );
+cle.addType(
+  "rloc-status",
+  (val) => Registries.statuses.has(val)
+);
 cle.addType("rloc-entity", (val) => Registries.entities.has(val));
 cle.addType("entity", () => false);
 cle.addType("nonentity-ctx", () => false);
@@ -104,6 +108,46 @@ cle.addKeyword(
     { name: "target", type: "entity" },
     { name: "item", type: "rloc-item|rloc-placeable" },
     { name: "amount", type: "number", optional: true },
+  ]
+);
+cle.addKeyword(
+  "effect",
+  (interp, labels, entity, status, duration) => {
+    /**@type {Entity} */
+    let target = entity?.value;
+    target.applyStatus(status?.value, (duration?.value ?? 10) * 60);
+    feedback(
+      "Given effect " +
+        Registries.statuses.get(status?.value).name +
+        " to " +
+        target.name +
+        " for " +
+        (duration?.value ?? 1) +
+        "s"
+    );
+  },
+  [
+    { name: "target", type: "entity" },
+    { name: "status", type: "rloc-status" },
+    { name: "duration", type: "number", optional: true },
+  ]
+);
+cle.addKeyword(
+  "shield",
+  (interp, labels, entity, amount) => {
+    /**@type {Entity} */
+    let target = entity?.value;
+    target.addShield(amount?.value ?? 0);
+    feedback(
+      "Added " +
+        (amount?.value ?? 0) +
+        " shield HP to " +
+        target.name
+    );
+  },
+  [
+    { name: "target", type: "entity" },
+    { name: "amount", type: "number" },
   ]
 );
 cle.addLabel("nuclear", ["explode"]);

@@ -116,37 +116,41 @@ class EquippedEntity extends InventoryEntity {
       this.leftHand
         .get(0)
         .getItem()
-        .component.draw(this.x, this.y, this.direction, true);
+        .component.draw(
+          this.x,
+          this.y,
+          this.direction,
+          true,
+          this.armType.xOffset,
+          this.armType.yOffset
+        );
     else this.armType.draw(this.x, this.y, this.direction, true);
     if (this.rightHand.get(0)?.getItem()?.component)
       this.rightHand
         .get(0)
         .getItem()
-        .component.draw(this.x, this.y, this.direction);
+        .component.draw(
+          this.x,
+          this.y,
+          this.direction,
+          false,
+          this.armType.xOffset,
+          this.armType.yOffset
+        );
     else this.armType.draw(this.x, this.y, this.direction);
 
     if (this.bodyPart) this.bodyPart.draw(this.x, this.y, this.direction);
     this.body.iterate((x) => {
       let item = x.getItem();
       if (item instanceof Equippable) {
-        item.component.draw(
-          this.x,
-          this.y,
-          this.direction,
-          inv == this.leftHand
-        );
+        item.component.draw(this.x, this.y, this.direction);
       }
     }, true);
     if (this.headPart) this.headPart.draw(this.x, this.y, this.direction);
     this.head.iterate((x) => {
       let item = x.getItem();
       if (item instanceof Equippable) {
-        item.component.draw(
-          this.x,
-          this.y,
-          this.direction,
-          inv == this.leftHand
-        );
+        item.component.draw(this.x, this.y, this.direction);
       }
     }, true);
     PhysicalObject.prototype.draw.call(this);
@@ -182,7 +186,7 @@ class EquippedEntity extends InventoryEntity {
     entity.head = Inventory.deserialise(created.head);
     entity.body = Inventory.deserialise(created.body);
   }
-  attack(){
+  attack() {
     if (
       this.rightHand.get(0) instanceof ItemStack &&
       this.rightHand.get(0).getItem() instanceof Equippable
