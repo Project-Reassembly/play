@@ -10,7 +10,6 @@ import {
 } from "../../play/effects.js";
 import { blockSize, totalSize, worldSize } from "../../scaling.js";
 import { game } from "../../play/game.js";
-import { Log } from "../../play/messaging.js";
 import { Block } from "../block/block.js";
 /**
  * @typedef SerialisedEntity

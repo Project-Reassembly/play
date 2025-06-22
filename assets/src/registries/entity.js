@@ -1,4 +1,7 @@
 import { Registries } from "../core/registry.js";
+Registries.entities.add("tonk", {
+  type: "modular-tank",
+});
 Registries.entities.add("scrap-player", {
   type: "player",
   name: "Player",

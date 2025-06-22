@@ -19,7 +19,8 @@ class Inventory {
   constructor(size, stacks = []) {
     stacks ??= [];
     this.size = size;
-    this.storage = stacks.map((x) => construct(x, "itemstack"));
+    if(stacks instanceof Inventory) this.storage = stacks.storage;
+    else this.storage = stacks.map((x) => construct(x, "itemstack"));
     this.storage.length = this.size;
   }
   /**@returns {SerialisedInventory} */

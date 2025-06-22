@@ -1,6 +1,5 @@
 import { construct } from "../../core/constructor.js";
 import { Registries } from "../../core/registry.js";
-import { Log } from "../../play/messaging.js";
 import { blockSize } from "../../scaling.js";
 import { Block } from "../block/block.js";
 import { Container } from "../block/container.js";
@@ -9,10 +8,13 @@ import { SignBlock } from "../block/decoration.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
 import { Weapon } from "../item/weapon.js";
 import { World } from "../world/world.js";
-import { WeaponisedComponent } from "./component.js";
+import { Component, WeaponisedComponent } from "./component.js";
 import { InventoryEntity } from "./inventory-entity.js";
 
 class ModularTankEntity extends InventoryEntity {
+  inventorySize = 1;
+  registryName = "tonk";
+  aiType = "hostile";
   /**
    * @param {World} world
    * @param {*} centreX
@@ -79,8 +81,8 @@ class ModularTankEntity extends InventoryEntity {
             weapon.yOffset = (block.gridY - centreY) * blockSize;
             weapon.type = "weaponised-component";
             weapon.weapon = itemwep;
-            ent.attackRange = Math.max(ent.attackRange, itemwep.range ?? 0)
-            ent.targetRange = Math.max(ent.targetRange, itemwep.range ?? 0)
+            ent.attackRange = Math.max(ent.attackRange, itemwep.range ?? 0);
+            ent.targetRange = Math.max(ent.targetRange, itemwep.range ?? 0);
             ent.components.push(weapon);
           } else {
             ent.inventory.push({
@@ -94,7 +96,6 @@ class ModularTankEntity extends InventoryEntity {
       if (block instanceof Conveyor) ent.speed += 20 / block.moveTime;
       if (block instanceof SignBlock) ent.name = block.getMsg();
     });
-    ent.aiType = "hostile";
     ent.addToWorld(
       world,
       centreX * blockSize + blockSize / 2,
@@ -115,20 +116,30 @@ class ModularTankEntity extends InventoryEntity {
   }
   serialise() {
     let e = super.serialise();
-    e.blocks = this.blocks.map((x) => x.serialise());
+    e.components = this.components.map((x) => x.serialise());
+    e.name = this.name;
+    e.speed = this.baseSpeed;
+    e.team = this.team;
+    e.attackRange = this.attackRange;
+    e.targetRange = this.targetRange;
+    e.height = this.height;
+    e.width = this.width;
+    e.inventorySize = this.inventorySize;
     return e;
   }
   static applyExtraProps(ent, created) {
-    if (created.blocks)
-      ent.blocks = created.blocks.map((x) => {
-        let blk = construct(x, "block");
-        if (x.direction) blk.direction = Direction.fromEnum(x.direction);
-        if (x.health) blk.health = x.health ?? 0;
-        if (x.team) blk.team = x.team ?? "enemy";
-        if (x.power) blk.power = x.power ?? 0;
-        //Specific saves
-        blk.constructor.applyExtraProps(blk, x);
-      });
+    super.applyExtraProps(ent, created);
+    ent.speed = created.speed ?? 10;
+    ent.name = created.name ?? "Entity";
+    ent.team = created.team ?? "enemy";
+    ent.attackRange = created.attackRange;
+    ent.targetRange = created.targetRange;
+    ent.height = created.height;
+    ent.width = created.width;
+    ent.inventorySize = created.inventorySize ?? 0;
+    if (created.components) ent.components = created.components;
+    ent.init();
+    console.log(ent);
   }
 }
 
