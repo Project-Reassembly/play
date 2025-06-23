@@ -225,8 +225,14 @@ class Entity extends ShootableObject {
         rnd(this.targetRange, this.targetRange / 4) *
         (tru(0.5) ? -1 : 1) *
         this.passiveIncentiveModifier;
-      this.target.x = clamp(this.target.x + xOffset, 0, totalSize);
-      this.target.y = clamp(this.target.y + yOffset, 0, totalSize);
+
+        this.target.x += xOffset;
+        this.target.y += yOffset;
+        if(this.target.x > totalSize) this.target.x = totalSize * 2 - this.target.x
+        if(this.target.y > totalSize) this.target.y = totalSize * 2 - this.target.y
+        
+        if(this.target.x < 0) this.target.x = -this.target.x
+        if(this.target.y < 0) this.target.y = -this.target.y
       this._waiting =
         this.waitTime + rnd(this.waitVariance, -this.waitVariance);
     }
