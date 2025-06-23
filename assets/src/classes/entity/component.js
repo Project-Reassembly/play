@@ -1,5 +1,5 @@
 import { construct } from "../../core/constructor.js";
-import { Vector } from "../../core/number.js";
+import { turn, Vector } from "../../core/number.js";
 import { RegisteredItem } from "../../core/registered-item.js";
 import { Registries } from "../../core/registry.js";
 import { rotatedImg } from "../../core/ui.js";
@@ -269,9 +269,20 @@ class WeaponisedComponent extends Component {
     super.tick(entity);
 
     if (entity.target) {
-      this.postRot =
-        new Vector(entity.target.x, entity.target.y).sub(this.getPosOn(entity))
-          .angleRad - entity.directionRad || this.postRot;
+      let pos = this.getPosOn(entity);
+      this.postRot = radians(
+        turn(
+          degrees(this.postRot + entity.directionRad),
+          pos.x,
+          pos.y,
+          entity.target.x,
+          entity.target.y,
+          entity.turnSpeed * 2
+        ).direction
+      ) - entity.directionRad;
+
+      // new Vector(entity.target.x, entity.target.y).sub(this.getPosOn(entity))
+      //   .angleRad - entity.directionRad || this.postRot;
     }
 
     if (!this._ticked) {

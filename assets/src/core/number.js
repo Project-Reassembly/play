@@ -207,6 +207,36 @@ class Vector {
     return new this();
   }
 }
+
+function turn(direction, x, y, toX, toY, amount) {
+  let delta = new Vector(toX - x, toY - y);
+  //Define variables
+  let currentDirection = Vector.fromAngle(direction).angle; //Find current angle, standardised
+  let targetDirection = delta.angle; //Find target angle, standardised
+  if (targetDirection === currentDirection)
+    return { direction: direction, done: true }; //Do nothing if facing the right way
+  let deltaRot = targetDirection - currentDirection;
+  //Rotation correction
+  if (deltaRot < -180) {
+    deltaRot += 360;
+  } else if (deltaRot > 180) {
+    deltaRot -= 360;
+  }
+  let sign = deltaRot < 0 ? -1 : 1; //Get sign: -1 if negative, 1 if positive
+  let deltaD = 0;
+  let done = false;
+  //Choose smaller turn
+  if (Math.abs(deltaRot) > amount) {
+    deltaD = amount * sign;
+    done = true;
+  } else {
+    deltaD = deltaRot;
+    done = false;
+  }
+  //Turn
+  return { direction: direction + deltaD, done: done };
+}
+
 export {
   shortenedNumber,
   clamp,
@@ -215,5 +245,6 @@ export {
   tru,
   dynamicSort,
   colinterp,
+  turn,
   Vector,
 };

@@ -21,6 +21,7 @@ Registries.deathmsg.add("laser", [
   [
     "(1) was shot by (2)",
     "(1) was lased by (2)",
+    "(1) was laser-cut by (2)",
     "(1) tried to dodge (2)'s laser",
   ],
 ]);
@@ -48,7 +49,11 @@ Registries.deathmsg.add("fire", [
   ],
 ]);
 Registries.deathmsg.add("electric", [
-  ["(1) was electrocuted", "(1) ignored the high-voltage warning sign"],
+  [
+    "(1) was electrocuted",
+    "(1) ignored the high-voltage warning sign",
+    "(1) couldn't handle current events",
+  ],
   [
     "(1) was electrocuted by (2)",
     "(2)'s attempt to defibrillate (1) failed", //Don't let them do CPR
@@ -57,6 +62,14 @@ Registries.deathmsg.add("electric", [
 Registries.deathmsg.add("no", [
   ["(1) stopped existing"],
   ["(1) stopped existing because of (2)"],
+]);
+Registries.deathmsg.add("power-off", [
+  ["(1)'s power ran out", "(1) forgot to charge their battery", "(1) neglected the energy meter"],
+  ["(1) ran out of power whilst fighting (2)"],
+]);
+Registries.deathmsg.add("system-error", [
+  ["(1)'s system crashed", "(1) threw a syntax error", "(1)'s system corrupted", "(1) threw a type error"],
+  [],
 ]);
 Registries.deathmsg.add("insanity", [
   [
@@ -67,6 +80,8 @@ Registries.deathmsg.add("insanity", [
   ],
   [],
 ]);
+//In a top-down, 2D game...
+//FALL DAMAGE.
 Registries.deathmsg.add("fall", [
   [
     "(1) invented gravity", //Hmmm yes f a l l

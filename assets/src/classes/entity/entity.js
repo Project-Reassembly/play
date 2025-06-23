@@ -226,13 +226,15 @@ class Entity extends ShootableObject {
         (tru(0.5) ? -1 : 1) *
         this.passiveIncentiveModifier;
 
-        this.target.x += xOffset;
-        this.target.y += yOffset;
-        if(this.target.x > totalSize) this.target.x = totalSize * 2 - this.target.x
-        if(this.target.y > totalSize) this.target.y = totalSize * 2 - this.target.y
-        
-        if(this.target.x < 0) this.target.x = -this.target.x
-        if(this.target.y < 0) this.target.y = -this.target.y
+      this.target.x += xOffset;
+      this.target.y += yOffset;
+      if (this.target.x > totalSize)
+        this.target.x = totalSize * 2 - this.target.x;
+      if (this.target.y > totalSize)
+        this.target.y = totalSize * 2 - this.target.y;
+
+      if (this.target.x < 0) this.target.x = -this.target.x;
+      if (this.target.y < 0) this.target.y = -this.target.y;
       this._waiting =
         this.waitTime + rnd(this.waitVariance, -this.waitVariance);
     }
@@ -255,12 +257,7 @@ class Entity extends ShootableObject {
   _scavengerAI() {
     if (
       !this.inventory ||
-      !this._generic_AttackerAI(
-        (ent) =>
-          !!ent.item,
-        false,
-        false
-      )
+      !this._generic_AttackerAI((ent) => !!ent.item, false, false)
     )
       if (
         !this._generic_AttackerAI((blk) => !!blk.inventory, true, true, false)
@@ -366,8 +363,10 @@ class Entity extends ShootableObject {
     noFill();
     stroke(this.target instanceof ShootableObject ? [255, 0, 0] : [0, 255, 0]);
     strokeWeight(4);
-    if (this.target) square(this.target.x, this.target.y, this.size);
-    line(this.x, this.y, this.target.x, this.target.y);
+    if (this.target) {
+      square(this.target.x, this.target.y, this.size);
+      line(this.x, this.y, this.target.x, this.target.y);
+    }
     if (this.aiType === "hostile" || this.aiType === "guard") {
       stroke(
         this.target instanceof ShootableObject

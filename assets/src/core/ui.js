@@ -2,6 +2,8 @@ import { Block } from "../classes/block/block.js";
 import { fonts } from "../play/game.js";
 import { Registries } from "./registry.js";
 import { Inventory, drawMultilineText } from "../classes/inventory.js";
+import { PhysicalObject, ShootableObject } from "../classes/physical.js";
+import { colinterp } from "./number.js";
 const ui = {
   menuState: "title",
   waitingForMouseUp: false,
@@ -65,7 +67,7 @@ const ui = {
     UIComponent.setCondition("boss:no");
     this.wasReset = true;
   },
-  wasReset: false
+  wasReset: false,
 };
 
 class UIComponent {
@@ -360,6 +362,158 @@ class UIComponent {
     } else {
       this.outlineColour = this.defOutlCol;
     }
+  }
+}
+
+class HealthbarComponent extends UIComponent {
+  /**@type {ShootableObject?} */
+  source = null;
+  healthbarColours = [[255, 255, 255]];
+  sourceIsFunction = false;
+  textColour = this.outlineColour;
+  #current = "health";
+  #max = "maxHealth";
+  setGetters(current = "health", max = "maxHealth") {
+    this.#current = current;
+    this.#max = max;
+    return this;
+  }
+  constructor(
+    x = 0,
+    y = 0,
+    width = 1,
+    height = 1,
+    bevel = "none",
+    onpress = () => {},
+    shownText = "",
+    useOCR = false,
+    shownTextSize = 20,
+    source = null,
+    healthcols = [[255, 255, 0]]
+  ) {
+    //Initialise component
+    super(
+      x,
+      y,
+      width,
+      height,
+      bevel,
+      onpress,
+      shownText,
+      useOCR,
+      shownTextSize
+    );
+    this.source = source;
+    this.sourceIsFunction = typeof this.source === "function";
+    this.healthbarColours = healthcols;
+  }
+  getSource() {
+    return this.sourceIsFunction ? this.source() : this.source;
+  }
+  draw() {
+    let src = this.getSource();
+    push();
+    translate(this.x, this.y);
+    rotate(this.rotation);
+    translate(-this.x, -this.y);
+    noStroke();
+    if (this.inverted) scale(1, -1);
+    if (this.invertedX) scale(-1, 1);
+    if (this.width > 0 && this.height > 0) {
+      //outline
+      if (this.outline && this.outlineColour) {
+        stroke(...this.outlineColour);
+        strokeWeight(10);
+        if (this.emphasised) stroke(...this.emphasisColour);
+      }
+      noFill();
+      this.#shape(
+        this.x - this.width / 2,
+        this.y,
+        this.width,
+        this.height,
+        true
+      );
+      //bar
+      noStroke();
+      fill(...(this.backgroundColour ?? [95, 100, 100, 160]));
+      this.#shape(
+        this.x - this.width / 2,
+        this.y,
+        this.width,
+        this.height,
+        true
+      );
+      fill(
+        src
+          ? colinterp(
+              this.healthbarColours,
+              src[this.#current] / src[this.#max]
+            )
+          : [255, 0, 0]
+      );
+      this.#shape(
+        this.x - this.width / 2,
+        this.y,
+        src ? (this.width * src[this.#current]) / src[this.#max] : this.width,
+        this.height,
+        true
+      );
+    }
+    //Draw optional text
+    noStroke();
+    textFont(this.ocr ? fonts.ocr : fonts.darktech);
+    if (this.ocr) {
+      stroke(...this.textColour);
+      strokeWeight(this.textSize / 15);
+    }
+    fill(...this.textColour);
+    textAlign(LEFT, CENTER);
+    textSize(this.textSize);
+    text(
+      " " + (src ? this.text : "No source"),
+      this.x - this.width / 2,
+      this.y
+    );
+    pop();
+  }
+  #shape(x, y, width, height, realign = false, realignV = false) {
+    if (realign) x += width / 2;
+    if (realignV) y += height / 2;
+
+    beginShape();
+    if (this.bevel === "none") {
+      vertex(x - width / 2, y + height / 2);
+      vertex(x + width / 2, y + height / 2);
+      vertex(x + width / 2, y - height / 2);
+      vertex(x - width / 2, y - height / 2);
+    } else if (this.bevel === "both") {
+      vertex(x - width / 2 - height / 2, y + height / 2);
+      vertex(x + width / 2 - height / 2, y + height / 2);
+      vertex(x + width / 2 + height / 2, y - height / 2);
+      vertex(x - width / 2 + height / 2, y - height / 2);
+    } else if (this.bevel === "trapezium") {
+      vertex(x - width / 2 - height / 2, y + height / 2);
+      vertex(x + width / 2 + height / 2, y + height / 2);
+      vertex(x + width / 2 - height / 2, y - height / 2);
+      vertex(x - width / 2 + height / 2, y - height / 2);
+    } else if (this.bevel === "right") {
+      vertex(x - width / 2, y + height / 2);
+      vertex(x + width / 2 - height / 2, y + height / 2);
+      vertex(x + width / 2 + height / 2, y - height / 2);
+      vertex(x - width / 2, y - height / 2);
+    } else if (this.bevel === "left") {
+      vertex(x - width / 2 - height / 2, y + height / 2);
+      vertex(x + width / 2, y + height / 2);
+      vertex(x + width / 2, y - height / 2);
+      vertex(x - width / 2 + height / 2, y - height / 2);
+    } else if (this.bevel === "reverse") {
+      vertex(x - width / 2 + height / 2, y + height / 2);
+      vertex(x + width / 2 + height / 2, y + height / 2);
+      vertex(x + width / 2 - height / 2, y - height / 2);
+      vertex(x - width / 2 - height / 2, y - height / 2);
+    }
+    endShape(CLOSE);
   }
 }
 
@@ -1074,6 +1228,44 @@ function createSliderComponent(
   return component;
 }
 
+function createHealthbarComponent(
+  screens = [],
+  conditions = [],
+  x = 0,
+  y = 0,
+  width = 1,
+  height = 1,
+  bevel = "none",
+  onpress = null,
+  shownText = "",
+  useOCR = false,
+  shownTextSize = 20,
+  source = null,
+  cols = [[255, 255, 0]]
+) {
+  //Make component
+  const component = new HealthbarComponent(
+    x,
+    y,
+    width,
+    height,
+    bevel,
+    onpress ?? (() => {}),
+    shownText,
+    useOCR,
+    shownTextSize,
+    source,
+    cols
+  );
+  component.conditions = conditions;
+  //Set conditional things
+  component.acceptedScreens = screens;
+  component.isInteractive = !!onpress;
+  //Add to game
+  ui.components.push(component);
+  return component;
+}
+
 export {
   ui,
   drawImg,
@@ -1086,6 +1278,7 @@ export {
   createUIComponent,
   createUIImageComponent,
   createUIInventoryComponent,
+  createHealthbarComponent,
   UIComponent,
   ImageContainer,
 };

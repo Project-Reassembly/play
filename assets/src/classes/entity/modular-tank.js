@@ -102,6 +102,7 @@ class ModularTankEntity extends InventoryEntity {
       centreY * blockSize + blockSize / 2
     );
     ent.speed /= ent.components.length;
+    ent.turnSpeed /= ent.components.length;
     ent.init();
     return ent;
   }
@@ -125,6 +126,7 @@ class ModularTankEntity extends InventoryEntity {
     e.height = this.height;
     e.width = this.width;
     e.inventorySize = this.inventorySize;
+    e.turnSpeed = this.turnSpeed;
     return e;
   }
   static applyExtraProps(ent, created) {
@@ -137,6 +139,7 @@ class ModularTankEntity extends InventoryEntity {
     ent.height = created.height;
     ent.width = created.width;
     ent.inventorySize = created.inventorySize ?? 0;
+    ent.turnSpeed = created.turnSpeed ?? 1;
     if (created.components) ent.components = created.components;
     ent.init();
     console.log(ent);

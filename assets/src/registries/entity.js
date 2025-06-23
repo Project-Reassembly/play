@@ -97,7 +97,7 @@ Registries.entities.add("scavenger", {
   width: 25,
   height: 25,
   aiType: "scavenger",
-  followRange: 250,
+  attackRange: 250,
   targetRange: 500,
   rightHand: [
     {
@@ -164,7 +164,7 @@ Registries.entities.add("scrap-sentinel", {
   width: 35,
   height: 35,
   aiType: "guard",
-  followRange: 200,
+  attackRange: 200,
   targetRange: 400,
   rightHand: [
     {
@@ -245,7 +245,7 @@ Registries.entities.add("iti-corporate-merchant", {
   width: 35,
   height: 35,
   aiType: "passive",
-  followRange: 400,
+  attackRange: 400,
   angerRange: 700,
   defensiveRange: 400,
   targetRange: 300,
@@ -305,8 +305,8 @@ Registries.entities.add("scrapper", {
   width: 50,
   height: 50,
   aiType: "hostile",
-  followRange: 400,
-  targetRange: 600,
+  attackRange: 400,
+  targetRange: 2600,
   rightHand: [
     {
       item: "scrap-cannon",

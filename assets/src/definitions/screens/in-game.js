@@ -4,6 +4,7 @@ import {
   createUIImageComponent,
   createUIInventoryComponent,
   createMultilineUIComponent,
+  createHealthbarComponent,
 } from "../../core/ui.js";
 import { Block } from "../../classes/block/block.js";
 import { ui } from "../../core/ui.js";
@@ -220,119 +221,150 @@ Object.defineProperty(
 ).anchorBottom(45);
 
 // mone
-createUIComponent(
-  ["in-game"],
-  [],
-  0,
-  0,
-  300,
-  40,
-  "trapezium",
-  null,
-  "",
-  true,
-  20
-)
+createUIComponent(["in-game"], [], 0, 0, 100, 40, "left", null, "", true, 20)
   .invert()
-  .anchorBottom();
+  .anchorBottom()
+  .anchorRight();
 Object.defineProperty(
-  createUIComponent(
-    ["in-game"],
-    [],
-    -100,
-    0,
-    0,
-    0,
-    "none",
-    null,
-    "",
-    true,
-    20
-  ).anchorTop(20),
+  createUIComponent(["in-game"], [], 0, 0, 0, 0, "none", null, "", true, 20)
+    .anchorTop(20)
+    .anchorRight(50),
   "text",
   { get: () => "$" + shortenedNumber(game.money) }
 );
-//health
-createUIComponent(["in-game"], [], 40, 0, 182, 20, "both")
-  .anchorTop(10)
-  .setBackgroundColour([0, 0, 0]);
+
+//healthbar
+Object.defineProperty(
+  createHealthbarComponent(
+    ["in-game"],
+    [],
+    10,
+    10,
+    200,
+    20,
+    "reverse",
+    null,
+    "Integrity",
+    true,
+    15,
+    () => game.player,
+    [[255, 200, 0]]
+  )
+    .anchorLeft(50)
+    .anchorBottom(10)
+    .setBackgroundColour([0, 0, 0]),
+  "width",
+  { get: () => width / 5 }
+);
+//shield bar
 Object.defineProperties(
-  createUIComponent(["in-game"], [], 94, 0, 0, 14, "both")
-    .anchorTop(13)
-    .setBackgroundColour([255, 230, 0])
-    .removeOutline(),
+  createHealthbarComponent(
+    ["in-game"],
+    [],
+    10,
+    10,
+    200,
+    20,
+    "reverse",
+    null,
+    "",
+    true,
+    15,
+    () => game.player,
+    [[0, 255, 255, 150]]
+  )
+    .anchorLeft(50)
+    .anchorBottom(10)
+    .setBackgroundColour([0, 0, 0, 0])
+    .setGetters("shield", "_lastMaxShield")
+    .setOutlineColour([0, 0, 0, 0]),
   {
-    width: { get: () => 174 * (game.player?.health / game.player?.maxHealth) },
-    x: { get: () => -47 + 87 * (game.player?.health / game.player?.maxHealth) },
+    width: { get: () => width / 5 },
+    text: { get: () => (game.player?.shield > 0 ? "Shield" : "") },
   }
 );
-Object.defineProperties(
-  createUIComponent(["in-game"], [], 94, 0, 0, 14, "both")
-    .anchorTop(13)
-    .setBackgroundColour([0, 230, 255, 150])
-    .removeOutline(),
-  {
-    width: { get: () => 174 * (game.player?.shield / game.player?._lastMaxShield) },
-    x: { get: () => -47 + 87 * (game.player?.shield / game.player?._lastMaxShield) },
-  }
+//energy bar
+Object.defineProperty(
+  createHealthbarComponent(
+    ["in-game"],
+    [],
+    10,
+    10,
+    200,
+    20,
+    "reverse",
+    null,
+    "Energy",
+    true,
+    15,
+    () => game.player,
+    [
+      [100, 255, 255],
+      [0, 255, 255],
+      [0, 200, 200],
+    ]
+  )
+    .anchorLeft(25)
+    .anchorBottom(35)
+    .setBackgroundColour([0, 0, 0])
+    .setGetters("energy", "maxEnergy"),
+  "width",
+  { get: () => width / 5 }
 );
-createUIComponent(
-  ["in-game"],
-  [],
-  0,
-  0,
-  0,
-  0,
-  "none",
-  null,
-  "Integrity",
-  true,
-  12
-)
-  .anchorTop(20)
-  .setTextColour([255, 255, 255]);
+
 //##############################################################
 
 //                       BOSS BAR
 
 //##############################################################
 
-createUIComponent(["in-game"], ["boss:yes"], 0, 0, 180, 20, "both")
-  .anchorTop(40)
-  .setBackgroundColour([0, 0, 0]);
 Object.defineProperties(
-  createUIComponent(["in-game"], ["boss:yes"], 0, 0, 0, 20, "both")
-    .anchorTop(40)
-    .setBackgroundColour([255, 0, 0]),
-  {
-    width: {
-      get: () =>
-        180 * (world.firstBoss()?.health / world.firstBoss()?.maxHealth),
-    },
-    x: {
-      get: () =>
-        -90 + 90 * (world.firstBoss()?.health / world.firstBoss()?.maxHealth),
-    },
-  }
-);
-Object.defineProperty(
-  createUIComponent(
+  createHealthbarComponent(
     ["in-game"],
     ["boss:yes"],
-    0,
-    0,
-    0,
-    0,
-    "none",
+    10,
+    10,
+    200,
+    20,
+    "both",
     null,
     "Boss HP",
     true,
-    12
+    15,
+    () => world.firstBoss(),
+    [[255, 0, 0]]
   )
-    .anchorTop(50)
-    .setTextColour([255, 255, 255]),
-  "text",
-  { get: () => world.firstBoss()?.name }
+    .anchorTop(10)
+    .setBackgroundColour([0, 0, 0]),
+  {
+    width: { get: () => width * 0.667 },
+    text: { get: () => world.firstBoss()?.name },
+  }
+);
+Object.defineProperties(
+  createHealthbarComponent(
+    ["in-game"],
+    ["boss:yes"],
+    10,
+    10,
+    200,
+    20,
+    "both",
+    null,
+    "",
+    true,
+    15,
+    () => world.firstBoss(),
+    [[0, 255, 255, 150]]
+  )
+    .anchorTop(10)
+    .setBackgroundColour([0, 0, 0, 0])
+    .setGetters("shield", "_lastMaxShield")
+    .setOutlineColour([0, 0, 0, 0]),
+  {
+    width: { get: () => width * 0.667 },
+    text: { get: () => world.firstBoss()?.shield > 0 ? world.firstBoss().name + " [Shield]" : "" },
+  }
 );
 
 //##############################################################
