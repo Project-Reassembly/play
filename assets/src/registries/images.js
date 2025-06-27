@@ -126,6 +126,26 @@ Registries.images.add("conveyor.basic-conveyor.belt", new ImageContainer("assets
 Registries.images.add("conveyor.basic-conveyor.ui", new ImageContainer("assets/textures/block/blocks/conveyor/basic-conveyor.png"))
 Registries.images.add("conveyor.basic-unloader.belt", new ImageContainer("assets/textures/block/blocks/conveyor/basic-unloader-belt.png"))
 Registries.images.add("conveyor.basic-unloader.ui", new ImageContainer("assets/textures/block/blocks/conveyor/basic-unloader.png"))
+//Blocks > Plasma
+Registries.images.add("ppipe.plasma-pipeline.ui", new ImageContainer("assets/textures/block/blocks/plasma/plasma-pipeline-ui.png"))
+Registries.images.add("ppipe.plasma-pipeline.base", new ImageContainer("assets/textures/block/blocks/plasma/plasma-pipeline-base.png"))
+Registries.images.add("ppipe.plasma-pipeline.input", new ImageContainer("assets/textures/block/blocks/plasma/plasma-pipeline-input.png"))
+Registries.images.add("ppipe.plasma-pipeline.output", new ImageContainer("assets/textures/block/blocks/plasma/plasma-pipeline-output.png"))
+Registries.images.add("ppipe.plasma-pipeline.base-plasma", new ImageContainer("assets/textures/block/blocks/plasma/plasma-pipeline-base-plasma.png"))
+Registries.images.add("ppipe.plasma-pipeline.input-plasma", new ImageContainer("assets/textures/block/blocks/plasma/plasma-pipeline-input-plasma.png"))
+Registries.images.add("ppipe.plasma-pipeline.output-plasma", new ImageContainer("assets/textures/block/blocks/plasma/plasma-pipeline-output-plasma.png"))
+
+Registries.images.add("ppipe.plasma-compressor.ui", new ImageContainer("assets/textures/block/blocks/plasma/compressor/plasma-compressor-ui.png"))
+Registries.images.add("ppipe.plasma-compressor.base", new ImageContainer("assets/textures/block/blocks/plasma/compressor/plasma-compressor-base.png"))
+Registries.images.add("ppipe.plasma-compressor.input", new ImageContainer("assets/textures/block/blocks/plasma/compressor/plasma-compressor-input.png"))
+Registries.images.add("ppipe.plasma-compressor.output", new ImageContainer("assets/textures/block/blocks/plasma/compressor/plasma-compressor-output.png"))
+Registries.images.add("ppipe.plasma-compressor.base-plasma", new ImageContainer("assets/textures/block/blocks/plasma/compressor/plasma-compressor-base-plasma.png"))
+Registries.images.add("ppipe.plasma-compressor.input-plasma", new ImageContainer("assets/textures/block/blocks/plasma/compressor/plasma-compressor-input-plasma.png"))
+Registries.images.add("ppipe.plasma-compressor.output-plasma", new ImageContainer("assets/textures/block/blocks/plasma/compressor/plasma-compressor-output-plasma.png"))
+Registries.images.add("ppipe.plasma-compressor.spinner", new ImageContainer("assets/textures/block/blocks/plasma/compressor/plasma-compressor-spinner.png"))
+
+Registries.images.add("tank.plasma-tank.base", new ImageContainer("assets/textures/block/blocks/plasma/plasma-tank.png"))
+Registries.images.add("tank.plasma-tank.plasma", new ImageContainer("assets/textures/block/blocks/plasma/plasma-tank-plasma.png"))
 //Blocks > Decoration
 Registries.images.add("block.message", new ImageContainer("assets/textures/block/blocks/deco/message.png"))
 //Blocks > Offense

@@ -28,6 +28,7 @@ class Block extends ShootableObject {
   blockX = 0;
   blockY = 0;
   rotatable = false;
+  /** Not the same as ShootableObject.direction, it's a direction in *radians* */
   direction = Direction.UP;
   explosiveness = 0.1;
   dropItem = null;

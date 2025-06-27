@@ -169,7 +169,7 @@ createLinkedBlockAndItem(
   {
     type: "bomb",
     health: 50,
-    fuseEffect: "burning"
+    fuseEffect: "burning",
   },
   {
     description:
@@ -187,7 +187,7 @@ createLinkedBlockAndItem(
     hiddenImg: "bomb.landmine.hidden",
     walkable: true,
     autoDetonationRange: 20,
-    detonationDelay: 35
+    detonationDelay: 35,
   },
   {
     image: "bomb.landmine.item",
@@ -205,7 +205,7 @@ createLinkedBlockAndItem(
     health: 50,
     explosion: {
       radius: 180,
-      amount: 1500
+      amount: 1500,
     },
     fuseEffect: {
       type: "particle-emission",
@@ -222,7 +222,7 @@ createLinkedBlockAndItem(
         colours: [
           [255, 255, 255],
           [255, 255, 0],
-          [0, 255, 0]
+          [0, 255, 0],
         ],
         rotateSpeed: 0.2,
         light: 50,
@@ -239,14 +239,14 @@ createLinkedBlockAndItem(
         colours: [
           [0, 255, 0, 100],
           [255, 255, 0, 100],
-          [255, 0, 0, 100]
+          [255, 0, 0, 100],
         ],
         light: 50,
         strokeFrom: 10,
-        strokeTo: 10
+        strokeTo: 10,
       },
     },
-    accelerable: false
+    accelerable: false,
   },
   {
     description:
@@ -757,7 +757,7 @@ createLinkedBlockAndItem(
       sand: "sand",
       "sand-water": "sand",
       stone: "stone",
-      "coal-ore":"coal",
+      "coal-ore": "coal",
       "copper-ore": "raw-copper",
     },
     amount: 1,
@@ -785,7 +785,7 @@ createLinkedBlockAndItem(
       sand: "sand",
       "sand-water": "sand",
       stone: "stone",
-      "coal-ore":"coal",
+      "coal-ore": "coal",
       "copper-ore": "raw-copper",
       "iron-ore": "raw-iron",
       "electrum-ore": "raw-electrum",
@@ -800,7 +800,7 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "Slowly collects resources from below it.\nCan drill Iron and Electrum."
+      "Slowly collects resources from below it.\nCan drill Iron and Electrum.",
   }
 );
 //## CONVEYOR ##
@@ -880,6 +880,97 @@ createLinkedBlockAndItem(
   },
   {
     description: "A small box for item storage.",
+    marketValue: 30,
+  }
+);
+//## PLASMA ##
+createLinkedBlockAndItem(
+  "plasma-generator",
+  "Plasma Generator",
+  "base.tungsten",
+  {
+    type: "plasma-generator",
+  },
+  {
+    description:
+      "Pressurises and superheats gas in\nthe atmosphere into plasma.",
+    rarity: Item.rarity.PETI,
+    marketValue: 5200,
+  }
+);
+createLinkedBlockAndItem(
+  "plasma-tank",
+  "Plasma Tank",
+  "tank.plasma-tank.base",
+  {
+    type: "plasma-tank",
+    capacity: 512,
+    plasma: "tank.plasma-tank.plasma",
+  },
+  {
+    description: "Stores plasma for later use.",
+    rarity: Item.rarity.PETI,
+    marketValue: 3250,
+  }
+);
+createLinkedBlockAndItem(
+  "plasma-pipeline",
+  "Plasma Pipeline",
+  "ppipe.plasma-pipeline.ui",
+  {
+    type: "plasma-pipe",
+    baseImage: "ppipe.plasma-pipeline.base",
+    basePlasma: "ppipe.plasma-pipeline.base-plasma",
+    inputImage: "ppipe.plasma-pipeline.input",
+    inputPlasma: "ppipe.plasma-pipeline.input-plasma",
+    outputImage: "ppipe.plasma-pipeline.output",
+    outputPlasma: "ppipe.plasma-pipeline.output-plasma",
+  },
+  {
+    description:
+      "A pressurised pipe for moving high-temperature\nionised gas, known as plasma.",
+    rarity: Item.rarity.PETI,
+    marketValue: 500,
+  }
+);
+createLinkedBlockAndItem(
+  "plasma-compressor",
+  "Plasma Compressor",
+  "ppipe.plasma-compressor.ui",
+  {
+    type: "plasma-compressor",
+    baseImage: "ppipe.plasma-compressor.base",
+    basePlasma: "ppipe.plasma-compressor.base-plasma",
+    inputImage: "ppipe.plasma-compressor.input",
+    inputPlasma: "ppipe.plasma-compressor.input-plasma",
+    outputImage: "ppipe.plasma-compressor.output",
+    outputPlasma: "ppipe.plasma-compressor.output-plasma",
+    spinnerImage: "ppipe.plasma-compressor.spinner",
+    capacity: 32,
+  },
+  {
+    description:
+      "A specialised pipe for increasing the pressure\nof plasma, allowing more to fit\nthrough the same pipes.\n2 pipes in , 1 pipe out.\n\nCan't compress plasma above 12 bar.",
+    rarity: Item.rarity.PETI,
+    marketValue: 1500,
+  }
+);
+createLinkedBlockAndItem(
+  "plasma-decompressor",
+  "Plasma Decompressor",
+  "ppipe.plasma-compressor.ui",
+  {
+    type: "plasma-decompressor",
+    image: "tank.plasma-tank.base",
+    plasma: "tank.plasma-tank.plasma",
+    spinnerImage: "ppipe.plasma-compressor.spinner",
+    capacity: 16,
+  },
+  {
+    description:
+      "A specialised pipe for decreasing the pressure\nof plasma, allowing other blocks to use it.\n1 pipe in , 2 pipes out.\n\nCan't decompress plasma below 1 bar.",
+    rarity: Item.rarity.PETI,
+    marketValue: 1500,
   }
 );
 //## DECO ##
@@ -904,10 +995,11 @@ createLinkedBlockAndItem(
     range: 1,
   },
   {
-    description: "Assembles a tank out of blocks.\nThe blocks are real and can be destroyed and interacted with,\nbut may produce odd results.",
-    rarity: Item.rarity.SPECIAL
+    description:
+      "Assembles a tank out of blocks.\nContainers add inventory space,\nConveyors add speed, and\nWeapons in containers are mounted\non the tank.",
+    rarity: Item.rarity.SPECIAL,
   }
-)
+);
 //## CAPITALISM ##
 createLinkedBlockAndItem(
   "launch-pad",
@@ -917,10 +1009,11 @@ createLinkedBlockAndItem(
     type: "launch-pad",
   },
   {
-    description: "Launches batches of items to space,\nready to be collected by ITI.",
-    rarity: Item.rarity.SPECIAL
+    description:
+      "Launches batches of items to space,\nready to be collected by ITI.",
+    rarity: Item.rarity.SPECIAL,
   }
-)
+);
 //## DEV ##
 createLinkedBlockAndItem(
   "dev::structurereader",

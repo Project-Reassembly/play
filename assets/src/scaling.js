@@ -34,7 +34,13 @@ const Direction = {
   vectorOf(direction) {
     return Vector.fromAngleRad(direction);
   },
-  /**@param {0|1|2|3} */
+  forEach(fn){
+    fn(this.UP);
+    fn(this.DOWN);
+    fn(this.LEFT);
+    fn(this.RIGHT);
+  },
+  /**@param {0|1|2|3} en */
   fromEnum(en) {
     switch (en) {
       case 0:
@@ -49,8 +55,8 @@ const Direction = {
         return Direction.UP;
     }
   },
-  toEnum(en) {
-    switch (en) {
+  toEnum(dir) {
+    switch (dir) {
       case Direction.UP:
         return 0;
       case Direction.DOWN:
