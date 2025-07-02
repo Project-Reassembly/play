@@ -1243,11 +1243,131 @@ Registries.items.add("scrap-cannon", {
   },
 });
 
-Registries.items.add("tank-gun", {
+Registries.items.add("peti-plasma-railgun", {
   type: "weapon",
+  name: "Plasma Railgun",
+  marketValue: 25000,
+  rarity: Item.rarity.PETI,
+  description: "Pierces targets with a massive bolt of red plasma.",
+  image: "weapon.peti-plasma-railgun.item",
+  range: 1000,
+  recoil: 20,
+  shootX: -6,
+  shootY: 3,
+  bullets: {
+    types: [
+      {
+        lifetime: 100,
+        extraUpdates: 99,
+        light: 70,
+        speed: 10,
+        trail: true,
+        hitSize: 10,
+        conditionalPierce: true,
+        trailShape: "rhombus",
+        trailEffect: "plasma-railgun-trail",
+        hitEffect: "plasma-railgun-hit~45",
+        knockback: 50,
+        drawer: {
+          hidden: true,
+        },
+        damage: [
+          {
+            type: "laser",
+            amount: 2400,
+            spread: 300,
+          },
+        ],
+        despawnEffect: "plasma-railgun-impact~70",
+      },
+    ],
+    ammos: {
+      none: 0,
+    },
+  },
+  shoot: {
+    charge: 100,
+    reload: 360,
+    chargeEffect: "plasma-railgun-charge",
+    effect: "plasma-railgun-fire",
+  },
+  component: {
+    type: "weapon-component",
+    width: 42,
+    height: 20,
+    yOffset: 5,
+    image: "weapon.peti-plasma-railgun.component",
+    recoil: 4,
+    rotationalRecoil: 10,
+    recoilSpeed: 0.1,
+  },
+});
+
+//Turret
+Registries.items.add("recycle-mounted", {
+  type: "turret-item",
+  name: "Recycle (Mounted)",
+  description:
+    "A version of the Recycle turret,\ndesigned for use with the larger\nScrap Turret Controller.",
+  image: "weapon.scrap-shooter.item",
+  range: 450,
+  baseSize: 1,
+  marketValue: 120,
+  bullets: {
+    types: [
+      {
+        lifetime: 30,
+        extraUpdates: 1,
+        speed: 15,
+        light: 30,
+        trail: true,
+        hitSize: 2.5,
+        trailShape: "rhombus",
+        drawer: {
+          shape: "rhombus",
+          fill: "#cd9f8b",
+          width: 12,
+          height: 2,
+          image: false,
+        },
+        trailColours: [[80, 62, 55, 100]],
+        damage: [
+          {
+            type: "ballistic",
+            amount: 15,
+            spread: 4,
+          },
+        ],
+      },
+    ],
+    ammos: {
+      "scrap-bullet": 0,
+    },
+  },
+  shoot: {
+    reload: 10,
+    pattern: {
+      spread: 3.5,
+    },
+  },
+  component: {
+    type: "weapon-component",
+    width: 32,
+    height: 11,
+    yOffset: 0,
+    image: "turret.recycle.component",
+    recoil: 4,
+    rotationalRecoil: 4,
+    recoilSpeed: 0.2,
+  },
+});
+
+Registries.items.add("scrap-artillery", {
+  type: "turret-item",
   name: "240mm Artillery Emplacement Gun",
-  marketValue: 1200,
-  description: "Pretty sure this goes on a tank.",
+  marketValue: 450,
+  description: "Large scrap gun, to be mounted\non a Turret Controller.",
+  baseSize: 2,
   image: "weapon.tank-gun.item",
   ammoUse: 4,
   shootX: 30,
@@ -1457,70 +1577,9 @@ Registries.items.add("tank-gun", {
     type: "weapon-component",
     width: 102,
     height: 32,
-    yOffset: -8,
     image: "weapon.tank-gun.component",
     recoil: 18,
     recoilSpeed: 0.2,
-  },
-});
-
-Registries.items.add("peti-plasma-railgun", {
-  type: "weapon",
-  name: "Plasma Railgun",
-  marketValue: 25000,
-  rarity: Item.rarity.PETI,
-  description: "Pierces targets with a massive bolt of red plasma.",
-  image: "weapon.peti-plasma-railgun.item",
-  range: 1000,
-  recoil: 20,
-  shootX: -6,
-  shootY: 3,
-  bullets: {
-    types: [
-      {
-        lifetime: 100,
-        extraUpdates: 99,
-        light: 70,
-        speed: 10,
-        trail: true,
-        hitSize: 10,
-        conditionalPierce: true,
-        trailShape: "rhombus",
-        trailEffect: "plasma-railgun-trail",
-        hitEffect: "plasma-railgun-hit~45",
-        knockback: 50,
-        drawer: {
-          hidden: true,
-        },
-        damage: [
-          {
-            type: "laser",
-            amount: 2400,
-            spread: 300,
-          },
-        ],
-        despawnEffect: "plasma-railgun-impact~70",
-      },
-    ],
-    ammos: {
-      none: 0,
-    },
-  },
-  shoot: {
-    charge: 100,
-    reload: 360,
-    chargeEffect: "plasma-railgun-charge",
-    effect: "plasma-railgun-fire",
-  },
-  component: {
-    type: "weapon-component",
-    width: 42,
-    height: 20,
-    yOffset: 5,
-    image: "weapon.peti-plasma-railgun.component",
-    recoil: 4,
-    rotationalRecoil: 10,
-    recoilSpeed: 0.1,
   },
 });
 

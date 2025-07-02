@@ -21,6 +21,8 @@ Registries.images.add("weapon.iti-laser-pistol.component", new ImageContainer("a
 Registries.images.add("weapon.iti-laser-caster.component", new ImageContainer("assets/textures/entity/weapon/iti-laser-caster.png"))
 Registries.images.add("weapon.iti-energy-repeater.component", new ImageContainer("assets/textures/entity/weapon/iti-energy-repeater.png"))
 Registries.images.add("weapon.peti-plasma-railgun.component", new ImageContainer("assets/textures/entity/weapon/peti-plasma-railgun.png"))
+//Components > Turrets
+Registries.images.add("turret.recycle.component", new ImageContainer("assets/textures/block/turret/recycle.png"))
 //Items
 Registries.images.add("item.raw-copper", new ImageContainer("assets/textures/item/raw-copper.png"))
 Registries.images.add("item.copper-ingot", new ImageContainer("assets/textures/item/copper-ingot.png"))
@@ -101,6 +103,9 @@ Registries.images.add("block.dev.commandblock.heat", new ImageContainer("assets/
 //Blocks > Defense
 Registries.images.add("block.stone-wall", new ImageContainer("assets/textures/block/blocks/defense/stone-wall.png"))
 Registries.images.add("block.sandstone-wall", new ImageContainer("assets/textures/block/blocks/defense/sandstone-wall.png"))
+//Blocks > Turrets
+Registries.images.add("turret-base.scrap.connector", new ImageContainer("assets/textures/block/turret/bases/scrap-connector.png"))
+Registries.images.add("turret-controller.scrap.base", new ImageContainer("assets/textures/block/turret/bases/scrap-turret-controller.png"))
 //Blocks > Crafters
 Registries.images.add("crafter.scrap-assembler", new ImageContainer("assets/textures/block/blocks/crafter/scrap-assembler.png"))
 Registries.images.add("crafter.scrap-smelter", new ImageContainer("assets/textures/block/blocks/crafter/scrap-smelter.png"))

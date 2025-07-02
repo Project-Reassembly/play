@@ -31,15 +31,6 @@ import { Throwable } from "../classes/item/throwable.js";
 import { Weapon } from "../classes/item/weapon.js";
 import { World } from "../classes/world/world.js";
 import { Chunk } from "../classes/world/chunk.js";
-import {
-  BlockGenerator,
-  GenerationOptions,
-  Generator,
-  OreGenerationOptions,
-  OreGenerator,
-  TileGenerationOptions,
-  TileGenerator,
-} from "../classes/world/generator.js";
 import { Block } from "../classes/block/block.js";
 import { Wall } from "../classes/block/defense/wall.js";
 import { Ore, Tile } from "../classes/block/tile.js";
@@ -77,6 +68,8 @@ import {
   PlasmaDecompressor,
   PlasmaGenerator,
 } from "../classes/block/plasma-gen-and-compressor.js";
+import { Turret } from "../classes/block/defense/turret.js";
+import { TurretBase, TurretController, TurretItem } from "../classes/block/defense/turret-components.js";
 //Basic
 Registries.type.add("generic", RegisteredItem);
 //Entities and parts
@@ -144,6 +137,11 @@ Registries.type.add("bomb", Bomb);
 Registries.type.add("nuclear-bomb", NuclearBomb);
 Registries.type.add("tank-assembler", TankAssemblyBay);
 Registries.type.add("launch-pad", LaunchPad);
+//Turret
+Registries.type.add("turret", Turret);
+Registries.type.add("turret-base", TurretBase);
+Registries.type.add("turret-controller", TurretController);
+Registries.type.add("turret-item", TurretItem);
 //Dev blocks
 Registries.type.add("dev::structurereader", StructureReaderBlock);
 Registries.type.add("dev::itemcatalog", ItemCatalogBlock);

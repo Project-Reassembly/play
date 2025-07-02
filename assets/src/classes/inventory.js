@@ -33,9 +33,9 @@ class Inventory {
   /**@param {SerialisedInventory} created  */
   static deserialise(created) {
     let inv = new this(0);
-    inv.storage = created.storage ?? [];
-    inv.size = inv.storage.length = created.size ?? inv.size;
-    if (created.storage)
+    inv.storage = created?.storage ?? [];
+    inv.size = inv.storage.length = created?.size ?? inv.size;
+    if (created?.storage)
       inv.storage = created.storage.map((x) => ItemStack.deserialise(x));
     return inv;
   }

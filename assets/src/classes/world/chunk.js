@@ -143,6 +143,12 @@ class Chunk {
     iterate2DArray(this.blocks, (block) => block && block.postDraw());
     pop();
   }
+  postDraw2BlocksOnly() {
+    push();
+    translate(blockSize / 2, blockSize / 2);
+    iterate2DArray(this.blocks, (block) => block?.postDraw2 && block.postDraw2());
+    pop();
+  }
   /**@returns {SerialisedChunk} */
   serialise() {
     return {

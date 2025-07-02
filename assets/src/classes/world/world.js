@@ -213,6 +213,7 @@ class World {
     }
     this.toRender.forEach((chunk) => chunk.drawBlocksOnly());
     this.toRender.forEach((chunk) => chunk.postDrawBlocksOnly());
+    this.toRender.forEach((chunk) => chunk.postDraw2BlocksOnly());
     for (let entity of this.entities) {
       if (
         !entity.visible ||

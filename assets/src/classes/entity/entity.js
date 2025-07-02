@@ -62,11 +62,22 @@ class Entity extends ShootableObject {
   //Physics
   flying = false;
   explosiveness = 0.1;
-  _lastPos = { x: 0, y: 0 };
+  _lastPos = Vector.ZERO;
+  get pos() {
+    return new Vector(this.x, this.y);
+  }
+  get computedVelocity() {
+    return this.pos.sub(this._lastPos);
+  }
   get computedSpeed() {
-    return (
-      ((this.x - this._lastPos.x) ** 2 + (this.y - this._lastPos.y) ** 2) ** 0.5
-    );
+    return this.computedVelocity.magnitude;
+  }
+
+  predictMotion(timeToImpact) {
+    return this.computedVelocity.scale(timeToImpact);
+  }
+  predictMotionDS(speedOfShot, distance) {
+    return this.predictMotion(distance / speedOfShot);
   }
 
   init() {
@@ -176,7 +187,7 @@ class Entity extends ShootableObject {
     if (this.controllable) this.ai();
     super.tick();
     this.tickStatuses();
-    this._lastPos = { x: this.x, y: this.y };
+    this._lastPos = new Vector(this.x, this.y);
   }
 
   ai() {

@@ -19,7 +19,7 @@ class Container extends Block {
   drawTooltip(x, y, outlineColour, backgroundColour, forceVReverse = false) {
     this.inventory.draw(
       x + 17,
-      y - 17,
+      y - 17 * (forceVReverse ? 1 : -1),
       null,
       6,
       30,

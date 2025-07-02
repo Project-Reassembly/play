@@ -82,6 +82,8 @@ function colinterp(cols, factor, forceint = false) {
  * A class representing a 2D vector structure.
  */
 class Vector {
+  /**@readonly */
+  static ZERO = new this(0, 0);
   x = 0;
   y = 0;
   constructor(x = 0, y = 0) {
@@ -191,20 +193,36 @@ class Vector {
   }
 
   /** Returns a p5.Vector object equivalent to this vector.\
-   * Use this class instead whenever possible.
+   * Use this class instead of p5.Vector whenever possible.
    */
   toP5() {
     return new p5.Vector(this.x, this.y);
   }
   /**
    * Creates a vector from a p5.Vector object.\
-   * Work with this class when possible.\
+   * Work with this class, not p5.Vector when possible.\
    * Will not retain 3D values.
    * @param {p5.Vector} vct P5.Vector object to convert.
    * @returns A new Vector equivalent to the p5 vector.
    */
   static fromP5(vct) {
-    return new this();
+    return new this(vct.x, vct.y);
+  }
+  /**
+   * Creates a vector from a single scalar.\
+   * The X and Y values will both equal this number.
+   * @param {number} size Size of each value.
+   * @returns A new Vector(size, size).
+   */
+  static fromScalar(size) {
+    return new this(size, size);
+  }
+  /**
+   * Creates a clone of this vector.
+   * @returns A different vector with the same value.
+   */
+  clone() {
+    return new Vector(this.x, this.y);
   }
 }
 

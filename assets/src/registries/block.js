@@ -304,6 +304,124 @@ createLinkedBlockAndItem(
         inputs: [
           {
             item: "scrap",
+            count: 4,
+          },
+          {
+            item: "plate",
+            count: 4,
+          },
+          {
+            item: "scrap-shooter",
+            count: 1,
+          },
+        ],
+        outputs: [
+          {
+            item: "recycle",
+            count: 1,
+          },
+        ],
+        time: 1200,
+      },
+      {
+        inputs: [
+          {
+            item: "recycle",
+            count: 1,
+          },
+          {
+            item: "plate",
+            count: 2,
+          },
+        ],
+        outputs: [
+          {
+            item: "recycle-mounted",
+            count: 1,
+          },
+        ],
+        time: 120,
+      },
+      {
+        inputs: [
+          {
+            item: "scrap",
+            count: 25,
+          },
+          {
+            item: "plate",
+            count: 15,
+          },
+        ],
+        outputs: [
+          {
+            item: "scrap-cannon",
+            count: 1,
+          },
+        ],
+        time: 900,
+      },
+      {
+        inputs: [
+          {
+            item: "plate",
+            count: 3,
+          },
+        ],
+        outputs: [
+          {
+            item: "scrap-turret-base",
+            count: 1,
+          },
+        ],
+        time: 120,
+      },
+      {
+        inputs: [
+          {
+            item: "scrap-turret-base",
+            count: 1,
+          },
+          {
+            item: "scrap",
+            count: 20,
+          },
+          {
+            item: "copper-wire",
+            count: 30,
+          },
+        ],
+        outputs: [
+          {
+            item: "scrap-turret-controller",
+            count: 1,
+          },
+        ],
+        time: 120,
+      },
+      {
+        inputs: [
+          {
+            item: "scrap",
+            count: 100,
+          },
+          {
+            item: "plate",
+            count: 35,
+          },
+        ],
+        outputs: [
+          {
+            item: "scrap-artillery",
+            count: 1,
+          },
+        ],
+        time: 1500,
+      },
+      {
+        inputs: [
+          {
+            item: "scrap",
             count: 1,
           },
         ],
@@ -881,6 +999,95 @@ createLinkedBlockAndItem(
   {
     description: "A small box for item storage.",
     marketValue: 30,
+  }
+);
+//## TURRETS ##
+createLinkedBlockAndItem(
+  "recycle",
+  "Recycle",
+  "base.scrap.smooth",
+  {
+    type: "turret",
+    inventorySize: 1,
+    range: 300,
+    bullets: {
+      types: [
+        {
+          lifetime: 15,
+          speed: 20,
+          light: 30,
+          trail: true,
+          hitSize: 2.5,
+          trailShape: "rhombus",
+          drawer: {
+            shape: "rhombus",
+            fill: "#cd9f8b",
+            width: 10,
+            height: 2.5,
+            image: false,
+          },
+          trailColours: [[80, 62, 55, 100]],
+          damage: [
+            {
+              type: "ballistic",
+              amount: 11,
+              spread: 2,
+            },
+          ],
+        },
+      ],
+      ammos: {
+        "scrap-bullet": 0,
+      },
+    },
+    shoot: {
+      reload: 13,
+      pattern: {
+        spread: 2.5,
+      },
+    },
+    component: {
+      type: "weapon-component",
+      width: 32,
+      height: 11,
+      xOffset: 5,
+      image: "turret.recycle.component",
+      recoil: 4,
+      recoilSpeed: 0.2,
+    },
+    shootX: 20,
+  },
+  {
+    description: "A mounted scrap shooter.\nShoots slower but further.",
+    marketValue: 100 //65
+  }
+);
+createLinkedBlockAndItem(
+  "scrap-turret-base",
+  "Scrap Turret Base",
+  "base.scrap.smooth",
+  {
+    type: "turret-base",
+    connectorImage: "turret-base.scrap.connector",
+    otherPart: "scrap-turret-controller"
+  },
+  {
+    description: "Basic block to increase the\n maximum size of turrets on\n a Scrap Turret Controller.",
+    marketValue: 20 // 3 plates = 15
+  }
+);
+createLinkedBlockAndItem(
+  "scrap-turret-controller",
+  "Scrap Turret Controller",
+  "turret-controller.scrap.base",
+  {
+    type: "turret-controller",
+    connectorImage: "turret-base.scrap.connector",
+    otherPart: "scrap-turret-base"
+  },
+  {
+    description: "Mounting point for turrets.\nMaximum size depends on number of bases.\nPlace them in a cross-shaped pattern.",
+    marketValue: 100
   }
 );
 //## PLASMA ##
