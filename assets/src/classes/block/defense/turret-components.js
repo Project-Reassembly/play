@@ -132,7 +132,12 @@ export class TurretController extends TurretBase {
     this.turretinv = new Inventory(1, this.turretinv);
   }
   postDraw2() {
-    this.turret?.component?.draw(this.x, this.y, this.gunDirection, 0, 0);
+    this.turret?.component?.draw(
+      this.x,
+      this.y,
+      this.gunDirection,
+      Math.cos(this.gunDirectionRad) < 0
+    );
   }
   fire() {
     this.turret?.fire(this);

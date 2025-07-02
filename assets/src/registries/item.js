@@ -273,6 +273,217 @@ Registries.items.add("scrap-shooter", {
     recoilSpeed: 0.2,
   },
 });
+Registries.items.add("scrap-repeater", {
+  type: "weapon",
+  marketValue: 200,
+  name: "Scrap Repeater",
+  description: "Shoots bullets far more quickly.\nMore inaccurate.\n\nIf you shoot enough bullets,\nyou can't miss!",
+  image: "weapon.scrap-repeater.item",
+  range: 250,
+  bullets: {
+    types: [
+      {
+        lifetime: 25,
+        extraUpdates: 1,
+        speed: 10,
+        light: 30,
+        trail: true,
+        hitSize: 2.5,
+        knockback: 2,
+        trailShape: "rhombus",
+        drawer: {
+          shape: "rhombus",
+          fill: "#cd9f8b",
+          width: 10,
+          height: 2.5,
+          image: false,
+        },
+        trailColours: [[80, 62, 55, 100]],
+        damage: [
+          {
+            type: "ballistic",
+            amount: 5,
+            spread: 2,
+          },
+        ],
+      },
+    ],
+    ammos: {
+      "scrap-bullet": 0,
+    },
+  },
+  shoot: {
+    reload: 3,
+    pattern: {
+      spread: 5,
+    },
+  },
+  component: {
+    type: "weapon-component",
+    width: 36,
+    height: 19,
+    yOffset: 0,
+    image: "weapon.scrap-repeater.component",
+    recoil: 6,
+    rotationalRecoil: 2,
+    recoilSpeed: 0.5,
+  },
+});
+
+Registries.items.add("scrap-cannon", {
+  type: "weapon",
+  name: "Scrap Cannon",
+  marketValue: 150,
+  description:
+    "Hurls 3 large clumps of scrap, which break apart\nin the air and on impact.",
+  image: "weapon.scrap-shooter.item",
+  range: 200,
+  bullets: {
+    types: [
+      {
+        lifetime: 18,
+        speed: 10,
+        decel: 0.5,
+        light: 30,
+        trail: true,
+        hitSize: 5,
+        trailShape: "rhombus",
+        drawer: {
+          shape: "rhombus",
+          fill: "#cd9f8b",
+          width: 14,
+          height: 9,
+          image: false,
+        },
+        trailColours: [[80, 62, 55, 100]],
+        damage: [
+          {
+            type: "ballistic",
+            amount: 30,
+            spread: 7.5,
+            radius: 20,
+          },
+        ],
+        despawnEffect: "explosion~20",
+        intervalNumber: 2,
+        intervalTime: 7,
+        intervalSpacing: 130,
+        intervalSpread: 15,
+        intervalBullet: {
+          speed: 9,
+          decel: 0.6,
+          lifetime: 12,
+          hitSize: 2.5,
+          trailColours: [[80, 62, 55, 100]],
+          damage: [
+            {
+              amount: 6,
+              type: "ballistic",
+              spread: 3,
+            },
+          ],
+          drawer: {
+            shape: "rhombus",
+            fill: "#cd9f8b",
+            width: 6,
+            height: 4,
+            image: false,
+          },
+        },
+        fragSpacing: 20,
+        fragNumber: 2,
+        fragSpread: 5,
+        fragBullet: {
+          speed: 10,
+          decel: 0.2,
+          lifetime: 12,
+          hitSize: 2.5,
+          trailColours: [[80, 62, 55, 100]],
+          damage: [
+            {
+              amount: 8,
+              type: "ballistic",
+              spread: 4,
+            },
+          ],
+          drawer: {
+            shape: "rhombus",
+            fill: "#cd9f8b",
+            width: 8,
+            height: 4,
+            image: false,
+          },
+        },
+      },
+    ],
+    ammos: {
+      scrap: 0,
+    },
+  },
+  shoot: {
+    effect: "explosion~10",
+    reload: 90,
+    pattern: {
+      spacing: 10,
+      spread: 5,
+      amount: 3,
+    },
+  },
+  component: {
+    type: "weapon-component",
+    width: 32,
+    height: 11,
+    yOffset: 0,
+    image: "weapon.scrap-shooter.component",
+    recoil: 6,
+    rotationalRecoil: 12,
+    recoilSpeed: 0.2,
+  },
+});
+
+Registries.items.add("construction-gun", {
+  type: "block-launcher",
+  marketValue: 1500,
+  name: "Construction Gun",
+  description:
+    "Fires blocks to place them and deal damage.\nAlt-fire to select ammo type, Main to launch.\nVolatile blocks will explode if unplaceable.\n\nTip: Use shift to avoid deconstructing blocks.",
+  image: "weapon.construction-gun.item",
+  range: -1,
+  base: {
+    speed: 15,
+    light: 30,
+    trail: true,
+    hitSize: 2.5,
+    hitColours: [
+      [255, 250, 100],
+      [255, 200, 50, 100],
+    ],
+    damage: [
+      {
+        type: "impact",
+        amount: 0,
+        radius: 25,
+      },
+    ],
+    despawnEffect: "construction-hit~25",
+  },
+  shoot: {
+    reload: 20,
+    pattern: {
+      spread: 0.5,
+    },
+  },
+  component: {
+    type: "weapon-component",
+    width: 32,
+    height: 19,
+    yOffset: 17,
+    image: "weapon.construction-gun.component",
+    recoil: 4,
+    rotationalRecoil: 4,
+    recoilSpeed: 0.2,
+  },
+});
 
 Registries.items.add("iti-laser-pistol", {
   type: "weapon",
@@ -1085,161 +1296,6 @@ Registries.items.add("iti-energy-repeater", {
     recoil: 2,
     rotationalRecoil: 3,
     recoilSpeed: 0.15,
-  },
-});
-
-Registries.items.add("construction-gun", {
-  type: "block-launcher",
-  marketValue: 1500,
-  name: "Construction Gun",
-  description:
-    "Fires blocks to place them and deal damage.\nAlt-fire to select ammo type, Main to launch.\nVolatile blocks will explode if unplaceable.\n\nTip: Use shift to avoid deconstructing blocks.",
-  image: "weapon.construction-gun.item",
-  range: -1,
-  base: {
-    speed: 15,
-    light: 30,
-    trail: true,
-    hitSize: 2.5,
-    hitColours: [
-      [255, 250, 100],
-      [255, 200, 50, 100],
-    ],
-    damage: [
-      {
-        type: "impact",
-        amount: 0,
-        radius: 25,
-      },
-    ],
-    despawnEffect: "construction-hit~25",
-  },
-  shoot: {
-    reload: 20,
-    pattern: {
-      spread: 0.5,
-    },
-  },
-  component: {
-    type: "weapon-component",
-    width: 32,
-    height: 19,
-    yOffset: 17,
-    image: "weapon.construction-gun.component",
-    recoil: 4,
-    rotationalRecoil: 4,
-    recoilSpeed: 0.2,
-  },
-});
-
-Registries.items.add("scrap-cannon", {
-  type: "weapon",
-  name: "Scrap Cannon",
-  marketValue: 150,
-  description:
-    "Hurls 3 large clumps of scrap, which break apart\nin the air and on impact.",
-  image: "weapon.scrap-shooter.item",
-  range: 200,
-  bullets: {
-    types: [
-      {
-        lifetime: 18,
-        speed: 10,
-        decel: 0.5,
-        light: 30,
-        trail: true,
-        hitSize: 5,
-        trailShape: "rhombus",
-        drawer: {
-          shape: "rhombus",
-          fill: "#cd9f8b",
-          width: 14,
-          height: 9,
-          image: false,
-        },
-        trailColours: [[80, 62, 55, 100]],
-        damage: [
-          {
-            type: "ballistic",
-            amount: 30,
-            spread: 7.5,
-            radius: 20,
-          },
-        ],
-        despawnEffect: "explosion~20",
-        intervalNumber: 2,
-        intervalTime: 7,
-        intervalSpacing: 130,
-        intervalSpread: 15,
-        intervalBullet: {
-          speed: 9,
-          decel: 0.6,
-          lifetime: 12,
-          hitSize: 2.5,
-          trailColours: [[80, 62, 55, 100]],
-          damage: [
-            {
-              amount: 6,
-              type: "ballistic",
-              spread: 3,
-            },
-          ],
-          drawer: {
-            shape: "rhombus",
-            fill: "#cd9f8b",
-            width: 6,
-            height: 4,
-            image: false,
-          },
-        },
-        fragSpacing: 20,
-        fragNumber: 2,
-        fragSpread: 5,
-        fragBullet: {
-          speed: 10,
-          decel: 0.2,
-          lifetime: 12,
-          hitSize: 2.5,
-          trailColours: [[80, 62, 55, 100]],
-          damage: [
-            {
-              amount: 8,
-              type: "ballistic",
-              spread: 4,
-            },
-          ],
-          drawer: {
-            shape: "rhombus",
-            fill: "#cd9f8b",
-            width: 8,
-            height: 4,
-            image: false,
-          },
-        },
-      },
-    ],
-    ammos: {
-      scrap: 0,
-    },
-  },
-  shoot: {
-    effect: "explosion~10",
-    reload: 90,
-    pattern: {
-      spacing: 10,
-      spread: 5,
-      amount: 3,
-    },
-  },
-  component: {
-    type: "weapon-component",
-    width: 32,
-    height: 11,
-    yOffset: 0,
-    image: "weapon.scrap-shooter.component",
-    recoil: 6,
-    rotationalRecoil: 12,
-    recoilSpeed: 0.2,
   },
 });
 

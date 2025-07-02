@@ -15,6 +15,7 @@ Registries.images.add("arm.scrap",  new ImageContainer("assets/textures/entity/c
 Registries.images.add("arm.iti",  new ImageContainer("assets/textures/entity/component/iti-arm.png"))
 //Components > Weapons
 Registries.images.add("weapon.scrap-shooter.component", new ImageContainer("assets/textures/entity/weapon/scrap-shooter.png"))
+Registries.images.add("weapon.scrap-repeater.component", new ImageContainer("assets/textures/entity/weapon/scrap-repeater.png"))
 Registries.images.add("weapon.construction-gun.component", new ImageContainer("assets/textures/entity/weapon/construction-gun.png"))
 Registries.images.add("weapon.tank-gun.component", new ImageContainer("assets/textures/entity/weapon/tank-gun.png"))
 Registries.images.add("weapon.iti-laser-pistol.component", new ImageContainer("assets/textures/entity/weapon/iti-laser-pistol.png"))
@@ -63,6 +64,7 @@ Registries.images.add("item.iti-plasma-cell", new ImageContainer("assets/texture
 Registries.images.add("item.iti-destabilised-cell", new ImageContainer("assets/textures/item/iti-destabilised-cell.png"))
 //Items > Weapons
 Registries.images.add("weapon.scrap-shooter.item", new ImageContainer("assets/textures/item/scrap-shooter.png"))
+Registries.images.add("weapon.scrap-repeater.item", new ImageContainer("assets/textures/item/scrap-repeater.png"))
 Registries.images.add("weapon.construction-gun.item", new ImageContainer("assets/textures/item/construction-gun.png"))
 Registries.images.add("weapon.tank-gun.item", new ImageContainer("assets/textures/item/tank-gun.png"))
 Registries.images.add("weapon.iti-laser-pistol.item", new ImageContainer("assets/textures/item/iti-laser-pistol.png"))

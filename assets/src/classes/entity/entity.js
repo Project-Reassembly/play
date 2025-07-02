@@ -14,6 +14,7 @@ import { Block } from "../block/block.js";
 /**
  * @typedef SerialisedEntity
  * @prop {number} health
+ * @prop {number} shield
  * @prop {string} entity Registry name.
  * @prop {{effect: string, duration: int}[]} statuses
  * @prop {number} x
@@ -63,6 +64,10 @@ class Entity extends ShootableObject {
   flying = false;
   explosiveness = 0.1;
   _lastPos = Vector.ZERO;
+
+  //because rate limit sucks and the scrapper is  s l o w
+  #firing = false;
+
   get pos() {
     return new Vector(this.x, this.y);
   }
@@ -191,9 +196,10 @@ class Entity extends ShootableObject {
   }
 
   ai() {
+    if (this.#firing) this.attack();
     if (this._aidelay > 0) {
       this._aidelay--;
-    } else {
+    } else {w
       this._aidelay = 6;
       if (this.aiType === "passive") {
         this._passiveAI();
@@ -303,6 +309,7 @@ class Entity extends ShootableObject {
     attackBlocks = true,
     attackEntities = true
   ) {
+    this.#firing = false;
     let tempTarget = this.target;
     let entity = attackEntities
       ? this.closestFrom(
@@ -330,7 +337,7 @@ class Entity extends ShootableObject {
     this.target = this.closestFrom([entity, block], this.targetRange);
     if (this.target) {
       if (shoots && this.distanceTo(this.target) < this.attackRange)
-        this.attack();
+        this.#firing = true;
       return true;
     } else {
       this.target = tempTarget;
@@ -474,6 +481,7 @@ class Entity extends ShootableObject {
       spawnX: roundNum(this.spawnX),
       spawnY: roundNum(this.spawnY),
       health: roundNum(this.health),
+      shield: roundNum(this.shield),
       statuses: this.statuses,
       isMainPlayer: this === game.player,
     };
@@ -484,6 +492,8 @@ class Entity extends ShootableObject {
     let entity = construct(Registries.entities.get(created.entity), "entity");
     entity.statuses = created.statuses;
     entity.health = created.health;
+    entity.shield = created.shield ?? 0;
+    entity._lastMaxShield = created.shield ?? 0;
     entity.constructor.applyExtraProps(entity, created);
     //Rest handled in-chunk, but here it is:
     if (!inFull) return entity;

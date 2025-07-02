@@ -618,6 +618,7 @@ window.windowResized = function () {
 
 function frameSkippingFunction(func) {
   if (framesToDraw > 1000) {
+    func();
     framesToDraw = 0;
     return;
   }
@@ -1437,9 +1438,13 @@ function eventify(world) {
     entiti.y = game.player.y + rnd(300, 800) * (tru(0.5) ? -1 : 1);
     deliverEntity(entiti, true, world);
   });
-  //bossfight in 10 mins
-  world.addEvent("scrapboss", 36000, (world) => {
-    Log.send("The Scrapper is descending!", [255, 50, 50]);
+  //bossfight in 3-ish mins
+  world.addEvent("scrapboss-warning", 36000, (world) => {
+    Log.send("The Scrapper is descending...", [255, 150, 150]);
+  });
+  //bossfight
+  world.addEvent("scrapboss", 46800, (world) => {
+    Log.send("The Scrapper has descended!", [255, 50, 50]);
     let entiti = construct(Registries.entities.get("scrapper"), "entity");
     entiti.x = game.player.x + rnd(300, 800) * (tru(0.5) ? -1 : 1);
     entiti.y = game.player.y + rnd(300, 800) * (tru(0.5) ? -1 : 1);

@@ -7,6 +7,7 @@ import { ShapeParticle } from "../effect/shape-particle.js";
 import { Fire } from "../effect/fire.js";
 import { blockSize } from "../../scaling.js";
 import { Log } from "../../play/messaging.js";
+import { DroppedItemStack } from "../item/dropped-itemstack.js";
 class Bullet extends PhysicalObject {
   extraUpdates = 0;
   direction = 0;
@@ -109,7 +110,7 @@ class Bullet extends PhysicalObject {
   step(dt) {
     //Not if dead
     if (!this.remove) {
-    this.spawnTrail(dt);
+      this.spawnTrail(dt);
       this.intervalTick();
       //Which way to move
       let moveVector = p5.Vector.fromAngle(this.directionRad);
@@ -276,7 +277,8 @@ class Bullet extends PhysicalObject {
       if (
         !this.remove &&
         this.collides &&
-        entity.tangible && 
+        entity.tangible &&
+        !(entity instanceof DroppedItemStack) &&
         !this.damaged.includes(entity) &&
         this.collidesWith(entity)
       ) {
@@ -299,9 +301,8 @@ class Bullet extends PhysicalObject {
       for (let instance of this.damage) {
         if (!instance.spread) instance.spread = 0;
         let todeal =
-          instance.amount + (this.conditionalPierce
-            ? 0
-            : rnd(instance.spread, -instance.spread));
+          instance.amount +
+          (this.conditionalPierce ? 0 : rnd(instance.spread, -instance.spread));
         let taken = Math.min(todeal, physobj.health);
         if (!instance.radius) {
           physobj.damage(instance.type, todeal, this.entity);

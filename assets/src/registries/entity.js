@@ -281,8 +281,8 @@ Registries.entities.add("iti-corporate-merchant", {
 Registries.entities.add("scrapper", {
   name: "The Scrapper",
   type: "equipped-entity",
-  health: 4000,
-  speed: 1.5,
+  health: 2000,
+  speed: 2.5,
   isBoss: true,
   components: [
     {
@@ -305,7 +305,7 @@ Registries.entities.add("scrapper", {
   width: 50,
   height: 50,
   aiType: "hostile",
-  attackRange: 400,
+  attackRange: 250,
   targetRange: 2600,
   rightHand: [
     {
@@ -315,7 +315,7 @@ Registries.entities.add("scrapper", {
   ],
   leftHand: [
     {
-      item: "tank-gun",
+      item: "scrap-repeater",
       dropChance: 0.25,
     },
   ],
@@ -336,6 +336,18 @@ Registries.entities.add("scrapper", {
       item: "scrap",
       min: 60,
       max: 100,
+      dropChance: 0.5,
+    },
+    {
+      item: "scrap-bullet",
+      min: 6000,
+      max: 10000,
+      dropChance: 0.5,
+    },
+    {
+      item: "scrap-bullet",
+      min: 6000,
+      max: 10000,
       dropChance: 0.5,
     },
   ],
