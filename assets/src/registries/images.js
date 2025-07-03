@@ -155,6 +155,10 @@ Registries.images.add("tank.plasma-tank.base", new ImageContainer("assets/textur
 Registries.images.add("tank.plasma-tank.plasma", new ImageContainer("assets/textures/block/blocks/plasma/plasma-tank-plasma.png"))
 //Blocks > Decoration
 Registries.images.add("block.message", new ImageContainer("assets/textures/block/blocks/deco/message.png"))
+//Blocks > Capitalism
+Registries.images.add("capitalism.iti.launch", new ImageContainer("assets/textures/block/blocks/capitalism/iti-launch-pad.png"))
+Registries.images.add("capitalism.iti.land", new ImageContainer("assets/textures/block/blocks/capitalism/iti-landing-pad.png"))
+Registries.images.add("capitalism.iti.pod", new ImageContainer("assets/textures/block/blocks/capitalism/iti-pod.png"))
 //Blocks > Offense
 Registries.images.add("bomb.basic", new ImageContainer("assets/textures/block/blocks/defense/bomb-block.png"))
 Registries.images.add("bomb.landmine", new ImageContainer("assets/textures/block/blocks/defense/landmine.png"))

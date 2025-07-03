@@ -61,7 +61,7 @@ import {
 import { VirtualBullet } from "../classes/projectile/virtual-bullet.js";
 import { ModularTankEntity } from "../classes/entity/modular-tank.js";
 import { TankAssemblyBay } from "../classes/block/tonq/tank-assembly-bay.js";
-import { LaunchPad } from "../classes/block/capitalism/launch-pad.js";
+import { LandingPad, LaunchPad } from "../classes/block/capitalism/launch-pad.js";
 import { PlasmaBlock, PlasmaPipe, PlasmaTank } from "../classes/block/plasma-pipe.js";
 import {
   PlasmaCompressor,
@@ -136,7 +136,9 @@ Registries.type.add("plasma-decompressor", PlasmaDecompressor);
 Registries.type.add("bomb", Bomb);
 Registries.type.add("nuclear-bomb", NuclearBomb);
 Registries.type.add("tank-assembler", TankAssemblyBay);
+//capitalism
 Registries.type.add("launch-pad", LaunchPad);
+Registries.type.add("landing-pad", LandingPad);
 //Turret
 Registries.type.add("turret", Turret);
 Registries.type.add("turret-base", TurretBase);

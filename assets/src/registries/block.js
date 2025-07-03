@@ -1211,13 +1211,28 @@ createLinkedBlockAndItem(
 createLinkedBlockAndItem(
   "launch-pad",
   "Launch Pad",
-  "base.iron",
+  "capitalism.iti.launch",
   {
     type: "launch-pad",
+    podImage: "capitalism.iti.pod"
   },
   {
     description:
       "Launches batches of items to space,\nready to be collected by ITI.",
+    rarity: Item.rarity.SPECIAL,
+  }
+);
+createLinkedBlockAndItem(
+  "landing-pad",
+  "Landing Pad",
+  "capitalism.iti.land",
+  {
+    type: "landing-pad",
+    podImage: "capitalism.iti.pod"
+  },
+  {
+    description:
+      "Buys items from ITI, and receives them.\nMust be given an item to use for reference.",
     rarity: Item.rarity.SPECIAL,
   }
 );
