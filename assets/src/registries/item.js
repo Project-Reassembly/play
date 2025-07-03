@@ -280,6 +280,7 @@ Registries.items.add("scrap-repeater", {
   description: "Shoots bullets far more quickly.\nMore inaccurate.\n\nIf you shoot enough bullets,\nyou can't miss!",
   image: "weapon.scrap-repeater.item",
   range: 250,
+  recoil: 0.6,
   bullets: {
     types: [
       {

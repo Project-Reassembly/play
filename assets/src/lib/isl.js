@@ -21,7 +21,7 @@ function feedback(msg) {
 }
 function give(entity, item, amount) {
   let leftover =
-    entity instanceof EquippedEntity
+    entity instanceof EquippedEntity && entity.equipment.hasItem(item)
       ? entity.equipment.addItem(item, amount)
       : amount ?? 0;
   let notgiven = 0;
@@ -74,10 +74,7 @@ cle.addType(
   "rloc-placeable",
   (val) => Registries.blocks.has(val) && Registries.items.has(val)
 );
-cle.addType(
-  "rloc-status",
-  (val) => Registries.statuses.has(val)
-);
+cle.addType("rloc-status", (val) => Registries.statuses.has(val));
 cle.addType("rloc-entity", (val) => Registries.entities.has(val));
 cle.addType("entity", () => false);
 cle.addType("nonentity-ctx", () => false);
@@ -138,12 +135,7 @@ cle.addKeyword(
     /**@type {Entity} */
     let target = entity?.value;
     target.addShield(amount?.value ?? 0);
-    feedback(
-      "Added " +
-        (amount?.value ?? 0) +
-        " shield HP to " +
-        target.name
-    );
+    feedback("Added " + (amount?.value ?? 0) + " shield HP to " + target.name);
   },
   [
     { name: "target", type: "entity" },

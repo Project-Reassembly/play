@@ -65,6 +65,7 @@ const ui = {
     UIComponent.setCondition("containerselected:false");
     UIComponent.setCondition("dead:no");
     UIComponent.setCondition("boss:no");
+    UIComponent.setCondition("mode:build");
     this.wasReset = true;
   },
   wasReset: false,
@@ -102,14 +103,26 @@ class UIComponent {
   alignLeft() {
     this.ox = this.x; //Save old x
     Object.defineProperty(this, "x", {
-      get: () => this.ox + Math.max(this.width, textWidth(this.text)) / 2,
+      get: () =>
+        this.ox +
+        Math.max(
+          this.width,
+          ...this.text.split("\n").map((x) => textWidth(x))
+        ) /
+          2,
     });
     return this;
   }
   alignRight() {
     this.ox = this.x; //Save old x
     Object.defineProperty(this, "x", {
-      get: () => this.ox - Math.max(this.width, textWidth(this.text)) / 2,
+      get: () =>
+        this.ox -
+        Math.max(
+          this.width,
+          ...this.text.split("\n").map((x) => textWidth(x))
+        ) /
+          2,
     });
     return this;
   }

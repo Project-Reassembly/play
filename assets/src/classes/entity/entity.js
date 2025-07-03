@@ -199,7 +199,7 @@ class Entity extends ShootableObject {
     if (this.#firing) this.attack();
     if (this._aidelay > 0) {
       this._aidelay--;
-    } else {w
+    } else {
       this._aidelay = 6;
       if (this.aiType === "passive") {
         this._passiveAI();

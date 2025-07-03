@@ -27,7 +27,9 @@ class DroppedItemStack extends Entity {
     this.height = 10;
     this.team = "items";
   }
-  damage() {return 0}
+  damage() {
+    return 0;
+  }
   tick() {
     if (this.dead) return;
     if (this.item.isEmpty()) {
@@ -46,7 +48,9 @@ class DroppedItemStack extends Entity {
         if (ent instanceof InventoryEntity && ent.collidesWith(this)) {
           let it = this.item.item;
           if (ent instanceof EquippedEntity) {
-            let leftOver = ent.equipment.addItem(it, this.item.count);
+            let leftOver = ent.equipment.hasItem(it)
+              ? ent.equipment.addItem(it, this.item.count)
+              : this.item.count;
             if (!leftOver) {
               if (ent === game.player) {
                 Log.send("Picked up " + this.item.toString(true));

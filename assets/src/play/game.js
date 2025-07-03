@@ -122,8 +122,6 @@ const gen = {
 };
 //
 let freecam = false;
-let freecamReturn = 0;
-let camDiff = { x: 0, y: 0 };
 
 if (!window.Worker) {
   const errmsg =
@@ -841,14 +839,9 @@ function gameFrame() {
       tickTimers();
       if (game.player) {
         movePlayer();
-        if (!freecam && freecamReturn <= 0) {
-          ui.camera.x = game.player.x;
-          ui.camera.y = game.player.y;
-        }
-        if (!freecam && freecamReturn >= 0) {
-          freecamReturn -= 0.05;
-          ui.camera.x -= camDiff.x * 0.05;
-          ui.camera.y -= camDiff.y * 0.05;
+        if (!freecam) {
+          ui.camera.x -= (ui.camera.x - game.player.x) * 0.1;
+          ui.camera.y -= (ui.camera.y - game.player.y) * 0.1;
         }
       } else UIComponent.setCondition("dead:yes");
       effects.applyShake();
@@ -889,11 +882,6 @@ function movePlayer() {
       ui.camera.x += 5;
     }
   } else {
-    if (freecam) {
-      freecamReturn = 1;
-      camDiff.x = ui.camera.x - game.player.x;
-      camDiff.y = ui.camera.y - game.player.y;
-    }
     freecam = false;
     if (
       keyIsDown(87) &&
@@ -1018,7 +1006,7 @@ function createPlayer(player = null, x, y, arm = true, playerType = "player") {
   if (!player) {
     player = construct(Registries.entities.get(playerType));
     if (arm) {
-      player.equipment.addItem("scrap-assembler");
+      player.inventory.addItem("scrap-assembler");
       if (tru(1 / 11)) player.leftHand.addItem("iti-laser-pistol");
       else player.rightHand.addItem("iti-laser-pistol");
     }
@@ -1188,7 +1176,11 @@ function mouseInteraction() {
 function secondaryInteract() {
   if (Inventory.mouseItemStack.item === "nothing") {
     let block = world.getBlock(game.mouse.blockX, game.mouse.blockY);
-    if (block && block.team === game.player.team && !keyIsDown(SHIFT))
+    if (
+      block &&
+      block.team === game.player.team &&
+      UIComponent.evaluateCondition("mode:build")
+    )
       if (block.dropItem) {
         //Break breakables
 
@@ -1196,16 +1188,18 @@ function secondaryInteract() {
           if (block === Container.selectedBlock) Container.selectedBlock = null;
         return;
       }
-    if (
-      game.player.rightHand.get(0) instanceof ItemStack &&
-      game.player.rightHand.get(0).getItem() instanceof Equippable
-    )
-      game.player.rightHand.get(0).getItem().use(game.player, true);
-    if (
-      game.player.leftHand.get(0) instanceof ItemStack &&
-      game.player.leftHand.get(0).getItem() instanceof Equippable
-    )
-      game.player.leftHand.get(0).getItem().use(game.player, true);
+    if (UIComponent.evaluateCondition("mode:fight")) {
+      if (
+        game.player.rightHand.get(0) instanceof ItemStack &&
+        game.player.rightHand.get(0).getItem() instanceof Equippable
+      )
+        game.player.rightHand.get(0).getItem().use(game.player, true);
+      if (
+        game.player.leftHand.get(0) instanceof ItemStack &&
+        game.player.leftHand.get(0).getItem() instanceof Equippable
+      )
+        game.player.leftHand.get(0).getItem().use(game.player, true);
+    }
   } else {
     DroppedItemStack.create(
       Inventory.mouseItemStack,
@@ -1221,72 +1215,74 @@ function secondaryInteract() {
 }
 
 function interact() {
-  let heldItem = Inventory.mouseItemStack.getItem();
-  let clickedBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
-  if (
-    clickedBlock &&
-    clickedBlock.team === game.player.team &&
-    clickedBlock.interaction(game.player, Inventory.mouseItemStack)
-  )
-    return;
-  let clickedTile =
-    world.getBlock(game.mouse.blockX, game.mouse.blockY, "floor") ??
-    world.getBlock(game.mouse.blockX, game.mouse.blockY, "tiles");
-  //If space is free, and buildable
-  if (clickedTile?.buildable) {
-    //Place items on free space
-    if (heldItem instanceof PlaceableItem) {
-      if (
-        heldItem.place(
-          Inventory.mouseItemStack,
-          game.mouse.blockX,
-          game.mouse.blockY,
-          selectedDirection
+  if (UIComponent.evaluateCondition("mode:build")) {
+    let heldItem = Inventory.mouseItemStack.getItem();
+    let clickedBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
+    if (
+      clickedBlock &&
+      clickedBlock.team === game.player.team &&
+      clickedBlock.interaction(game.player, Inventory.mouseItemStack)
+    )
+      return;
+    let clickedTile =
+      world.getBlock(game.mouse.blockX, game.mouse.blockY, "floor") ??
+      world.getBlock(game.mouse.blockX, game.mouse.blockY, "tiles");
+    //If space is free, and buildable
+    if (clickedTile?.buildable) {
+      //Place items on free space
+      if (heldItem instanceof PlaceableItem) {
+        if (
+          heldItem.place(
+            Inventory.mouseItemStack,
+            game.mouse.blockX,
+            game.mouse.blockY,
+            selectedDirection
+          )
         )
-      )
-        return;
+          return;
+      }
     }
-  }
-  //If clicked again
-  if (clickedBlock && clickedBlock === Container.selectedBlock) {
-    Container.selectedBlock = null;
-    ui.waitingForMouseUp = true;
-    return;
-  }
-  //If block is (not) interacted with
-  if (
-    clickedBlock &&
-    clickedBlock.selectable &&
-    clickedBlock.team === game.player.team
-  ) {
-    Container.selectedBlock = clickedBlock;
-    ui.waitingForMouseUp = true;
-    return;
-  } else {
-    if (Container.selectedBlock) {
+    //If clicked again
+    if (clickedBlock && clickedBlock === Container.selectedBlock) {
       Container.selectedBlock = null;
       ui.waitingForMouseUp = true;
       return;
     }
+    //If block is (not) interacted with
+    if (
+      clickedBlock &&
+      clickedBlock.selectable &&
+      clickedBlock.team === game.player.team
+    ) {
+      Container.selectedBlock = clickedBlock;
+      ui.waitingForMouseUp = true;
+      return;
+    } else {
+      if (Container.selectedBlock) {
+        Container.selectedBlock = null;
+        ui.waitingForMouseUp = true;
+        return;
+      }
+    }
+    if (heldItem !== null)
+      Inventory.mouseItemStack
+        .getItem()
+        .useInAir(game.player, Inventory.mouseItemStack);
+    if (Inventory.mouseItemStack?.isEmpty())
+      Inventory.mouseItemStack = ItemStack.EMPTY;
+  } else {
+    if (ui.waitingForMouseUp) return;
+    if (
+      game.player.rightHand.get(0) instanceof ItemStack &&
+      game.player.rightHand.get(0).getItem() instanceof Equippable
+    )
+      game.player.rightHand.get(0).getItem().use(game.player);
+    if (
+      game.player.leftHand.get(0) instanceof ItemStack &&
+      game.player.leftHand.get(0).getItem() instanceof Equippable
+    )
+      game.player.leftHand.get(0).getItem().use(game.player);
   }
-  if (heldItem !== null)
-    Inventory.mouseItemStack
-      .getItem()
-      .useInAir(game.player, Inventory.mouseItemStack);
-  if (Inventory.mouseItemStack?.isEmpty())
-    Inventory.mouseItemStack = ItemStack.EMPTY;
-
-  if (ui.waitingForMouseUp) return;
-  if (
-    game.player.rightHand.get(0) instanceof ItemStack &&
-    game.player.rightHand.get(0).getItem() instanceof Equippable
-  )
-    game.player.rightHand.get(0).getItem().use(game.player);
-  if (
-    game.player.leftHand.get(0) instanceof ItemStack &&
-    game.player.leftHand.get(0).getItem() instanceof Equippable
-  )
-    game.player.leftHand.get(0).getItem().use(game.player);
 }
 
 function reset() {
@@ -1351,19 +1347,32 @@ window.keyPressed = function (ev) {
       UIComponent.setCondition("menu:none");
     else UIComponent.setCondition("menu:inventory");
   }
-  //Hotkeys
-  else if (key === "1") game.player.equipment.hotkeySlot(0, true);
-  else if (key === "2") game.player.equipment.hotkeySlot(1, true);
-  else if (key === "3") game.player.equipment.hotkeySlot(2, true);
-  else if (key === "4") game.player.equipment.hotkeySlot(3, true);
-  else if (key === "5") game.player.equipment.hotkeySlot(4, true);
   //DevTools and fullscreen
   else if (key === "f12" || key === "f11") return true;
   //Recipe controls
   else if (key === "arrowright") nextRecipe();
   else if (key === "arrowleft") prevRecipe();
+  else if (key === "arrowup") UIComponent.setCondition("mode:build");
+  else if (key === "arrowdown") UIComponent.setCondition("mode:fight");
   //Command line
   else if (key === "/") openCommandLine();
+  //Hotkeys
+  else if (key === "b") {
+    if (UIComponent.evaluateCondition("mode:build"))
+      UIComponent.setCondition("mode:fight");
+    else UIComponent.setCondition("mode:build");
+  } else if (UIComponent.evaluateCondition("mode:build")) {
+    if (key === "1") game.player.inventory.hotkeySlot(0, true);
+    else if (key === "2") game.player.inventory.hotkeySlot(1, true);
+    else if (key === "3") game.player.inventory.hotkeySlot(2, true);
+    else if (key === "4") game.player.inventory.hotkeySlot(3, true);
+    else if (key === "5") game.player.inventory.hotkeySlot(4, true);
+    else if (key === "6") game.player.inventory.hotkeySlot(5, true);
+    else if (key === "7") game.player.inventory.hotkeySlot(6, true);
+    else if (key === "8") game.player.inventory.hotkeySlot(7, true);
+    else if (key === "9") game.player.inventory.hotkeySlot(8, true);
+    else if (key === "0") game.player.inventory.hotkeySlot(9, true);
+  }
   //Prevent any default behaviour
   ev.preventDefault();
   ev.stopPropagation();

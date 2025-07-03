@@ -8,19 +8,12 @@ import {
 } from "../../core/ui.js";
 import { Block } from "../../classes/block/block.js";
 import { ui } from "../../core/ui.js";
-import {
-  createPlayer,
-  deliverPlayer,
-  game,
-  gen,
-  world,
-} from "../../play/game.js";
+import { deliverPlayer, game, gen, world } from "../../play/game.js";
 import { Container } from "../../classes/block/container.js";
 import { DroppedItemStack } from "../../classes/item/dropped-itemstack.js";
 import { shortenedNumber } from "../../core/number.js";
 import { Log } from "../../play/messaging.js";
-import { blockSize, chunkSize, totalSize, worldSize } from "../../scaling.js";
-import { World } from "../../classes/world/world.js";
+import { totalSize } from "../../scaling.js";
 //##############################################################
 
 //                        INDICATORS
@@ -102,12 +95,15 @@ Object.defineProperty(
 //                          HOTBAR
 
 //##############################################################
+
+//fight mode
+
 createUIComponent(
   ["in-game"],
   [],
   0,
   0,
-  500,
+  400,
   60,
   "trapezium",
   null,
@@ -116,66 +112,11 @@ createUIComponent(
   20
 ).anchorBottom();
 
-createUIComponent(["in-game"], [], 295, 0, 80, 50, "reverse", () => {
-  UIComponent.setCondition("menu:inventory");
-}).anchorBottom();
-
-createUIImageComponent(
-  ["in-game"],
-  [],
-  295,
-  0,
-  50,
-  50,
-  null,
-  "icon.chest",
-  false,
-  0.5
-).anchorBottom();
-
-createUIComponent(["in-game"], [], -295, 0, 80, 50, "both", () => {
-  selectedDirection = keyIsDown(SHIFT)
-    ? Block.direction.rotateAntiClockwise(selectedDirection)
-    : Block.direction.rotateClockwise(selectedDirection);
-}).anchorBottom();
-
-let selectedDirection = Block.direction.UP;
-export { selectedDirection };
-Object.defineProperties(
-  createUIImageComponent(
-    ["in-game"],
-    [],
-    -295,
-    0,
-    50,
-    50,
-    null,
-    "icon.arrow",
-    false,
-    0.5
-  ).anchorBottom(),
-  {
-    rotation: {
-      get: () => selectedDirection,
-    },
-  }
-);
-
-Object.defineProperty(
-  createUIInventoryComponent(["in-game"], [], -95, 250, null, null, 5),
-  "inventory",
-  {
-    get: () => game.player?.equipment,
-  }
-).anchorBottom(30);
-
-//Weapon info, if any
-
 Object.defineProperty(
   createMultilineUIComponent(
     ["in-game"],
-    [],
-    -110,
+    ["mode:fight"],
+    -120,
     230,
     0,
     0,
@@ -196,11 +137,45 @@ Object.defineProperty(
 )
   .anchorBottom(45)
   .alignRight();
+
+Object.defineProperty(
+  createUIInventoryComponent(
+    ["in-game"],
+    ["mode:fight"],
+    -35,
+    250,
+    null,
+    1,
+    1,
+    40
+  ),
+  "inventory",
+  {
+    get: () => game.player?.leftHand,
+  }
+).anchorBottom(30);
+Object.defineProperty(
+  createUIInventoryComponent(
+    ["in-game"],
+    ["mode:fight"],
+    35,
+    250,
+    null,
+    1,
+    1,
+    40
+  ),
+  "inventory",
+  {
+    get: () => game.player?.rightHand,
+  }
+).anchorBottom(30);
+
 Object.defineProperty(
   createMultilineUIComponent(
     ["in-game"],
-    [],
-    110,
+    ["mode:fight"],
+    60,
     230,
     0,
     0,
@@ -220,6 +195,201 @@ Object.defineProperty(
   }
 ).anchorBottom(45);
 
+//fight mode, ammo part
+createUIComponent(
+  ["in-game"],
+  ["mode:fight"],
+  0,
+  0,
+  315,
+  60,
+  "left",
+  null,
+  "",
+  true,
+  20
+)
+  .anchorRight(-127)
+  .rotate(-Math.PI / 2);
+
+createUIComponent(
+  ["in-game"],
+  ["mode:build"],
+  0,
+  0,
+  315,
+  60,
+  "left",
+  null,
+  "",
+  true,
+  20
+)
+  .anchorRight(-177)
+  .rotate(-Math.PI / 2);
+
+Object.defineProperty(
+  createUIInventoryComponent(
+    ["in-game"],
+    ["mode:fight"],
+    0,
+    -100,
+    null,
+    null,
+    1
+  ),
+  "inventory",
+  {
+    get: () => game.player?.equipment,
+  }
+).anchorRight(30);
+
+createUIComponent(
+  ["in-game"],
+  ["mode:fight"],
+  0,
+  -140,
+  0,
+  0,
+  "none",
+  null,
+  "Ammo",
+  true,
+  20
+).anchorRight(30);
+
+//build mode
+createUIComponent(
+  ["in-game"],
+  ["mode:build"],
+  0,
+  0,
+  540,
+  60,
+  "trapezium",
+  null,
+  "",
+  true,
+  20
+).anchorBottom();
+
+createUIComponent(
+  ["in-game"],
+  ["mode:fight"],
+  0,
+  0,
+  540,
+  60,
+  "trapezium",
+  null,
+  "",
+  true,
+  20
+).anchorBottom(-57);
+
+createUIComponent(
+  ["in-game"],
+  ["mode:build"],
+  315,
+  0,
+  80,
+  50,
+  "reverse",
+  () => {
+    UIComponent.setCondition("menu:inventory");
+  }
+).anchorBottom();
+
+createUIImageComponent(
+  ["in-game"],
+  ["mode:build"],
+  315,
+  0,
+  50,
+  50,
+  null,
+  "icon.chest",
+  false,
+  0.5
+).anchorBottom();
+
+createUIComponent(["in-game"], ["mode:build"], -315, 0, 80, 50, "both", () => {
+  selectedDirection = keyIsDown(SHIFT)
+    ? Block.direction.rotateAntiClockwise(selectedDirection)
+    : Block.direction.rotateClockwise(selectedDirection);
+}).anchorBottom();
+
+let selectedDirection = Block.direction.UP;
+export { selectedDirection };
+
+Object.defineProperties(
+  createUIImageComponent(
+    ["in-game"],
+    ["mode:build"],
+    -315,
+    0,
+    50,
+    50,
+    null,
+    "icon.arrow",
+    false,
+    0.5
+  ).anchorBottom(),
+  {
+    rotation: {
+      get: () => selectedDirection,
+    },
+  }
+);
+
+Object.defineProperty(
+  createUIInventoryComponent(
+    ["in-game"],
+    ["mode:build"],
+    -215,
+    250,
+    null,
+    1,
+    10
+  ),
+  "inventory",
+  {
+    get: () => game.player?.inventory,
+  }
+).anchorBottom(30);
+
+//indicators
+createUIImageComponent(
+  ["in-game"],
+  ["mode:build"],
+  400,
+  0,
+  50,
+  50,
+  () => UIComponent.setCondition("mode:fight"),
+  "icon.arrow",
+  false,
+  0.5
+)
+  .anchorBottom()
+  .rotate(Math.PI / 2);
+
+createUIImageComponent(
+  ["in-game"],
+  ["mode:fight"],
+  400,
+  0,
+  50,
+  50,
+  () => UIComponent.setCondition("mode:build"),
+  "icon.arrow",
+  false,
+  0.5
+)
+  .anchorBottom(-20)
+  .rotate(-Math.PI / 2);
+
+//universal
 // mone
 createUIComponent(["in-game"], [], 0, 0, 100, 40, "left", null, "", true, 20)
   .invert()
@@ -363,7 +533,12 @@ Object.defineProperties(
     .setOutlineColour([0, 0, 0, 0]),
   {
     width: { get: () => width * 0.667 },
-    text: { get: () => world.firstBoss()?.shield > 0 ? world.firstBoss().name + " [Shield]" : "" },
+    text: {
+      get: () =>
+        world.firstBoss()?.shield > 0
+          ? world.firstBoss().name + " [Shield]"
+          : "",
+    },
   }
 );
 
@@ -569,7 +744,7 @@ createUIComponent(
   () => {
     game.player?.equipment.transfer(game.player?.inventory, true);
   },
-  "Store Equipment",
+  "Store Ammunition",
   true,
   15
 );
@@ -582,9 +757,11 @@ createUIComponent(
   30,
   "both",
   () => {
-    game.player?.inventory.transfer(game.player?.equipment, true);
+    game.player?.inventory.transfer(game.player?.equipment, true, (stack) =>
+      game.player.equipment.hasItem(stack.item)
+    );
   },
-  "Equip First",
+  "Refill Ammo",
   true,
   15
 );
