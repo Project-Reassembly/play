@@ -9,16 +9,42 @@
   <link rel="icon" type="image/x-icon" href="./assets/textures/item/scrap.png">
   <link href="./style.css" rel="stylesheet" type="text/css" />
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script> -->
-
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script> -->
-   
 </head>
 
 <body>
   <script>
     //Game info
-    const gameVersion = "0.0.0";
-    const isPreview = true;
+    const versionGetURL = "https://cdn.jsdelivr.net/gh/Project-Reassembly/play@main/version.json";
+    let gameVersion = "0.0.0";
+    let preNumber = -1; //remember to increment this when you commit
+    let isPreview = true;
+    async function getVer() {
+      await import("" + versionGetURL, { with: { type: "json" } }).then((val) => {
+        let def = val.default
+        console.log("[v] Got version data", def)
+        gameVersion = def?.version ?? "0.0.0(error)"
+        preNumber = def?.preview ?? -1
+        isPreview = def?.isPreview ?? true
+      }, async () => {
+        console.warn("[v] Failed to get version data, retrying from local data...");
+        await import("./version.json", { with: { type: "json" } }).then((val) => {
+          let def = val.default
+          console.log("[v] Got backup version data", def)
+          gameVersion = def?.version ?? "0.0.0(error)"
+          preNumber = def?.preview ?? -1
+          isPreview = def?.isPreview ?? true
+        })
+      })
+    }
+    console.log("[v] Getting initial version data...");
+    import("./version.json", { with: { type: "json" } }).then((val) => {
+      let def = val.default
+      console.log("[v] Got initial version data", def)
+      gameVersion = def?.version ?? "0.0.0(error)"
+      preNumber = def?.preview ?? -1
+      isPreview = def?.isPreview ?? true
+    })
   </script>
   <!-- Libraries -->
   <script src="https://q5js.org/q5.js"></script>

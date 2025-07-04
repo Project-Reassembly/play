@@ -1,2 +1,2 @@
 # Project: Reassembly
- Sandbox factory-building survival game
+ Sandbox factory-building survival game.
