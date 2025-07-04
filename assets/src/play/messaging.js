@@ -90,4 +90,10 @@ class InGameMessageBox {
   }
 }
 const Log = new InGameMessageBox(0, -100, 600, 20);
+notify = () =>
+  Log.send(
+    "Update available! Save the game with /save and reload the page.",
+    [255, 220, 0],
+    "bold", 600
+  );
 export { Log, InGameMessageBox };

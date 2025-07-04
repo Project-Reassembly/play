@@ -55,35 +55,33 @@ createUIComponent(
   50
 ).setTextColour([230, 170, 0]);
 
-let versiongetter = false;
 Object.defineProperty(
-  createUIComponent(["title"], [], 0, -140, 0, 0, "none", null, "", true, 15)
+  createUIComponent(
+    ["title"],
+    [],
+    0,
+    -140,
+    500,
+    50,
+    "none",
+    checkUpdate,
+    "",
+    true,
+    15
+  )
     .setTextColour([230, 170, 0])
-    .anchorBottom(80),
+    .anchorBottom(80)
+    .setBackgroundColour([0, 0, 0, 0])
+    .setOutlineColour([0, 0, 0, 0]),
   "text",
   {
     get: () =>
       "<version " +
       gameVersion +
       (isPreview ? "-pre" + preNumber : "") +
-      "-js>\n" +
-      (versiongetter ? "Reload page, update available" : ""),
+      "-js>" +
+      (versiongetter ? "\nReload page, update available" : ""),
   }
 );
-//update info every 5 hours
-setInterval(() => {
-  console.log("[v] Checking for update...");
-  let oldver = gameVersion;
-  let oldpre = preNumber;
-  getVer();
-  console.log("[v] Got data:");
-  if (gameVersion !== oldver || preNumber !== oldpre) {
-    console.log("  Update available!");
-    versiongetter = true;
-  } else {
-    console.log("  No update available.");
-    versiongetter = false;
-  }
-  gameVersion = oldver;
-  preNumber = oldpre;
-}, 18_000_000);
+//update info every hour
+setInterval(checkUpdate, 3_600_000);
