@@ -777,6 +777,21 @@ createLinkedBlockAndItem(
         inputs: [
           {
             item: "copper-ingot",
+            count: 1
+          }
+        ],
+        outputs: [
+          {
+            item: "copper-wire",
+            count: 6
+          }
+        ],
+        time: 120
+      },
+      {
+        inputs: [
+          {
+            item: "copper-ingot",
             count: 1,
           },
           {

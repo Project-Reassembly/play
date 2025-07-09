@@ -37,6 +37,10 @@ class Entity extends ShootableObject {
   turnSpeed = 10;
   target = null;
 
+  //nrg
+  energy = 100;
+  maxEnergy = 0;
+
   //AI
   aiType = "passive";
   attackRange = 100;
@@ -87,6 +91,7 @@ class Entity extends ShootableObject {
 
   init() {
     super.init();
+    this.maxEnergy = this.energy;
     this.components = this.components.map((x) => construct(x, "component"));
     this.baseSpeed = this.speed;
   }
@@ -482,6 +487,7 @@ class Entity extends ShootableObject {
       spawnY: roundNum(this.spawnY),
       health: roundNum(this.health),
       shield: roundNum(this.shield),
+      energy: roundNum(this.energy),
       statuses: this.statuses,
       isMainPlayer: this === game.player,
     };
@@ -490,9 +496,11 @@ class Entity extends ShootableObject {
   static deserialise(created, inFull = true) {
     /**@type {Entity} */
     let entity = construct(Registries.entities.get(created.entity), "entity");
+    console.log(entity)
     entity.statuses = created.statuses;
     entity.health = created.health;
     entity.shield = created.shield ?? 0;
+    entity.energy = created.energy ?? entity.maxEnergy;
     entity._lastMaxShield = created.shield ?? 0;
     entity.constructor.applyExtraProps(entity, created);
     //Rest handled in-chunk, but here it is:

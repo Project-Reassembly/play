@@ -35,10 +35,88 @@ Registries.entities.add("scrap-player", {
   width: 25,
   height: 25,
   speed: 3,
+  assemblySlots: 4,
+  assemblyRecipes: [
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 20,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-storage",
+          count: 1,
+        },
+      ],
+      time: 150,
+    },
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 10,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-drill",
+          count: 1,
+        },
+      ],
+      time: 300,
+    },
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 25,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-assembler",
+          count: 1,
+        },
+      ],
+      time: 600,
+    },
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 40,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-compressor",
+          count: 1,
+        },
+      ],
+      time: 600,
+    },
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 30,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-smelter",
+          count: 1,
+        },
+      ],
+      time: 600,
+    },
+  ],
 });
-Registries.entities.add("player", {
+Registries.entities.add("iti-player", {
   type: "player",
-  name: "Player",
+  name: "Integrity",
   health: 350,
   light: 100,
   components: [
@@ -46,7 +124,7 @@ Registries.entities.add("player", {
       image: "npc.iti.player.head",
       width: 32,
       height: 32,
-      xOffset: -3
+      xOffset: -3,
     },
     {
       image: "npc.iti.generic.body",
@@ -69,7 +147,85 @@ Registries.entities.add("player", {
   team: "player",
   width: 25,
   height: 25,
-  speed: 4
+  speed: 4,
+  assemblySlots: 4,
+  assemblyRecipes: [
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 20,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-storage",
+          count: 1,
+        },
+      ],
+      time: 150,
+    },
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 10,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-drill",
+          count: 1,
+        },
+      ],
+      time: 300,
+    },
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 25,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-assembler",
+          count: 1,
+        },
+      ],
+      time: 600,
+    },
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 40,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-compressor",
+          count: 1,
+        },
+      ],
+      time: 600,
+    },
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 30,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-smelter",
+          count: 1,
+        },
+      ],
+      time: 600,
+    },
+  ],
 });
 Registries.entities.add("scavenger", {
   name: "Scavenger",
@@ -272,11 +428,10 @@ Registries.entities.add("iti-corporate-merchant", {
       item: "iti-energy-cell",
       dropChance: 0.2,
       min: 5,
-      max: 20
-    }
-  ]
+      max: 20,
+    },
+  ],
 });
-
 
 Registries.entities.add("scrapper", {
   name: "The Scrapper",

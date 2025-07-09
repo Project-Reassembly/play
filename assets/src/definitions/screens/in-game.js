@@ -11,7 +11,7 @@ import { ui } from "../../core/ui.js";
 import { deliverPlayer, game, gen, world } from "../../play/game.js";
 import { Container } from "../../classes/block/container.js";
 import { DroppedItemStack } from "../../classes/item/dropped-itemstack.js";
-import { shortenedNumber } from "../../core/number.js";
+import { roundNum, shortenedNumber } from "../../core/number.js";
 import { Log } from "../../play/messaging.js";
 import { totalSize } from "../../scaling.js";
 //##############################################################
@@ -403,8 +403,59 @@ Object.defineProperty(
   { get: () => "$" + shortenedNumber(game.money) }
 );
 
+Object.defineProperties(
+  createUIComponent(
+    ["in-game"],
+    [],
+    10,
+    10,
+    200,
+    0,
+    "none",
+    null,
+    "Name Here",
+    true,
+    15
+  )
+    .anchorLeft(35)
+    .anchorBottom(75)
+    .setBackgroundColour([0, 0, 0]),
+  {
+    text: { get: () => game.player?.name },
+    width: { get: () => textWidth(game.player?.name ?? "e") },
+  }
+);
+Object.defineProperties(
+  createUIImageComponent(
+    ["in-game"],
+    [],
+    10,
+    10,
+    20,
+    20,
+    null,
+    "error",
+    false,
+    1
+  )
+    .anchorLeft(10)
+    .anchorBottom(65)
+    .setBackgroundColour([0, 0, 0]),
+  {
+    image: {
+      get: () =>
+        game.player?.registryName.includes("iti")
+          ? "iti-icon"
+          : game.player?.registryName.includes("peti")
+          ? "peti-icon"
+          : game.player?.registryName.includes("ccc")
+          ? "ccc-icon"
+          : "scrap",
+    },
+  }
+);
 //healthbar
-Object.defineProperty(
+Object.defineProperties(
   createHealthbarComponent(
     ["in-game"],
     [],
@@ -414,7 +465,7 @@ Object.defineProperty(
     20,
     "reverse",
     null,
-    "Integrity",
+    "HP",
     true,
     15,
     () => game.player,
@@ -423,8 +474,14 @@ Object.defineProperty(
     .anchorLeft(50)
     .anchorBottom(10)
     .setBackgroundColour([0, 0, 0]),
-  "width",
-  { get: () => width / 5 }
+
+  {
+    text: {
+      get: () =>
+        "HP | " + roundNum(game.player?.health) + "/" + game.player.maxHealth,
+    },
+    width: { get: () => width / 5 },
+  }
 );
 //shield bar
 Object.defineProperties(
@@ -450,11 +507,11 @@ Object.defineProperties(
     .setOutlineColour([0, 0, 0, 0]),
   {
     width: { get: () => width / 5 },
-    text: { get: () => (game.player?.shield > 0 ? "Shield" : "") },
+    text: { get: () => (game.player?.shield > 0 ? "Shield | "+roundNum(game.player?.shield)+"/"+game.player?._lastMaxShield : "") },
   }
 );
 //energy bar
-Object.defineProperty(
+Object.defineProperties(
   createHealthbarComponent(
     ["in-game"],
     [],
@@ -478,8 +535,13 @@ Object.defineProperty(
     .anchorBottom(35)
     .setBackgroundColour([0, 0, 0])
     .setGetters("energy", "maxEnergy"),
-  "width",
-  { get: () => width / 5 }
+  {
+    text: {
+      get: () =>
+        "Energy | " + roundNum(game.player?.energy) + "/" + game.player.maxEnergy,
+    },
+    width: { get: () => width / 5 },
+  }
 );
 
 //##############################################################
@@ -560,7 +622,11 @@ Object.defineProperties(
     "left",
     () => {
       if (Container.selectedBlock instanceof Container) {
-        Container.selectedBlock.inventory.transfer(game.player?.equipment);
+        Container.selectedBlock.inventory.transfer(
+          game.player?.equipment,
+          true,
+          (ist) => game.player?.equipment?.hasItem(ist.item)
+        );
         Container.selectedBlock.inventory.transfer(game.player?.inventory);
       }
     },
@@ -790,6 +856,52 @@ createUIComponent(
   "Dump",
   true,
   15
+);
+
+Object.defineProperty(
+  createUIInventoryComponent(
+    ["in-game"],
+    ["menu:inventory"],
+    -320,
+    90,
+    null,
+    null,
+    2
+  ),
+  "inventory",
+  {
+    get: () => game.player?.assemblyInventory,
+  }
+);
+
+createUIComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  -100,
+  110,
+  250,
+  90,
+  "none",
+  () => game.player?.nextRecipe()
+);
+Object.defineProperty(
+  createMultilineUIComponent(
+    ["in-game"],
+    ["menu:inventory"],
+    -220,
+    70,
+    0,
+    0,
+    "none",
+    null,
+    "txt",
+    true,
+    20
+  ),
+  "text",
+  {
+    get: () => game.player?.getRecipeInfo(),
+  }
 );
 
 Object.defineProperty(

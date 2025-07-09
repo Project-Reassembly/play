@@ -165,7 +165,7 @@ worldGenWorker.onmessage = (ev) => {
       worldSize / 2,
       true,
       true,
-      "player",
+      "iti-player",
       world
     );
 
@@ -363,6 +363,9 @@ worldGenWorker.onmessageerror = (ev) => {
 const propertyReplacements = [
   ['"health":', "ḣ"],
   ['"direction":', "ḋ"],
+  ['"shield":', "ּ"],
+  ['"energy":', "ɞ"],
+  ['"power":', "∏"],
   ['"block":', "ḃ"],
   ['"blocks":', "ḇ"],
   ['"tiles":', "ṫ"],
@@ -402,6 +405,19 @@ const propertyReplacements = [
   ['"name":', "ν"],
   ['"money":', "⅘"],
   ['"world":', "ɰ"],
+  ['"plasma":', "℗"],
+  ["ⁿ,", "њ"],
+  ["ɴ,", "ñ"],
+  ["л,", "ň"],
+
+  ["ñññññ", "ɲ"],
+  ["ňňňňň", "ŋ"],
+
+  ["false", "ɟ"],
+  ["true", "ŧ"],
+
+  ['"player"', "ַ"],
+  ['"enemy"', "ế"],
 ];
 const postDictReplacers = [
   ["},{", "⁺"],
@@ -450,13 +466,17 @@ function saveGame(name) {
   let dict = [];
   let num = 0;
   Registries.blocks.forEach((name) => {
-    dict.push([num, name]);
-    num++;
-  });
-  Registries.items.forEach((name) => {
-    if (!hasNameInDictArray(name, dict)) {
+    if (file.includes(name)) {
       dict.push([num, name]);
       num++;
+    }
+  });
+  Registries.items.forEach((name) => {
+    if (file.includes(name)) {
+      if (!hasNameInDictArray(name, dict)) {
+        dict.push([num, name]);
+        num++;
+      }
     }
   });
   Registries.entities.forEach((name) => {
@@ -1002,13 +1022,20 @@ function showMousePos() {
 /**
  * @param {Player | null} player
  */
-function createPlayer(player = null, x, y, arm = true, playerType = "player") {
+function createPlayer(
+  player = null,
+  x,
+  y,
+  arm = true,
+  playerType = "iti-player"
+) {
   if (!player) {
     player = construct(Registries.entities.get(playerType));
     if (arm) {
-      player.inventory.addItem("scrap-assembler");
-      if (tru(1 / 11)) player.leftHand.addItem("iti-laser-pistol");
-      else player.rightHand.addItem("iti-laser-pistol");
+      if (playerType === "iti-player") {
+        if (tru(1 / 11)) player.leftHand.addItem("iti-laser-pistol");
+        else player.rightHand.addItem("iti-laser-pistol");
+      }
     }
     player.addToWorld(world, x ?? worldSize / 2, y ?? worldSize / 2);
   }
@@ -1031,7 +1058,7 @@ function deliverPlayer(
   y,
   arm = true,
   moveCamera = false,
-  playerType = "player",
+  playerType = "iti-player",
   iworld = world
 ) {
   createPlayer(player, x, y, arm, playerType);
@@ -1271,6 +1298,12 @@ function interact() {
     if (Inventory.mouseItemStack?.isEmpty())
       Inventory.mouseItemStack = ItemStack.EMPTY;
   } else {
+    if (Inventory.mouseItemStack.getItem() !== null) {
+      Inventory.mouseItemStack
+        .getItem()
+        .useInAir(game.player, Inventory.mouseItemStack);
+      return;
+    }
     if (ui.waitingForMouseUp) return;
     if (
       game.player.rightHand.get(0) instanceof ItemStack &&
