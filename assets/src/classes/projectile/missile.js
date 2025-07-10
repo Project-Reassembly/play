@@ -12,11 +12,6 @@ class Missile extends Bullet {
   turnSpeed = 1;
   targetType = "mouse"; //"nearest", "mouse", "hovered"
   trackingRange = 200;
-  init() {
-    if (this.trailInterval === -1) {
-      this.trailInterval = this.speed / this.hitSize;
-    }
-  }
   spawnTrail(dt) {
     //Visual fire effect
     for (let e = 0; e < this.speed * dt; e++) {
@@ -32,9 +27,9 @@ class Missile extends Bullet {
               0,
               this.trailShape, //flames
               this.trailColours,
-              this.hitSize * 1.9,
+              this.trailWidth || this.hitSize * 1.9,
               0,
-              this.hitSize * 1.9,
+              this.trailWidth || this.hitSize * 1.9,
               0,
               0
             );
@@ -43,7 +38,10 @@ class Missile extends Bullet {
             this.world.particles.push(trailparticle);
           } else this.emit(this.trailEffect);
         }
-        this._trailCounter = this.trailInterval;
+        this._trailCounter =
+          this.trailInterval === -1
+            ? this.speed / this.hitSize
+            : this.trailInterval;
       } else {
         this._trailCounter--;
       }

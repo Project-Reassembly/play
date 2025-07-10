@@ -284,6 +284,29 @@ createLinkedBlockAndItem(
       {
         inputs: [
           {
+            item: "makeshift-explosive",
+            count: 4,
+          },
+          {
+            item: "scrap",
+            count: 1,
+          },
+          {
+            item: "coal",
+            count: 5,
+          },
+        ],
+        outputs: [
+          {
+            item: "scrap-rocket",
+            count: 10,
+          },
+        ],
+        time: 300,
+      },
+      {
+        inputs: [
+          {
             item: "scrap",
             count: 10,
           },
@@ -356,6 +379,25 @@ createLinkedBlockAndItem(
         outputs: [
           {
             item: "scrap-cannon",
+            count: 1,
+          },
+        ],
+        time: 900,
+      },
+      {
+        inputs: [
+          {
+            item: "scrap",
+            count: 25,
+          },
+          {
+            item: "plate",
+            count: 15,
+          },
+        ],
+        outputs: [
+          {
+            item: "scrap-launcher",
             count: 1,
           },
         ],

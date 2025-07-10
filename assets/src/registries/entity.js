@@ -227,6 +227,120 @@ Registries.entities.add("iti-player", {
     },
   ],
 });
+Registries.entities.add("ccc-player", {
+  type: "player",
+  name: "Endeavour",
+  health: 200,
+  light: 100,
+  components: [
+    {
+      image: "npc.ccc.player.head",
+      width: 32,
+      height: 32,
+      xOffset: -3,
+    },
+    {
+      image: "npc.ccc.generic.body",
+      width: 32,
+      height: 32,
+    },
+    {
+      type: "leg-component",
+      image: "npc.ccc.generic.legs",
+      width: 32,
+      height: 32,
+    },
+  ],
+  armType: {
+    width: 32,
+    height: 11,
+    yOffset: 13,
+    image: "arm.ccc",
+  },
+  team: "player",
+  width: 25,
+  height: 25,
+  speed: 4,
+  assemblySlots: 4,
+  assemblyRecipes: [
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 20,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-storage",
+          count: 1,
+        },
+      ],
+      time: 150,
+    },
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 10,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-drill",
+          count: 1,
+        },
+      ],
+      time: 300,
+    },
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 25,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-assembler",
+          count: 1,
+        },
+      ],
+      time: 600,
+    },
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 40,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-compressor",
+          count: 1,
+        },
+      ],
+      time: 600,
+    },
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 30,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-smelter",
+          count: 1,
+        },
+      ],
+      time: 600,
+    },
+  ],
+});
+
 Registries.entities.add("scavenger", {
   name: "Scavenger",
   type: "equipped-entity",

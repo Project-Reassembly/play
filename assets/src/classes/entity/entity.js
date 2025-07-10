@@ -496,7 +496,6 @@ class Entity extends ShootableObject {
   static deserialise(created, inFull = true) {
     /**@type {Entity} */
     let entity = construct(Registries.entities.get(created.entity), "entity");
-    console.log(entity)
     entity.statuses = created.statuses;
     entity.health = created.health;
     entity.shield = created.shield ?? 0;

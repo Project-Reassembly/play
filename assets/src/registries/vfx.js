@@ -255,6 +255,35 @@ Registries.vfx.add("tonk-shoot", {
     },
   ],
 });
+Registries.vfx.add("launcher-smoke", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      cone: 30,
+      emissions: 5,
+      interval: 5,
+      amount: 2,
+      particle: {
+        lifetime: 90,
+        direction: 180,
+        speed: 2,
+        decel: 0.02,
+        shape: "circle",
+        colours: [
+          [50, 50, 50, 100],
+          [100, 100, 100, 0],
+        ],
+        widthFrom: 10,
+        widthTo: 20,
+        heightFrom: 10,
+        heightTo: 20,
+        rotateSpeed: 0,
+        light: 0,
+      },
+    },
+  ],
+});
 
 Registries.vfx.add("laser-caster-frag", {
   type: "particle-emission",
@@ -690,6 +719,22 @@ Registries.vfx.add("laser-caster-charge", {
     colours: [
       [0, 255, 255, 0],
       [255, 255, 255],
+    ],
+    light: 30,
+  },
+});
+Registries.vfx.add("charged-laser-blaster-charge", {
+  type: "wave-emission",
+  parentise: true,
+  particle: {
+    lifetime: 25,
+    radiusFrom: 20,
+    radiusTo: 0,
+    strokeFrom: 2,
+    strokeTo: 5,
+    colours: [
+      [255, 0, 0, 0],
+      [255, 100, 100],
     ],
     light: 30,
   },

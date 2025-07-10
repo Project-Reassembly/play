@@ -277,7 +277,8 @@ Registries.items.add("scrap-repeater", {
   type: "weapon",
   marketValue: 200,
   name: "Scrap Repeater",
-  description: "Shoots bullets far more quickly.\nMore inaccurate.\n\nIf you shoot enough bullets,\nyou can't miss!",
+  description:
+    "Shoots bullets far more quickly.\nMore inaccurate.\n\nIf you shoot enough bullets,\nyou can't miss!",
   image: "weapon.scrap-repeater.item",
   range: 250,
   recoil: 0.6,
@@ -439,6 +440,102 @@ Registries.items.add("scrap-cannon", {
     recoil: 6,
     rotationalRecoil: 12,
     recoilSpeed: 0.2,
+  },
+});
+Registries.items.add("scrap-launcher", {
+  type: "weapon",
+  name: "Scrap Launcher",
+  marketValue: 150,
+  description: "Launches explosive rockets with very long range.",
+  image: "weapon.scrap-launcher.item",
+  range: 900,
+  shootX: -5,
+  bullets: {
+    types: [
+      {
+        speed: 0,
+        decel: -0.05,
+        extraUpdates: 2,
+        lifetime: 240,
+        hitSize: 6,
+        trailEffect: "burning",
+        knockback: 20,
+        // trailColours: [
+        //   [255, 255, 255],
+        //   [255, 255, 0],
+        //   [255, 128, 0],
+        //   [255, 0, 0],
+        //   [0, 0, 0, 100],
+        //   [100, 100, 100, 0],
+        // ],
+        damage: [
+          {
+            amount: 8,
+            type: "ballistic",
+            spread: 4,
+          },
+          {
+            amount: 45,
+            type: "explosion",
+            spread: 10,
+            radius: 60,
+          },
+        ],
+        drawer: {
+          image: "bullet.scrap-rocket",
+          width: 16,
+          height: 9,
+        },
+        despawnEffect: "explosion~60",
+        fragBullet: {
+          lifetime: 10,
+          speed: 15,
+          light: 30,
+          trail: true,
+          hitSize: 2.5,
+          trailShape: "rhombus",
+          drawer: {
+            shape: "rhombus",
+            fill: "#cd9f8b",
+            width: 8,
+            height: 3,
+            image: false,
+          },
+          trailColours: [
+            [255, 255, 100, 200],
+            [255, 0, 0, 100],
+            [75, 75, 75, 20],
+          ],
+          trailLife: 30,
+          damage: [
+            {
+              type: "ballistic",
+              amount: 10,
+              spread: 5,
+            },
+          ],
+        },
+        fragNumber: 9,
+        fragSpread: 360,
+      },
+    ],
+    ammos: {
+      "scrap-rocket": 0,
+    },
+  },
+  shoot: {
+    effect: "launcher-smoke",
+    reload: 45,
+  },
+  component: {
+    type: "weapon-component",
+    width: 36,
+    height: 19,
+    yOffset: 0,
+    image: "weapon.scrap-launcher.component",
+    recoil: 3,
+    rotationalRecoil: 2,
+    recoilSpeed: 0.1,
   },
 });
 
@@ -964,7 +1061,6 @@ Registries.items.add("iti-energy-repeater", {
           [0, 0, 255, 100],
         ],
         trailLight: 50,
-        trailWidth: 1,
         knockback: 10,
         status: "plasma-burn",
         statusDuration: 120,
@@ -1300,6 +1396,155 @@ Registries.items.add("iti-energy-repeater", {
   },
 });
 
+Registries.items.add("peti-charged-laser-blaster", {
+  type: "weapon",
+  name: "Charged Laser Blaster",
+  marketValue: 0,
+  rarity: Item.rarity.PETI,
+  description: "Shoots a pair of high-damage\nexploding balls of energy.",
+  image: "weapon.peti-charged-laser-blaster.item",
+  range: 300,
+  shootX: 7,
+  bullets: {
+    types: [
+      {
+        type: "missile",
+        lifetime: 30,
+        extraUpdates: 1,
+        light: 70,
+        speed: 10,
+        trail: true,
+        hitSize: 2,
+        trailShape: "rhombus",
+        trailInterval: 2,
+        trailColours: [
+          [255, 50, 50],
+          [255, 0, 0, 0],
+        ],
+        hitEffect: "laser-caster-frag-destabilised",
+        trailLife: 30,
+        knockback: 10,
+        drawer: {
+          shape: "circle",
+          fill: "red",
+          width: 6,
+          height: 6,
+        },
+        damage: [
+          {
+            type: "laser",
+            amount: 15,
+            spread: 5,
+            radius: 20,
+          },
+        ],
+        targetType: "hovered",
+        trackingRange: 300,
+        turnSpeed: 4,
+        despawnEffect: "laser-caster-explosion-destabilised~20",
+      },
+    ],
+    ammos: {
+      none: 0,
+    },
+  },
+  shoot: {
+    reload: 60,
+    effect: "laser-caster-explosion-destabilised~10",
+    pattern: {
+      spread: 30,
+      burst: 2,
+      interval: 5,
+    },
+  },
+  component: {
+    type: "weapon-component",
+    width: 32,
+    height: 11,
+    yOffset: 0,
+    image: "weapon.peti-charged-laser-blaster.component",
+    recoil: 3,
+    rotationalRecoil: 4,
+    recoilSpeed: 0.15,
+  },
+});
+Registries.items.add("peti-plasma-sprayer", {
+  type: "weapon",
+  name: "Plasma Sprayer",
+  marketValue: 5000,
+  rarity: Item.rarity.PETI,
+  description: "Shoots a stream of low-damage\nexploding balls of energy.",
+  image: "weapon.peti-charged-laser-blaster.item",
+  range: 300,
+  shootX: 7,
+  bullets: {
+    types: [
+      {
+        // type: "missile",
+        lifetime: 30,
+        extraUpdates: 1,
+        light: 70,
+        speed: 10,
+        trail: true,
+        hitSize: 1,
+        trailShape: "circle",
+        trailInterval: 4,
+        trailColours: [
+          [255, 50, 50],
+          [255, 0, 0, 0],
+        ],
+        trailWidth: 3,
+        hitEffect: "laser-caster-frag-destabilised",
+        trailLife: 30,
+        knockback: 10,
+        drawer: {
+          shape: "circle",
+          fill: "red",
+          width: 3,
+          height: 3,
+        },
+        damage: [
+          {
+            type: "laser",
+            amount: 5,
+            spread: 2,
+            radius: 10,
+          },
+        ],
+        // targetType: "hovered",
+        // trackingRange: 300,
+        // turnSpeed: 4,
+        despawnEffect: "laser-caster-explosion-destabilised~10",
+      },
+    ],
+    ammos: {
+      none: 0,
+    },
+  },
+  shoot: {
+    charge: 20,
+    chargeEffect: "charged-laser-blaster-charge",
+    reload: 5,
+    effect: "laser-caster-frag-destabilised",
+    pattern: {
+      spread: 2,
+      spacing: 5,
+      burst: 5,
+      interval: 5,
+      amount: 2,
+    },
+  },
+  component: {
+    type: "weapon-component",
+    width: 32,
+    height: 11,
+    yOffset: 0,
+    image: "weapon.peti-charged-laser-blaster.component",
+    recoil: 3,
+    rotationalRecoil: 4,
+    recoilSpeed: 0.15,
+  },
+});
 Registries.items.add("peti-plasma-railgun", {
   type: "weapon",
   name: "Plasma Railgun",
@@ -1647,6 +1892,13 @@ Registries.items.add("scrap-bullet", {
   description: "A tiny piece of scrap,\nfashioned into a sharp bullet.",
   image: "item.scrap-bullet",
   stackSize: 10000,
+});
+Registries.items.add("scrap-rocket", {
+  name: "Scrap Bullet",
+  marketValue: 2,
+  description: "A makeshift explosive rocket.",
+  image: "item.scrap-rocket",
+  stackSize: 1000,
 });
 Registries.items.add("iti-energy-cell", {
   name: "Energy Cell",

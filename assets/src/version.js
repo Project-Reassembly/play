@@ -23,7 +23,7 @@ async function checkUpdate() {
   let ov = processVersion(oldver);
   if (gv !== ov || preNumber > oldpre) {
     console.log("  Update available (" + gv + "/" + ov + ")");
-    if (ui.menuState === "in-game") notify();
+    notify();
     versiongetter = true;
   } else {
     console.log("  No update available (" + gv + ").");

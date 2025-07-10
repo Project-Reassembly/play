@@ -317,7 +317,10 @@ class Weapon extends Equippable {
     /**@type {Bullet} */
     let blt = construct(bullet, "bullet");
     if (!blt) return [ind(idl) + "🟥invalid: " + bullet + "⬜"];
-    let time = Math.min(blt.lifetime, blt.speed / blt.decel);
+    let time =
+      blt.decel > 0
+        ? Math.min(blt.lifetime, blt.speed / blt.decel)
+        : blt.lifetime;
     return [
       ind(idl) +
         (blt instanceof PointBullet
@@ -326,7 +329,7 @@ class Weapon extends Equippable {
           ? blt.length
           : roundNum(
               //s = ut + ½at²
-              (blt.speed * time - 0.5 * (blt.decel * time ** 2)) / 30,
+              (blt.speed * time + 0.5 * (-blt.decel * time ** 2)) / 30,
               1
             ) + " blocks range"),
 

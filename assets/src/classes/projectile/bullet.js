@@ -110,7 +110,6 @@ class Bullet extends PhysicalObject {
   step(dt) {
     //Not if dead
     if (!this.remove) {
-      this.spawnTrail(dt);
       this.intervalTick();
       //Which way to move
       let moveVector = p5.Vector.fromAngle(this.directionRad);
@@ -128,6 +127,7 @@ class Bullet extends PhysicalObject {
       } else {
         this.lifetime -= dt;
       }
+      this.spawnTrail(dt);
     }
   }
   move(x, y) {
@@ -138,7 +138,7 @@ class Bullet extends PhysicalObject {
 
     for (let e = 0; e < this.speed * dt; e++) {
       this._trailCounter--;
-      if (this._trailCounter <= 0) {
+      if (this._trailCounter <= 1) {
         if (this.world?.particles != null && this.trail) {
           if (this.trailEffect === "default") {
             let trailparticle = new ShapeParticle(
