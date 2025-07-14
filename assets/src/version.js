@@ -33,7 +33,9 @@ async function checkUpdate() {
   preNumber = oldpre;
 }
 async function getVer() {
-  await import("" + versionGetURL, { with: { type: "json" } }).then(
+  await import("" + versionGetURL + `?t=${Date.now()}`, {
+    with: { type: "json" },
+  }).then(
     (val) => {
       let def = val.default;
       console.log("[v] Got version data", def);
@@ -45,7 +47,7 @@ async function getVer() {
       console.warn(
         "[v] Failed to get version data, retrying from local data..."
       );
-      await import("../../version.json", { with: { type: "json" } }).then(
+      await import(`../../version.json?t=${Date.now()}`, { with: { type: "json" } }).then(
         (val) => {
           let def = val.default;
           console.log("[v] Got backup version data", def);
@@ -59,7 +61,7 @@ async function getVer() {
 }
 
 console.log("[v] Getting initial version data...");
-import("../../version.json", { with: { type: "json" } }).then((val) => {
+import(`../../version.json?t=${Date.now()}`, { with: { type: "json" } }).then((val) => {
   let def = val.default;
   console.log("[v] Got initial version data", def);
   gameVersion = def?.version ?? "0.0.0(error)";
