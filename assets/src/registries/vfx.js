@@ -531,6 +531,105 @@ Registries.vfx.add("plasma-railgun-hit", {
   ],
 });
 
+//impact frames
+Registries.vfx.add("nuke-impact", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      cone: 0,
+      amount: 1,
+      particle: {
+        lifetime: 45,
+        speed: 0,
+        decel: 0.01,
+        shape: "inverted-triangle",
+        direction: -90,
+        colours: [
+          [255, 255, 255, 150],
+          [255, 240, 210, 150],
+          [255, 230, 175, 150],
+        ],
+        widthFrom: 5000,
+        widthTo: 0,
+        heightFrom: 640,
+        heightTo: 0,
+        rotateSpeed: 20,
+        light: 30,
+      },
+    },
+    {
+      type: "particle-emission",
+      cone: 0,
+      amount: 1,
+      particle: {
+        lifetime: 45,
+        speed: 0,
+        decel: 0.01,
+        shape: "inverted-triangle",
+        direction: 180,
+        colours: [
+          [255, 255, 255, 150],
+          [255, 240, 210, 150],
+          [255, 230, 175, 150],
+        ],
+        widthFrom: 5000,
+        widthTo: 0,
+        heightFrom: 640,
+        heightTo: 0,
+        rotateSpeed: 20,
+        light: 30,
+      },
+    },
+    {
+      type: "particle-emission",
+      cone: 0,
+      amount: 1,
+      particle: {
+        lifetime: 45,
+        speed: 0,
+        decel: 0.01,
+        shape: "inverted-triangle",
+        direction: 0,
+        colours: [
+          [255, 255, 255, 150],
+          [255, 240, 210, 150],
+          [255, 230, 175, 150],
+        ],
+        widthFrom: 5000,
+        widthTo: 0,
+        heightFrom: 640,
+        heightTo: 0,
+        rotateSpeed: 20,
+        light: 30,
+      },
+    },
+    {
+      type: "particle-emission",
+      cone: 0,
+      amount: 1,
+      particle: {
+        lifetime: 45,
+        speed: 0,
+        decel: 0.01,
+        shape: "inverted-triangle",
+        direction: 90,
+        colours: [
+          [255, 255, 255, 150],
+          [255, 240, 210, 150],
+          [255, 230, 175, 150],
+        ],
+        widthFrom: 5000,
+        widthTo: 0,
+        heightFrom: 640,
+        heightTo: 0,
+        rotateSpeed: 20,
+        light: 30,
+      },
+    },
+  ],
+});
+
 //Nuclear
 
 Registries.vfx.add("nuke", {

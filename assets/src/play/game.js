@@ -79,6 +79,7 @@ const effects = {
     });
   },
   applyShake() {
+    if (world.impactParticles.length > 0) return;
     let intensity = 0;
     this.screenShakeInstances.forEach((v, i, a) => {
       v.duration--;
@@ -848,6 +849,7 @@ function uiFrame() {
 }
 
 function tickTimers() {
+  if (world.impactParticles.length > 0) return;
   effectTimer.tick();
   respawnTimer.tick();
 }
@@ -858,7 +860,7 @@ function gameFrame() {
     if (!game.paused) {
       tickTimers();
       if (game.player) {
-        movePlayer();
+        if (world.impactParticles.length == 0) movePlayer();
         if (!freecam) {
           ui.camera.x -= (ui.camera.x - game.player.x) * 0.1;
           ui.camera.y -= (ui.camera.y - game.player.y) * 0.1;

@@ -1,6 +1,10 @@
 import { Block, BreakType } from "../block.js";
 import { drawImg } from "../../../core/ui.js";
-import { autoScaledEffect, Explosion, NuclearExplosion } from "../../../play/effects.js";
+import {
+  autoScaledEffect,
+  Explosion,
+  NuclearExplosion,
+} from "../../../play/effects.js";
 import { DroppedItemStack } from "../../item/dropped-itemstack.js";
 import { Registries } from "../../../core/registry.js";
 import { VirtualBullet } from "../../projectile/virtual-bullet.js";
@@ -15,6 +19,7 @@ class Bomb extends Block {
   explosionEffect = "explosion";
   autoDetonationRange = 50;
   triggerEffect = "none";
+  impactFrame = "none";
   fuseEffect = "none";
   detonationDelay = 60;
   delaySpread = 20;
@@ -69,6 +74,15 @@ class Bomb extends Block {
   }
   _explode() {
     this.break(BreakType.explode);
+    autoScaledEffect(
+      this.impactFrame,
+      this.world,
+      this.x + Block.size / 2,
+      this.y + Block.size / 2,
+      0,
+      undefined,
+      true
+    );
     autoScaledEffect(
       this.explosionEffect.includes("~")
         ? this.explosionEffect
@@ -162,6 +176,15 @@ class NuclearBomb extends Bomb {
   explosionEffect = "nuke";
   _explode() {
     this.break(BreakType.explode);
+    autoScaledEffect(
+      this.impactFrame,
+      this.world,
+      this.x + Block.size / 2,
+      this.y + Block.size / 2,
+      0,
+      undefined,
+      true
+    );
     autoScaledEffect(
       this.explosionEffect.includes("~")
         ? this.explosionEffect

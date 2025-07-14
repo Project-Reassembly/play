@@ -17,12 +17,20 @@ class Timer {
   }
   tick() {
     this.ticks++;
-    this.#operations.forEach((operation, index) => {
+    this.#operations.forEach((operation) => {
       operation.tick();
-      if (operation.executed) {
-        this.#operations.splice(index, 1);
-      }
     });
+    let l = this.#operations.length;
+    for (let i = 0; i < l; i++) {
+      let operation = this.#operations[i];
+      if (!operation || operation?.executed) {
+        this.#operations.splice(i, 1);
+        if (i > 0) {
+          i--;
+          l--;
+        }
+      }
+    }
   }
   /**
    * Adds a function call to be executed after a specified delay.

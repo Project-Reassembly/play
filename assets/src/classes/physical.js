@@ -285,8 +285,8 @@ class PhysicalObject extends RegisteredItem {
   }
 
   /**Shortcut for `emitEffect(effect, this, offX, offY)`. */
-  emit(effect, offX, offY) {
-    emitEffect(effect, this, offX, offY);
+  emit(effect, offX, offY, impact = false) {
+    emitEffect(effect, this, offX, offY, impact);
   }
 }
 

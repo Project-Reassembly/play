@@ -79,6 +79,7 @@ class Bullet extends PhysicalObject {
   spawnEffect = "none";
   despawnEffect = "explosion~5";
   hitEffect = "none";
+  impactFrame = "none";
   trailEffect = "default";
   //incendiary
   fire = {};
@@ -315,6 +316,7 @@ class Bullet extends PhysicalObject {
           }
         }
       }
+      this.emit(this.impactFrame, 0, 0, true);
       this.emit(this.hitEffect);
       //Make the bullet know
       this.damaged.push(physobj);

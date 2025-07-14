@@ -255,6 +255,31 @@ createLinkedBlockAndItem(
     marketValue: 2500,
   }
 );
+createLinkedBlockAndItem(
+  "nuke",
+  "Nuclear Bomb",
+  "bomb.basic",
+  {
+    type: "nuclear-bomb",
+    health: 50,
+    explosion: {
+      radius: 400,
+      amount: 20000,
+    },
+    fuseEffect: "plasma-burn",
+    detonationDelay: 180,
+    autoDetonationRange: 300,
+    triggerEffect: "laser-caster-fire",
+    impactFrame: "nuke-impact",
+    accelerable: false,
+  },
+  {
+    description:
+      "🟥Now I am become Death, destroyer of worlds.⬜",
+    rarity: Item.rarity.SPECIAL,
+    marketValue: 25000,
+  }
+);
 //## CRAFTERS ##
 //Scrap Tier [0]
 createLinkedBlockAndItem(

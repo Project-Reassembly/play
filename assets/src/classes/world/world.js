@@ -39,6 +39,8 @@ class World {
   floorParticles = [];
   /** @type {(ImageParticle|ShapeParticle|TextParticle|WaveParticle)[]} */
   particles = [];
+  /** @type {(ImageParticle|ShapeParticle|TextParticle|WaveParticle)[]} */
+  impactParticles = [];
   /** @type {Entity[]} */
   entities = [];
   /** @type {Bullet[]} */
@@ -74,6 +76,7 @@ class World {
     this.entities = [];
     this.particles = [];
     this.floorParticles = [];
+    this.impactParticles = [];
     this.networks = [];
     this.toRender = [];
     this.toTick = [];
@@ -87,6 +90,10 @@ class World {
     this.toRender = this.getRenderedChunks(undefined, ui.camera.zoom);
   }
   #actualTick() {
+    if (this.impactParticles.length > 0) {
+      this.impactParticles.forEach((p) => p.step(1));
+      return;
+    }
     this.resetRenderer();
     this.toTick = this.getRenderedChunks(World.simulationDistance);
     //Tick *everything*
@@ -116,71 +123,80 @@ class World {
     });
   }
   #removeDead() {
-    //THEN remove dead stuff
-    let len = this.bullets.length;
-    for (let b = 0; b < len; b++) {
-      if (this.bullets[b]?.remove && !this.bullets[b].exploded) {
-        let bullet = this.bullets[b];
-        bullet.exploded = true;
-        for (let instance of bullet.damage) {
-          if (!instance.spread) instance.spread = 0;
-          if (instance.radius) {
-            //If it explodes
-            let boom = new (instance.nuclear ? NuclearExplosion : Explosion)(
-              instance
-            );
-            boom.x = bullet.x;
-            boom.y = bullet.y;
-            boom.world = bullet.world;
-            boom.source = bullet.entity;
-            if (boom.status === "none") boom.status = bullet.status;
-            if (boom.statusDuration === 0)
-              boom.statusDuration = bullet.statusDuration;
-            boom.dealDamage();
-          }
-          if (instance.blinds) {
-            flash(
-              bullet.x,
-              bullet.y,
-              instance.blindOpacity,
-              instance.blindDuration,
-              instance.glareSize
-            );
-          }
-          bullet.emit(instance.effect ?? "none");
+    let len = this.impactParticles.length;
+    if (len > 0) {
+      for (let p = 0; p < len; p++) {
+        if (this.impactParticles[p]?.remove) {
+          this.impactParticles.splice(p, 1);
         }
-        bullet.ondestroyed();
-        bullet.frag();
-        bullet.incend();
-        //Delete the bullet
-        this.bullets.splice(b, 1);
       }
-    }
-    len = this.particles.length;
-    for (let p = 0; p < len; p++) {
-      if (this.particles[p]?.remove) {
-        this.particles.splice(p, 1);
+    } else {
+      //THEN remove dead stuff
+      len = this.bullets.length;
+      for (let b = 0; b < len; b++) {
+        if (this.bullets[b]?.remove && !this.bullets[b].exploded) {
+          let bullet = this.bullets[b];
+          bullet.exploded = true;
+          for (let instance of bullet.damage) {
+            if (!instance.spread) instance.spread = 0;
+            if (instance.radius) {
+              //If it explodes
+              let boom = new (instance.nuclear ? NuclearExplosion : Explosion)(
+                instance
+              );
+              boom.x = bullet.x;
+              boom.y = bullet.y;
+              boom.world = bullet.world;
+              boom.source = bullet.entity;
+              if (boom.status === "none") boom.status = bullet.status;
+              if (boom.statusDuration === 0)
+                boom.statusDuration = bullet.statusDuration;
+              boom.dealDamage();
+            }
+            if (instance.blinds) {
+              flash(
+                bullet.x,
+                bullet.y,
+                instance.blindOpacity,
+                instance.blindDuration,
+                instance.glareSize
+              );
+            }
+            bullet.emit(instance.effect ?? "none");
+          }
+          bullet.ondestroyed();
+          bullet.frag();
+          bullet.incend();
+          //Delete the bullet
+          this.bullets.splice(b, 1);
+        }
       }
-    }
-    len = this.floorParticles.length;
-    for (let p = 0; p < len; p++) {
-      if (this.floorParticles[p]?.remove) {
-        this.floorParticles.splice(p, 1);
+      len = this.particles.length;
+      for (let p = 0; p < len; p++) {
+        if (this.particles[p]?.remove) {
+          this.particles.splice(p, 1);
+        }
       }
-    }
-    len = this.entities.length;
-    for (let e = 0; e < len; e++) {
-      if (this.entities[e]?.dead) {
-        this.entities.splice(e, 1);
+      len = this.floorParticles.length;
+      for (let p = 0; p < len; p++) {
+        if (this.floorParticles[p]?.remove) {
+          this.floorParticles.splice(p, 1);
+        }
       }
-    }
-    len = this.physobjs.length;
-    for (let p = 0; p < len; p++) {
-      if (this.physobjs[p]?.remove) {
-        this.physobjs.splice(p, 1);
+      len = this.entities.length;
+      for (let e = 0; e < len; e++) {
+        if (this.entities[e]?.dead) {
+          this.entities.splice(e, 1);
+        }
       }
+      len = this.physobjs.length;
+      for (let p = 0; p < len; p++) {
+        if (this.physobjs[p]?.remove) {
+          this.physobjs.splice(p, 1);
+        }
+      }
+      //No search algorithms => faster
     }
-    //No search algorithms => faster
   }
   /**
    * Returns an array of chunks to be rendered this frame.
@@ -236,6 +252,11 @@ class World {
       bullet.draw();
     }
     for (let particle of this.particles) {
+      if (!World.isInRenderDistance(particle, 1, 0, 0, 0, ui.camera.zoom))
+        continue;
+      particle.draw();
+    }
+    for (let particle of this.impactParticles) {
       if (!World.isInRenderDistance(particle, 1, 0, 0, 0, ui.camera.zoom))
         continue;
       particle.draw();
@@ -457,11 +478,11 @@ class World {
   }
   evlisten = {};
 
-  hasBoss(){
-    return this.entities.some(x => x.isBoss)
+  hasBoss() {
+    return this.entities.some((x) => x.isBoss);
   }
-  firstBoss(){
-    return this.entities.find(x => x.isBoss)
+  firstBoss() {
+    return this.entities.find((x) => x.isBoss);
   }
 }
 export { World };

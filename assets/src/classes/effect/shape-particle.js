@@ -57,6 +57,13 @@ class ShapeParticle {
       } else {
         this.speed = 0;
       }
+
+      if (this.rotateSpeed >= this.decel) {
+        this.rotateSpeed -= this.decel * dt;
+      } else {
+        this.rotateSpeed = 0;
+      }
+
       if (this.rotateSpeed) {
         this.#rotOffset += this.rotateSpeed * dt;
       }
