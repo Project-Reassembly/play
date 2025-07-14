@@ -1144,6 +1144,7 @@ createLinkedBlockAndItem(
     marketValue: 100 //65
   }
 );
+//## TURRET BASES ##
 createLinkedBlockAndItem(
   "scrap-turret-base",
   "Scrap Turret Base",
@@ -1170,6 +1171,36 @@ createLinkedBlockAndItem(
   {
     description: "Mounting point for turrets.\nMaximum size depends on number of bases.\nPlace them in a cross-shaped pattern.",
     marketValue: 100
+  }
+);
+createLinkedBlockAndItem(
+  "peti-turret-base",
+  "PETI Turret Base",
+  "turret-base.peti.base",
+  {
+    type: "turret-base",
+    connectorImage: "turret-base.peti.connector",
+    otherPart: "peti-turret-controller"
+  },
+  {
+    description: "Block to increase the\n maximum size of turrets on\n a PETI Turret Controller.",
+    marketValue: 200 // 3 plates = 15
+  }
+);
+createLinkedBlockAndItem(
+  "peti-turret-controller",
+  "PETI Turret Controller",
+  "turret-controller.peti.base",
+  {
+    type: "turret-controller",
+    connectorImage: "turret-base.peti.connector",
+    otherPart: "peti-turret-base",
+    maxSize: 6,
+    turnSpeed: 0.1
+  },
+  {
+    description: "Mounting point for PETI turrets.\nHeavy-duty, so turns slowly.\nMaximum size depends on number of bases.\nPlace them in a cross-shaped pattern.",
+    marketValue: 1000
   }
 );
 //## PLASMA ##

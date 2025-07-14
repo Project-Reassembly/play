@@ -531,6 +531,56 @@ Registries.vfx.add("plasma-railgun-hit", {
   ],
 });
 
+Registries.vfx.add("deathbringer-trail", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      amount: 2,
+      cone: 0,
+      maxXOffset: 7,
+      maxYOffset: 7,
+      particle: {
+        shape: "rhombus",
+        lifetime: 10,
+        speed: 3,
+        widthFrom: 15,
+        widthTo: 0,
+        heightFrom: 60,
+        heightTo: 180,
+        colours: [
+          [255, 0, 0],
+          [255, 50, 50, 128],
+          [255, 0, 0, 0],
+        ],
+        light: 60,
+      },
+    },
+    {
+      type: "particle-emission",
+      amount: 2,
+      cone: 0,
+      maxXOffset: 7,
+      maxYOffset: 7,
+      particle: {
+        shape: "rhombus",
+        lifetime: 10,
+        speed: 3,
+        widthFrom: 7,
+        widthTo: 0,
+        heightFrom: 60,
+        heightTo: 180,
+        colours: [
+          [255, 100, 100],
+          [255, 50, 50, 128],
+          [255, 0, 0, 0],
+        ],
+        light: 60,
+      },
+    },
+  ],
+});
+
 //impact frames
 Registries.vfx.add("nuke-impact", {
   type: "multi-effect",
@@ -629,11 +679,138 @@ Registries.vfx.add("nuke-impact", {
     },
   ],
 });
+Registries.vfx.add("deathbringer-charge", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      cone: 360,
+      amount: 5,
+      particle: {
+        lifetime: 120,
+        speed: 0,
+        decel: 0.005,
+        shape: "inverted-triangle",
+        colours: [
+          [255, 0, 0, 150],
+          [255, 50, 50, 50],
+        ],
+        widthFrom: 10000,
+        widthTo: 0,
+        heightFrom: 640,
+        heightTo: 0,
+        rotateSpeed: -10,
+        light: 30,
+      },
+    },
+    {
+      type: "particle-emission",
+      cone: 360,
+      amount: 5,
+      particle: {
+        lifetime: 120,
+        speed: 0,
+        decel: 0.005,
+        shape: "inverted-triangle",
+        colours: [
+          [255, 50, 50, 150],
+          [255, 0, 0, 50],
+        ],
+        widthFrom: 10000,
+        widthTo: 0,
+        heightFrom: 640,
+        heightTo: 0,
+        rotateSpeed: 10,
+        light: 30,
+      },
+    },
+    {
+      type: "wave-emission",
+      particle: {
+        lifetime: 120,
+        radiusFrom: 600,
+        radiusTo: 0,
+        strokeFrom: 10,
+        strokeTo: 30,
+        colours: [
+          [255, 0, 0, 50],
+          [255, 150, 150, 255],
+        ],
+        light: 30,
+      },
+    },
+  ],
+});
+Registries.vfx.add("deathbringer-shot-impact", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      cone: 360,
+      amount: 5,
+      particle: {
+        lifetime: 45,
+        speed: 0,
+        decel: 0.015,
+        shape: "inverted-triangle",
+        colours: [
+          [255, 0, 0, 150],
+          [255, 50, 50, 50],
+        ],
+        widthFrom: 10000,
+        widthTo: 0,
+        heightFrom: 1280,
+        heightTo: 0,
+        rotateSpeed: -10,
+        light: 30,
+      },
+    },
+    {
+      type: "particle-emission",
+      cone: 360,
+      amount: 5,
+      particle: {
+        lifetime: 45,
+        speed: 0,
+        decel: 0.015,
+        shape: "inverted-triangle",
+        colours: [
+          [255, 50, 50, 150],
+          [255, 0, 0, 50],
+        ],
+        widthFrom: 10000,
+        widthTo: 0,
+        heightFrom: 1280,
+        heightTo: 0,
+        rotateSpeed: 10,
+        light: 30,
+      },
+    },
+  ],
+});
 
 //Nuclear
 
 Registries.vfx.add("nuke", {
   type: "nuclear-explosion",
+});
+Registries.vfx.add("deathbringer-nuke", {
+  type: "nuclear-explosion",
+  flashColours: [
+    [255, 175, 150],
+    [255, 0, 0, 0],
+  ],
+  flashColoursLight: [
+    [255, 230, 200],
+    [255, 100, 100, 0],
+  ],
+  fireColours: [
+    [255, 255, 255, 100],
+    [255, 64, 0, 75],
+    [255, 0, 0, 50],
+    [255, 0, 0, 25],
+    [155, 0, 0, 0],
+  ],
 });
 
 //Fire

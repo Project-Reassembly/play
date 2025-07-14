@@ -1885,6 +1885,73 @@ Registries.items.add("scrap-artillery", {
   },
 });
 
+Registries.items.add("deathbringer-turret", {
+  type: "turret-item",
+  name: "Deathbringer Turret",
+  description: "🟥The end is near.⬜",
+  image: "turret.deathbringer.item",
+  rarity: Item.rarity.PETI,
+  range: 2000,
+  baseSize: 4,
+  marketValue: 120000,
+  shootX: -20,
+  bullets: {
+    types: [
+      {
+        lifetime: 200,
+        extraUpdates: 198,
+        speed: 10,
+        trail: true,
+        hitSize: 10,
+        trailEffect: "deathbringer-trail",
+        knockback: 300,
+        drawer: {
+          hidden: true,
+        },
+        damage: [
+          {
+            type: "laser",
+            amount: 10000,
+            spread: 2000,
+          },
+          {
+            type: "laser",
+            amount: 2000,
+            spread: 300,
+            radius: 300,
+          },
+          {
+            type: "explosion",
+            amount: 24000,
+            spread: 3000,
+            radius: 300,
+            nuclear: true,
+          },
+        ],
+        despawnEffect: "deathbringer-nuke~300",
+        impactFrame: "deathbringer-shot-impact",
+      },
+    ],
+    ammos: {
+      "iti-destabilised-cell": 0,
+    },
+  },
+  shoot: {
+    reload: 480,
+    charge: 120,
+    chargeEffect: "deathbringer-charge",
+  },
+  component: {
+    type: "weapon-component",
+    width: 270,
+    height: 180,
+    yOffset: 0,
+    image: "turret.deathbringer.component",
+    recoil: 40,
+    rotationalRecoil: 0,
+    recoilSpeed: 0.2,
+  },
+});
 //Ammo
 Registries.items.add("scrap-bullet", {
   name: "Scrap Bullet",

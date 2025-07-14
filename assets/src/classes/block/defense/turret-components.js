@@ -171,7 +171,7 @@ export class TurretController extends TurretBase {
           this.turnSpeed
         );
         this.gunDirection = res.direction;
-        this.gunCanFire = Math.abs(res.direction - od) < this.turnSpeed;
+        this.gunCanFire = Math.abs(this.gunDirection - od) < this.turnSpeed;
       }
       this._generic_AttackerAI((phys) => !(phys instanceof DroppedItemStack));
     }

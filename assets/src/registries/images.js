@@ -28,6 +28,7 @@ Registries.images.add("weapon.peti-charged-laser-blaster.component", new ImageCo
 Registries.images.add("weapon.peti-plasma-railgun.component", new ImageContainer("assets/textures/entity/weapon/peti-plasma-railgun.png"))
 //Components > Turrets
 Registries.images.add("turret.recycle.component", new ImageContainer("assets/textures/block/turret/recycle.png"))
+Registries.images.add("turret.deathbringer.component", new ImageContainer("assets/textures/block/turret/deathbringer.png"))
 //Items
 Registries.images.add("item.raw-copper", new ImageContainer("assets/textures/item/raw-copper.png"))
 Registries.images.add("item.copper-ingot", new ImageContainer("assets/textures/item/copper-ingot.png"))
@@ -82,6 +83,8 @@ Registries.images.add("weapon.peti-charged-laser-blaster.item", new ImageContain
 Registries.images.add("weapon.peti-plasma-railgun.item", new ImageContainer("assets/textures/item/peti-plasma-railgun.png"))
 //boolet
 Registries.images.add("bullet.scrap-rocket", new ImageContainer("assets/textures/bullet/scrap-rocket.png"))
+//Items > Turrets
+Registries.images.add("turret.deathbringer.item", new ImageContainer("assets/textures/item/deathbringer-turret.png"))
 //Tiles
 Registries.images.add("tile.grass", new ImageContainer("assets/textures/block/tile/grass.png"))
 Registries.images.add("tile.sand", new ImageContainer("assets/textures/block/tile/sand.png"))
@@ -119,6 +122,9 @@ Registries.images.add("block.sandstone-wall", new ImageContainer("assets/texture
 //Blocks > Turrets
 Registries.images.add("turret-base.scrap.connector", new ImageContainer("assets/textures/block/turret/bases/scrap-connector.png"))
 Registries.images.add("turret-controller.scrap.base", new ImageContainer("assets/textures/block/turret/bases/scrap-turret-controller.png"))
+Registries.images.add("turret-base.peti.connector", new ImageContainer("assets/textures/block/turret/bases/peti-connector.png"))
+Registries.images.add("turret-base.peti.base", new ImageContainer("assets/textures/block/turret/bases/peti-turret-base.png"))
+Registries.images.add("turret-controller.peti.base", new ImageContainer("assets/textures/block/turret/bases/peti-turret-controller.png"))
 //Blocks > Crafters
 Registries.images.add("crafter.scrap-assembler", new ImageContainer("assets/textures/block/blocks/crafter/scrap-assembler.png"))
 Registries.images.add("crafter.scrap-smelter", new ImageContainer("assets/textures/block/blocks/crafter/scrap-smelter.png"))

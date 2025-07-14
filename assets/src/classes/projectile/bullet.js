@@ -77,6 +77,7 @@ class Bullet extends PhysicalObject {
   #intervalCounter = 0;
   //vfx
   spawnEffect = "none";
+  spawnFrame = "none";
   despawnEffect = "explosion~5";
   hitEffect = "none";
   impactFrame = "none";
@@ -100,6 +101,7 @@ class Bullet extends PhysicalObject {
     this.world ??= this.entity?.world;
   }
   oncreated() {
+    this.emit(this.spawnFrame, 0, 0, true);
     this.emit(this.spawnEffect);
   }
   ondestroyed() {
