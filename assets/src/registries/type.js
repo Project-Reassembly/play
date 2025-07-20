@@ -70,6 +70,7 @@ import {
 } from "../classes/block/plasma-gen-and-compressor.js";
 import { Turret } from "../classes/block/defense/turret.js";
 import { TurretBase, TurretController, TurretItem } from "../classes/block/defense/turret-components.js";
+import { LightningEmissionEffect, LinearEffect, LinearMultiEffect, LineEmissionEffect } from "../play/line-effects.js";
 //Basic
 Registries.type.add("generic", RegisteredItem);
 //Entities and parts
@@ -158,3 +159,8 @@ Registries.type.add("wave-emission", WaveEmissionEffect);
 Registries.type.add("multi-effect", MultiEffect);
 Registries.type.add("explosion", ExplosionEffect);
 Registries.type.add("nuclear-explosion", NuclearExplosionEffect);
+
+Registries.type.add("linear-effect", LinearEffect);
+Registries.type.add("linear-multi", LinearMultiEffect);
+Registries.type.add("line-emission", LineEmissionEffect);
+Registries.type.add("lightning-emission", LightningEmissionEffect);

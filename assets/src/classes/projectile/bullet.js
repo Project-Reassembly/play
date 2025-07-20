@@ -1,7 +1,7 @@
 import { PhysicalObject, ShootableObject } from "../physical.js";
 import { rotatedImg, rotatedShape } from "../../core/ui.js";
-import { rnd, tru } from "../../core/number.js";
-import { repeat } from "../../play/effects.js";
+import { rnd, tru, Vector } from "../../core/number.js";
+import { createLinearEffect, repeat } from "../../play/effects.js";
 import { construct } from "../../core/constructor.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
 import { Fire } from "../effect/fire.js";
@@ -80,6 +80,7 @@ class Bullet extends PhysicalObject {
   spawnFrame = "none";
   despawnEffect = "explosion~5";
   hitEffect = "none";
+  endLine = "none"; //linear effect
   impactFrame = "none";
   trailEffect = "default";
   //incendiary
@@ -94,6 +95,7 @@ class Bullet extends PhysicalObject {
    * Generally, this option allows any integer number of fires between 0 and `fires` to spawn, whereas, with this off, the only options are `fires` fires, or no fires.
    */
   isFireBinomial = false;
+  startpos = Vector.ZERO;
   init() {
     super.init();
     this.maxLife = this.lifetime;
@@ -103,9 +105,18 @@ class Bullet extends PhysicalObject {
   oncreated() {
     this.emit(this.spawnFrame, 0, 0, true);
     this.emit(this.spawnEffect);
+    this.startpos = new Vector(this.x, this.y);
   }
   ondestroyed() {
     this.emit(this.despawnEffect);
+    createLinearEffect(
+      this.endLine,
+      this.world,
+      this.startpos.x,
+      this.startpos.y,
+      this.x,
+      this.y
+    );
   }
   tick() {
     repeat(this.extraUpdates + 1, () => this.step(1));

@@ -1,4 +1,6 @@
+import { construct } from "../../core/constructor.js";
 import { Vector } from "../../core/number.js";
+import { createLinearEffect } from "../../play/effects.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
 import { WaveParticle } from "../effect/wave-particle.js";
 import { Bullet } from "./bullet.js";
@@ -6,6 +8,7 @@ class PointBullet extends Bullet {
   lifetime = 1;
   #moved = false; //If the bullet has teleported to the target entity or not.
   hitColours = [[255, 255, 0]];
+  lineEffect = "snipe-trail";
   init() {
     this.speed = 0; //Remove speed
     if (this.hitColours.length === 1) {
@@ -20,10 +23,13 @@ class PointBullet extends Bullet {
       if (this.entity) {
         //If a target exists
         if (this.entity.target) {
-          let tx = this.entity.target.x,
-            ty = this.entity.target.y;
-          //Point towards it, like a weapon
-          this.direction = new Vector(tx, ty).subXY(this.x, this.y).angle;
+          let range = this.entity.pos.sub(
+            new Vector(this.entity.target.x, this.entity.target.y)
+          ).magnitude;
+          //find end pos
+          let epos = new Vector(this.x, this.y).add(Vector.fromAngle(this.direction).scale(range))
+          let tx = epos.x;
+          let ty = epos.y;
           //Create line to it
           this.createTrailTo(tx, ty);
           //Teleport to it
@@ -41,26 +47,27 @@ class PointBullet extends Bullet {
   }
   draw() {} //Totally invisible
   createTrailTo(x, y) {
-    let distance = dist(this.x, this.y, x, y);
-    this.world.particles.push(
-      new ShapeParticle(
-        //Find halfway point
-        (this.x + x) / 2,
-        (this.y + y) / 2,
-        this.directionRad,
-        30,
-        0,
-        0,
-        "rect",
-        this.hitColours,
-        this.hitSize,
-        this.hitSize,
-        distance,
-        distance,
-        0,
-        true
-      )
-    );
+    createLinearEffect(this.lineEffect, this.world, this.x, this.y, x, y);
+    // let distance = dist(this.x, this.y, x, y);
+    // this.world.particles.push(
+    //   new ShapeParticle(
+    //     //Find halfway point
+    //     (this.x + x) / 2,
+    //     (this.y + y) / 2,
+    //     this.directionRad,
+    //     30,
+    //     0,
+    //     0,
+    //     "rect",
+    //     this.hitColours,
+    //     this.hitSize,
+    //     this.hitSize,
+    //     distance,
+    //     distance,
+    //     0,
+    //     true
+    //   )
+    // );
   }
   createHitEffect() {
     if (this.hitEffect) this.emit(this.hitEffect);

@@ -12,6 +12,7 @@ import { world, effects } from "../play/game.js";
 import { TextParticle } from "../classes/effect/text-particle.js";
 import { PhysicalObject } from "../classes/physical.js";
 import { Log } from "./messaging.js";
+import { LinearEffect } from "./line-effects.js";
 const effectTimer = new Timer();
 class Explosion {
   x = 0;
@@ -977,6 +978,36 @@ function createEffect(
   return fx;
 }
 
+/**
+ * Creates a linear effect, independently of any objects.
+ * @param {string | Object} effect Registry name of the visual effect, or a constructible visual effect.
+ * @param {float} x1 X position of the effect's origin
+ * @param {float} y1 Y position of the effect's origin
+ * @param {float} x2 X position of the effect's end
+ * @param {float} y2 Y position of the effect's end
+ * @param {() => {x1: number, y1: number, x2: number, y2: number}} pos Function to get position for parentised effects.
+ * @returns
+ */
+function createLinearEffect(
+  effect,
+  world,
+  x1,
+  y1,
+  x2,
+  y2,
+  pos,
+  impact = false
+) {
+  if(effect === "none") return new LinearEffect();
+  /**@type {LinearEffect} */
+  let fx = construct(
+    typeof effect === "object" ? effect : Registries.vfx.get(effect),
+    "linear-effect"
+  );
+  fx.execute(world, x1, y1, x2, y2, pos, impact);
+  return fx;
+}
+
 function autoScaledEffect(effect, world, x, y, direction, pos, impact = false) {
   let effectparts = effect.split("~");
   createEffect(
@@ -1032,6 +1063,7 @@ export {
   emitEffect,
   createDestructionExplosion,
   createEffect,
+  createLinearEffect,
   liquidDestructionBlast,
   flash,
   VisualEffect,

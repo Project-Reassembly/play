@@ -271,15 +271,15 @@ worldGenWorker.onmessage = (ev) => {
 
               blk.direction = Block.dir.fromEnum(block.direction);
 
-              stats.placed[block.block] ??= 0;
-              stats.placed[block.block]++;
+              stats.placed["[Struct] " + block.block] ??= 0;
+              stats.placed["[Struct] " + block.block]++;
             } catch (e) {
               console.warn("Worldgen Error:\n" + e);
               successful = false;
               stats.failed++;
 
-              stats.placed["(" + block.block + ")"] ??= 0;
-              stats.placed["(" + block.block + ")"]++;
+              stats.placed["[Struct] (" + block.block + ")"] ??= 0;
+              stats.placed["[Struct] (" + block.block + ")"]++;
             }
           else if (block.entity)
             try {
@@ -295,15 +295,15 @@ worldGenWorker.onmessage = (ev) => {
 
               ent.direction = Block.dir.fromEnum(block.direction);
 
-              stats.placed["{E}" + block.entity] ??= 0;
-              stats.placed["{E}" + block.entity]++;
+              stats.placed["[Entity] " + block.entity] ??= 0;
+              stats.placed["[Entity] " + block.entity]++;
             } catch (e) {
               console.warn("Worldgen Error:\n" + e);
               successful = false;
               stats.failed++;
 
-              stats.placed["(" + block.block + ")"] ??= 0;
-              stats.placed["(" + block.block + ")"]++;
+              stats.placed["[Entity] (" + block.entity + ")"] ??= 0;
+              stats.placed["[Entity] (" + block.entity + ")"]++;
             }
         }
       }

@@ -1,5 +1,6 @@
-import { colinterp } from "../../core/number.js";
-class WaveParticle {
+import { Particle } from "./particle.js";
+// A hollow circular particle.
+class WaveParticle extends Particle {
   constructor(
     x,
     y,
@@ -11,35 +12,20 @@ class WaveParticle {
     strokeTo,
     light
   ) {
-    this.x = x;
-    this.y = y;
-    this.lifetime = lifetime;
+    super(x, y, 0, lifetime, 0, 0, colours, 0, light);
     this.fromRadius = fromRadius;
     this.toRadius = toRadius;
     this.radius = fromRadius;
-    this.remove = false;
-    this.colours = colours;
-    this.colour = this.colours[0];
-    this.maxLifetime = lifetime;
     this.strokeFrom = strokeFrom;
     this.stroke = strokeFrom;
     this.strokeTo = strokeTo;
-    this.light = light ?? 0;
   }
-  step(dt) {
-    if (this.lifetime >= dt) {
-      let lf = this.calcLifeFract();
-      this.radius = this.fromRadius * lf + this.toRadius * (1 - lf);
-      this.stroke = this.strokeFrom * lf + this.strokeTo * (1 - lf);
-      this.colour = colinterp(this.colours, 1 - lf);
-      this.lifetime -= dt;
-    } else {
-      this.remove = true;
-    }
+  calcSizes(lf) {
+    this.radius = this.fromRadius * lf + this.toRadius * (1 - lf);
+    this.stroke = this.strokeFrom * lf + this.strokeTo * (1 - lf);
   }
-  calcLifeFract() {
-    return this.lifetime / this.maxLifetime;
-  }
+  movement(dt){}
+  calcDecels(dt){}
   draw() {
     push();
     noFill();
@@ -50,12 +36,6 @@ class WaveParticle {
   }
   get size() {
     return this.radius * 2;
-  }
-  get uiX() {
-    return (this.x - ui.camera.x) * ui.camera.zoom;
-  }
-  get uiY() {
-    return (this.y - ui.camera.y) * ui.camera.zoom;
   }
 }
 export { WaveParticle };

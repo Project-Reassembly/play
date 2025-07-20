@@ -1158,6 +1158,7 @@ Registries.vfx.add("land-target", {
         rotateSpeed: 2,
         light: 30,
         shape: "rect",
+        decel: 0,
         colours: [
           [255, 0, 0],
           [255, 255, 255],
@@ -1183,6 +1184,7 @@ Registries.vfx.add("land-target", {
         rotateSpeed: 2,
         light: 30,
         shape: "rect",
+        decel: 0,
         colours: [
           [255, 0, 0],
           [255, 255, 255],
@@ -1617,6 +1619,36 @@ Registries.vfx.add("shield-break-yellow", {
       },
     },
   ],
+});
+
+// lines
+Registries.vfx.add("snipe-trail", {
+  type: "line-emission",
+  amount: 1,
+  line: {
+    lifetime: 10,
+    light: 20,
+    colours: [
+      [255, 255, 100],
+      [255, 200, 50, 100],
+    ],
+    strokeFrom: 5,
+    strokeTo: 0,
+  },
+});
+Registries.vfx.add("peti-zap", {
+  type: "lightning-emission",
+  amount: 1,
+  line: {
+    lifetime: 10,
+    light: 20,
+    colours: [
+      [255, 30, 30],
+      [255, 0, 0, 50],
+    ],
+    strokeFrom: 2,
+    strokeTo: 0,
+  },
 });
 
 // hmmmmmm

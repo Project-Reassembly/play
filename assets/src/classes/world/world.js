@@ -13,6 +13,7 @@ import { Explosion, NuclearExplosion } from "../../play/effects.js";
 import { PowerNetwork } from "./power-network.js";
 import { Log } from "../../play/messaging.js";
 import { assign } from "../../core/constructor.js";
+import { Particle } from "../effect/particle.js";
 
 /**
  * @typedef SerialisedWorld
@@ -33,13 +34,13 @@ class World {
   /** The distance in chunks **outside the render distance** that will still tick. */
   static simulationDistance = 5;
   /**
-   * @type {(ImageParticle|ShapeParticle|TextParticle|WaveParticle)[]}
+   * @type {Particle[]}
    * Particles that will be drawn underneath normal blocks, but on top of floors and tiles.
    */
   floorParticles = [];
-  /** @type {(ImageParticle|ShapeParticle|TextParticle|WaveParticle)[]} */
+  /** @type {Particle[]} */
   particles = [];
-  /** @type {(ImageParticle|ShapeParticle|TextParticle|WaveParticle)[]} */
+  /** @type {Particle[]} */
   impactParticles = [];
   /** @type {Entity[]} */
   entities = [];

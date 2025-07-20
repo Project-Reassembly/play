@@ -1,6 +1,7 @@
 import { rotatedImg } from "../../core/ui.js";
-class ImageParticle {
-  #rotOffset;
+import { Particle } from "./particle.js";
+// A particle which shows an image.
+class ImageParticle extends Particle {
   constructor(
     x,
     y,
@@ -17,64 +18,22 @@ class ImageParticle {
     sizeYTo,
     rotateSpeed
   ) {
-    this.x = x;
-    this.y = y;
-    this.direction = direction;
-    this.speed = speed;
-    this.lifetime = lifetime;
-    this.decel = decel;
+    super(x, y, direction, lifetime, speed, decel, [[0, 0, 0]], rotateSpeed, 0);
     this.image = image;
-    this.remove = false;
     this.opacityFrom = opacityFrom;
     this.opacityTo = opacityTo;
-    this.maxLifetime = lifetime;
     this.sizeXFrom = sizeXFrom;
     this.sizeXTo = sizeXTo;
     this.sizeX = sizeXFrom;
     this.sizeYFrom = sizeYFrom;
     this.sizeYTo = sizeYTo;
     this.sizeY = sizeYFrom;
-    this.rotateSpeed = rotateSpeed;
-    this.#rotOffset = 0;
   }
-  step(dt) {
-    if (this.lifetime >= dt) {
-      //Interpolate size
-      this.sizeX =
-        this.sizeXFrom * this.calcLifeFract() +
-        this.sizeXTo * (1 - this.calcLifeFract());
-      this.sizeY =
-        this.sizeYFrom * this.calcLifeFract() +
-        this.sizeYTo * (1 - this.calcLifeFract());
-      //Move
-      this.moveTo(
-        this.x + this.speed * Vector.fromAngle(this.direction).x * dt,
-        this.y + this.speed * Vector.fromAngle(this.direction).y * dt
-      );
-      //Decelerate
-      if (this.speed >= this.decel) {
-        this.speed -= this.decel * dt;
-      } else {
-        this.speed = 0;
-      }
-      if (this.rotateSpeed) {
-        this.#rotOffset += this.rotateSpeed * dt;
-      }
-      this.lifetime -= dt;
-    } else {
-      this.remove = true;
-    }
+  calcSizes(lf) {
+    this.sizeX = this.sizeXFrom * lf + this.sizeXTo * (1 - lf);
+    this.sizeY = this.sizeYFrom * lf + this.sizeYTo * (1 - lf);
   }
-  calcLifeFract() {
-    return this.lifetime / this.maxLifetime;
-  }
-  moveTo(x, y) {
-    this.x = x;
-    this.y = y;
-  }
-  draw() {
-    //Draw the particle
-    push();
+  actualDraw() {
     opacity(
       this.opacityFrom * this.calcLifeFract() +
         this.opacityTo * (1 - this.calcLifeFract())
@@ -85,9 +44,8 @@ class ImageParticle {
       this.y,
       this.sizeX,
       this.sizeY,
-      this.direction + this.#rotOffset + HALF_PI
+      this.direction + this._rotOffset + HALF_PI
     );
-    pop();
   }
 }
 export { ImageParticle };
