@@ -1625,6 +1625,84 @@ Registries.items.add("peti-plasma-railgun", {
   },
 });
 
+Registries.items.add("astral-blaster", {
+  type: "weapon",
+  name: "Astral Blaster",
+  marketValue: 12500,
+  rarity: Item.rarity.SPECIAL,
+  description:
+    "Shoots some sort of , i don't know,\nspace blob which explodes somehow.",
+  image: "weapon.iti-laser-caster.item",
+  range: 400,
+  bullets: {
+    types: [
+      {
+        lifetime: 120,
+        extraUpdates: 7,
+        light: 70,
+        speed: 5,
+        trail: true,
+        hitSize: 3,
+        trailEffect: {
+          type: "particle-emission",
+          amount: 1,
+          particle: {
+            shape: "circle",
+            widthFrom: 30,
+            widthTo: 10,
+            heightFrom: 30,
+            heightTo: 10,
+            speed: 1,
+            decel: 0.05,
+            colours: [[100, 0, 255]],
+            space: true,
+            lifetime: 30
+          },
+        },
+        knockback: 10,
+        drawer: {
+          hidden: true,
+        },
+        damage: [
+          {
+            type: "space",
+            amount: 1000,
+            spread: 300,
+            radius: 100,
+          },
+        ],
+        despawnEffect: {
+          type: "explosion",
+          scale: 100,
+          isSpace: true,
+          sparkColours: [[100, 0, 255]],
+          smokeColours: [[100, 0, 255]],
+          waveColours: [[100, 0, 255]],
+        },
+      },
+    ],
+    ammos: {
+      none: 0,
+    },
+  },
+  shoot: {
+    charge: 60,
+    reload: 180,
+    chargeEffect: "laser-caster-charge",
+    effect: "laser-caster-frag",
+  },
+  component: {
+    type: "weapon-component",
+    width: 32,
+    height: 11,
+    yOffset: 0,
+    image: "weapon.iti-laser-caster.component",
+    recoil: 4,
+    rotationalRecoil: 8,
+    recoilSpeed: 0.15,
+  },
+});
+
 //Turret
 Registries.items.add("recycle-mounted", {
   type: "turret-item",
@@ -1915,11 +1993,13 @@ Registries.items.add("deathbringer-turret", {
   baseSize: 4,
   marketValue: 120000,
   shootX: -20,
+  turnSpeed: 0.1,
+  shootCone: 0.1,
   bullets: {
     types: [
       {
         lifetime: 200,
-        extraUpdates: 198,
+        extraUpdates: 99,
         speed: 10,
         trail: true,
         hitSize: 10,
@@ -1949,7 +2029,6 @@ Registries.items.add("deathbringer-turret", {
           },
         ],
         despawnEffect: "deathbringer-nuke~300",
-        impactFrame: "deathbringer-shot-impact",
       },
     ],
     ammos: {

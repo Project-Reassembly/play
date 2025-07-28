@@ -11,7 +11,6 @@ import { ExecutorParticle } from "../classes/effect/extra-particles.js";
 import { world, effects } from "../play/game.js";
 import { TextParticle } from "../classes/effect/text-particle.js";
 import { PhysicalObject } from "../classes/physical.js";
-import { Log } from "./messaging.js";
 import { LinearEffect } from "./line-effects.js";
 const effectTimer = new Timer();
 class Explosion {
@@ -557,6 +556,8 @@ class ParticleEmissionEffect extends EmissionEffect {
     radiusTo: 100,
     strokeFrom: 10,
     strokeTo: 0,
+    //all
+    space: false,
   };
   create(world, x = 0, y = 0, direction = 0, scale = 1, impact = false) {
     repeat(this.amount, () =>
@@ -582,7 +583,8 @@ class ParticleEmissionEffect extends EmissionEffect {
           this.particle.heightFrom ?? 20,
           this.particle.heightTo ?? 30,
           radians(this.particle.rotateSpeed ?? 0),
-          this.particle.light ?? 0
+          this.particle.light ?? 0,
+          this.particle.space
         )
       )
     );
@@ -614,7 +616,8 @@ class ImageParticleEmissionEffect extends ParticleEmissionEffect {
           this.particle.widthTo ?? 30,
           this.particle.heightFrom ?? 20,
           this.particle.heightTo ?? 30,
-          radians(this.particle.rotateSpeed ?? 0)
+          radians(this.particle.rotateSpeed ?? 0),
+          this.particle.space
         )
       )
     );
@@ -647,7 +650,8 @@ class TextParticleEmissionEffect extends ParticleEmissionEffect {
           this.particle.sizeFrom ?? 20,
           this.particle.sizeTo ?? 30,
           radians(this.particle.rotateSpeed ?? 0),
-          this.particle.useOCR ?? true
+          this.particle.useOCR ?? true,
+          this.particle.space
         )
       )
     );
@@ -670,7 +674,8 @@ class WaveEmissionEffect extends ParticleEmissionEffect {
           ],
           this.particle.strokeFrom ?? 10,
           this.particle.strokeTo ?? 0,
-          this.particle.light ?? 0
+          this.particle.light ?? 0,
+          this.particle.space
         )
       )
     );
@@ -705,6 +710,7 @@ class ExplosionEffect extends VisualEffect {
   sparks = true;
   wave = true;
   shake = true;
+  isSpace = false;
   create(world, x = 0, y = 0, direction = 0, scale = 1, impact = false) {
     //Spawn smoke
     if (this.smoke)
@@ -724,7 +730,8 @@ class ExplosionEffect extends VisualEffect {
             scale ** 0.8 * 1.5,
             0,
             0,
-            true
+            true,
+            this.isSpace
           )
         );
       }
@@ -746,7 +753,8 @@ class ExplosionEffect extends VisualEffect {
             scale ** 0.75,
             scale ** 0.5,
             0,
-            100
+            100,
+            this.isSpace
           )
         );
       }
@@ -761,7 +769,8 @@ class ExplosionEffect extends VisualEffect {
           this.waveColours,
           scale ** 0.75,
           0,
-          20
+          20,
+          this.isSpace
         )
       );
     //Screen shake
@@ -998,7 +1007,7 @@ function createLinearEffect(
   pos,
   impact = false
 ) {
-  if(effect === "none") return new LinearEffect();
+  if (effect === "none") return new LinearEffect();
   /**@type {LinearEffect} */
   let fx = construct(
     typeof effect === "object" ? effect : Registries.vfx.get(effect),

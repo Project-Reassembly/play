@@ -16,9 +16,10 @@ class LightningParticle extends LinearParticle {
     strokeTo,
     deviation,
     lineLength,
-    glowEffect = 1
+    glowEffect = 1,
+    space = false
   ) {
-    super(x1, y1, x2, y2, lifetime, colours, light, strokeFrom, strokeTo);
+    super(x1, y1, x2, y2, lifetime, colours, light, strokeFrom, strokeTo, space);
 
     //Generate points
     let direction = this.pos2.sub(this.pos1);
@@ -33,7 +34,6 @@ class LightningParticle extends LinearParticle {
     }
 
     this.points.push(this.pos2);
-    console.log(this.points);
 
     this.glowEffect = glowEffect;
   }
@@ -41,7 +41,7 @@ class LightningParticle extends LinearParticle {
     let ir = this.stroke;
     for (let rf = 1; rf > 0; rf -= 1 / this.glowEffect) {
       strokeWeight(ir * rf);
-      
+
       beginShape();
       this.points.forEach((p) => {
         vertex(p.x, p.y);

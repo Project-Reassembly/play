@@ -29,7 +29,9 @@ class PhysicalObject extends RegisteredItem {
 
   visible = true;
   tangible = true;
-
+  get pos() {
+    return new Vector(this.x, this.y);
+  }
   get directionRad() {
     return (this.direction / 180) * Math.PI;
   }

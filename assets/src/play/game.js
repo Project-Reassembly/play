@@ -4,7 +4,7 @@ import { Chunk } from "../classes/world/chunk.js";
 import { World } from "../classes/world/world.js";
 import { Registries } from "../core/registry.js";
 import { Log } from "./messaging.js";
-import { ui, rotatedShape } from "../core/ui.js";
+import { ui, rotatedShape, ImageContainer } from "../core/ui.js";
 import { Inventory } from "../classes/inventory.js";
 import { UIComponent } from "../core/ui.js";
 import {} from "../lib/isl.js";
@@ -26,6 +26,7 @@ import { DroppedItemStack } from "../classes/item/dropped-itemstack.js";
 import { fonts } from "./font.js";
 import { patternedBulletExpulsion } from "../classes/projectile/bullet.js";
 import { blockSize } from "../scaling.js";
+import { Space } from "../classes/effect/space-renderer.js";
 let histIndex = 0;
 const game = {
   saveslot: 1,
@@ -572,7 +573,6 @@ function loadGame(name) {
         replacer[0]
     );
   }
-  console.log(file);
   effectTimer.cancel("*");
   effects.screenShakeInstances.splice(0);
 
@@ -599,8 +599,16 @@ function sizeKB(string) {
 }
 
 globalThis.preload = async function () {
-  Registries.images.forEachAsync((name, el) => el.load());
-  fonts.load();
+  ImageContainer.total = Registries.images.size;
+  ImageContainer.loaded = 0;
+  await Registries.images.forEachAsync((name, el) => el.load());
+  console.log(
+    "Loaded " + ImageContainer.loaded + "/" + ImageContainer.total + " images."
+  );
+  await fonts.load();
+  console.log("Loaded fonts.");
+  
+  console.log("All assets loaded.");
 };
 //Set up the canvas, using the previous function
 globalThis.setup = function () {
@@ -611,6 +619,7 @@ globalThis.setup = function () {
   colorMode("rgb", 255);
   textFont(fonts.darktech);
   textStyle("normal");
+  Space.setup();
 };
 
 async function delay(ms) {
@@ -883,6 +892,8 @@ function gameFrame() {
   rectMode(CORNERS);
   rect(...borders());
   pop();
+
+  world.drawSpace();
 
   pop();
 }

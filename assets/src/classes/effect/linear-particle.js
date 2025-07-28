@@ -5,11 +5,12 @@ class LinearParticle extends Particle {
   pos1 = Vector.ZERO;
   pos2 = Vector.ZERO;
   size = 0;
-  constructor(x1, y1, x2, y2, lifetime, colours, light, strokeFrom, strokeTo) {
+  constructor(x1, y1, x2, y2, lifetime, colours, light, strokeFrom, strokeTo,
+    space = false) {
     let pos1 = new Vector(x1, y1);
     let pos2 = new Vector(x2, y2);
     let center = pos1.add(pos2).scale(0.5);
-    super(center.x, center.y, 0, lifetime, 0, 0, colours, 0, light);
+    super(center.x, center.y, 0, lifetime, 0, 0, colours, 0, light, space);
     this.pos1 = pos1;
     this.pos2 = pos2;
     this.strokeFrom = strokeFrom;

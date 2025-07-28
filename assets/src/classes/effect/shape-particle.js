@@ -1,4 +1,4 @@
-import { rotatedShape } from "../../core/ui.js";
+import { rotatedShape, rotatedShapeExt } from "../../core/ui.js";
 import { Particle } from "./particle.js";
 // A basic particle - a coloured shape.
 class ShapeParticle extends Particle {
@@ -16,9 +16,21 @@ class ShapeParticle extends Particle {
     sizeYFrom,
     sizeYTo,
     rotateSpeed,
-    light = 0
+    light = 0,
+    space = false
   ) {
-    super(x, y, direction, lifetime, speed, decel, colours, rotateSpeed, light);
+    super(
+      x,
+      y,
+      direction,
+      lifetime,
+      speed,
+      decel,
+      colours,
+      rotateSpeed,
+      light,
+      space
+    );
     this.shape = shape;
     this.sizeXFrom = sizeXFrom;
     this.sizeXTo = sizeXTo;
@@ -31,15 +43,26 @@ class ShapeParticle extends Particle {
     this.sizeX = this.sizeXFrom * lf + this.sizeXTo * (1 - lf);
     this.sizeY = this.sizeYFrom * lf + this.sizeYTo * (1 - lf);
   }
-  actualDraw() {
-    rotatedShape(
-      this.shape,
-      this.x,
-      this.y,
-      this.sizeX,
-      this.sizeY,
-      this.direction + this._rotOffset + HALF_PI
-    );
+  actualDraw(g) {
+    if (g)
+      rotatedShapeExt(
+        g,
+        this.shape,
+        this.x,
+        this.y,
+        this.sizeX,
+        this.sizeY,
+        this.direction + this._rotOffset + HALF_PI
+      );
+    else
+      rotatedShape(
+        this.shape,
+        this.x,
+        this.y,
+        this.sizeX,
+        this.sizeY,
+        this.direction + this._rotOffset + HALF_PI
+      );
   }
 }
 export { ShapeParticle };

@@ -18,6 +18,7 @@ import {
   WeaponBulletConfiguration,
   WeaponShootConfiguration,
 } from "../../item/weapon.js";
+import { PhysicalObject, ShootableObject } from "../../physical.js";
 import { patternedBulletExpulsion } from "../../projectile/bullet.js";
 import { Timer } from "../../timer.js";
 import { Block } from "../block.js";
@@ -108,7 +109,9 @@ export class TurretController extends TurretBase {
   get gunDirectionRad() {
     return (this.gunDirection / 180) * Math.PI;
   }
+  //defaults
   turnSpeed = 5;
+  shootCone = -1;
 
   target = null;
 
@@ -116,6 +119,7 @@ export class TurretController extends TurretBase {
   selectable = true;
   /**@type {Inventory} */
   turretinv = null;
+
   get lastAmmo() {
     return this.turret?.lastAmmo;
   }
@@ -124,14 +128,22 @@ export class TurretController extends TurretBase {
     let i = this.turretinv.get(0)?.getItem();
     return i instanceof TurretItem ? i : null;
   }
+  get gunTurnSpeed() {
+    return this.turret?.turnSpeed;
+  }
+  get gunShootCone() {
+    return this.turret?.shootCone;
+  }
   get range() {
     return this.turret?.range;
   }
   init() {
     super.init();
     this.turretinv = new Inventory(1, this.turretinv);
+    if (this.shootCone === -1) this.shootCone = this.turnSpeed * 2;
   }
   postDraw2() {
+    if (PhysicalObject.debug) this._debugAI();
     this.turret?.component?.draw(
       this.x,
       this.y,
@@ -152,7 +164,6 @@ export class TurretController extends TurretBase {
       }
       w.tick(this);
       if (this.target) {
-        let od = this.gunDirection;
         let d =
           this.target instanceof Block
             ? Vector.fromScalar(blockSize / 2)
@@ -168,12 +179,18 @@ export class TurretController extends TurretBase {
           this.y + blockSize / 2,
           this.target.x + d.x,
           this.target.y + d.y,
-          this.turnSpeed
+          this.gunTurnSpeed ?? this.turnSpeed
         );
         this.gunDirection = res.direction;
-        this.gunCanFire = Math.abs(this.gunDirection - od) < this.turnSpeed;
+        this.gunCanFire =
+          Math.abs(
+            this.gunDirection -
+              this.target.pos.sub(
+                this.pos.add(Vector.fromScalar(blockSize / 2))
+              ).angle
+          ) < (this.gunShootCone ?? this.shootCone);
       }
-      this._generic_AttackerAI((phys) => !(phys instanceof DroppedItemStack));
+      this.ai((phys) => !(phys instanceof DroppedItemStack));
     }
   }
   serialise() {
@@ -225,7 +242,7 @@ export class TurretController extends TurretBase {
    * @param {boolean} [shoots=true] Whether or not the entity should shoot at the new target.
    * @returns {boolean} `true` if an entity is being targeted, `false` if not.
    */
-  _generic_AttackerAI(
+  ai(
     conditions = () => true,
     shoots = true,
     attackBlocks = true,
@@ -269,6 +286,34 @@ export class TurretController extends TurretBase {
       this.target = tempTarget;
       return false;
     }
+  }
+  _debugAI() {
+    push();
+    noFill();
+    stroke(this.target instanceof ShootableObject ? [255, 0, 0] : [0, 255, 0]);
+    strokeWeight(4);
+    if (this.target) {
+      square(this.target.x, this.target.y, this.size);
+      line(
+        this.x + blockSize / 2,
+        this.y + blockSize / 2,
+        this.target.x,
+        this.target.y
+      );
+    }
+    let directionLine = this.pos.add(
+      Vector.fromAngleRad(this.gunDirectionRad).scale(this.range)
+    );
+    if (this.gunCanFire) stroke(0, 255, 255);
+    else stroke(100, 0, 255);
+    line(this.x, this.y, directionLine.x, directionLine.y);
+    stroke(
+      this.target instanceof ShootableObject
+        ? [200, 0, 255, 100]
+        : [255, 255, 0, 100]
+    );
+    circle(this.x, this.y, this.attackRange * 2);
+    pop();
   }
   getSize() {
     for (let size = 1; size < this.maxSize; size++) {
@@ -393,6 +438,9 @@ export class TurretItem extends Item {
   lastAmmo = "none";
 
   component = {};
+
+  turnSpeed = 5;
+  shootCone = 10;
 
   init() {
     super.init();

@@ -72,9 +72,7 @@ class Entity extends ShootableObject {
   //because rate limit sucks and the scrapper is  s l o w
   #firing = false;
 
-  get pos() {
-    return new Vector(this.x, this.y);
-  }
+  
   get computedVelocity() {
     return this.pos.sub(this._lastPos);
   }

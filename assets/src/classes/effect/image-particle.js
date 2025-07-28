@@ -16,9 +16,10 @@ class ImageParticle extends Particle {
     sizeXTo,
     sizeYFrom,
     sizeYTo,
-    rotateSpeed
+    rotateSpeed,
+    space = false
   ) {
-    super(x, y, direction, lifetime, speed, decel, [[0, 0, 0]], rotateSpeed, 0);
+    super(x, y, direction, lifetime, speed, decel, [[0, 0, 0]], rotateSpeed, 0, space);
     this.image = image;
     this.opacityFrom = opacityFrom;
     this.opacityTo = opacityTo;

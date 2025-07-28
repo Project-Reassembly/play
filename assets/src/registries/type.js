@@ -152,6 +152,7 @@ Registries.type.add("dev::commandblock", CommandExecutorBlock);
 //Effects
 Registries.type.add("status-effect", StatusEffect);
 Registries.type.add("visual-effect", VisualEffect);
+
 Registries.type.add("particle-emission", ParticleEmissionEffect);
 Registries.type.add("image-particle-emission", ImageParticleEmissionEffect);
 Registries.type.add("text-particle-emission", TextParticleEmissionEffect);

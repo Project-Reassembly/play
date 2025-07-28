@@ -1196,10 +1196,9 @@ createLinkedBlockAndItem(
     connectorImage: "turret-base.peti.connector",
     otherPart: "peti-turret-base",
     maxSize: 6,
-    turnSpeed: 0.1
   },
   {
-    description: "Mounting point for PETI turrets.\nHeavy-duty, so turns slowly.\nMaximum size depends on number of bases.\nPlace them in a cross-shaped pattern.",
+    description: "Mounting point for PETI turrets.\nMaximum size depends on number of bases.\nPlace them in a cross-shaped pattern.",
     marketValue: 1000
   }
 );

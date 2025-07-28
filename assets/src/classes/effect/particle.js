@@ -1,7 +1,8 @@
 import { Vector, colinterp } from "../../core/number.js";
-import { rotatedShape } from "../../core/ui.js";
+import { rotatedShape, rotatedShapeExt } from "../../core/ui.js";
 class Particle {
   _rotOffset = 0;
+  isSpace = false;
   constructor(
     x,
     y,
@@ -11,7 +12,8 @@ class Particle {
     decel = 0,
     colours = [[255, 0, 0]],
     rotateSpeed = 0,
-    light = 0
+    light = 0,
+    space = false
   ) {
     this.x = x;
     this.y = y;
@@ -25,13 +27,15 @@ class Particle {
     this.maxLifetime = lifetime;
     this.rotateSpeed = rotateSpeed;
     this.light = light;
+    this.isSpace = space;
   }
   calcSizes(lf) {}
   calcLifeFract() {
     return this.lifetime / this.maxLifetime;
   }
-  actualDraw() {
-    rotatedShape("circle", this.x, this.y, 5, 5, 0);
+  actualDraw(g) {
+    if (g) rotatedShapeExt(g, "circle", this.x, this.y, 5, 5, 0);
+    else rotatedShape("circle", this.x, this.y, 5, 5, 0);
   }
 
   calcDecels(dt) {
@@ -65,8 +69,8 @@ class Particle {
       )
     );
     if (this.rotateSpeed) {
-        this._rotOffset += this.rotateSpeed * dt;
-      }
+      this._rotOffset += this.rotateSpeed * dt;
+    }
   }
   step(dt) {
     if (this.lifetime >= dt) {
@@ -76,7 +80,7 @@ class Particle {
       this.calcDecels(dt);
 
       this.movement(dt);
-      
+
       //Colours
       this.colour = colinterp(this.colours, 1 - lf);
       //Lifetime
@@ -92,7 +96,17 @@ class Particle {
     this.x = x;
     this.y = y;
   }
-  draw() {
+  draw(g) {
+    if (g) {
+      g.push();
+      g.noStroke();
+      //Interpolate colour
+      g.fill(this.colour);
+      //Draw the particle
+      this.actualDraw(g);
+      g.pop();
+      return;
+    }
     push();
     noStroke();
     //Interpolate colour

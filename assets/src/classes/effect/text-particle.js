@@ -14,7 +14,8 @@ class TextParticle extends Particle {
     sizeFrom,
     sizeTo,
     rotateSpeed,
-    useOCR = false
+    useOCR = false,
+    space = false
   ) {
     super(
       x,
@@ -24,7 +25,7 @@ class TextParticle extends Particle {
       speed,
       decel,
       colours,
-      rotateSpeed
+      rotateSpeed,space
     );
     this.text = text;
     this.useOCR = useOCR;

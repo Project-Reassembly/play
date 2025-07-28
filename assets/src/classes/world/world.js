@@ -1,6 +1,6 @@
 import { Chunk, create2DArray, iterate2DArray } from "./chunk.js";
 import { Entity } from "../entity/entity.js";
-import { createPlayer } from "../../play/game.js";
+import { createPlayer, game } from "../../play/game.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { ItemStack } from "../item/item-stack.js";
 import { ui } from "../../core/ui.js";
@@ -11,9 +11,9 @@ import { tru } from "../../core/number.js";
 import { worldSize } from "../../scaling.js";
 import { Explosion, NuclearExplosion } from "../../play/effects.js";
 import { PowerNetwork } from "./power-network.js";
-import { Log } from "../../play/messaging.js";
 import { assign } from "../../core/constructor.js";
 import { Particle } from "../effect/particle.js";
+import { Space } from "../effect/space-renderer.js";
 
 /**
  * @typedef SerialisedWorld
@@ -38,6 +38,11 @@ class World {
    * Particles that will be drawn underneath normal blocks, but on top of floors and tiles.
    */
   floorParticles = [];
+  /**
+   * @type {Particle[]}
+   * Particles that will be drawn as a hole in the world.
+   */
+  spaceParticles = [];
   /** @type {Particle[]} */
   particles = [];
   /** @type {Particle[]} */
@@ -99,6 +104,7 @@ class World {
     this.toTick = this.getRenderedChunks(World.simulationDistance);
     //Tick *everything*
     this.physobjs.forEach((p) => p.tick());
+    this.spaceParticles.forEach((p) => p.step(1));
     this.floorParticles.forEach((p) => p.step(1));
     this.bullets.forEach((b) => b.tick());
     this.particles.forEach((p) => p.step(1));
@@ -184,6 +190,12 @@ class World {
           this.floorParticles.splice(p, 1);
         }
       }
+      len = this.spaceParticles.length;
+      for (let p = 0; p < len; p++) {
+        if (this.spaceParticles[p]?.remove) {
+          this.spaceParticles.splice(p, 1);
+        }
+      }
       len = this.entities.length;
       for (let e = 0; e < len; e++) {
         if (this.entities[e]?.dead) {
@@ -253,6 +265,7 @@ class World {
       bullet.draw();
     }
     for (let particle of this.particles) {
+      if (particle.isSpace) continue;
       if (!World.isInRenderDistance(particle, 1, 0, 0, 0, ui.camera.zoom))
         continue;
       particle.draw();
@@ -262,6 +275,13 @@ class World {
         continue;
       particle.draw();
     }
+  }
+  drawSpace() {
+    push();
+    //circle(game.player?.x, game.player?.y, 100, 100);
+    //draw space
+    Space.draw(this.particles);
+    pop();
   }
   static isInRenderDistance(
     thing,

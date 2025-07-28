@@ -32,6 +32,7 @@ class Turret extends Container {
   }
   range = 180;
   turnSpeed = 5;
+  shootCone = -1;
 
   //Internal
   #cooldown = 0;
@@ -63,6 +64,7 @@ class Turret extends Container {
     this.component = construct(this.component, "component");
     this.shoot = constructFromType(this.shoot, WeaponShootConfiguration);
     this.bullets = constructFromType(this.bullets, WeaponBulletConfiguration);
+    if (this.shootCone === -1) this.shootCone = this.turnSpeed * 2;
   }
 
   tick() {
@@ -71,7 +73,6 @@ class Turret extends Container {
     this.decelerate();
     this.component?.tick(this);
     if (this.target) {
-      let od = this.gunDirection;
       let d =
         this.target instanceof Block
           ? Vector.fromScalar(blockSize / 2)
@@ -90,7 +91,13 @@ class Turret extends Container {
         this.turnSpeed
       );
       this.gunDirection = res.direction;
-      this.gunCanFire = Math.abs(res.direction - od) < this.turnSpeed;
+      this.gunCanFire =
+        Math.abs(
+          this.gunDirection -
+            new Vector(this.target.x, this.target.y).sub(
+              new Vector(this.x, this.y).add(Vector.fromScalar(blockSize / 2))
+            )
+        ) < this.shootCone;
     }
     if (this.#cooldown > 0) {
       this.#cooldown--;
@@ -105,7 +112,7 @@ class Turret extends Container {
         );
       }
     }
-    this._generic_AttackerAI((phys) => !(phys instanceof DroppedItemStack));
+    this.ai((phys) => !(phys instanceof DroppedItemStack));
   }
   getAcceleratedReloadRate(shoot) {
     if (this.#acceleration <= -1 || this.#acceleration > this.maxAccel)
@@ -252,7 +259,7 @@ class Turret extends Container {
    * @param {boolean} [shoots=true] Whether or not the entity should shoot at the new target.
    * @returns {boolean} `true` if an entity is being targeted, `false` if not.
    */
-  _generic_AttackerAI(
+  ai(
     conditions = () => true,
     shoots = true,
     attackBlocks = true,

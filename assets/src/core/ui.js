@@ -4,6 +4,7 @@ import { Registries } from "./registry.js";
 import { Inventory, drawMultilineText } from "../classes/inventory.js";
 import { PhysicalObject, ShootableObject } from "../classes/physical.js";
 import { colinterp } from "./number.js";
+import { totalSize } from "../scaling.js";
 const ui = {
   menuState: "title",
   waitingForMouseUp: false,
@@ -750,6 +751,8 @@ class BlockInventoryUIComponent extends UIComponent {
 }
 
 class ImageContainer {
+  static total = 0;
+  static loaded = 0;
   #image;
   #path;
   constructor(path) {
@@ -761,7 +764,7 @@ class ImageContainer {
   }
   async load() {
     this.#image = await loadImage(this.#path);
-    console.log("Loaded image from " + this.#path);
+    ImageContainer.loaded++;
     return true;
   }
   get image() {
