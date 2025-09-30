@@ -1,6 +1,6 @@
 import { Item } from "./item.js";
 import { Weapon } from "./weapon.js";
-import { patternedBulletExpulsion } from "../projectile/bullet.js";
+import { patternedBulletExpulsion } from "../projectile/yeeter.js";
 import { ui } from "../../core/ui.js";
 class Throwable extends Item {
   bullet = {};

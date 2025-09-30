@@ -30,6 +30,7 @@ class DroppedItemStack extends Entity {
   damage() {
     return 0;
   }
+  knock() {}
   tick() {
     if (this.dead) return;
     if (this.item.isEmpty()) {

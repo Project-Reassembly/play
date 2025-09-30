@@ -24,7 +24,7 @@ import {} from "../lib/int-setup.js";
 import { ExecutionContext, exec } from "../lib/isl.js";
 import { DroppedItemStack } from "../classes/item/dropped-itemstack.js";
 import { fonts } from "./font.js";
-import { patternedBulletExpulsion } from "../classes/projectile/bullet.js";
+import { patternedBulletExpulsion } from "../classes/projectile/yeeter.js";
 import { blockSize } from "../scaling.js";
 import { Space } from "../classes/effect/space-renderer.js";
 let histIndex = 0;

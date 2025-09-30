@@ -176,6 +176,30 @@ class Vector {
     return this.scale(1 / this.magnitude, mutate);
   }
   /**
+   * Rotates a vector around an angle, anticlockwise.
+   * @param {number} angle Angle in degrees to rotate the vector.
+   * @param {boolean} mutate Whether or not to change this vector's values.
+   * @returns The new rotated vector.
+   */
+  rotate(angle, mutate = false){
+    return this.rotateRad(angle / 180 * Math.PI, mutate);
+  }
+  /**
+   * Rotates a vector around an angle, anticlockwise.
+   * @param {number} angle Angle in radians to rotate the vector.
+   * @param {boolean} mutate Whether or not to change this vector's values.
+   * @returns The new rotated vector.
+   */
+  rotateRad(angle, mutate = false){
+    let nx = this.x * Math.cos(angle) - this.y * Math.sin(angle),
+      ny = this.y * Math.cos(angle) + this.x * Math.sin(angle);
+    if (mutate) {
+      this.x = nx;
+      this.y = ny;
+    }
+    return mutate ? this : new Vector(nx, ny);
+  }
+  /**
    * Finds the distance between this vector and another.
    * @param {Vector} vct The other vector to get the distance to.
    * @returns The Euclidean distance from this vector to the other one.
@@ -254,6 +278,8 @@ function turn(direction, x, y, toX, toY, amount) {
   //Turn
   return { direction: direction + deltaD, done: done };
 }
+
+globalThis["PRVec"] = Vector;
 
 export {
   shortenedNumber,

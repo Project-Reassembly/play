@@ -3,7 +3,7 @@ import { fonts } from "../play/game.js";
 import { Registries } from "./registry.js";
 import { Inventory, drawMultilineText } from "../classes/inventory.js";
 import { PhysicalObject, ShootableObject } from "../classes/physical.js";
-import { colinterp } from "./number.js";
+import { colinterp, Vector } from "./number.js";
 import { totalSize } from "../scaling.js";
 const ui = {
   menuState: "title",
@@ -35,6 +35,9 @@ const ui = {
     y: 0,
     rotation: 0,
     zoom: 1,
+    get pos() {
+      return new Vector(this.x, this.y);
+    },
   },
   conditions: {},
   components: [],

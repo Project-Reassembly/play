@@ -1,4 +1,4 @@
-import { rnd, tru } from "../../core/number.js";
+import { rnd, tru, Vector } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { Log } from "../../play/messaging.js";
 import { Timer } from "../timer.js";
@@ -163,7 +163,7 @@ class Player extends EquippedEntity {
       UIComponent.setCondition("dead:yes");
     }, this.respawnTime);
   }
-  ai() {
+  doAI() {
     if (this.target) {
       this.rotateTowards(this.target.x, this.target.y, this.turnSpeed);
     }

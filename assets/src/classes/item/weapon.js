@@ -8,9 +8,11 @@ import { WeaponComponent } from "../entity/component.js";
 import { roundNum } from "../../core/number.js";
 import { PointBullet } from "../projectile/point-bullet.js";
 import { LaserBullet } from "../projectile/laser-bullet.js";
-import { Bullet, patternedBulletExpulsion } from "../projectile/bullet.js";
+import { Bullet } from "../projectile/bullet.js";
 import { Missile } from "../projectile/missile.js";
 import { Registries } from "../../core/registry.js";
+import { WeaponBulletConfiguration, WeaponShootConfiguration } from "./weapon-exts.js";
+import { patternedBulletExpulsion } from "../projectile/yeeter.js";
 class Weapon extends Equippable {
   timer = new Timer();
   ammoUse = 1;
@@ -443,44 +445,4 @@ function ind(lvl = 0) {
   return "  ".repeat(lvl);
 }
 
-class ShootPattern {
-  spread = 0;
-  spacing = 0;
-  amount = 1;
-  interval = 0;
-  burst = 1;
-}
-class WeaponShootConfiguration {
-  pattern = new ShootPattern();
-  charge = 0;
-  chargeEffect = "none";
-  reload = 30;
-  readyEffect = "none";
-  effect = "shoot";
-  recoilScale = 1;
-  rotRecoilScale = 1;
-  init() {
-    this.pattern = constructFromType(this.pattern, ShootPattern);
-  }
-}
-class WeaponBulletConfiguration {
-  // Defines possible bullets.
-  types = [];
-  // Matches ammo items to bullets.
-  ammos = {};
-  // Hide variations
-  unbrowsable = [];
-  get(index) {
-    if (index instanceof Array) return index.map((i) => this.get(i));
-    else return this.types[index] ?? null;
-  }
-  getAmmo(ammo) {
-    if (ammo instanceof Array) return ammo.map((i) => this.getAmmo(i));
-    else {
-      let def = this.ammos[ammo];
-      if (def instanceof Array) return def.map((d) => this.types[d] ?? null);
-      return this.types[def] ?? null;
-    }
-  }
-}
-export { Weapon, WeaponShootConfiguration, WeaponBulletConfiguration };
+export { Weapon };

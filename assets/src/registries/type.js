@@ -61,16 +61,52 @@ import {
 import { VirtualBullet } from "../classes/projectile/virtual-bullet.js";
 import { ModularTankEntity } from "../classes/entity/modular-tank.js";
 import { TankAssemblyBay } from "../classes/block/tonq/tank-assembly-bay.js";
-import { LandingPad, LaunchPad } from "../classes/block/capitalism/launch-pad.js";
-import { PlasmaBlock, PlasmaPipe, PlasmaTank } from "../classes/block/plasma-pipe.js";
+import {
+  LandingPad,
+  LaunchPad,
+} from "../classes/block/capitalism/launch-pad.js";
+import {
+  PlasmaBlock,
+  PlasmaPipe,
+  PlasmaTank,
+} from "../classes/block/plasma-pipe.js";
 import {
   PlasmaCompressor,
   PlasmaDecompressor,
   PlasmaGenerator,
 } from "../classes/block/plasma-gen-and-compressor.js";
 import { Turret } from "../classes/block/defense/turret.js";
-import { TurretBase, TurretController, TurretItem } from "../classes/block/defense/turret-components.js";
-import { LightningEmissionEffect, LinearEffect, LinearMultiEffect, LineEmissionEffect } from "../play/line-effects.js";
+import {
+  TurretBase,
+  TurretController,
+  TurretItem,
+} from "../classes/block/defense/turret-components.js";
+import {
+  LightningEmissionEffect,
+  LinearEffect,
+  LinearMultiEffect,
+  LineEmissionEffect,
+} from "../play/line-effects.js";
+import {
+  AIAttackTask,
+  AITask,
+  CreateBulletsTask,
+  RetargetTask,
+  SetDataTask,
+  ShootBulletsTask,
+  TrackTargetTask,
+} from "../classes/entity/ai/ai-tasks.js";
+import {
+  AICondition,
+  AlternativeCondition,
+  CombinedCondition,
+  DataComparisonCondition,
+  HasTargetCondition,
+  KeyDownCondition,
+  MouseDownCondition,
+  NearTargetCondition,
+  StoredTargetCondition,
+} from "../classes/entity/ai/ai-conditions.js";
 //Basic
 Registries.type.add("generic", RegisteredItem);
 //Entities and parts
@@ -106,14 +142,6 @@ Registries.type.add("block-launcher", BlockLauncher);
 //World
 Registries.type.add("world", World);
 Registries.type.add("chunk", Chunk);
-// Registries.type.add("generator", Generator);
-// Registries.type.add("tile-generator", TileGenerator);
-// Registries.type.add("ore-generator", OreGenerator);
-// Registries.type.add("block-generator", BlockGenerator);
-
-// Registries.type.add("gen-options", GenerationOptions);
-// Registries.type.add("tile-gen-options", TileGenerationOptions);
-// Registries.type.add("ore-gen-options", OreGenerationOptions);
 //Block
 Registries.type.add("block", Block);
 Registries.type.add("wall", Wall);
@@ -165,3 +193,26 @@ Registries.type.add("linear-effect", LinearEffect);
 Registries.type.add("linear-multi", LinearMultiEffect);
 Registries.type.add("line-emission", LineEmissionEffect);
 Registries.type.add("lightning-emission", LightningEmissionEffect);
+//AI
+Registries.type.add("ai.nothing", AITask);
+Registries.type.add("ai.attack", AIAttackTask);
+Registries.type.add("ai.shoot-bullet", ShootBulletsTask);
+Registries.type.add("ai.create-bullet", CreateBulletsTask);
+Registries.type.add("ai.retarget", RetargetTask);
+Registries.type.add("ai.follow", TrackTargetTask);
+
+Registries.type.add("ai.set-data", SetDataTask);
+
+Registries.type.add("aicon.constant", AICondition);
+Registries.type.add("aicon.has-target", HasTargetCondition);
+Registries.type.add("aicon.stored-target", StoredTargetCondition);
+Registries.type.add("aicon.near-target", NearTargetCondition);
+Registries.type.add("aicon.mouse", MouseDownCondition);
+Registries.type.add("aicon.keydown", KeyDownCondition);
+
+Registries.type.add("aicon.data", DataComparisonCondition);
+
+Registries.type.add("aicon.all", CombinedCondition);
+Registries.type.alias("aicon.all", "aicon.combined");
+Registries.type.add("aicon.any", AlternativeCondition);
+Registries.type.alias("aicon.any", "aicon.alternative");

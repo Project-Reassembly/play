@@ -1,5 +1,5 @@
 import { ShootableObject } from "../physical.js";
-import { construct } from "../../core/constructor.js";
+import { construct, constructFromType } from "../../core/constructor.js";
 import { Registries } from "../../core/registry.js";
 import { World } from "../world/world.js";
 import { rnd, tru, roundNum, Vector, clamp } from "../../core/number.js";
@@ -11,6 +11,7 @@ import {
 import { blockSize, totalSize, worldSize } from "../../scaling.js";
 import { game } from "../../play/game.js";
 import { Block } from "../block/block.js";
+import { AI } from "./ai/ai.js";
 /**
  * @typedef SerialisedEntity
  * @prop {number} health
@@ -55,6 +56,10 @@ class Entity extends ShootableObject {
   /** Multiplier for both range and movement speed while passive. */
   passiveIncentiveModifier = 0.75;
 
+  //custom ai, only available for entities and not turrets
+  /**@type {AI?} */
+  ai = null;
+
   isBoss = false;
 
   //Status effects
@@ -72,7 +77,6 @@ class Entity extends ShootableObject {
   //because rate limit sucks and the scrapper is  s l o w
   #firing = false;
 
-  
   get computedVelocity() {
     return this.pos.sub(this._lastPos);
   }
@@ -92,6 +96,8 @@ class Entity extends ShootableObject {
     this.maxEnergy = this.energy;
     this.components = this.components.map((x) => construct(x, "component"));
     this.baseSpeed = this.speed;
+
+    if (this.ai) this.ai = constructFromType(this.ai, AI);
   }
 
   moveTowards(x, y, rotate = true) {
@@ -192,38 +198,46 @@ class Entity extends ShootableObject {
   tick() {
     this.components.forEach((c) => c.tick(this));
     this.tickGroundEffects();
-    if (this.controllable) this.ai();
+    if (this.controllable) this.doAI();
     super.tick();
     this.tickStatuses();
     this._lastPos = new Vector(this.x, this.y);
   }
 
-  ai() {
-    if (this.#firing) this.attack();
-    if (this._aidelay > 0) {
-      this._aidelay--;
-    } else {
-      this._aidelay = 6;
-      if (this.aiType === "passive") {
-        this._passiveAI();
-      } else if (this.aiType === "hostile") {
-        this._hostileAI();
-      } else if (this.aiType === "guard") {
-        this._guardAI();
-      } else if (this.aiType === "scavenger") {
-        this._scavengerAI();
+  doAI() {
+    if (this.ai) this.ai.tick(this);
+    else {
+      if (this.#firing) this.attack();
+      if (this._aidelay > 0) {
+        this._aidelay--;
+      } else {
+        this._aidelay = 6;
+        if (this.aiType === "passive") {
+          this._passiveAI();
+        } else if (this.aiType === "hostile") {
+          this._hostileAI();
+        } else if (this.aiType === "guard") {
+          this._guardAI();
+        } else if (this.aiType === "scavenger") {
+          this._scavengerAI();
+        }
       }
-    }
-    //Base AI
-    if (this.target) {
-      this._waiting--;
-      if (this._waiting <= 0) {
-        if (this.distanceToPoint(this.target.x, this.target.y) > this.size / 2)
-          this.moveTowards(
-            (this.target instanceof Block ? blockSize / 2 : 0) + this.target.x,
-            (this.target instanceof Block ? blockSize / 2 : 0) + this.target.y,
-            true
-          );
+      //Base AI
+      if (this.target) {
+        this._waiting--;
+        if (this._waiting <= 0) {
+          if (
+            this.distanceToPoint(this.target.x, this.target.y) >
+            this.size / 2
+          )
+            this.moveTowards(
+              (this.target instanceof Block ? blockSize / 2 : 0) +
+                this.target.x,
+              (this.target instanceof Block ? blockSize / 2 : 0) +
+                this.target.y,
+              true
+            );
+        }
       }
     }
   }

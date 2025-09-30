@@ -5,13 +5,12 @@ import { blockSize } from "../../../scaling.js";
 import { WeaponComponent } from "../../entity/component.js";
 import { Entity } from "../../entity/entity.js";
 import { DroppedItemStack } from "../../item/dropped-itemstack.js";
+import { WeaponBulletConfiguration, WeaponShootConfiguration } from "../../item/weapon-exts.js";
 import {
-  Weapon,
-  WeaponBulletConfiguration,
-  WeaponShootConfiguration,
+  Weapon
 } from "../../item/weapon.js";
 import { PhysicalObject } from "../../physical.js";
-import { patternedBulletExpulsion } from "../../projectile/bullet.js";
+import { patternedBulletExpulsion } from "../../projectile/yeeter.js";
 import { Timer } from "../../timer.js";
 import { Block } from "../block.js";
 import { Container } from "../container.js";

@@ -71,7 +71,7 @@ class NPC extends EquippedEntity {
       this.relation -= relchange || 0.1;
     }
   }
-  ai() {
+  doAI() {
     if (this.relation < -100) this.relation = -100;
     if (this.relation > 100) this.relation = 100;
     if (

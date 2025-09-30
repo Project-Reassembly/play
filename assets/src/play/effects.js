@@ -16,7 +16,6 @@ const effectTimer = new Timer();
 class Explosion {
   x = 0;
   y = 0;
-  /**@type {World} */
   world = null;
   knockback = NaN;
   radius = 0;

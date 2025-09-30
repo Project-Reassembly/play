@@ -1,4 +1,3 @@
-import { construct } from "../../core/constructor.js";
 import { Vector } from "../../core/number.js";
 import { createLinearEffect } from "../../play/effects.js";
 import { ShapeParticle } from "../effect/shape-particle.js";

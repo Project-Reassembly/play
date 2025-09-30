@@ -8,7 +8,7 @@ import { ImageParticle } from "../../effect/image-particle.js";
 import { drawMultilineText } from "../../inventory.js";
 import { ItemStack } from "../../item/item-stack.js";
 import { Item } from "../../item/item.js";
-import { patternedBulletExpulsion } from "../../projectile/bullet.js";
+import { patternedBulletExpulsion } from "../../projectile/yeeter.js";
 import { Timer } from "../../timer.js";
 import { Container } from "../container.js";
 

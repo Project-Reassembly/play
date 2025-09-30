@@ -15,11 +15,10 @@ import { ItemStack } from "../../item/item-stack.js";
 import { Item } from "../../item/item.js";
 import {
   Weapon,
-  WeaponBulletConfiguration,
-  WeaponShootConfiguration,
 } from "../../item/weapon.js";
+import { WeaponBulletConfiguration, WeaponShootConfiguration } from "../../item/weapon-exts.js";
 import { PhysicalObject, ShootableObject } from "../../physical.js";
-import { patternedBulletExpulsion } from "../../projectile/bullet.js";
+import { patternedBulletExpulsion } from "../../projectile/yeeter.js";
 import { Timer } from "../../timer.js";
 import { Block } from "../block.js";
 import { Container } from "../container.js";

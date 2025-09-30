@@ -10,8 +10,6 @@ import {
 } from "../core/number.js";
 import { emitEffect } from "../play/effects.js";
 import { TextParticle } from "./effect/text-particle.js";
-import { game } from "../play/game.js";
-import { Log } from "../play/messaging.js";
 class PhysicalObject extends RegisteredItem {
   static debug = false;
   x = 0;
@@ -497,7 +495,7 @@ class ShootableObject extends PhysicalObject {
         5
       );
       pop();
-      if (!game.paused) this._healthbarShowTime--;
+      this._healthbarShowTime--;
     }
     if (this._shieldShowTime > 0 && this.shield > 0) {
       push();
@@ -510,7 +508,7 @@ class ShootableObject extends PhysicalObject {
       }
       ellipse(this.x, this.y, this.width * 1.5, this.height * 1.5);
       pop();
-      if (!game.paused) this._shieldShowTime--;
+      this._shieldShowTime--;
     }
   }
 }

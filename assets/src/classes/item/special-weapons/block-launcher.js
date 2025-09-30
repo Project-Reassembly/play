@@ -1,9 +1,8 @@
-import { Weapon, WeaponBulletConfiguration } from "../weapon.js";
+import { Weapon } from "../weapon.js";
 import { PointBullet } from "../../projectile/point-bullet.js";
 import { constructFromType, construct } from "../../../core/constructor.js";
 import { game } from "../../../play/game.js";
 import { Log } from "../../../play/messaging.js";
-import { WeaponShootConfiguration } from "../weapon.js";
 import { Registries } from "../../../core/registry.js";
 import { Wall } from "../../block/defense/wall.js";
 import { ui } from "../../../core/ui.js";
@@ -16,6 +15,7 @@ import {
 import { DroppedItemStack } from "../dropped-itemstack.js";
 import { Block } from "../../block/block.js";
 import { ItemStack } from "../item-stack.js";
+import { WeaponBulletConfiguration } from "../weapon-exts.js";
 class BlockLauncher extends Weapon {
   ammoType = "none";
   places = true;
