@@ -1,10 +1,11 @@
 import { construct } from "../../../core/constructor.js";
+import { RegisteredItem } from "../../../core/registered-item.js";
 import { ui } from "../../../core/ui.js";
 import { Entity } from "../entity.js";
 import { AI } from "./ai.js";
 
 /**Always returns true or false. Don't use directly, instead use `"always"` or `"never"`.*/
-export class AICondition {
+export class AICondition extends RegisteredItem{
   /** @readonly */
   static ALWAYS = new this(true);
   /**@readonly */
@@ -16,7 +17,8 @@ export class AICondition {
    * @param {Entity} entity
    */
   canDoIt(ai, entity) {
-    return this.eval(ai, entity) !== this.invert;
+    let t = this.eval(ai, entity);
+    return t !== this.invert;
   }
   /**
    * @param {AI} ai
@@ -26,6 +28,7 @@ export class AICondition {
     return this.#override;
   }
   constructor(override) {
+    super();
     if (override !== undefined) this.#override = !!override;
   }
 }
@@ -69,7 +72,7 @@ export class MouseDownCondition extends AICondition {
    * @param {Entity} entity
    */
   eval(ai, entity) {
-    return mouseIsPressed && ui.mouseButton === button;
+    return mouseIsPressed && ui.mouseButton === this.button;
   }
 }
 /**True if a button on the keyboard is pressed. The button is a number - a keyCode. Use this: https://www.toptal.com/developers/keycode. */

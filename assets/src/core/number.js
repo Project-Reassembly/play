@@ -181,8 +181,8 @@ class Vector {
    * @param {boolean} mutate Whether or not to change this vector's values.
    * @returns The new rotated vector.
    */
-  rotate(angle, mutate = false){
-    return this.rotateRad(angle / 180 * Math.PI, mutate);
+  rotate(angle, mutate = false) {
+    return this.rotateRad((angle / 180) * Math.PI, mutate);
   }
   /**
    * Rotates a vector around an angle, anticlockwise.
@@ -190,7 +190,7 @@ class Vector {
    * @param {boolean} mutate Whether or not to change this vector's values.
    * @returns The new rotated vector.
    */
-  rotateRad(angle, mutate = false){
+  rotateRad(angle, mutate = false) {
     let nx = this.x * Math.cos(angle) - this.y * Math.sin(angle),
       ny = this.y * Math.cos(angle) + this.x * Math.sin(angle);
     if (mutate) {
@@ -247,6 +247,9 @@ class Vector {
    */
   clone() {
     return new Vector(this.x, this.y);
+  }
+  toString() {
+    return `[${this.x},${this.y}]`;
   }
 }
 

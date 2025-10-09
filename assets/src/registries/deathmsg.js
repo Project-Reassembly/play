@@ -34,6 +34,7 @@ Registries.deathmsg.add("explosion", [
   [
     "(1) was blown up by (2)",
     "(1)'s surface area was rapidly increased by (2)",
+    "(2) used (1) as paint",
   ],
 ]);
 Registries.deathmsg.add("fire", [

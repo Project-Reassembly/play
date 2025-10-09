@@ -646,3 +646,142 @@ Registries.entities.add("scrapper", {
     image: "arm.scrap",
   },
 });
+
+Registries.entities.add("*", {
+  name: "*",
+  type: "equipped-entity",
+  health: 1500,
+  speed: 2.5,
+  components: [
+    {
+      image: "entity.scrap-sentinel.head",
+      width: 32,
+      height: 32,
+    },
+    {
+      image: "entity.scrap-sentinel.body",
+      width: 32,
+      height: 32,
+    },
+    {
+      type: "leg-component",
+      image: "entity.scrap-sentinel.legs",
+      width: 32,
+      height: 32,
+    },
+  ],
+  width: 25,
+  height: 25,
+  ai: {
+    tasks: [
+      {
+        type: "ai.create-bullet",
+        duration: 120,
+        x: 400,
+        y: -400,
+        direction: 135,
+        relativeToCamera: true,
+        bullet: {
+          speed: 0,
+          despawnEffect: "none",
+          lifetime: 300,
+          collides: false,
+          intervalNumber: 1,
+          intervalTime: 1,
+          intervalBullet: {
+            lifetime: 200,
+            extraUpdates: 199,
+            light: 70,
+            speed: 10,
+            trail: true,
+            hitSize: 60,
+            trailShape: "rhombus",
+            trailEffect: "death-laser-trail",
+            hitEffect: "death-laser-hit~200",
+            spawnEffect: "death-laser-fire",
+            knockback: 10,
+            drawer: {
+              hidden: true,
+            },
+            damage: [
+              {
+                type: "laser",
+                amount: 80,
+                spread: 20,
+              },
+            ],
+          },
+          fragNumber: 1,
+          fragBullet: {
+            lifetime: 200,
+            extraUpdates: 199,
+            light: 70,
+            speed: 10,
+            trail: true,
+            pierce: 99999,
+            hitSize: 60,
+            trailShape: "rhombus",
+            trailEffect: "death-laser-trail",
+            hitEffect: "death-laser-hit~200",
+            spawnEffect: "death-laser-fire",
+            knockback: 10,
+            drawer: {
+              hidden: true,
+            },
+            damage: [
+              {
+                type: "laser",
+                amount: 80,
+                spread: 20,
+              },
+            ],
+          },
+        },
+        pattern: { amount: 2, spacing: 40 },
+        condition: {
+          type: "aicon.mouse",
+        },
+      },
+    ],
+  },
+  attackRange: 250,
+  targetRange: 500,
+  rightHand: [
+    {
+      item: "scrap-shooter",
+      min: 0,
+      max: 1,
+      dropChance: 0.25,
+    },
+  ],
+  leftHand: [
+    {
+      item: "scrap-shooter",
+      min: 0,
+      max: 1,
+      dropChance: 0.25,
+    },
+  ],
+  armType: {
+    width: 32,
+    height: 11,
+    yOffset: 13,
+    image: "arm.scrap",
+  },
+  ammo: [
+    {
+      item: "scrap-bullet",
+      min: 100,
+      max: 250,
+      dropChance: 0.5,
+    },
+  ],
+  inventory: [
+    {
+      item: "scrap",
+      min: 10,
+      max: 25,
+      dropChance: 0.6,
+    },
+  ],
+});

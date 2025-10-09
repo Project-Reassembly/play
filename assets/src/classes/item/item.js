@@ -1,6 +1,7 @@
 import { RegisteredItem } from "../../core/registered-item.js";
 import { tru, rnd } from "../../core/number.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
+import { effectTimer } from "../../play/effects.js";
 class Item extends RegisteredItem {
   image = "error";
   name = "<unnamed item>";
@@ -58,7 +59,9 @@ class Item extends RegisteredItem {
   getInformativeTooltip() {
     if (!this._cachedTooltip)
       this._cachedTooltip = this.createExtendedTooltip();
-    return this._cachedTooltip.concat("🟩Sell value: $" + this.marketValue+"⬜");
+    return this._cachedTooltip.concat(
+      "🟩Sell value: $" + this.marketValue + "⬜"
+    );
   }
   createExtendedTooltip() {
     return [];
@@ -81,7 +84,11 @@ class Item extends RegisteredItem {
           case this.rarity.RARE:
             return [200, 150, 255];
           case this.rarity.SPECIAL:
-            return [255, 240, 150];
+            return [
+              255,
+              230 + Math.sin(effectTimer.ticks / 30) * 30,
+              130 + Math.sin(effectTimer.ticks / 30) * 20,
+            ];
           case this.rarity.PETI:
             return [255, 150, 150];
           case this.rarity.ITI:

@@ -1625,6 +1625,66 @@ Registries.items.add("peti-plasma-railgun", {
   },
 });
 
+Registries.items.add("peti-remote-railgun", {
+  type: "weapon",
+  name: "Remote Railgun",
+  marketValue: 75000,
+  rarity: Item.rarity.SPECIAL,
+  description: "Pew.",
+  image: "weapon.peti-remote-railgun.item",
+  range: 1000,
+  recoil: 0,
+  shootX: 42,
+  shootY: -1,
+  bullets: {
+    types: [
+      {
+        lifetime: 100,
+        extraUpdates: 99,
+        light: 70,
+        speed: 10,
+        trail: true,
+        hitSize: 10,
+        conditionalPierce: true,
+        trailShape: "rhombus",
+        trailEffect: "plasma-railgun-trail",
+        hitEffect: "plasma-railgun-hit~70",
+        knockback: 50,
+        drawer: {
+          hidden: true,
+        },
+        damage: [
+          {
+            type: "laser",
+            amount: 4500,
+            spread: 500,
+          },
+        ],
+        despawnEffect: "plasma-railgun-impact~120",
+      },
+    ],
+    ammos: {
+      none: 0,
+    },
+  },
+  shoot: {
+    charge: 100,
+    reload: 360,
+    chargeEffect: "plasma-railgun-charge",
+    effect: "plasma-railgun-fire",
+  },
+  component: {
+    type: "weapon-component",
+    width: 83,
+    height: 20,
+    yOffset: 5,
+    image: "weapon.peti-remote-railgun.component",
+    recoil: 14,
+    rotationalRecoil: 0,
+    recoilSpeed: 0.1,
+  },
+});
+
 Registries.items.add("astral-blaster", {
   type: "weapon",
   name: "Astral Blaster",
@@ -1656,7 +1716,7 @@ Registries.items.add("astral-blaster", {
             decel: 0.05,
             colours: [[100, 0, 255]],
             space: true,
-            lifetime: 30
+            lifetime: 30,
           },
         },
         knockback: 10,
@@ -2078,8 +2138,8 @@ Registries.items.add("iti-energy-cell", {
   attributeModifiers: {
     speed: 1.1,
     "fire-rate": 1.2,
-    health: 0.7
-  }
+    health: 0.7,
+  },
 });
 Registries.items.add("iti-plasma-cell", {
   name: "Plasma Cell",

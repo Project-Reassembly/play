@@ -26,6 +26,7 @@ Registries.images.add("weapon.iti-energy-repeater.component", new ImageContainer
 
 Registries.images.add("weapon.peti-charged-laser-blaster.component", new ImageContainer("assets/textures/entity/weapon/peti-charged-laser-blaster.png"))
 Registries.images.add("weapon.peti-plasma-railgun.component", new ImageContainer("assets/textures/entity/weapon/peti-plasma-railgun.png"))
+Registries.images.add("weapon.peti-remote-railgun.component", new ImageContainer("assets/textures/entity/weapon/peti-remote-railgun.png"))
 //Components > Turrets
 Registries.images.add("turret.recycle.component", new ImageContainer("assets/textures/block/turret/recycle.png"))
 Registries.images.add("turret.deathbringer.component", new ImageContainer("assets/textures/block/turret/deathbringer.png"))
@@ -81,6 +82,7 @@ Registries.images.add("weapon.iti-energy-repeater.item", new ImageContainer("ass
 
 Registries.images.add("weapon.peti-charged-laser-blaster.item", new ImageContainer("assets/textures/item/peti-charged-laser-blaster.png"))
 Registries.images.add("weapon.peti-plasma-railgun.item", new ImageContainer("assets/textures/item/peti-plasma-railgun.png"))
+Registries.images.add("weapon.peti-remote-railgun.item", new ImageContainer("assets/textures/item/peti-remote-railgun.png"))
 //boolet
 Registries.images.add("bullet.scrap-rocket", new ImageContainer("assets/textures/bullet/scrap-rocket.png"))
 //Items > Turrets

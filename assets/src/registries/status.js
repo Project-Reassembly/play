@@ -62,3 +62,22 @@ Registries.statuses.add(
     "status-effect"
   )
 );
+
+Registries.statuses.add(
+  "death-burn",
+  construct(
+    {
+      name: "Death Burn",
+      damage: 9,
+      interval: 25,
+      damageType: "fire",
+      effect: "death-burn",
+      effectChance: 0.5,
+      attributeModifiers: {
+        resistances: 0,
+        speed: 0.5,
+      },
+    },
+    "status-effect"
+  )
+);

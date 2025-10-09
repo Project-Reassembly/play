@@ -595,6 +595,193 @@ Registries.vfx.add("plasma-railgun-hit", {
   ],
 });
 
+Registries.vfx.add("death-laser-fire", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      cone: 360,
+      particle: {
+        shape: "rhombus",
+        lifetime: 40,
+        direction: 90,
+        speed: 0,
+        widthFrom: 100,
+        widthTo: 500,
+        heightFrom: 40,
+        heightTo: 0,
+        colours: [
+          [255, 255, 100],
+          [200, 200, 80],
+          [255, 255, 100, 128],
+          [200, 200, 80, 0],
+        ],
+        light: 60,
+      },
+    },
+    {
+      type: "particle-emission",
+      particle: {
+        shape: "circle",
+        lifetime: 40,
+        direction: 90,
+        speed: 0,
+        widthFrom: 145,
+        widthTo: 190,
+        heightFrom: 145,
+        heightTo: 190,
+        colours: [
+          [20, 20, 0],
+          [0, 0, 0, 0],
+        ],
+        light: 60,
+      },
+    },
+    {
+      type: "wave-emission",
+      particle: {
+        lifetime: 40,
+        radiusFrom: 180,
+        radiusTo: 70,
+        strokeFrom: 20,
+        strokeTo: 0,
+        colours: [
+          [255, 255, 100, 0],
+          [222, 222, 100, 255],
+          [200, 200, 80],
+        ],
+        light: 30,
+      },
+    },
+    {
+      type: "wave-emission",
+      particle: {
+        lifetime: 40,
+        radiusFrom: 0,
+        radiusTo: 300,
+        strokeFrom: 40,
+        strokeTo: 0,
+        colours: [
+          [20, 20, 0],
+          [0, 0, 0],
+        ],
+        light: 30,
+      },
+    },
+  ],
+});
+Registries.vfx.add("death-laser-trail", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      amount: 1,
+      cone: 0,
+      maxXOffset: 50,
+      maxYOffset: 50,
+      particle: {
+        shape: "rhombus",
+        lifetime: 50,
+        speed: 10,
+        widthFrom: 30,
+        widthTo: 0,
+        heightFrom: 600,
+        heightTo: 300,
+        colours: [
+          [20, 20, 0],
+          [0, 0, 0],
+        ],
+        light: 60,
+      },
+    },
+    {
+      type: "particle-emission",
+      amount: 2,
+      cone: 0,
+      maxXOffset: 50,
+      maxYOffset: 50,
+      particle: {
+        shape: "rhombus",
+        lifetime: 50,
+        speed: 10,
+        widthFrom: 10,
+        widthTo: 0,
+        heightFrom: 200,
+        heightTo: 100,
+        colours: [
+          [255, 255, 100],
+          [200, 200, 80],
+        ],
+        light: 60,
+      },
+    },
+  ],
+});
+Registries.vfx.add("death-laser-hit", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      amount: 4,
+      cone: 45,
+      particle: {
+        shape: "rhombus",
+        lifetime: 45,
+        speed: 9,
+        widthFrom: 20,
+        widthTo: 0,
+        heightFrom: 60,
+        heightTo: 120,
+        colours: [
+          [0, 0, 0],
+          [20, 20, 0],
+          [0, 0, 0],
+          [20, 20, 0],
+          [255, 255, 100, 128],
+          [200, 200, 80, 0],
+        ],
+        light: 60,
+      },
+    },
+    {
+      type: "particle-emission",
+      amount: 4,
+      cone: 60,
+      particle: {
+        shape: "rhombus",
+        lifetime: 40,
+        speed: 3,
+        widthFrom: 20,
+        widthTo: 0,
+        heightFrom: 60,
+        heightTo: 120,
+        colours: [
+          [0, 0, 0],
+          [20, 20, 0],
+          [0, 0, 0],
+          [20, 20, 0],
+          [255, 255, 100, 128],
+          [200, 200, 80, 0],
+        ],
+        light: 60,
+      },
+    },
+    {
+      type: "explosion",
+      sparkColours: [
+        [0, 0, 0],
+        [20, 20, 0],
+        [0, 0, 0],
+        [20, 20, 0],
+        [255, 255, 100, 128],
+        [200, 200, 80, 0],
+      ],
+      wave: false,
+      smoke: false,
+    },
+  ],
+});
+
 Registries.vfx.add("deathbringer-trail", {
   type: "multi-effect",
   effects: [
@@ -961,6 +1148,28 @@ Registries.vfx.add("laser-caster-fire-destabilised", {
     light: 100,
   },
 });
+Registries.vfx.add("death-laser-flames", {
+  type: "particle-emission",
+  amount: 4,
+  particle: {
+    shape: "rhombus",
+    lifetime: 30,
+    speed: 1,
+    decel: 0.03,
+    widthFrom: 5,
+    widthTo: 10,
+    heightFrom: 5,
+    heightTo: 10,
+    colours: [
+      [0, 0, 0],
+      [20, 20, 0],
+      [255, 255, 150, 128],
+      [200, 200, 100, 0],
+    ],
+    rotateSpeed: 2,
+    light: 100,
+  },
+});
 
 //Status
 
@@ -1039,6 +1248,28 @@ Registries.vfx.add("destabilised", {
       [255, 128, 128],
       [255, 0, 0, 100],
     ],
+    light: 50,
+  },
+});
+Registries.vfx.add("death-burn", {
+  type: "particle-emission",
+  amount: 2,
+  particle: {
+    shape: "rhombus",
+    lifetime: 30,
+    speed: 0.5,
+    decel: 0.05,
+    widthFrom: 5,
+    widthTo: 10,
+    heightFrom: 5,
+    heightTo: 10,
+    colours: [
+      [0, 0, 0],
+      [20, 20, 0],
+      [255, 255, 150, 128],
+      [200, 200, 100, 0],
+    ],
+    rotateSpeed: 2,
     light: 50,
   },
 });

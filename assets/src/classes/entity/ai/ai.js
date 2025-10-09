@@ -29,6 +29,9 @@ export class AI {
     }
     task.tick(this, entity);
   }
+  next(){
+    this.#index++;
+  }
   get(name) {
     return this.data.has(name) ? this.data.get(name) : null;
   }

@@ -1,5 +1,6 @@
-import { construct } from "../../../core/constructor.js";
+import { construct, constructFromType } from "../../../core/constructor.js";
 import { Vector } from "../../../core/number.js";
+import { RegisteredItem } from "../../../core/registered-item.js";
 import { ui } from "../../../core/ui.js";
 import { autoScaledEffect } from "../../../play/effects.js";
 import {
@@ -13,7 +14,7 @@ import { AICondition } from "./ai-conditions.js";
 import { AI } from "./ai.js";
 
 //Base class, counts as just waiting
-export class AITask {
+export class AITask extends RegisteredItem{
   started = false;
   duration = 1;
   #timer = 0;
@@ -29,7 +30,8 @@ export class AITask {
    * @param {Entity} entity
    */
   tick(ai, entity) {
-    if (!this.started && this.condition.canDoIt(ai, entity)) {
+    if (!this.condition.canDoIt(ai, entity)) return;
+    if (!this.started) {
       this.started = true;
       this.start(ai, entity);
     } else if (this.#timer < this.duration) {
@@ -39,6 +41,7 @@ export class AITask {
       this.end(ai, entity);
       this.started = false;
       this.#timer = 0;
+      ai.next();
     }
   }
   /**
@@ -130,13 +133,17 @@ export class CreateBulletsTask extends AITask {
   pattern = new ShootPattern();
   effect = "none";
   timer = new Timer();
+  init() {
+    super.init();
+    this.pattern = constructFromType(this.pattern, ShootPattern);
+  }
   /**
    * @param {AI} ai
    * @param {Entity} entity The entity to do it to.
    */
   start(ai, entity) {
     this.timer.repeat(
-      () => {
+      (i) => {
         let pos = this.relativeToCamera
           ? ui.camera.pos.addXY(this.x, this.y)
           : new Vector(this.x, this.y);
@@ -145,14 +152,14 @@ export class CreateBulletsTask extends AITask {
           entity.world,
           pos.x,
           pos.y,
-          radians(direction)
+          radians(this.direction)
         );
         patternedBulletExpulsion(
           pos.x,
           pos.y,
           this.bullet,
           this.pattern.amount,
-          direction,
+          this.direction,
           this.pattern.spread,
           this.pattern.spacing,
           entity.world,
@@ -162,6 +169,10 @@ export class CreateBulletsTask extends AITask {
       this.pattern.burst,
       this.pattern.interval
     );
+    this.timer.tick();
+  }
+  update(ai, entity) {
+    this.timer.tick();
   }
 }
 /**
