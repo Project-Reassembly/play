@@ -67,13 +67,12 @@ class Explosion {
     for (let e of this.world.entities) {
       //If hit
       if (!e.dead) {
-        let dist2 = (this.x - e.x) ** 2 + (this.y - e.y) ** 2 || 1;
-        let scalar = kbrm * 100;
+        let dist = ((this.x - e.x) ** 2 + (this.y - e.y) ** 2) ** 0.5 || 1;
+        let scalar = kbrm * 75;
         e.knock(
           clamp(
-            ((!isNaN(this.knockback) ? this.knockback : this.amount ** 0.5) *
-              scalar) /
-              dist2,
+            ((!isNaN(this.knockback) ? this.knockback : this.amount) * scalar) /
+              dist ** 3,
             0,
             200
           ),

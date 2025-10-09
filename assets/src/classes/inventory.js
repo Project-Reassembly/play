@@ -492,8 +492,6 @@ class Inventory {
             this.canPlaceInSlot(index)
           ) {
             if (ui.mouseButton === "right") {
-              Log.send("place in empty slot");
-
               ui.waitingForMouseUp = true;
               invitemstack.item = Inventory.mouseItemStack.item;
               invitemstack.count = 1;

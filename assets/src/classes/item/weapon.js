@@ -11,7 +11,10 @@ import { LaserBullet } from "../projectile/laser-bullet.js";
 import { Bullet } from "../projectile/bullet.js";
 import { Missile } from "../projectile/missile.js";
 import { Registries } from "../../core/registry.js";
-import { WeaponBulletConfiguration, WeaponShootConfiguration } from "./weapon-exts.js";
+import {
+  WeaponBulletConfiguration,
+  WeaponShootConfiguration,
+} from "./weapon-exts.js";
 import { patternedBulletExpulsion } from "../projectile/yeeter.js";
 class Weapon extends Equippable {
   timer = new Timer();
@@ -63,7 +66,7 @@ class Weapon extends Equippable {
     this.timer.tick();
     this.decelerate();
     if (this.#cooldown > 0) {
-      this.#cooldown--;
+      this.#cooldown -= holder.attributes.getValue("fire-rate");
       if (this.#cooldown <= 0) {
         let pos = this._getShootPos(holder);
         autoScaledEffect(
@@ -296,11 +299,7 @@ class Weapon extends Equippable {
       "🟨Shots:⬜",
       ...Object.keys(bulletConfig.ammos).flatMap((x) =>
         bulletConfig.unbrowsable.includes(bulletConfig.ammos[x])
-          ? [
-              x == "none"
-                ? " "
-                : ind(1) + "🟨" + Registries.items.get(x).name + ": variant⬜",
-            ]
+          ? []
           : [
               x == "none"
                 ? " "
@@ -357,11 +356,9 @@ class Weapon extends Equippable {
           : ""),
 
       ind(idl) +
-        (blt.pierce > 0
-          ? blt.conditionalPierce
-            ? "🟨continues if target destroyed⬜"
-            : "🟨" + blt.pierce + "× pierce⬜"
-          : ""),
+        (blt.conditionalPierce ? "🟨continues if target destroyed⬜" : ""),
+
+      ind(idl) + (blt.pierce > 0 ? "🟨" + blt.pierce + "× pierce⬜" : ""),
 
       ind(idl) + (blt.fires > 0 ? "🟧incendiary: " : ""),
       ind(idl + 1) +
@@ -419,7 +416,7 @@ function entityHasAmmo(ent, ammoItem, ammoAmount) {
   if (ammoItem === "none") return true;
   return ent instanceof InventoryEntity
     ? ent instanceof EquippedEntity
-      ? ent.equipment.hasItem(ammoItem, ammoAmount)
+      ? ent.ammo.hasItem(ammoItem, ammoAmount)
       : ent.inventory.hasItem(ammoItem, ammoAmount)
     : false;
 }
@@ -428,7 +425,7 @@ function entityAmmoCount(ent, ammoItem, ammoAmount) {
   if (ammoItem === "none") return -1;
   return ent instanceof InventoryEntity
     ? ent instanceof EquippedEntity
-      ? ent.equipment.count(ammoItem)
+      ? ent.ammo.count(ammoItem)
       : ent.inventory.count(ammoItem)
     : false;
 }
@@ -436,7 +433,7 @@ function entityAmmoCount(ent, ammoItem, ammoAmount) {
 function entityAmmoUse(ent, ammoItem, ammoAmount) {
   return ent instanceof InventoryEntity
     ? ent instanceof EquippedEntity
-      ? ent.equipment.removeItem(ammoItem, ammoAmount)
+      ? ent.ammo.removeItem(ammoItem, ammoAmount)
       : ent.inventory.removeItem(ammoItem, ammoAmount)
     : false;
 }

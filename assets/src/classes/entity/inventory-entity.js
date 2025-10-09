@@ -46,6 +46,8 @@ class EquippedEntity extends InventoryEntity {
   leftHand = null;
   /**@type {Inventory} */
   body = null;
+  /**@type {Inventory} */
+  ammo = null;
 
   armType = new Component();
 
@@ -80,6 +82,7 @@ class EquippedEntity extends InventoryEntity {
       this.rightHand,
       this.leftHand,
       this.body,
+      this.ammo,
     ];
   }
 
@@ -90,6 +93,7 @@ class EquippedEntity extends InventoryEntity {
     this.body = new Inventory(1, this.body);
     this.head = new Inventory(1, this.head);
     this.equipment = new Inventory(5, this.equipment);
+    this.ammo = new Inventory(5, this.ammo);
     this.armType = construct(this.armType, "component");
   }
 
@@ -138,36 +142,17 @@ class EquippedEntity extends InventoryEntity {
           this.armType.yOffset
         );
     else this.armType.draw(this.x, this.y, this.direction);
-
+    let d = (item) => {
+      if (item instanceof Equippable) {
+        item.component.draw(this.x, this.y, this.direction);
+      }
+    };
     if (this.bodyPart) this.bodyPart.draw(this.x, this.y, this.direction);
-    this.body.iterate((x) => {
-      let item = x.getItem();
-      if (item instanceof Equippable) {
-        item.component.draw(this.x, this.y, this.direction);
-      }
-    }, true);
     if (this.headPart) this.headPart.draw(this.x, this.y, this.direction);
-    this.head.iterate((x) => {
-      let item = x.getItem();
-      if (item instanceof Equippable) {
-        item.component.draw(this.x, this.y, this.direction);
-      }
-    }, true);
+    d(this.body.get(0)?.getItem());
+    d(this.head.get(0)?.getItem());
     PhysicalObject.prototype.draw.call(this);
     if (PhysicalObject.debug) this._debugAI();
-    // for (let inv of this.inventories) {
-    //   inv.iterate((x) => {
-    //     let item = x.getItem();
-    //     if (item instanceof Equippable) {
-    //       item.component.draw(
-    //         this.x,
-    //         this.y,
-    //         this.direction,
-    //         inv == this.leftHand
-    //       );
-    //     }
-    //   });
-    // }
   }
   serialise() {
     let e = super.serialise();
@@ -176,6 +161,7 @@ class EquippedEntity extends InventoryEntity {
     e.rightHand = this.rightHand.serialise();
     e.head = this.head.serialise();
     e.body = this.body.serialise();
+    e.ammo = this.ammo.serialise();
     return e;
   }
   static applyExtraProps(entity, created) {
@@ -185,6 +171,7 @@ class EquippedEntity extends InventoryEntity {
     entity.rightHand = Inventory.deserialise(created.rightHand);
     entity.head = Inventory.deserialise(created.head);
     entity.body = Inventory.deserialise(created.body);
+    entity.ammo = Inventory.deserialise(created.ammo);
   }
   attack() {
     if (
@@ -197,6 +184,18 @@ class EquippedEntity extends InventoryEntity {
       this.leftHand.get(0).getItem() instanceof Equippable
     )
       this.leftHand.get(0).getItem().use(this);
+  }
+  calculateAttributeModifiers() {
+    super.calculateAttributeModifiers();
+
+    this.equipment.iterate((stack) => {
+      let i = stack.getItem();
+      if (i instanceof Equippable) {
+        for (let key in i.attributeModifiers) {
+          this.attributes.multiply(key, i.attributeModifiers[key]);
+        }
+      }
+    });
   }
 }
 export { EquippedEntity, InventoryEntity };

@@ -189,3 +189,7 @@ Registries.images.add("icon.question", new ImageContainer("assets/textures/icon/
 Registries.images.add("icon.selector", new ImageContainer("assets/textures/icon/selector.png"))
 Registries.images.add("icon.arrow", new ImageContainer("assets/textures/icon/arrow.png"))
 Registries.images.add("icon.home", new ImageContainer("assets/textures/icon/home.png"))
+Registries.images.add("icon.bullet", new ImageContainer("assets/textures/icon/bullet.png"))
+Registries.images.add("icon.iti", new ImageContainer("assets/textures/icon/iti.png"))
+Registries.images.add("icon.peti", new ImageContainer("assets/textures/icon/peti.png"))
+Registries.images.add("icon.ccc", new ImageContainer("assets/textures/icon/ccc.png"))

@@ -107,6 +107,7 @@ import {
   NearTargetCondition,
   StoredTargetCondition,
 } from "../classes/entity/ai/ai-conditions.js";
+import { Equippable } from "../classes/item/equippable.js";
 //Basic
 Registries.type.add("generic", RegisteredItem);
 //Entities and parts
@@ -134,7 +135,7 @@ Registries.type.add("virtual", VirtualBullet);
 Registries.type.add("item", Item);
 Registries.type.add("placeable", PlaceableItem);
 Registries.type.add("itemstack", ItemStack);
-Registries.type.add("equippable", EquippedEntity);
+Registries.type.add("equippable", Equippable);
 //Weapons
 Registries.type.add("weapon", Weapon);
 Registries.type.add("throwable", Throwable);

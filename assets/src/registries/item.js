@@ -1573,9 +1573,9 @@ Registries.items.add("peti-plasma-railgun", {
   description: "Pierces targets with a massive bolt of red plasma.",
   image: "weapon.peti-plasma-railgun.item",
   range: 1000,
-  recoil: 20,
-  shootX: -6,
-  shootY: 3,
+  recoil: 10,
+  shootX: 42,
+  shootY: -1,
   bullets: {
     types: [
       {
@@ -1588,7 +1588,7 @@ Registries.items.add("peti-plasma-railgun", {
         conditionalPierce: true,
         trailShape: "rhombus",
         trailEffect: "plasma-railgun-trail",
-        hitEffect: "plasma-railgun-hit~45",
+        hitEffect: "plasma-railgun-hit~70",
         knockback: 50,
         drawer: {
           hidden: true,
@@ -1600,7 +1600,7 @@ Registries.items.add("peti-plasma-railgun", {
             spread: 300,
           },
         ],
-        despawnEffect: "plasma-railgun-impact~70",
+        despawnEffect: "plasma-railgun-impact~120",
       },
     ],
     ammos: {
@@ -1615,12 +1615,12 @@ Registries.items.add("peti-plasma-railgun", {
   },
   component: {
     type: "weapon-component",
-    width: 42,
+    width: 83,
     height: 20,
     yOffset: 5,
     image: "weapon.peti-plasma-railgun.component",
-    recoil: 4,
-    rotationalRecoil: 10,
+    recoil: 14,
+    rotationalRecoil: 25,
     recoilSpeed: 0.1,
   },
 });
@@ -2067,19 +2067,25 @@ Registries.items.add("scrap-rocket", {
   stackSize: 1000,
 });
 Registries.items.add("iti-energy-cell", {
+  type: "equippable",
   name: "Energy Cell",
   marketValue: 1000,
   description:
-    "A kind of battery manufactured by\nInfiniTech Industries.\nCan boost most energy weapons.",
+    "A kind of battery manufactured by\nInfiniTech Industries.\nCan boost most energy-using things, including\nyou and weapons.",
   image: "item.iti-energy-cell",
   rarity: Item.rarity.ITI,
   stackSize: 200,
+  attributeModifiers: {
+    speed: 1.1,
+    "fire-rate": 1.2,
+    health: 0.7
+  }
 });
 Registries.items.add("iti-plasma-cell", {
   name: "Plasma Cell",
   marketValue: 2500,
   description:
-    "More powerful version of the Energy Cell,\ndesigned for better weapon boosting.",
+    "More powerful version of the Energy Cell,\ndesigned for better weapon boosting.\nWon't boost players.",
   image: "item.iti-plasma-cell",
   rarity: Item.rarity.ITI,
   stackSize: 200,

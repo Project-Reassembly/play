@@ -240,7 +240,7 @@ Object.defineProperty(
   ),
   "inventory",
   {
-    get: () => game.player?.equipment,
+    get: () => game.player?.ammo,
   }
 ).anchorRight(30);
 
@@ -415,9 +415,9 @@ Object.defineProperties(
     null,
     "Name Here",
     true,
-    15
+    18
   )
-    .anchorLeft(35)
+    .anchorLeft(40)
     .anchorBottom(75)
     .setBackgroundColour([0, 0, 0]),
   {
@@ -431,8 +431,8 @@ Object.defineProperties(
     [],
     10,
     10,
-    20,
-    20,
+    25,
+    25,
     null,
     "error",
     false,
@@ -445,11 +445,11 @@ Object.defineProperties(
     image: {
       get: () =>
         game.player?.registryName.includes("iti")
-          ? "iti-icon"
+          ? "icon.iti"
           : game.player?.registryName.includes("peti")
-          ? "peti-icon"
+          ? "icon.peti"
           : game.player?.registryName.includes("ccc")
-          ? "ccc-icon"
+          ? "icon.ccc"
           : "scrap",
     },
   }
@@ -478,7 +478,14 @@ Object.defineProperties(
   {
     text: {
       get: () =>
-        "HP | " + roundNum(game.player?.health) + "/" + game.player.maxHealth,
+        "HP | " +
+        roundNum(
+          game.player?.health * game.player?.attributes.getValue("health")
+        ) +
+        "/" +
+        roundNum(
+          game.player.maxHealth * game.player?.attributes.getValue("health")
+        ),
     },
     width: { get: () => width / 5 },
   }
@@ -507,7 +514,15 @@ Object.defineProperties(
     .setOutlineColour([0, 0, 0, 0]),
   {
     width: { get: () => width / 5 },
-    text: { get: () => (game.player?.shield > 0 ? "Shield | "+roundNum(game.player?.shield)+"/"+game.player?._lastMaxShield : "") },
+    text: {
+      get: () =>
+        game.player?.shield > 0
+          ? "Shield | " +
+            roundNum(game.player?.shield) +
+            "/" +
+            game.player?._lastMaxShield
+          : "",
+    },
   }
 );
 //energy bar
@@ -538,7 +553,10 @@ Object.defineProperties(
   {
     text: {
       get: () =>
-        "Energy | " + roundNum(game.player?.energy) + "/" + game.player.maxEnergy,
+        "Energy | " +
+        roundNum(game.player?.energy) +
+        "/" +
+        game.player.maxEnergy,
     },
     width: { get: () => width / 5 },
   }
@@ -623,9 +641,9 @@ Object.defineProperties(
     () => {
       if (Container.selectedBlock instanceof Container) {
         Container.selectedBlock.inventory.transfer(
-          game.player?.equipment,
+          game.player?.ammo,
           true,
-          (ist) => game.player?.equipment?.hasItem(ist.item)
+          (ist) => game.player?.ammo?.hasItem(ist.item)
         );
         Container.selectedBlock.inventory.transfer(game.player?.inventory);
       }
@@ -651,7 +669,7 @@ Object.defineProperties(
     "left",
     () => {
       if (Container.selectedBlock instanceof Container) {
-        game.player?.equipment.transfer(Container.selectedBlock.inventory);
+        game.player?.ammo.transfer(Container.selectedBlock.inventory);
         game.player?.inventory.transfer(Container.selectedBlock.inventory);
       }
     },
@@ -676,7 +694,7 @@ Object.defineProperties(
     "left",
     () => {
       if (Container.selectedBlock instanceof Container) {
-        game.player?.equipment.transfer(
+        game.player?.ammo.transfer(
           Container.selectedBlock.inventory,
           true,
           (itemstack) =>
@@ -705,7 +723,7 @@ Object.defineProperties(
 
 //##############################################################
 createUIComponent(["in-game"], ["menu:inventory"], -200, 0, 500, 400);
-createUIComponent(["in-game"], ["menu:inventory"], 200, 0, 300, 500);
+createUIComponent(["in-game"], ["menu:inventory"], 230, 0, 360, 500);
 createUIComponent(
   ["in-game"],
   ["menu:inventory"],
@@ -808,7 +826,7 @@ createUIComponent(
   30,
   "both",
   () => {
-    game.player?.equipment.transfer(game.player?.inventory, true);
+    game.player?.ammo.transfer(game.player?.inventory, true);
   },
   "Store Ammunition",
   true,
@@ -823,8 +841,8 @@ createUIComponent(
   30,
   "both",
   () => {
-    game.player?.inventory.transfer(game.player?.equipment, true, (stack) =>
-      game.player.equipment.hasItem(stack.item)
+    game.player?.inventory.transfer(game.player?.ammo, true, (stack) =>
+      game.player.ammo.hasItem(stack.item)
     );
   },
   "Refill Ammo",
@@ -913,6 +931,34 @@ Object.defineProperty(
     null,
     null,
     5
+  ),
+  "inventory",
+  {
+    get: () => game.player?.ammo,
+  }
+);
+
+createUIImageComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  360,
+  -200,
+  40,
+  40,
+  null,
+  "icon.bullet",
+  false
+);
+
+Object.defineProperty(
+  createUIInventoryComponent(
+    ["in-game"],
+    ["menu:inventory"],
+    360,
+    -72,
+    null,
+    5,
+    1
   ),
   "inventory",
   {

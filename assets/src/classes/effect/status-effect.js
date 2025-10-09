@@ -5,10 +5,7 @@ class StatusEffect extends RegisteredItem {
   damage = 0;
   healing = 0;
   damageType = "normal";
-  speedMult = 1;
-  healthMult = 1;
-  damageMult = 1;
-  resistanceMult = 1;
+  attributeModifiers = {};
   interval = 10;
   effect = "none";
   effectChance = 1;

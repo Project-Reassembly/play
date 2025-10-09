@@ -38,11 +38,6 @@ class DroppedItemStack extends Entity {
       return;
     }
     this.item.getItem().groundTick(this.x, this.y, this.world);
-    this.speed *= 0.9;
-    this.move(
-      Math.cos(this.directionRad) * this.speed,
-      Math.sin(this.directionRad) * this.speed
-    );
     this.#delayLeft--;
     if (this.#delayLeft <= 0)
       for (let ent of this.world.entities) {
@@ -84,6 +79,13 @@ class DroppedItemStack extends Entity {
           }
         }
       }
+    else {
+      this.attributes.multiply("speed", 0.9);
+      this.move(
+        Math.cos(this.directionRad) * this.speed,
+        Math.sin(this.directionRad) * this.speed
+      );
+    }
     this.tickGroundEffects();
   }
   tickGroundEffects() {

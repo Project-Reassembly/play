@@ -12,6 +12,7 @@ import { blockSize, totalSize, worldSize } from "../../scaling.js";
 import { game } from "../../play/game.js";
 import { Block } from "../block/block.js";
 import { AI } from "./ai/ai.js";
+import { AttributeMap } from "./attribute.js";
 /**
  * @typedef SerialisedEntity
  * @prop {number} health
@@ -34,8 +35,21 @@ class Entity extends ShootableObject {
 
   moving = false;
   hitSize = 20;
-  speed = 10;
-  turnSpeed = 10;
+  get speed() {
+    return this.attributes.get("speed").get();
+  }
+  set speed(_) {
+    this.attributes.get("speed").set(_);
+  }
+  get baseSpeed() {
+    return this.attributes.get("speed").base();
+  }
+  get turnSpeed() {
+    return this.attributes.get("turnSpeed").get();
+  }
+  set turnSpeed(_) {
+    this.attributes.get("turnSpeed").set(_);
+  }
   target = null;
 
   //nrg
@@ -63,10 +77,15 @@ class Entity extends ShootableObject {
   isBoss = false;
 
   //Status effects
-  effectiveDamageMult = 1;
-  effectiveHealthMult = 1;
-  effectiveResistanceMult = 1;
-  effectiveSpeedMult = 1;
+  /** @type {AttributeMap} */
+  attributes = new AttributeMap({
+    speed: 10,
+    turnSpeed: 10,
+    health: 1,
+    resistances: 1,
+    "fire-rate": 1,
+  });
+
   statuses = {};
 
   //Physics
@@ -74,7 +93,7 @@ class Entity extends ShootableObject {
   explosiveness = 0.1;
   _lastPos = Vector.ZERO;
 
-  //because rate limit sucks and the scrapper is  s l o w
+  //because ai rate limit sucks and the scrapper is  s l o w
   #firing = false;
 
   get computedVelocity() {
@@ -95,7 +114,12 @@ class Entity extends ShootableObject {
     super.init();
     this.maxEnergy = this.energy;
     this.components = this.components.map((x) => construct(x, "component"));
-    this.baseSpeed = this.speed;
+
+    if (!(this.attributes instanceof AttributeMap)) {
+      console.warn("Invalid attribute map!");
+      this.attributes = new AttributeMap();
+      this.dead = true;
+    }
 
     if (this.ai) this.ai = constructFromType(this.ai, AI);
   }
@@ -197,10 +221,9 @@ class Entity extends ShootableObject {
 
   tick() {
     this.components.forEach((c) => c.tick(this));
-    this.tickGroundEffects();
     if (this.controllable) this.doAI();
     super.tick();
-    this.tickStatuses();
+    this.calculateAttributeModifiers();
     this._lastPos = new Vector(this.x, this.y);
   }
 
@@ -383,7 +406,7 @@ class Entity extends ShootableObject {
       );
     if (blockIn && blockIn.walkable) blockIn.steppedOnBy(this);
     else if (blockOn?.speedMultiplier)
-      this.speed = this.baseSpeed * blockOn.speedMultiplier;
+      this.attributes.multiply("speed", blockOn.speedMultiplier);
   }
   draw() {
     for (let component of this.components) {
@@ -428,13 +451,13 @@ class Entity extends ShootableObject {
     }
     pop();
   }
+  calculateAttributeModifiers() {
+    this.attributes.resetAll();
+    this.tickStatuses();
+    this.tickGroundEffects();
+  }
 
   tickStatuses() {
-    this.effectiveSpeedMult =
-      this.effectiveDamageMult =
-      this.effectiveHealthMult =
-      this.effectiveResistanceMult =
-        1;
     for (let status in this.statuses) {
       let time = this.statuses[status];
       /**@type {StatusEffect} */
@@ -449,10 +472,9 @@ class Entity extends ShootableObject {
         this.damage(effect.damageType, effect.damage);
         this.heal(effect.healing);
       }
-      this.effectiveSpeedMult *= effect.speedMult ?? 1;
-      this.effectiveDamageMult *= effect.damageMult ?? 1;
-      this.effectiveHealthMult *= effect.healthMult ?? 1;
-      this.effectiveResistanceMult *= effect.resistanceMult ?? 1;
+      for (let key in effect.attributeModifiers) {
+        this.attributes.multiply(key, effect.attributeModifiers[key]);
+      }
       if (time > 0) this.statuses[status]--; //Tick timer
       else delete this.statuses[status];
     }
@@ -463,7 +485,8 @@ class Entity extends ShootableObject {
 
   damage(type = "normal", amount = 0, source = null) {
     let calcAmount =
-      (amount / this.effectiveHealthMult) * (source?.effectiveDamageMult ?? 1); //Get damage multiplier of source, if there is one
+      (amount / this.attributes.getValue("health")) *
+      (source?.attributes ? source.attributes.getValue("damageMult") : 1); //Get damage multiplier of source, if there is one
     for (let resistance of this.resistances) {
       if (resistance.type === type) {
         calcAmount -= amount * resistance.amount; //Negative resistance would actually make it do more damage

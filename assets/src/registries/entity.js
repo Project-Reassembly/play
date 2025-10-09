@@ -391,7 +391,7 @@ Registries.entities.add("scavenger", {
     yOffset: 13,
     image: "arm.scrap",
   },
-  equipment: [
+  ammo: [
     {
       item: "scrap-bullet",
       min: 100,
@@ -454,7 +454,7 @@ Registries.entities.add("scrap-sentinel", {
     yOffset: 15,
     image: "arm.scrap",
   },
-  equipment: [
+  ammo: [
     {
       item: "scrap-bullet",
       min: 200,
@@ -537,7 +537,7 @@ Registries.entities.add("iti-corporate-merchant", {
       dropChance: 0.125,
     },
   ],
-  equipment: [
+  ammo: [
     {
       item: "iti-energy-cell",
       dropChance: 0.2,
@@ -585,7 +585,6 @@ Registries.entities.add("scrapper", {
   leftHand: [
     {
       item: "scrap-repeater",
-      dropChance: 0.25,
     },
   ],
   armType: {
@@ -594,7 +593,7 @@ Registries.entities.add("scrapper", {
     yOffset: 20,
     image: "arm.scrap",
   },
-  equipment: [
+  ammo: [
     {
       item: "scrap",
       min: 60,

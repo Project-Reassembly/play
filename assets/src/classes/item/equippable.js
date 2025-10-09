@@ -1,4 +1,5 @@
 import { construct } from "../../core/constructor.js";
+import { roundNum } from "../../core/number.js";
 import { Item } from "./item.js";
 class Equippable extends Item {
   //Shown offsets
@@ -7,6 +8,7 @@ class Equippable extends Item {
   /** @type {Component} */
   component = null;
   stackSize = 1;
+  attributeModifiers = {}; // what do when equipped?
   /** (extra) Rotation in degrees */
   get rotation() {
     if (!this.component) return 0;
@@ -26,5 +28,28 @@ class Equippable extends Item {
   }
   /** @param {Entity} holder The entity using this item */
   use(holder, isSecondary = false) {}
+
+  createExtendedTooltip() {
+    let mods = Object.keys(this.attributeModifiers);
+    return [
+      "🟨 -------------------- ⬜",
+      mods.length > 0
+        ? [
+            "🟨When equipped:⬜",
+            mods.map((key) => {
+              let i = this.attributeModifiers[key];
+              return (
+                (i < 1 ? "🟥  " : "🟩  +") +
+                roundNum((i - 1) * 100, 1) +
+                "% " +
+                key.replace("-", " ") +
+                "⬜"
+              );
+            }),
+            "🟨 -------------------- ⬜",
+          ].flat()
+        : "🟨 -------------------- ⬜",
+    ].flat(2);
+  }
 }
 export { Equippable };

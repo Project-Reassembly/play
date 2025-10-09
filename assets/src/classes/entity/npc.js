@@ -92,7 +92,7 @@ class NPC extends EquippedEntity {
     ) {
       this.pacify();
     }
-    super.ai();
+    super.doAI();
   }
   ispassive = () => this.aiType == "passive";
   pacify = () => {
