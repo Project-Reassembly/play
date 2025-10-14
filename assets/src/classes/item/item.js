@@ -1,7 +1,7 @@
 import { RegisteredItem } from "../../core/registered-item.js";
 import { tru, rnd } from "../../core/number.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
-import { effectTimer } from "../../play/effects.js";
+import { Decoration, process, TextDrawer, wrapWords } from "../../core/text.js";
 class Item extends RegisteredItem {
   image = "error";
   name = "<unnamed item>";
@@ -9,10 +9,27 @@ class Item extends RegisteredItem {
   rarity = 0;
   stackSize = 100;
 
-  marketValue = 1;
+  marketValue = 0;
 
   _cachedTooltip = null;
-  init() {}
+  /**@type {TextDrawer} */
+  tooltip = null;
+  init() {
+    // this.description = wrapWords(this.description, 40);
+    this.title = process("#@b"+this.name+"#fn", 40)
+      .drawer(25)
+      .conjoin(
+        process(
+          this.description +
+            (this.marketValue > 0
+              ? "\n#a-Sell value: $" + this.marketValue
+              : "\n#4iNo sell value"),
+          40
+        ).drawer(20)
+      );
+
+    //this.tooltip =
+  }
   /** Called every tick while in inventory.
    * @param {InventoryEntity} holder Entity holding this item.
    */
@@ -58,10 +75,13 @@ class Item extends RegisteredItem {
   getContextualisedInfo(entity) {}
   getInformativeTooltip() {
     if (!this._cachedTooltip)
-      this._cachedTooltip = this.createExtendedTooltip();
-    return this._cachedTooltip.concat(
-      "🟩Sell value: $" + this.marketValue + "⬜"
-    );
+      this._cachedTooltip = this.createExtendedTooltip().concat(
+        "🟩Sell value: $" + this.marketValue + "⬜"
+      );
+    return this._cachedTooltip;
+  }
+  getTooltipDrawer() {
+    return this.tooltip;
   }
   createExtendedTooltip() {
     return [];
@@ -78,21 +98,17 @@ class Item extends RegisteredItem {
           case this.rarity.COMMON:
             return [255, 255, 255];
           case this.rarity.CCC:
-            return [150, 255, 150];
+            return Decoration.colours.h;
           case this.rarity.BLUE:
-            return [150, 150, 255];
+            return Decoration.colours.l;
           case this.rarity.RARE:
-            return [200, 150, 255];
+            return Decoration.colours.r;
           case this.rarity.SPECIAL:
-            return [
-              255,
-              230 + Math.sin(effectTimer.ticks / 30) * 30,
-              130 + Math.sin(effectTimer.ticks / 30) * 20,
-            ];
+            return Decoration.colours.s;
           case this.rarity.PETI:
-            return [255, 150, 150];
+            return Decoration.colours.p;
           case this.rarity.ITI:
-            return [0, 190, 230];
+            return Decoration.colours.i;
         }
       }
       case "dark": {

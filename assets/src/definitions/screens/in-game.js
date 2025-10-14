@@ -116,8 +116,8 @@ Object.defineProperty(
   createMultilineUIComponent(
     ["in-game"],
     ["mode:fight"],
-    -120,
-    230,
+    -85,
+    210,
     0,
     0,
     "none",
@@ -135,7 +135,7 @@ Object.defineProperty(
         ?.getContextualisedInfo(game.player) ?? "",
   }
 )
-  .anchorBottom(45)
+  .anchorBottom(55)
   .alignRight();
 
 Object.defineProperty(
@@ -176,7 +176,7 @@ Object.defineProperty(
     ["in-game"],
     ["mode:fight"],
     60,
-    230,
+    210,
     0,
     0,
     "none",
@@ -193,7 +193,7 @@ Object.defineProperty(
         ?.getItem()
         ?.getContextualisedInfo(game.player) ?? "",
   }
-).anchorBottom(45);
+).anchorBottom(55);
 
 //fight mode, ammo part
 createUIComponent(

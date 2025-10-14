@@ -651,7 +651,7 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "A simple construction,\ncapable of crafting\nbasic machinery.\n\nCan reproduce.",
+      "A simple construction, capable of crafting basic machinery.\n\nCan reproduce.",
     marketValue: 30,
   }
 );
@@ -667,7 +667,7 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "A machine capable of reversing\nthe work of a Scrap Assembler.",
+      "A machine capable of reversing the work of a Scrap Assembler.",
     marketValue: 60,
   }
 );
@@ -1155,7 +1155,7 @@ createLinkedBlockAndItem(
     otherPart: "scrap-turret-controller"
   },
   {
-    description: "Basic block to increase the\n maximum size of turrets on\n a Scrap Turret Controller.",
+    description: "Basic block to increase the  maximum size of turrets on  a Scrap Turret Controller.",
     marketValue: 20 // 3 plates = 15
   }
 );
@@ -1183,7 +1183,7 @@ createLinkedBlockAndItem(
     otherPart: "peti-turret-controller"
   },
   {
-    description: "Block to increase the\n maximum size of turrets on\n a PETI Turret Controller.",
+    description: "Block to increase the  maximum size of turrets on  a PETI Turret Controller.",
     marketValue: 200 // 3 plates = 15
   }
 );
@@ -1212,7 +1212,7 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "Pressurises and superheats gas in\nthe atmosphere into plasma.",
+      "Pressurises and superheats gas in the atmosphere into plasma.",
     rarity: Item.rarity.PETI,
     marketValue: 5200,
   }
@@ -1247,7 +1247,7 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "A pressurised pipe for moving high-temperature\nionised gas, known as plasma.",
+      "A pressurised pipe for moving high-temperature ionised gas, known as plasma.",
     rarity: Item.rarity.PETI,
     marketValue: 500,
   }
@@ -1269,7 +1269,7 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "A specialised pipe for increasing the pressure\nof plasma, allowing more to fit\nthrough the same pipes.\n2 pipes in , 1 pipe out.\n\nCan't compress plasma above 12 bar.",
+      "A specialised pipe for increasing the pressure of plasma, allowing more to fit through the same pipes.\n2 pipes in , 1 pipe out.\n\nCan't compress plasma above 12 bar.",
     rarity: Item.rarity.PETI,
     marketValue: 1500,
   }
@@ -1287,7 +1287,7 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "A specialised pipe for decreasing the pressure\nof plasma, allowing other blocks to use it.\n1 pipe in , 2 pipes out.\n\nCan't decompress plasma below 1 bar.",
+      "A specialised pipe for decreasing the pressure of plasma, allowing other blocks to use it.\n1 pipe in , 2 pipes out.\n\nCan't decompress plasma below 1 bar.",
     rarity: Item.rarity.PETI,
     marketValue: 1500,
   }
@@ -1315,7 +1315,7 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "Assembles a tank out of blocks.\nContainers add inventory space,\nConveyors add speed, and\nWeapons in containers are mounted\non the tank.",
+      "Assembles a tank out of blocks.\nContainers add inventory space, Conveyors add speed, and Weapons in containers are mounted on the tank.",
     rarity: Item.rarity.SPECIAL,
   }
 );
@@ -1330,7 +1330,7 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "Launches batches of items to space,\nready to be collected by ITI.",
+      "Launches batches of items to space, ready to be collected by ITI.",
     rarity: Item.rarity.SPECIAL,
   }
 );

@@ -6,6 +6,7 @@ import { fonts } from "../play/game.js";
 import { Item } from "./item/item.js";
 import { dynamicSort } from "../core/number.js";
 import { roundNum, shortenedNumber } from "../core/number.js";
+import { process } from "../core/text.js";
 /**
  * @typedef SerialisedInventory
  * @prop {SerialisedItemStack[]} storage
@@ -19,7 +20,7 @@ class Inventory {
   constructor(size, stacks = []) {
     stacks ??= [];
     this.size = size;
-    if(stacks instanceof Inventory) this.storage = stacks.storage;
+    if (stacks instanceof Inventory) this.storage = stacks.storage;
     else this.storage = stacks.map((x) => construct(x, "itemstack"));
     this.storage.length = this.size;
   }
@@ -545,32 +546,41 @@ class Inventory {
   ) {
     if (!this?.tooltip?.item) return;
 
-    let itt = this.tooltip.item.getInformativeTooltip();
-    if (!Array.isArray(itt))
-      throw new TypeError("Tooltip " + itt + " is not an array!");
-    let info = itt.filter((x) => x.toString().trim().length > 0).join("\n");
+    // let itt = this.tooltip.item.getInformativeTooltip();
+    // if (!Array.isArray(itt))
+    //   throw new TypeError("Tooltip " + itt + " is not an array!");
+    // let info = itt.filter((x) => x.toString().trim().length > 0).join("\n");
 
-    let tooltip = this.tooltip.item.description;
-    let header =
-      this.tooltip.item.name +
-      (this.tooltip.stackSize !== 1
-        ? " (" + this.tooltip.count + "/" + this.tooltip.stackSize + ")"
-        : "");
+    // let tooltip = this.tooltip.item.description;
+    // let header =
+    //   this.tooltip.item.name +
+    //   (this.tooltip.stackSize !== 1
+    //     ? " (" + this.tooltip.count + "/" + this.tooltip.stackSize + ")"
+    //     : "");
+    // let tt =
+    //   tooltip +
+    //   (info.length > 0
+    //     ? "\n" + (keyIsDown(SHIFT) ? info : "🟨 -< SHIFT for info >- ⬜")
+    //     : "");
+    // drawMultilineText(
+    //   ui.mouse.x,
+    //   ui.mouse.y,
+    //   tt,
+    //   header,
+    //   Item.getColourFromRarity(0, "light"),
+    //   outlineColour,
+    //   backgroundColour,
+    //   20,
+    //   Item.getColourFromRarity(this.tooltip.item.rarity, "light")
+    // );
 
-    drawMultilineText(
-      ui.mouse.x,
-      ui.mouse.y,
-      tooltip +
-        (info.length > 0
-          ? "\n" + (keyIsDown(SHIFT) ? info : "🟨 -< SHIFT for info >- ⬜")
-          : ""),
-      header,
-      Item.getColourFromRarity(0, "light"),
-      outlineColour,
-      backgroundColour,
-      20,
+    this.tooltip.item.title.draw(
+      ui.mouse.x + 10,
+      ui.mouse.y + 10,
+      undefined,
       Item.getColourFromRarity(this.tooltip.item.rarity, "light")
     );
+    //this.tooltip.item.tooltip.draw(ui.mouse.x + 10, ui.mouse.y + 30);
 
     // if (!this?.tooltip?.item) return;
     // push();
@@ -670,7 +680,7 @@ function drawMultilineText(
   stroke(headerColourOverride ?? colour);
   strokeWeight(1);
   let textX = displayX - maxWidth / 2 + 10;
-  let textY = displayY - boxH / 2 + (header ? txtSize * 1.5 : 0);
+  let textY = displayY - boxH / 2 + (header ? txtSize * 0.5 : -txtSize) + 5;
   if (header) text(header, textX, textY - 5);
   textSize(txtSize * 0.9);
   fill(colour);

@@ -1,5 +1,5 @@
 import { fonts } from "./font.js";
-
+import {} from "../core/text.js";
 class InGameMessageBox {
   x = 0;
   y = -100;
@@ -32,9 +32,7 @@ class InGameMessageBox {
     }
     for (let index = 0; index < len; index++) {
       push();
-      let message = (
-        this.y < 0 ? this._messages.slice(0).reverse() : this._messages
-      )[index];
+      let message = this._messages[this.y < 0 ? len - index : index];
       if (!message) continue;
       let drawY =
         this.y > 0
@@ -56,6 +54,7 @@ class InGameMessageBox {
     }
     pop();
     textStyle("normal");
+    rectMode(CENTER);
   }
   tick() {
     let len = this._messages.length;
@@ -94,6 +93,7 @@ notify = () =>
   Log.send(
     "Update available! Save the game with /save and reload the page.",
     [255, 220, 0],
-    "bold", 600
+    "bold",
+    600
   );
 export { Log, InGameMessageBox };

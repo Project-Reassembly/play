@@ -6,7 +6,7 @@ Registries.items.add("scrap", {
   name: "Scrap Metal",
   marketValue: 1,
   description:
-    "A small piece of scrap,\nrecovered from remains\nof destroyed machines.",
+    "A small piece of scrap, recovered from remains of destroyed machines.",
   image: "item.scrap",
 });
 Registries.items.add("plate", {
@@ -278,7 +278,7 @@ Registries.items.add("scrap-repeater", {
   marketValue: 200,
   name: "Scrap Repeater",
   description:
-    "Shoots bullets far more quickly.\nMore inaccurate.\n\nIf you shoot enough bullets,\nyou can't miss!",
+    "Shoots bullets far more quickly.\nMore inaccurate.\n\nIf you shoot enough bullets, you can't miss!",
   image: "weapon.scrap-repeater.item",
   range: 250,
   recoil: 0.6,
@@ -337,7 +337,7 @@ Registries.items.add("scrap-cannon", {
   name: "Scrap Cannon",
   marketValue: 150,
   description:
-    "Hurls 3 large clumps of scrap, which break apart\nin the air and on impact.",
+    "Hurls 3 large clumps of scrap, which break apart in the air and on impact.",
   image: "weapon.scrap-shooter.item",
   range: 200,
   bullets: {
@@ -1404,7 +1404,7 @@ Registries.items.add("peti-charged-laser-blaster", {
   marketValue: 0,
   rarity: Item.rarity.PETI,
   description:
-    "Shoots a pair of high-damage\ncharged balls of homing energy.\nBalls explode when near enemies.",
+    "Shoots a pair of high-damage charged balls of homing energy.\nBalls explode when near enemies.",
   image: "weapon.peti-charged-laser-blaster.item",
   range: 300,
   shootX: 7,
@@ -1493,7 +1493,7 @@ Registries.items.add("peti-plasma-sprayer", {
   name: "Plasma Sprayer",
   marketValue: 5000,
   rarity: Item.rarity.PETI,
-  description: "Shoots a stream of low-damage\nexploding balls of energy.",
+  description: "Shoots a stream of low-damage exploding balls of energy.",
   image: "weapon.peti-charged-laser-blaster.item",
   range: 300,
   shootX: 7,
@@ -1630,7 +1630,7 @@ Registries.items.add("peti-remote-railgun", {
   name: "Remote Railgun",
   marketValue: 75000,
   rarity: Item.rarity.SPECIAL,
-  description: "Pew.",
+  description: "#~ Pew.",
   image: "weapon.peti-remote-railgun.item",
   range: 1000,
   recoil: 0,
@@ -1691,7 +1691,7 @@ Registries.items.add("astral-blaster", {
   marketValue: 12500,
   rarity: Item.rarity.SPECIAL,
   description:
-    "Shoots some sort of , i don't know,\nspace blob which explodes somehow.",
+    "Shoots some sort of , i don't know, space blob which explodes somehow.",
   image: "weapon.iti-laser-caster.item",
   range: 400,
   bullets: {
@@ -1768,7 +1768,7 @@ Registries.items.add("recycle-mounted", {
   type: "turret-item",
   name: "Recycle (Mounted)",
   description:
-    "A version of the Recycle turret,\ndesigned for use with the larger\nScrap Turret Controller.",
+    "A version of the Recycle turret, designed for use with the larger Scrap Turret Controller.",
   image: "weapon.scrap-shooter.item",
   range: 450,
   baseSize: 1,
@@ -1826,7 +1826,7 @@ Registries.items.add("scrap-artillery", {
   type: "turret-item",
   name: "240mm Artillery Emplacement Gun",
   marketValue: 450,
-  description: "Large scrap gun, to be mounted\non a Turret Controller.",
+  description: "Large scrap gun, to be mounted on a Turret Controller.",
   baseSize: 2,
   image: "weapon.tank-gun.item",
   ammoUse: 4,
@@ -2115,7 +2115,7 @@ Registries.items.add("deathbringer-turret", {
 Registries.items.add("scrap-bullet", {
   name: "Scrap Bullet",
   marketValue: 0.01,
-  description: "A tiny piece of scrap,\nfashioned into a sharp bullet.",
+  description: "A tiny piece of scrap, fashioned into a sharp bullet.",
   image: "item.scrap-bullet",
   stackSize: 10000,
 });
@@ -2131,7 +2131,7 @@ Registries.items.add("iti-energy-cell", {
   name: "Energy Cell",
   marketValue: 1000,
   description:
-    "A kind of battery manufactured by\nInfiniTech Industries.\nCan boost most energy-using things, including\nyou and weapons.",
+    "A kind of battery manufactured by InfiniTech Industries.\nCan boost most energy-using things, including you and weapons.",
   image: "item.iti-energy-cell",
   rarity: Item.rarity.ITI,
   stackSize: 200,
@@ -2145,7 +2145,7 @@ Registries.items.add("iti-plasma-cell", {
   name: "Plasma Cell",
   marketValue: 2500,
   description:
-    "More powerful version of the Energy Cell,\ndesigned for better weapon boosting.\nWon't boost players.",
+    "More powerful version of the Energy Cell, designed for better weapon boosting.\nWon't boost players.",
   image: "item.iti-plasma-cell",
   rarity: Item.rarity.ITI,
   stackSize: 200,
