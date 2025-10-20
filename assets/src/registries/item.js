@@ -2151,7 +2151,7 @@ Registries.items.add("iti-plasma-cell", {
   stackSize: 200,
 });
 Registries.items.add("iti-destabilised-cell", {
-  name: "Destabilised Energy Cell",
+  name: "#c*Destabilised#fn Energy Cell",
   marketValue: 7500,
   description: "Is this even ITI?",
   image: "item.iti-destabilised-cell",

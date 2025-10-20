@@ -573,13 +573,13 @@ class Inventory {
     //   20,
     //   Item.getColourFromRarity(this.tooltip.item.rarity, "light")
     // );
-
     this.tooltip.item.title.draw(
       ui.mouse.x + 10,
       ui.mouse.y + 10,
       undefined,
       Item.getColourFromRarity(this.tooltip.item.rarity, "light")
     );
+
     //this.tooltip.item.tooltip.draw(ui.mouse.x + 10, ui.mouse.y + 30);
 
     // if (!this?.tooltip?.item) return;
@@ -723,12 +723,13 @@ function coltxt(textToShow = "", x, y, defcolour) {
   //Log.send(textToShow + " => " + colcode + ", " + endcolcode);
   let colour = textcolours[colcode];
   let endcolour = textcolours[endcolcode];
+
   if (colour === "reset") fill(defcolour);
   else if (colour) fill(colour);
   text(
-    colour || endcolour
+    (colour || endcolour
       ? textToShow.replace(colcode, "").replace(endcolcode, "")
-      : textToShow,
+      : textToShow).replaceAll(/#../g, ""),//since this text doesnt support colour codes like #ci, remove them to avoid confusion
     x,
     y
   );

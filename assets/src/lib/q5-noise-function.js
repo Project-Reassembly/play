@@ -118,4 +118,4 @@ const Shr3 = function () {
 };
 let rng1 = Shr3();
 rng1.setSeed();
-export { setNoiseParams, noise, noiseSeed, rng1};
+export { setNoiseParams, noise, noiseSeed, rng1, Shr3};

@@ -607,7 +607,7 @@ globalThis.preload = async function () {
   );
   await fonts.load();
   console.log("Loaded fonts.");
-  
+
   console.log("All assets loaded.");
 };
 //Set up the canvas, using the previous function
@@ -962,6 +962,9 @@ function updateUIActivity() {
 }
 
 function drawUI() {
+  textFont(fonts.ocr);
+  textStyle("normal");
+  textSize(20);
   for (let component of ui.components) {
     if (component.active) {
       component.draw();

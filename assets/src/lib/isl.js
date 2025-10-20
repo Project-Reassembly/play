@@ -19,10 +19,10 @@ let quietMode = false;
 function feedback(msg) {
   if (!quietMode) Log.send("ISL> " + msg, [200, 200, 200], "italic");
 }
-function give(entity, item, amount) {
+function give(entity, item, amount = 1) {
   let leftover =
-    entity instanceof EquippedEntity && entity.equipment.hasItem(item)
-      ? entity.equipment.addItem(item, amount)
+    entity instanceof EquippedEntity && entity.ammo.hasItem(item)
+      ? entity.ammo.addItem(item, amount)
       : amount ?? 0;
   let notgiven = 0;
   if (leftover) notgiven = entity.inventory.addItem(item, leftover);

@@ -54,7 +54,7 @@ Registries.statuses.add(
     {
       name: "Destabilised",
       damage: 100,
-      interval: 120,
+      interval: 60,
       damageType: "destabilisation",
       effect: "destabilised",
       effectChance: 0.5,

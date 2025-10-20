@@ -468,7 +468,7 @@ class Entity extends ShootableObject {
           rnd(-this.width / 2, this.width / 2),
           rnd(-this.height / 2, this.height / 2)
         );
-      if (time % effect.interval === 0) {
+      if (time % effect.interval === clamp(10, 0, effect.interval - 1)) {
         this.damage(effect.damageType, effect.damage);
         this.heal(effect.healing);
       }

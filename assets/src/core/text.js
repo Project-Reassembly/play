@@ -1,3 +1,4 @@
+import { Shr3 } from "../lib/q5-noise-function.js";
 import { effectTimer } from "../play/effects.js";
 import { colinterp } from "./number.js";
 
@@ -101,6 +102,8 @@ export const Decoration = {
     i: "italic",
     n: "normal",
     k: "bold italic",
+
+    "*": "glowing",
   },
 };
 
@@ -109,7 +112,9 @@ class TextComponent {
   /**@type {string} */
   colour = null;
   /**@type {string} */
-  style = "normal";
+  style = "n";
+  /**@type {string} */
+  effects = "";
   constructor(text) {
     this.text = text;
   }
@@ -117,12 +122,21 @@ class TextComponent {
     this.colour = col;
     return this;
   }
+  effect(fx) {
+    this.effects = fx;
+    return this;
+  }
   styled(style) {
-    if (style) this.style = style;
+    if (style === "*") {
+      this.style = "b";
+      this.effects = "g";
+    } else this.style = style;
     return this;
   }
   toString() {
-    return `[${this.colour ?? "default"}, ${this.style}] "${this.text}"`;
+    return `[${this.colour ?? "default"}, ${this.style}${
+      this.effects ? "<" + this.effects + ">" : ""
+    }] "${this.text}"`;
   }
   append(str) {
     this.text += str;
@@ -134,13 +148,13 @@ class TextComponent {
       .map((x) => new TextComponent(x).copyVisuals(this));
   }
   clone() {
-    return new TextComponent(this.text)
-      .styled(this.style)
-      .coloured(this.colour);
+    return new TextComponent(this.text).copyVisuals(this);
   }
   /**@param {TextComponent} other  */
   copyVisuals(other) {
-    return this.coloured(other.colour).styled(other.style);
+    return this.coloured(other.colour)
+      .styled(other.style)
+      .effect(other.effects);
   }
   /**@param {TextComponent} other  */
   hasSameStyle(other) {
@@ -325,9 +339,12 @@ class TextDrawer {
 }
 
 class DrawnTextElement {
+  static ids = 0;
+  static randomiser = Shr3();
   #xOffset = 0;
   #yOffset = 0;
   charSize = 0;
+  id = 0;
   /**@type {TextComponent} */
   component = null;
   constructor(x, y, component, charSize) {
@@ -335,6 +352,8 @@ class DrawnTextElement {
     this.#yOffset = y;
     this.component = component;
     this.charSize = charSize;
+    this.id = DrawnTextElement.ids;
+    DrawnTextElement.ids++;
   }
   move(x, y) {
     this.#xOffset += x;
@@ -345,11 +364,49 @@ class DrawnTextElement {
     push();
     textSize(this.charSize);
     textStyle(Decoration.styles[this.component.style]);
-    fill(
+    let c =
       this.component.colour === "@"
         ? rarityColour
-        : Decoration.colours[this.component.colour] ?? basecol
-    );
+        : Decoration.colours[this.component.colour] ?? basecol;
+
+    if (this.component.effects === "g") {
+      for (let o = 0; o < this.component.getWidth(); o += 5) {
+        DrawnTextElement.randomiser.setSeed(this.id + o);
+        for (let j = 0; j < 5; j++) {
+          let pos = [
+            baseX +
+              o +
+              this.#xOffset +
+              this.charSize *
+                (DrawnTextElement.randomiser.rand() / 4 +
+                  Math.sin(
+                    frameCount /
+                      (11 + DrawnTextElement.randomiser.rand() * 10) /
+                      3
+                  ) /
+                    4),
+            baseY +
+              this.#yOffset +
+              this.charSize *
+                (0.35 +
+                  DrawnTextElement.randomiser.rand() / 6 +
+                  Math.cos(
+                    frameCount /
+                      (11 + DrawnTextElement.randomiser.rand() * 10) /
+                      3
+                  ) /
+                    6),
+          ];
+      fill(...c.map((x) => x * 0.655), 8);
+          circle(...pos, this.charSize);
+      fill(...c.map((x) => x * 0.80), 8);
+          circle(...pos, this.charSize/2);
+      fill(...c, 8);
+          circle(...pos, this.charSize/4);
+        }
+      }
+    }
+    fill(c);
     text(this.component.text, baseX + this.#xOffset, baseY + this.#yOffset);
     pop();
   }

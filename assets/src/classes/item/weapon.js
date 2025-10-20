@@ -5,7 +5,7 @@ import { EquippedEntity, InventoryEntity } from "../entity/inventory-entity.js";
 import { autoScaledEffect } from "../../play/effects.js";
 import { construct } from "../../core/constructor.js";
 import { WeaponComponent } from "../entity/component.js";
-import { roundNum } from "../../core/number.js";
+import { roundNum, shortenedNumber } from "../../core/number.js";
 import { PointBullet } from "../projectile/point-bullet.js";
 import { LaserBullet } from "../projectile/laser-bullet.js";
 import { Bullet } from "../projectile/bullet.js";
@@ -231,7 +231,7 @@ class Weapon extends Equippable {
       }
     }
     return (
-      (this.name.length <= 15 ? this.name : this.name.substring(0, 14) + "…") +
+      crop(this.name, 15) +
       "\nAmmo: " +
       (ammoType !== "none"
         ? ammoType === "-"
@@ -242,7 +242,7 @@ class Weapon extends Equippable {
       (ammoType !== "none"
         ? ammoType === "-"
           ? "None Available"
-          : Registries.items.get(ammoType).name + " ×" + this.ammoUse
+          : crop(Registries.items.get(ammoType).name, 12) + " ×" + this.ammoUse
         : "Free") +
       "\n" +
       this.createProgressBar() +
@@ -427,7 +427,7 @@ function entityAmmoCount(ent, ammoItem, ammoAmount) {
     ? ent instanceof EquippedEntity
       ? ent.ammo.count(ammoItem)
       : ent.inventory.count(ammoItem)
-    : false;
+    : 0;
 }
 
 function entityAmmoUse(ent, ammoItem, ammoAmount) {
@@ -440,6 +440,11 @@ function entityAmmoUse(ent, ammoItem, ammoAmount) {
 
 function ind(lvl = 0) {
   return "  ".repeat(lvl);
+}
+
+function crop(text, length) {
+  text = text.replaceAll(/#../g, "");
+  return text.length <= length ? text : text.substring(0, length - 1) + "…";
 }
 
 export { Weapon };
