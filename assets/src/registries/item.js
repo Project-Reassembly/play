@@ -584,13 +584,13 @@ Registries.items.add("construction-gun", {
     recoilSpeed: 0.2,
   },
 });
-
+//Weapons > Corporate
 Registries.items.add("iti-laser-pistol", {
   type: "weapon",
   name: "Laser Pistol",
   marketValue: 0,
   rarity: Item.rarity.ITI,
-  description: "Standard issue item.\nShoots medium-range small laser beams.",
+  description: "Shoots medium-range small laser beams which inflict #i-Plasma Burn#-- on enemies.\n#6iStandard Issue",
   image: "weapon.iti-laser-pistol.item",
   range: 300,
   shootX: 0,
@@ -652,10 +652,10 @@ Registries.items.add("iti-laser-pistol", {
 Registries.items.add("iti-laser-caster", {
   type: "weapon",
   name: "Laser Caster",
-  marketValue: 25000,
+  marketValue: 2500,
   rarity: Item.rarity.ITI,
   description:
-    "Fires fast-moving incendiary bolts of explosive plasma.\nBolts deal secondary damage, with homing fragmentation.",
+    "Fires fast-moving incendiary bolts of explosive plasma.\nBolts release smaller fragments on hit, which home in on enemies and set them on fire.",
   image: "weapon.iti-laser-caster.item",
   range: 400,
   bullets: {
@@ -1038,10 +1038,10 @@ Registries.items.add("iti-laser-caster", {
 Registries.items.add("iti-energy-repeater", {
   type: "weapon",
   name: "Energy Repeater",
-  marketValue: 22000,
+  marketValue: 2000,
   rarity: Item.rarity.ITI,
   description:
-    "Shoots quickfire bursts of plasma bolts.\nAlt-fire to charge a larger explosive bolt.",
+    "Rapid-fire mind-guided laser weapon. Homes in on whatever you want it to.\nShoots quickfire bursts of plasma bolts.\nAlt-fire to charge a larger explosive bolt.",
   image: "weapon.iti-energy-repeater.item",
   range: 300,
   bullets: {
@@ -1404,7 +1404,87 @@ Registries.items.add("peti-charged-laser-blaster", {
   marketValue: 0,
   rarity: Item.rarity.PETI,
   description:
-    "Shoots a pair of high-damage charged balls of homing energy.\nBalls explode when near enemies.",
+    "Mid-range laser weapon.\nCharges up and shoots a medium-damage single-target laser, along with a secondary inaccurate burst of low-damage lasers.\n#6iStandard Issue",
+  image: "weapon.peti-charged-laser-blaster.item",
+  range: 250,
+  shootX: 7,
+  bullets: {
+    types: [
+      {
+        lifetime: 25,
+        extraUpdates: 24,
+        light: 70,
+        speed: 10,
+        hitSize: 3,
+        trail: false,
+        endLine: "peti-laser",
+        hitEffect: "laser-caster-frag-destabilised",
+        knockback: 15,
+        drawer: {
+          hidden: true,
+        },
+        damage: [
+          {
+            type: "laser",
+            amount: 30,
+          },
+        ],
+        despawnEffect: "none",
+        spawnNumber: 5,
+        spawnSpread: 15,
+        spawnSpeedMin: 0.67,
+        spawnSpeedMax: 1.5,
+        spawnBullet: {
+          lifetime: 11,
+          extraUpdates: 10,
+          light: 70,
+          speed: 10,
+          hitSize: 3,
+          trail: false,
+          endLine: "peti-laser-mini",
+          hitEffect: "laser-caster-frag-destabilised",
+          knockback: 4,
+          drawer: {
+            hidden: true,
+          },
+          damage: [
+            {
+              type: "laser",
+              amount: 5,
+            },
+          ],
+          despawnEffect: "none",
+        },
+      },
+    ],
+    ammos: {
+      none: 0,
+    },
+  },
+  shoot: {
+    charge: 45,
+    chargeEffect: "charged-laser-blaster-charge",
+    reload: 20,
+    effect: "laser-caster-explosion-destabilised~10",
+  },
+  component: {
+    type: "weapon-component",
+    width: 32,
+    height: 11,
+    yOffset: 0,
+    image: "weapon.peti-charged-laser-blaster.component",
+    recoil: 3,
+    rotationalRecoil: 4,
+    recoilSpeed: 0.15,
+  },
+});
+Registries.items.add("peti-electrified-plasma-launcher", {
+  type: "weapon",
+  name: "Electrified Plasma Launcher",
+  marketValue: 500,
+  rarity: Item.rarity.PETI,
+  description:
+    "Shoots a pair of charged balls of energy.\nBalls explode when near enemies, releasing high-damage lightning which arcs between them.",
   image: "weapon.peti-charged-laser-blaster.item",
   range: 300,
   shootX: 7,
@@ -1435,15 +1515,20 @@ Registries.items.add("peti-charged-laser-blaster", {
           height: 6,
         },
         damage: [],
-        targetType: "hovered",
-        trackingRange: 300,
-        turnSpeed: 3,
+        targetType: "nearest",
+        trackingRange: 100,
+        turnSpeed: 1,
         despawnEffect: "laser-caster-explosion-destabilised~5",
         fragNumber: 3,
         fragSpread: 30,
         fragBullet: {
-          lifetime: 15,
-          extraUpdates: 14,
+          type: "missile",
+          targetType: "nearest",
+          trackingRange: 100,
+          turnSpeed: 360,
+          lifeOnHit: 5,
+          lifetime: 10,
+          extraUpdates: 24,
           light: 70,
           speed: 10,
           trail: false,
@@ -1472,86 +1557,9 @@ Registries.items.add("peti-charged-laser-blaster", {
     reload: 60,
     effect: "laser-caster-explosion-destabilised~10",
     pattern: {
-      spread: 30,
+      spread: 10,
       burst: 2,
       interval: 5,
-    },
-  },
-  component: {
-    type: "weapon-component",
-    width: 32,
-    height: 11,
-    yOffset: 0,
-    image: "weapon.peti-charged-laser-blaster.component",
-    recoil: 3,
-    rotationalRecoil: 4,
-    recoilSpeed: 0.15,
-  },
-});
-Registries.items.add("peti-plasma-sprayer", {
-  type: "weapon",
-  name: "Plasma Sprayer",
-  marketValue: 5000,
-  rarity: Item.rarity.PETI,
-  description: "Shoots a stream of low-damage exploding balls of energy.",
-  image: "weapon.peti-charged-laser-blaster.item",
-  range: 300,
-  shootX: 7,
-  bullets: {
-    types: [
-      {
-        // type: "missile",
-        lifetime: 30,
-        extraUpdates: 1,
-        light: 70,
-        speed: 10,
-        trail: true,
-        hitSize: 1,
-        trailShape: "circle",
-        trailInterval: 4,
-        trailColours: [
-          [255, 50, 50],
-          [255, 0, 0, 0],
-        ],
-        trailWidth: 3,
-        hitEffect: "laser-caster-frag-destabilised",
-        trailLife: 30,
-        knockback: 10,
-        drawer: {
-          shape: "circle",
-          fill: "red",
-          width: 3,
-          height: 3,
-        },
-        damage: [
-          {
-            type: "laser",
-            amount: 5,
-            spread: 2,
-            radius: 10,
-          },
-        ],
-        // targetType: "hovered",
-        // trackingRange: 300,
-        // turnSpeed: 4,
-        despawnEffect: "laser-caster-explosion-destabilised~10",
-      },
-    ],
-    ammos: {
-      none: 0,
-    },
-  },
-  shoot: {
-    charge: 20,
-    chargeEffect: "charged-laser-blaster-charge",
-    reload: 5,
-    effect: "laser-caster-frag-destabilised",
-    pattern: {
-      spread: 2,
-      spacing: 5,
-      burst: 5,
-      interval: 5,
-      amount: 2,
     },
   },
   component: {
@@ -1568,7 +1576,7 @@ Registries.items.add("peti-plasma-sprayer", {
 Registries.items.add("peti-plasma-railgun", {
   type: "weapon",
   name: "Plasma Railgun",
-  marketValue: 25000,
+  marketValue: 10000,
   rarity: Item.rarity.PETI,
   description: "Pierces targets with a massive bolt of red plasma.",
   image: "weapon.peti-plasma-railgun.item",
@@ -1628,9 +1636,9 @@ Registries.items.add("peti-plasma-railgun", {
 Registries.items.add("peti-remote-railgun", {
   type: "weapon",
   name: "Remote Railgun",
-  marketValue: 75000,
-  rarity: Item.rarity.SPECIAL,
-  description: "#~ Pew.",
+  marketValue: 30000,
+  rarity: 8,
+  description: "#~ Pew.\n#5iPreview Content",
   image: "weapon.peti-remote-railgun.item",
   range: 1000,
   recoil: 0,
@@ -1684,14 +1692,14 @@ Registries.items.add("peti-remote-railgun", {
     recoilSpeed: 0.1,
   },
 });
-
+//Weapons > Experimental
 Registries.items.add("astral-blaster", {
   type: "weapon",
   name: "Astral Blaster",
   marketValue: 12500,
   rarity: Item.rarity.SPECIAL,
   description:
-    "Shoots some sort of , i don't know, space blob which explodes somehow.",
+    "Shoots some sort of, I don't know, space blob which explodes somehow.\n#5iPreview Content",
   image: "weapon.iti-laser-caster.item",
   range: 400,
   bullets: {
@@ -2046,7 +2054,7 @@ Registries.items.add("scrap-artillery", {
 Registries.items.add("deathbringer-turret", {
   type: "turret-item",
   name: "Deathbringer Turret",
-  description: "🟥The end is near.⬜",
+  description: "#4-The end is near.\n#5iPreview Content",
   image: "turret.deathbringer.item",
   rarity: Item.rarity.PETI,
   range: 2000,

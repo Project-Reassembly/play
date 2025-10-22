@@ -250,7 +250,7 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "A Bomb powered by a runaway chain reaction of decaying Uranium.",
+      "A Bomb powered by a runaway chain reaction of decaying Uranium.\n#5iPreview Content",
     rarity: Item.rarity.BLUE,
     marketValue: 2500,
   }
@@ -275,8 +275,8 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "🟥Now I am become Death, destroyer of worlds.⬜",
-    rarity: Item.rarity.SPECIAL,
+      "#4-Now I am become Death, destroyer of worlds.\n#5iPreview Content",
+    rarity: Item.rarity.RARE,
     marketValue: 25000,
   }
 );
@@ -1183,7 +1183,7 @@ createLinkedBlockAndItem(
     otherPart: "peti-turret-controller"
   },
   {
-    description: "Block to increase the  maximum size of turrets on  a PETI Turret Controller.",
+    description: "Block to increase the maximum size of turrets on a PETI Turret Controller.\n#5iPreview Content",
     marketValue: 200 // 3 plates = 15
   }
 );
@@ -1198,7 +1198,7 @@ createLinkedBlockAndItem(
     maxSize: 6,
   },
   {
-    description: "Mounting point for PETI turrets.\nMaximum size depends on number of bases.\nPlace them in a cross-shaped pattern.",
+    description: "Mounting point for PETI turrets.\nMaximum size depends on number of bases.\nPlace them in a cross-shaped pattern.\n#5iPreview Content",
     marketValue: 1000
   }
 );
@@ -1212,7 +1212,7 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "Pressurises and superheats gas in the atmosphere into plasma.",
+      "Pressurises and superheats gas in the atmosphere into plasma.\n#5iPreview Content",
     rarity: Item.rarity.PETI,
     marketValue: 5200,
   }
@@ -1227,7 +1227,7 @@ createLinkedBlockAndItem(
     plasma: "tank.plasma-tank.plasma",
   },
   {
-    description: "Stores plasma for later use.",
+    description: "Stores plasma for later use.\n#5iPreview Content",
     rarity: Item.rarity.PETI,
     marketValue: 3250,
   }
@@ -1247,7 +1247,7 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "A pressurised pipe for moving high-temperature ionised gas, known as plasma.",
+      "A pressurised pipe for moving high-temperature ionised gas, known as plasma.\n#5iPreview Content",
     rarity: Item.rarity.PETI,
     marketValue: 500,
   }
@@ -1269,7 +1269,7 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "A specialised pipe for increasing the pressure of plasma, allowing more to fit through the same pipes.\n2 pipes in , 1 pipe out.\n\nCan't compress plasma above 12 bar.",
+      "A specialised pipe for increasing the pressure of plasma, allowing more to fit through the same pipes.\n2 pipes in , 1 pipe out.\n\nCan't compress plasma above 12 bar.\n#5iPreview Content",
     rarity: Item.rarity.PETI,
     marketValue: 1500,
   }
@@ -1287,7 +1287,7 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "A specialised pipe for decreasing the pressure of plasma, allowing other blocks to use it.\n1 pipe in , 2 pipes out.\n\nCan't decompress plasma below 1 bar.",
+      "A specialised pipe for decreasing the pressure of plasma, allowing other blocks to use it.\n1 pipe in , 2 pipes out.\n\nCan't decompress plasma below 1 bar.\n#5iPreview Content",
     rarity: Item.rarity.PETI,
     marketValue: 1500,
   }
@@ -1315,8 +1315,8 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "Assembles a tank out of blocks.\nContainers add inventory space, Conveyors add speed, and Weapons in containers are mounted on the tank.",
-    rarity: Item.rarity.SPECIAL,
+      "Assembles a tank out of blocks.\nContainers add inventory space, Conveyors add speed, and Weapons in containers are mounted on the tank.\n#5iPreview Content",
+    rarity: Item.rarity.RARE,
   }
 );
 //## CAPITALISM ##
@@ -1331,7 +1331,7 @@ createLinkedBlockAndItem(
   {
     description:
       "Launches batches of items to space, ready to be collected by ITI.",
-    rarity: Item.rarity.SPECIAL,
+    rarity: Item.rarity.ITI,
   }
 );
 createLinkedBlockAndItem(
@@ -1345,7 +1345,7 @@ createLinkedBlockAndItem(
   {
     description:
       "Buys items from ITI, and receives them.\nMust be given an item to use for reference.",
-    rarity: Item.rarity.SPECIAL,
+    rarity: Item.rarity.ITI,
   }
 );
 //## DEV ##
@@ -1360,7 +1360,8 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "Outputs a structure array into the console.\nDEVELOPMENT ITEM",
+      "Outputs a structure array into the console.\n#yiDevelopment Item",
+    rarity: Item.rarity.DEV,
   }
 );
 createLinkedBlockAndItem(
@@ -1374,7 +1375,8 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "Contains an infinite supply of every registered item.\nAlso has a trash slot.\nDEVELOPMENT ITEM",
+      "Contains an infinite supply of every currently registered item.\nAlso has a trash slot.\n#yiDevelopment Item",
+    rarity: Item.rarity.DEV,
   }
 );
 createLinkedBlockAndItem(
@@ -1386,7 +1388,8 @@ createLinkedBlockAndItem(
     health: 1000000,
   },
   {
-    description: "Executes a pre-set command on activation.\nDEVELOPMENT ITEM",
+    description: "Executes a pre-set command on activation.\n#yiDevelopment Item",
+    rarity: Item.rarity.DEV,
   }
 );
 createLinkedBlockAndItem(
@@ -1401,7 +1404,8 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "Executes a pre-set command on activation.\nCan be pointed into another command block to chain.\nDEVELOPMENT ITEM",
+      "Executes a pre-set command on activation.\nCan be pointed into another command block to chain.\n#yiDevelopment Item",
+    rarity: Item.rarity.DEV,
   }
 );
 createLinkedBlockAndItem(
@@ -1415,7 +1419,8 @@ createLinkedBlockAndItem(
   },
   {
     description:
-      "Executes a pre-set command continuously on activation.\nActivation while running will stop execution.\nDEVELOPMENT ITEM",
+      "Executes a pre-set command continuously on activation.\nActivation while running will stop execution.\n#yiDevelopment Item",
+    rarity: Item.rarity.DEV,
   }
 );
 //## TEST ##

@@ -988,20 +988,14 @@ function createEffect(
 /**
  * Creates a linear effect, independently of any objects.
  * @param {string | Object} effect Registry name of the visual effect, or a constructible visual effect.
- * @param {float} x1 X position of the effect's origin
- * @param {float} y1 Y position of the effect's origin
- * @param {float} x2 X position of the effect's end
- * @param {float} y2 Y position of the effect's end
- * @param {() => {x1: number, y1: number, x2: number, y2: number}} pos Function to get position for parentised effects.
+ * @param {Vector[]} positions Positions to spawn the effect along
+ * @param {() => Vector[]} pos Function to get position for parentised effects.
  * @returns
  */
 function createLinearEffect(
   effect,
   world,
-  x1,
-  y1,
-  x2,
-  y2,
+  positions,
   pos,
   impact = false
 ) {
@@ -1011,7 +1005,7 @@ function createLinearEffect(
     typeof effect === "object" ? effect : Registries.vfx.get(effect),
     "linear-effect"
   );
-  fx.execute(world, x1, y1, x2, y2, pos, impact);
+  fx.execute(world, positions, pos, impact);
   return fx;
 }
 

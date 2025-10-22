@@ -1,2 +1,3 @@
 # Project: Reassembly
- Sandbox factory-building survival game.
+ Sandbox/survival factory-building game.  
+ In development.

@@ -44,8 +44,8 @@ class DroppedItemStack extends Entity {
         if (ent instanceof InventoryEntity && ent.collidesWith(this)) {
           let it = this.item.item;
           if (ent instanceof EquippedEntity) {
-            let leftOver = ent.equipment.hasItem(it)
-              ? ent.equipment.addItem(it, this.item.count)
+            let leftOver = ent.ammo.hasItem(it)
+              ? ent.ammo.addItem(it, this.item.count)
               : this.item.count;
             if (!leftOver) {
               if (ent === game.player) {
@@ -80,7 +80,7 @@ class DroppedItemStack extends Entity {
         }
       }
     else {
-      this.attributes.multiply("speed", 0.9);
+      this.attributes.multiply("speed", 0.86);
       this.move(
         Math.cos(this.directionRad) * this.speed,
         Math.sin(this.directionRad) * this.speed

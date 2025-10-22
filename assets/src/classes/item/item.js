@@ -89,14 +89,11 @@ class Item extends RegisteredItem {
   /**
    *
    * @param {number} rarity Item rarity. Must be between 0 and 5 inclusive. Use of `Item.rarity` is recommended.
-   * @param {"light"|"dark"} [scheme="light"] Colour scheme **of the text**, not of the background.
    */
-  static getColourFromRarity(rarity, scheme = "light") {
-    switch (scheme) {
-      case "light": {
-        switch (rarity) {
+  static getColourFromRarity(rarity) {
+    switch (rarity) {
           case this.rarity.COMMON:
-            return [255, 255, 255];
+            return Decoration.colours.f;
           case this.rarity.CCC:
             return Decoration.colours.h;
           case this.rarity.BLUE:
@@ -109,27 +106,11 @@ class Item extends RegisteredItem {
             return Decoration.colours.p;
           case this.rarity.ITI:
             return Decoration.colours.i;
+          case this.rarity.DEV:
+            return Decoration.colours.y;
+          case 8:
+            return Decoration.colours.v;
         }
-      }
-      case "dark": {
-        switch (rarity) {
-          case this.rarity.COMMON:
-            return [0, 0, 0];
-          case this.rarity.CCC:
-            return [0, 150, 0];
-          case this.rarity.BLUE:
-            return [0, 0, 150];
-          case this.rarity.RARE:
-            return [100, 0, 150];
-          case this.rarity.SPECIAL:
-            return [150, 145, 0];
-          case this.rarity.PETI:
-            return [150, 0, 0];
-          case this.rarity.ITI:
-            return [0, 50, 100];
-        }
-      }
-    }
     return [0, 0, 0, 0];
   }
   /**@readonly */
@@ -148,6 +129,9 @@ class Item extends RegisteredItem {
     SPECIAL: 5,
     /**@readonly */
     BLUE: 6, //What?
+    /**@readonly */
+    DEV: 7,
+    8: 8
   };
 }
 export { Item };

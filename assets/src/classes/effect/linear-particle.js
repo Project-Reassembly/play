@@ -2,17 +2,28 @@ import { Vector } from "../../core/number.js";
 import { Particle } from "./particle.js";
 // An extended particle class which connects 2 points
 class LinearParticle extends Particle {
-  pos1 = Vector.ZERO;
-  pos2 = Vector.ZERO;
+  /**@type {Vector[]} */
+  positions = [];
   size = 0;
-  constructor(x1, y1, x2, y2, lifetime, colours, light, strokeFrom, strokeTo,
-    space = false) {
-    let pos1 = new Vector(x1, y1);
-    let pos2 = new Vector(x2, y2);
+  /**
+   * @param {Vector[]} positions
+   */
+  constructor(
+    positions,
+    lifetime,
+    colours,
+    light,
+    strokeFrom,
+    strokeTo,
+    space = false
+  ) {
+    let pos1 = positions[0] ?? Vector.ZERO;
+    let pos2 = positions.at(-1) ?? Vector.ZERO;
     let center = pos1.add(pos2).scale(0.5);
     super(center.x, center.y, 0, lifetime, 0, 0, colours, 0, light, space);
     this.pos1 = pos1;
     this.pos2 = pos2;
+    this.positions = positions;
     this.strokeFrom = strokeFrom;
     this.stroke = strokeFrom;
     this.strokeTo = strokeTo;
@@ -24,17 +35,24 @@ class LinearParticle extends Particle {
   calcDecels(dt) {}
   movement(dt) {}
   draw() {
-    push();
-    noFill();
-    //Interpolate colour
-    stroke(this.colour);
-    strokeWeight(this.stroke);
-    //Draw the particle
-    this.actualDraw();
-    pop();
+    if (this.positions.length >= 2) {
+      push();
+      noFill();
+      //Interpolate colour
+      stroke(this.colour);
+      strokeWeight(this.stroke);
+      //Draw the particle
+      this.actualDraw();
+      pop();
+    }
   }
   actualDraw() {
-    line(this.pos1.x, this.pos1.y, this.pos2.x, this.pos2.y);
+    let prev = this.positions[0];
+    for (let p = 1; p < this.positions.length; p++) {
+      let curr = this.positions[p];
+      line(prev.x, prev.y, curr.x, curr.y);
+      prev = curr;
+    }
   }
 }
 export { LinearParticle };

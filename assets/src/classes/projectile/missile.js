@@ -12,6 +12,10 @@ class Missile extends Bullet {
   turnSpeed = 1;
   targetType = "mouse"; //"nearest", "mouse", "hovered"
   trackingRange = 200;
+  init() {
+    super.init();
+    if (this.targetType !== "nearest") this.controlled = true;
+  }
   spawnTrail(dt) {
     //Visual fire effect
     for (let e = 0; e < this.speed * dt; e++) {
@@ -69,7 +73,8 @@ class Missile extends Bullet {
             !(entity instanceof DroppedItemStack) &&
             entity.team !== this.entity.team &&
             !entity.dead &&
-            entity.visible
+            entity.visible &&
+            !this.damaged.includes(entity)
           ) {
             let dist = this.distanceTo(entity);
             if (dist < this.trackingRange && dist < minDist) {

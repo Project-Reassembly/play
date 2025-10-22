@@ -7,20 +7,10 @@ import { effectTimer, repeat, VisualEffect } from "./effects.js";
 
 // Different enough to not extend
 class LinearEffect extends RegisteredItem {
-  create(world, x1 = 0, y1 = 0, x2 = 0, y2 = 1, impact = false) {}
-  execute(
-    world,
-    x1 = 0,
-    y1 = 0,
-    x2 = 0,
-    y2 = 0,
-    pos = () => ({ x1: 0, y1: 0, x2: 0, y2: 0 }),
-    impact = false
-  ) {
-    if (this.parentise) {
-      let p = pos();
-      this.create(world, p.x1, p.y1, p.x2, p.y2, impact);
-    } else this.create(world, x1, y1, x2, y2, impact);
+  create(world, positions = [], impact = false) {}
+  execute(world, positions = [], pos = () => [], impact = false) {
+    if (this.parentise) this.create(world, pos(), impact);
+    else this.create(world, positions, impact);
   }
 }
 
@@ -33,19 +23,15 @@ class LinearEmissionEffect extends LinearEffect {
   maxXOffset = 0;
   maxYOffset = 0;
   isFloor = false;
-  execute(
-    world,
-    x1 = 0,
-    y1 = 0,
-    x2 = 0,
-    y2 = 0,
-    pos = () => ({ x1: x1, y1: y1, x2: x2, y2: y2 }),
-    impact = false
-  ) {
+  execute(world, positions = [], pos = () => [], impact = false) {
     let fn = () => {
       let xo = rnd(this.maxXOffset, -this.maxXOffset);
       let yo = rnd(this.maxYOffset, -this.maxYOffset);
-      this.create(world, x1 + xo, y1 + yo, x2 + xo, y2 + yo, impact);
+      this.create(
+        world,
+        positions.map((v) => v.addXY(xo, yo)),
+        impact
+      );
     };
 
     if (this.parentise) {
@@ -53,7 +39,11 @@ class LinearEmissionEffect extends LinearEffect {
         let p = pos();
         let xo = rnd(this.maxXOffset, -this.maxXOffset);
         let yo = rnd(this.maxYOffset, -this.maxYOffset);
-        this.create(world, p.x1 + xo, p.y1 + yo, p.x2 + xo, p.y2 + yo, impact);
+        this.create(
+          world,
+          p.map((v) => v.addXY(xo, yo)),
+          impact
+        );
       };
     }
     if (this.emissions > 1)
@@ -75,16 +65,8 @@ class LinearMultiEffect extends LinearEffect {
   init() {
     this.effects = this.effects.map((x) => construct(x, "linear-effect"));
   }
-  execute(
-    world,
-    x1 = 0,
-    y1 = 0,
-    x2 = 0,
-    y2 = 0,
-    pos = () => ({ x1: x1, y1: y1, x2: x2, y2: y2 }),
-    impact = false
-  ) {
-    this.effects.forEach((z) => z.execute(world, x1, y1, x2, y2, pos, impact));
+  execute(world, positions = [], pos = () => [], impact = false) {
+    this.effects.forEach((z) => z.execute(world, positions, pos, impact));
   }
 }
 class LineEmissionEffect extends LinearEmissionEffect {
@@ -100,22 +82,19 @@ class LineEmissionEffect extends LinearEmissionEffect {
     strokeFrom: 10,
     strokeTo: 0,
   };
-  create(world, x1 = 0, y1 = 0, x2 = 0, y2 = 0, impact = false) {
-    repeat(this.amount, () =>
+  create(world, positions = [], impact = false) {
+    repeat(this.amount, () => {
       this.getParticleArray(world, impact).push(
         new LinearParticle(
-          x1,
-          y1,
-          x2,
-          y2,
+          positions,
           this.line.lifetime ?? 20,
           this.line.colours,
           this.line.light ?? 0,
           this.line.strokeFrom ?? 10,
           this.line.strokeTo ?? 0
         )
-      )
-    );
+      );
+    });
   }
 }
 class LightningEmissionEffect extends LinearEmissionEffect {
@@ -130,29 +109,26 @@ class LightningEmissionEffect extends LinearEmissionEffect {
     ],
     strokeFrom: 10,
     strokeTo: 0,
-    lineLength: 60,
+    lineLength: 3,
     deviation: 20,
-    glowEffect: 0
+    glowEffect: 0,
   };
-  create(world, x1 = 0, y1 = 0, x2 = 0, y2 = 0, impact = false) {
-    repeat(this.amount, () =>
+  create(world, positions = [], impact = false) {
+    repeat(this.amount, () => {
       this.getParticleArray(world, impact).push(
         new LightningParticle(
-          x1,
-          y1,
-          x2,
-          y2,
+          positions,
           this.line.lifetime ?? 20,
           this.line.colours,
           this.line.light ?? 0,
           this.line.strokeFrom ?? 10,
           this.line.strokeTo ?? 0,
           this.line.deviation ?? 20,
-          this.line.lineLength ?? 60,
+          this.line.lineLength ?? 3,
           this.line.glowEffect ?? 1
         )
-      )
-    );
+      );
+    });
   }
 }
 

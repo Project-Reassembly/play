@@ -172,8 +172,6 @@ class World {
             bullet.emit(instance.effect ?? "none");
           }
           bullet.ondestroyed();
-          bullet.frag();
-          bullet.incend();
           //Delete the bullet
           this.bullets.splice(b, 1);
         }

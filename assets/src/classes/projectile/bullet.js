@@ -25,7 +25,7 @@ class Bullet extends PhysicalObject {
   collidesAir = true;
 
   //trails
-  trail = true;
+  trail = false;
   trailColours = [[255, 255, 255, 200]];
   trailShape = "rhombus";
   trailWidth = 0;
@@ -51,12 +51,22 @@ class Bullet extends PhysicalObject {
   damaged = [];
   pierce = 0;
   conditionalPierce = false;
+  lifeOnHit = 0;
   //internal
   _trailCounter = 20;
   trailInterval = null;
   //Statuseseseseses
   status = "none";
   statusDuration = 0;
+  //spawn bullet
+  spawnBullet = {};
+  spawnNumber = 0;
+  spawnDirection = 0;
+  spawnSpread = 0;
+  spawnSpacing = 0;
+
+  spawnSpeedMin = 0.8;
+  spawnSpeedMax = 1.2;
   //Frags
   fragBullet = {};
   fragNumber = 0;
@@ -94,7 +104,15 @@ class Bullet extends PhysicalObject {
    * Generally, this option allows any integer number of fires between 0 and `fires` to spawn, whereas, with this off, the only options are `fires` fires, or no fires.
    */
   isFireBinomial = false;
+
+  // These don't affect the bullet directly, but are used for certain interactions:
+  /**Indicates whether or not the entity or block firing this bullet is in control of this bullet. Forced to true if it's homing to anything other than 'nearest'. */
+  controlled = false;
+  /**The point at which this bullet spawned. Used for linear effects. */
   startpos = Vector.ZERO;
+  /**All points this bullet has been at. Used for linear effects, and is only populated if `endLine` is not `"none"` */
+  positions = [];
+
   init() {
     super.init();
     this.maxLife = this.lifetime;
@@ -105,17 +123,15 @@ class Bullet extends PhysicalObject {
     this.emit(this.spawnFrame, 0, 0, true);
     this.emit(this.spawnEffect);
     this.startpos = new Vector(this.x, this.y);
+    this.spawn();
   }
   ondestroyed() {
+    this.frag();
+    this.incend();
     this.emit(this.despawnEffect);
-    createLinearEffect(
-      this.endLine,
-      this.world,
-      this.startpos.x,
-      this.startpos.y,
-      this.x,
-      this.y
-    );
+    if (this.endLine !== "none") {
+      createLinearEffect(this.endLine, this.world, this.positions);
+    }
   }
   tick() {
     repeat(this.extraUpdates + 1, () => this.step(1));
@@ -141,6 +157,9 @@ class Bullet extends PhysicalObject {
         this.lifetime -= dt;
       }
       this.spawnTrail(dt);
+      if (this.endLine !== "none") {
+        this.positions.push(this.pos);
+      }
     }
   }
   move(x, y) {
@@ -243,6 +262,21 @@ class Bullet extends PhysicalObject {
       this.fragSpeedMax
     );
   }
+  spawn() {
+    patternedBulletExpulsion(
+      this.x,
+      this.y,
+      this.spawnBullet,
+      this.spawnNumber,
+      this.direction + this.spawnDirection,
+      this.spawnSpread,
+      this.spawnSpacing,
+      this.world,
+      this.entity,
+      this.spawnSpeedMin,
+      this.spawnSpeedMax
+    );
+  }
   interval() {
     patternedBulletExpulsion(
       this.x,
@@ -310,7 +344,9 @@ class Bullet extends PhysicalObject {
     if (physobj.team !== this.entity.team) {
       //Reduce pierce
       this.pierce--;
-      //Take all damage instances
+      //Increase life (if applicable)
+      this.lifetime += this.lifeOnHit;
+      //Deal all damage instances
       for (let instance of this.damage) {
         if (!instance.spread) instance.spread = 0;
         let todeal =

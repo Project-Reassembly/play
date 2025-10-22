@@ -49,9 +49,9 @@ export const Decoration = {
     1: [0, 50, 200], // blue
     2: [0, 200, 0], // green
     3: [0, 150, 150], // cyan
-    4: [200, 0, 0], // red
-    5: [200, 0, 200], // purple
-    6: [200, 100, 0], // orange
+    4: [230, 0, 0], // red
+    5: [220, 0, 220], // purple
+    6: [250, 140, 0], // orange
     7: [170, 170, 170], // light grey
     8: [70, 70, 70], // dark grey
     9: [0, 100, 150], // faded blue
@@ -66,9 +66,10 @@ export const Decoration = {
     // These aren't.
     i: [0, 190, 230], //ITI blue
     p: [255, 100, 100], //PETI red
+    h: [150, 255, 150], //CCC C*H*rono green
     r: [200, 150, 255], //Rare purple
     l: [150, 150, 255], //B*l*ue blue
-    h: [150, 255, 150], //CCC C*H*rono green
+    y: [255, 255, 0], //Dev *y*ellow
     get s() {
       //Special, cycles yellow to gold and back
       return [
@@ -76,6 +77,16 @@ export const Decoration = {
         230 + Math.sin(effectTimer.ticks / 30) * 30,
         130 + Math.sin(effectTimer.ticks / 30) * 20,
       ];
+    },
+    get v() {
+      //...Don't ask.
+      return colinterp(
+        [
+          [255, 255, 151],
+          [235, 235, 80],
+        ],
+        0.5 + Math.sin(effectTimer.ticks / 30) / 2
+      );
     },
 
     // Rarity indicator
@@ -318,11 +329,15 @@ class TextDrawer {
     if (baseX + this.width > width / 2) baseX = width / 2 - this.width;
     if (baseY + this.height > height / 2) baseY = height / 2 - this.height;
     push();
-    stroke(50, 50, 50);
-    strokeWeight(5);
-    fill(100, 100, 100, 200);
     rectMode(CORNER);
-    rect(baseX - 5, baseY - 5, this.width + 10, this.height + 10);
+    strokeWeight(13);
+    stroke(50);
+    fill(10, 220);
+    rect(baseX - 8, baseY - 8, this.width + 16, this.height + 16);
+    strokeWeight(2);
+    stroke(rarityColour);
+    noFill();
+    rect(baseX - 7, baseY - 7, this.width + 14, this.height + 14);
     noStroke();
     this.#texts.forEach((x) => x.draw(baseX, baseY, basecol, rarityColour));
     pop();
@@ -397,12 +412,12 @@ class DrawnTextElement {
                   ) /
                     6),
           ];
-      fill(...c.map((x) => x * 0.655), 8);
+          fill(...c.map((x) => x * 0.655), 8);
           circle(...pos, this.charSize);
-      fill(...c.map((x) => x * 0.80), 8);
-          circle(...pos, this.charSize/2);
-      fill(...c, 8);
-          circle(...pos, this.charSize/4);
+          fill(...c.map((x) => x * 0.8), 8);
+          circle(...pos, this.charSize / 2);
+          fill(...c, 8);
+          circle(...pos, this.charSize / 4);
         }
       }
     }
