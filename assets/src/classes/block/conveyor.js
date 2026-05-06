@@ -1,12 +1,13 @@
-import { Container } from "./container.js";
+import { roundNum } from "../../core/number.js";
+import { Registries } from "../../core/registry.js";
 import { drawImg, rotatedImg, ui } from "../../core/ui.js";
+import { Log } from "../../play/messaging.js";
 import { blockSize, Direction } from "../../scaling.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
-import { ShootableObject } from "../physical.js";
-import { roundNum } from "../../core/number.js";
-import { Log } from "../../play/messaging.js";
 import { ItemStack } from "../item/item-stack.js";
-import { Registries } from "../../core/registry.js";
+import { ShootableObject } from "../physical.js";
+import { Container } from "./container.js";
+import { Crafter } from "./production/crafter.js";
 class Conveyor extends Container {
   moveTime = 10;
   _progress = 0;
@@ -23,10 +24,7 @@ class Conveyor extends Container {
     let vct = Direction.vectorOf(this.direction);
     let target =
       this.world.getBlock(this.gridX + vct.x, this.gridY + vct.y) ??
-      this.world.getBlock(
-        this.gridX + vct.x * 2 ** 0.5,
-        this.gridY + vct.y * 2 ** 0.5
-      );
+      this.world.getBlock(this.gridX + vct.x * 2 ** 0.5, this.gridY + vct.y * 2 ** 0.5);
     this.convey(target, this.gridX + vct.x, this.gridY + vct.y);
   }
   convey(target, posX, posY) {
@@ -36,20 +34,18 @@ class Conveyor extends Container {
         DroppedItemStack.create(
           this.inventory.get(0),
           this.world,
-          (posX + 0.5) * blockSize,
-          (posY + 0.5) * blockSize,
+          posX * blockSize,
+          posY * blockSize,
           100 / this.moveTime,
-          degrees(this.direction)
+          degrees(this.direction),
         );
         this.inventory.clear();
         this._progress = 0;
       }
-      if (
-        target instanceof Container &&
-        target.inventory.canAddItems([this.inventory.get(0)])
-      ) {
+      let i = this.inventory.get(0);
+      if (target instanceof Container && target.inventory.canAddItem(i.item, i.count)) {
         this._progress = 0;
-        target.inventory.addItems([this.inventory.get(0)]);
+        target.inventory.addItem(i.item, i.count);
         if (target instanceof Conveyor && this.direction !== target.direction) {
           target._progress = target.moveTime / 2;
         }
@@ -58,20 +54,14 @@ class Conveyor extends Container {
     }
   }
   draw() {
-    drawImg(
-      this.baseImg,
-      this.x,
-      this.y,
-      this.tileSize * blockSize,
-      this.tileSize * blockSize
-    );
+    drawImg(this.baseImg, this.x, this.y, this.tileSize * blockSize, this.tileSize * blockSize);
     rotatedImg(
       this.beltImg,
       this.x,
       this.y,
       this.tileSize * blockSize,
       this.tileSize * blockSize,
-      this.direction
+      this.direction,
     );
     ShootableObject.prototype.draw.call(this);
   }
@@ -85,7 +75,7 @@ class Conveyor extends Container {
           this.x + vct.x * (amt - 0.5) * blockSize,
           this.y + vct.y * (amt - 0.5) * blockSize,
           20,
-          20
+          20,
         );
     }
     super.postDraw();
@@ -120,21 +110,25 @@ class Conveyor extends Container {
 class Unloader extends Conveyor {
   filter = "nothing";
   tick() {
+    this.extract();
+    super.tick();
+  }
+  extract() {
     let vct = Direction.vectorOf(this.direction);
-    let extractFrom = this.world.getBlock(
-      this.gridX - vct.x,
-      this.gridY - vct.y
-    );
+    let extractFrom = this.world.getBlock(this.gridX - vct.x, this.gridY - vct.y);
     if (extractFrom instanceof Container) {
-      if (
-        extractFrom.inventory.hasItem(this.filter) &&
-        this.inventory.canAddItem(this.filter)
-      ) {
+      if (extractFrom instanceof Crafter) {
+        if (extractFrom.results.hasItem(this.filter) && this.inventory.canAddItem(this.filter)) {
+          extractFrom.results.removeItem(this.filter);
+          this.inventory.addItem(this.filter);
+          return;
+        }
+      }
+      if (extractFrom.inventory.hasItem(this.filter) && this.inventory.canAddItem(this.filter)) {
         extractFrom.inventory.removeItem(this.filter);
         this.inventory.addItem(this.filter);
       }
     }
-    super.tick();
   }
   /**
    *
@@ -153,13 +147,7 @@ class Unloader extends Conveyor {
     super.highlight(emphasised);
     if (this.filter && this.filter !== "nothing") {
       let img = Registries.items.get(this.filter).image;
-      drawImg(
-        img ?? "error",
-        this.uiX + 9,
-        this.uiY + 9,
-        15 * ui.camera.zoom,
-        15 * ui.camera.zoom
-      );
+      drawImg(img ?? "error", this.uiX - 9, this.uiY - 9, 15 * ui.camera.zoom, 15 * ui.camera.zoom);
     }
   }
   serialise() {
@@ -180,3 +168,4 @@ class Unloader extends Conveyor {
   }
 }
 export { Conveyor, Unloader };
+

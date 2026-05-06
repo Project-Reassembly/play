@@ -1,10 +1,7 @@
+import { col } from "../../core/color.js";
 import { colinterp } from "../../core/number.js";
 import { drawImg, rotatedImg } from "../../core/ui.js";
-import {
-  autoScaledEffect,
-  createEffect,
-  Explosion,
-} from "../../play/effects.js";
+import { createEffect, Explosion } from "../../play/effects.js";
 import { blockSize, Direction } from "../../scaling.js";
 import { ShootableObject } from "../physical.js";
 import { Block, BreakType } from "./block.js";
@@ -18,15 +15,8 @@ class PlasmaBlock extends Block {
     let vct = Direction.vectorOf(dir);
     let target =
       this.world.getBlock(this.gridX + vct.x, this.gridY + vct.y) ??
-      this.world.getBlock(
-        this.gridX + vct.x,
-        this.gridY + vct.y
-      );
-    if (
-      target &&
-      target instanceof PlasmaBlock &&
-      target.acceptsPlasmaFrom(dir, level)
-    )
+      this.world.getBlock(this.gridX + vct.x, this.gridY + vct.y);
+    if (target && target instanceof PlasmaBlock && target.acceptsPlasmaFrom(dir, level))
       this.movePlasmaTo(target, level);
   }
   movePlasmaTo(target, level = this.level) {
@@ -54,22 +44,14 @@ class PlasmaBlock extends Block {
   }
   break(type) {
     if (type !== BreakType.deconstruct) {
-      let col = colinterp(
-        [
-          [255, 0, 0],
-          [255, 128, 0],
-          [255, 255, 255],
-        ],
-        this.compression / PlasmaBlock.maxCompression
+      let col1 = colinterp(
+        [col.red, col.from(255, 128, 0), col.white],
+        this.compression / PlasmaBlock.maxCompression,
       );
 
       let col2 = colinterp(
-        [
-          [255, 0, 0],
-          [255, 128, 0],
-          [255, 255, 255],
-        ],
-        this.compression / 2 / PlasmaBlock.maxCompression
+        [col.red, col.from(255, 128, 0), col.white],
+        this.compression / 2 / PlasmaBlock.maxCompression,
       );
       col2[3] = 0;
       let dmg = (this.compression + 1) * (this.level + 10);
@@ -77,20 +59,17 @@ class PlasmaBlock extends Block {
       createEffect(
         {
           type: "explosion",
-          waveColours: [col, col2],
-          sparkColours: [col, col2],
-          smokeColours: [col, col2],
+          waveColours: [col1, col2],
+          sparkColours: [col1, col2],
+          smokeColours: [col1, col2],
         },
         this.world,
         this.x + blockSize / 2,
         this.y + blockSize / 2,
         0,
-        radius
+        radius,
       );
-      let ex = new Explosion({
-        radius: radius,
-        amount: dmg,
-      });
+      let ex = new Explosion({ radius: radius, amount: dmg });
       ex.x = this.x + blockSize / 2;
       ex.y = this.y + blockSize / 2;
       ex.world = this.world;
@@ -146,7 +125,8 @@ class PlasmaPipe extends PlasmaBlock {
     let d = Direction.oppositeOf(dir);
     if (
       blk instanceof PlasmaBlock &&
-      blk.outputsPlasmaIn(d) && this.acceptsPlasmaFrom(d, blk.level)
+      blk.outputsPlasmaIn(d) &&
+      this.acceptsPlasmaFrom(d, blk.level)
     ) {
       this.#ins[d] = true;
     }
@@ -172,7 +152,7 @@ class PlasmaPipe extends PlasmaBlock {
       this.y,
       this.tileSize * blockSize,
       this.tileSize * blockSize,
-      this.direction
+      this.direction,
     );
     for (let dir in this.#ins) {
       // input
@@ -182,7 +162,7 @@ class PlasmaPipe extends PlasmaBlock {
         this.y,
         this.tileSize * blockSize,
         this.tileSize * blockSize,
-        dir
+        dir,
       );
     }
     // output
@@ -192,21 +172,17 @@ class PlasmaPipe extends PlasmaBlock {
       this.y,
       this.tileSize * blockSize,
       this.tileSize * blockSize,
-      this.direction
+      this.direction,
     );
 
     //plasmas
     push();
     opacity(this.level / this.capacity);
-    tint(
-      colinterp(
-        [
-          [255, 0, 0],
-          [255, 128, 0],
-          [255, 255, 255],
-        ],
-        this.compression / PlasmaBlock.maxCompression
-      )
+    col.tint(
+      col.interp(
+        [col.red, col.from(255, 128, 0), col.white],
+        this.compression / PlasmaBlock.maxCompression,
+      ),
     );
     // base
     rotatedImg(
@@ -215,7 +191,7 @@ class PlasmaPipe extends PlasmaBlock {
       this.y,
       this.tileSize * blockSize,
       this.tileSize * blockSize,
-      this.direction
+      this.direction,
     );
     // inputs
     for (let dir in this.#ins) {
@@ -225,7 +201,7 @@ class PlasmaPipe extends PlasmaBlock {
         this.y,
         this.tileSize * blockSize,
         this.tileSize * blockSize,
-        dir
+        dir,
       );
     }
     // output
@@ -235,7 +211,7 @@ class PlasmaPipe extends PlasmaBlock {
       this.y,
       this.tileSize * blockSize,
       this.tileSize * blockSize,
-      this.direction
+      this.direction,
     );
     pop();
 
@@ -253,24 +229,14 @@ class PlasmaTank extends PlasmaBlock {
     super.draw();
     push();
     opacity(this.level / this.capacity);
-    tint(
-      colinterp(
-        [
-          [255, 0, 0],
-          [255, 128, 0],
-          [255, 255, 255],
-        ],
-        this.compression / PlasmaBlock.maxCompression
-      )
+    col.tint(
+      col.interp(
+        [col.red, col.from(255, 128, 0), col.white],
+        this.compression / PlasmaBlock.maxCompression,
+      ),
     );
     // output
-    drawImg(
-      this.plasma,
-      this.x,
-      this.y,
-      this.tileSize * blockSize,
-      this.tileSize * blockSize
-    );
+    drawImg(this.plasma, this.x, this.y, this.tileSize * blockSize, this.tileSize * blockSize);
     pop();
   }
   acceptsPlasmaFrom(direction, amount) {
@@ -283,4 +249,5 @@ class PlasmaTank extends PlasmaBlock {
   }
 }
 
-export { PlasmaPipe, PlasmaTank, PlasmaBlock };
+export { PlasmaBlock, PlasmaPipe, PlasmaTank };
+

@@ -1,12 +1,11 @@
-import { Container } from "../container.js";
-import { tru, roundNum } from "../../../core/number.js";
-import { autoScaledEffect } from "../../../play/effects.js";
-import { blockSize } from "../../../scaling.js";
 import { construct } from "../../../core/constructor.js";
+import * as MLF1 from "../../../core/mlf1.js";
+import { roundNum, tru } from "../../../core/number.js";
 import { Registries } from "../../../core/registry.js";
-import { drawMultilineText } from "../../inventory.js";
+import { autoScaledEffect } from "../../../play/effects.js";
 import { Log } from "../../../play/messaging.js";
 import { Item } from "../../item/item.js";
+import { Container } from "../container.js";
 class TileProducer extends Container {
   results = {};
   amount = 0;
@@ -21,19 +20,11 @@ class TileProducer extends Container {
 
   tick() {
     super.tick();
-    let floor = this.chunk.getBlock(
-      this.blockX,
-      this.blockY,
-      "floor"
-    )?.registryName;
-    let tile = this.chunk.getBlock(
-      this.blockX,
-      this.blockY,
-      "tiles"
-    )?.registryName;
+    let floor = this.chunk.getBlock(this.blockX, this.blockY, "floor")?.registryName;
+    let tile = this.chunk.getTile(this.blockX, this.blockY);
     this._blockOn = !floor || floor === "null" ? tile : floor;
     if (!this._blockOn) {
-      Log.send("Tile-dependent block is on air!", [255, 100, 100]);
+      Log.send("#c-Tile-dependent block is on air!");
       this.chunk.removeBlock(this.blockX, this.blockY, "blocks");
     }
     if (this._blockOn in this.results) {
@@ -56,25 +47,19 @@ class TileProducer extends Container {
   }
   createTickEffect() {
     if (tru(this.tickEffectChance))
-      autoScaledEffect(
-        this.tickEffect,
-        this.world,
-        this.x + blockSize / 2,
-        this.y + blockSize / 2,
-        this.direction
-      );
+      autoScaledEffect(this.tickEffect, this.world, this.x, this.y, this.direction);
   }
   stringifyRecipe() {
     return (
-      (this.results[this._blockOn]
-        ? "--> " +
-          (Registries.items.has(this.results[this._blockOn])
-            ? Registries.items.get(this.results[this._blockOn])
-            : { name: "Unknown" }
-          )?.name +
-          " x" +
-          this.amount
-        : "No recipe") +
+      (this.results[this._blockOn] ?
+        "--> " +
+        (Registries.items.has(this.results[this._blockOn]) ?
+          Registries.items.get(this.results[this._blockOn])
+        : { name: "Unknown" }
+        )?.name +
+        " x" +
+        this.amount
+      : "No recipe") +
       "\n" +
       ""
         .padEnd((this._progress / this.duration) * 20, "■")
@@ -87,14 +72,14 @@ class TileProducer extends Container {
   }
   drawTooltip(x, y, outlineColour, backgroundColour) {
     super.drawTooltip(x, y, outlineColour, backgroundColour, true);
-    drawMultilineText(
+    MLF1.draw(
       x,
       y,
       this.stringifyRecipe(),
       this.title,
       Item.getColourFromRarity(0, "light"),
       outlineColour,
-      backgroundColour
+      backgroundColour,
     );
   }
   createExtendedTooltip() {
@@ -114,11 +99,10 @@ class TileProducer extends Container {
               (blk.drillSpeed !== 1 ? " (" + blk.drillSpeed + "× speed)" : ""),
           ];
         }),
-      "Base Production: " +
-        roundNum(this.amount * (60 / this.duration), 1) +
-        "/s",
+      "Base Production: " + roundNum(this.amount * (60 / this.duration), 1) + "/s",
       "🟨 -------------------- ⬜",
     ];
   }
 }
 export { TileProducer };
+

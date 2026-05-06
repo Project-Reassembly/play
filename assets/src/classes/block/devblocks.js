@@ -1,19 +1,19 @@
-import { Block } from "./block.js";
-import { Container } from "./container.js";
+import { col } from "../../core/color.js";
+import * as MLF1 from "../../core/mlf1.js";
 import { Registries } from "../../core/registry.js";
-import { commandLine, exec, ExecutionContext } from "../../lib/isl.js";
-import { Inventory } from "../inventory.js";
-import { ItemStack } from "../item/item-stack.js";
-import { drawImg, rotatedShape } from "../../core/ui.js";
-import { ui } from "../../core/ui.js";
-import { drawMultilineText } from "../inventory.js";
-import { Item } from "../item/item.js";
-import { PlaceableItem } from "../item/placeable.js";
+import { drawImg, rotatedShape, ui } from "../../core/ui.js";
+import { exec, ExecutionContext } from "../../lib/isl.js";
 import { Log } from "../../play/messaging.js";
+import { blockSize, Direction } from "../../scaling.js";
+import { ImageParticle } from "../effect/image-particle.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
 import { TextParticle } from "../effect/text-particle.js";
-import { Direction } from "../../scaling.js";
-import { ImageParticle } from "../effect/image-particle.js";
+import { Inventory } from "../inventory.js";
+import { ItemStack } from "../item/item-stack.js";
+import { Item } from "../item/item.js";
+import { PlaceableItem } from "../item/placeable.js";
+import { Block } from "./block.js";
+import { Container } from "./container.js";
 class StructureReaderBlock extends Block {
   _range = 1;
   _output = [];
@@ -30,12 +30,12 @@ class StructureReaderBlock extends Block {
     "dev::itemcatalog",
   ];
   drawTooltip(x, y, outline, background) {
-    drawMultilineText(
+    MLF1.draw(
       x,
       y,
       this._outTxt,
-      this.title + " [" + this._range + " blocks]",
-      Item.getColourFromRarity(0, "light")
+      `${this.title} [${this._range} blocks]`,
+      Item.getColourFromRarity(0, "light"),
     );
   }
   leftArrow() {
@@ -51,10 +51,10 @@ class StructureReaderBlock extends Block {
     stroke(255, emphasised ? 0 : 255, emphasised ? 0 : 255);
     strokeWeight((emphasised ? 2 : 1) * ui.camera.zoom);
     rect(
-      this.uiX + (Block.size * ui.camera.zoom) / 2,
-      this.uiY + (Block.size * ui.camera.zoom) / 2,
-      (this._range * 2 + 1) * Block.size * ui.camera.zoom,
-      (this._range * 2 + 1) * Block.size * ui.camera.zoom
+      this.uiX,
+      this.uiY,
+      (this._range * 2 + 1) * blockSize * ui.camera.zoom,
+      (this._range * 2 + 1) * blockSize * ui.camera.zoom,
     );
     pop();
   }
@@ -63,16 +63,7 @@ class StructureReaderBlock extends Block {
     if (keyIsDown(SHIFT)) {
       this._output = this.outputStructure();
       this._outTxt = this._output
-        .map(
-          (x) =>
-            x.block +
-            ": " +
-            (x.x < 0 ? "" : "+") +
-            x.x +
-            ", " +
-            (x.y < 0 ? "" : "+") +
-            x.y
-        )
+        .map((x) => `${x.block}: ${x.x < 0 ? "" : "+"}${x.x}, ${x.y < 0 ? "" : "+"}${x.y}`)
         .join("\n");
       ui.waitingForMouseUp = true;
       return true;
@@ -81,7 +72,7 @@ class StructureReaderBlock extends Block {
     let item = istack.getItem();
     if (item instanceof PlaceableItem) {
       this._becomes = item.block;
-      Log.send("This block will be read as " + item.name);
+      Log.send(`This block will be read as ${item.name}`);
       ui.waitingForMouseUp = true;
       return true;
     }
@@ -92,21 +83,10 @@ class StructureReaderBlock extends Block {
     noFill();
     stroke(255);
     strokeWeight(1);
-    rect(
-      this.uiX + Block.size / 2,
-      this.uiY + Block.size / 2,
-      (this._range * 2 + 1) * Block.size,
-      (this._range * 2 + 1) * Block.size
-    );
+    rect(this.uiX, this.uiY, (this._range * 2 + 1) * blockSize, (this._range * 2 + 1) * blockSize);
     opacity(0.66);
     if (this._becomes)
-      drawImg(
-        Registries.blocks.get(this._becomes).image,
-        this.x,
-        this.y,
-        Block.size,
-        Block.size
-      );
+      drawImg(Registries.blocks.get(this._becomes).image, this.x, this.y, blockSize, blockSize);
     pop();
   }
   outputStructure() {
@@ -117,57 +97,53 @@ class StructureReaderBlock extends Block {
           by = this.gridY + y;
         let block = this.world.getBlock(bx, by, "blocks");
         let exists = !!block;
-        let unreadable =
-          exists &&
-          StructureReaderBlock.unreadable.includes(block.registryName);
+        let unreadable = exists && StructureReaderBlock.unreadable.includes(block.registryName);
         this.world.particles.push(
           new ShapeParticle(
-            (bx + 0.5) * Block.size,
-            (by + 0.5) * Block.size,
+            bx * blockSize,
+            by * blockSize,
             0,
             120,
             0,
             0,
             "rect",
             [
-              unreadable ? [255, 255, 0] : exists ? [0, 255, 0] : [255, 0, 0],
-              [255, 255, 255, 0],
+              unreadable ? col.yellow
+              : exists ? col.green
+              : col.red,
+              col.hide(col.white),
             ],
-            Block.size,
-            Block.size,
-            Block.size,
-            Block.size,
+            blockSize,
+            blockSize,
+            blockSize,
+            blockSize,
             0,
-            60
+            60,
           ),
           new TextParticle(
-            (bx + 0.5) * Block.size,
-            (by + 0.5) * Block.size,
+            bx * blockSize,
+            by * blockSize,
             0,
             120,
             0,
             0,
-            x + ", " + y,
-            [255, 255, 255],
-            unreadable
-              ? [255, 255, 0]
-              : exists
-              ? [100, 255, 100, 0]
-              : [255, 100, 100, 0],
+            `${x}, ${y}`,
+            [
+              col.white,
+              unreadable ? col.yellow
+              : exists ? col.from(100, 255, 100, 0)
+              : col.from(255, 100, 100, 0),
+            ],
             5,
             5,
             0,
-            true
-          )
+            true,
+          ),
         );
 
         if (exists) {
           if (block === this && this._becomes) {
-            blocks.push({
-              x: x,
-              y: y,
-              block: this._becomes,
-            });
+            blocks.push({ x: x, y: y, block: this._becomes });
           }
           if (!unreadable) {
             if (block.direction !== 0)
@@ -177,12 +153,7 @@ class StructureReaderBlock extends Block {
                 block: block.registryName,
                 direction: Direction.toEnum(block.direction),
               });
-            else
-              blocks.push({
-                x: x,
-                y: y,
-                block: block.registryName,
-              });
+            else blocks.push({ x: x, y: y, block: block.registryName });
           }
         }
       }
@@ -191,7 +162,7 @@ class StructureReaderBlock extends Block {
     return blocks;
   }
   read() {
-    return "[" + this._output.map((x) => this.x.block).join("|") + "]";
+    return `[${this._output.map((x) => this.x.block).join("|")}]`;
   }
 }
 class ItemCatalogBlock extends Container {
@@ -201,8 +172,8 @@ class ItemCatalogBlock extends Container {
   }
   tick() {
     let slot = 0;
-    Registries.items.forEach((name) => {
-      this.inventory.set(slot, new ItemStack(Registries.items.at(slot)));
+    Registries.items.forEach((v, n) => {
+      this.inventory.set(slot, new ItemStack(n));
       slot++;
     });
   }
@@ -240,12 +211,10 @@ class CommandExecutorBlock extends Block {
     }
   }
   run() {
-    let ex = (this.gridX + 0.5) * Block.size,
-      ey = (this.gridY + 0.5) * Block.size;
     this.world.particles.push(
       new ImageParticle(
-        ex,
-        ey,
+        this.x,
+        this.y,
         0,
         120,
         0,
@@ -253,21 +222,18 @@ class CommandExecutorBlock extends Block {
         "block.dev.commandblock.heat",
         1,
         0,
-        Block.size,
-        Block.size,
-        Block.size,
-        Block.size,
-        0
-      )
+        blockSize,
+        blockSize,
+        blockSize,
+        blockSize,
+        0,
+      ),
     );
-    exec(this._command, new ExecutionContext(ex, ey, this));
+    exec(this._command, new ExecutionContext(this.x, this.y, this));
     //Activate next block
     if (this.chaining) {
       let vct = Direction.vectorOf(this.direction);
-      let nextblock = this.world.getBlock(
-        this.gridX + vct.x,
-        this.gridY + vct.y
-      );
+      let nextblock = this.world.getBlock(this.gridX + vct.x, this.gridY + vct.y);
       if (nextblock instanceof CommandExecutorBlock) {
         nextblock.activated();
       }
@@ -282,12 +248,12 @@ class CommandExecutorBlock extends Block {
       fill(80 + pulse * 20, 205 + 50 * pulse, 80 + pulse * 20);
       rotatedShape(
         "moved-triangle",
-        this.uiX + (Block.size / 2) * ui.camera.zoom,
-        this.uiY + (Block.size / 2) * ui.camera.zoom,
-        Block.size * ui.camera.zoom,
-        (Block.size / 2) * ui.camera.zoom,
+        this.uiX,
+        this.uiY,
+        blockSize * ui.camera.zoom,
+        (blockSize / 2) * ui.camera.zoom,
         this.direction,
-        false
+        false,
       );
       pop();
     }
@@ -310,7 +276,7 @@ class CommandExecutorBlock extends Block {
     ui.texteditor.isCommandLine = true;
     ui.texteditor.title = "Set Console Command:";
     ui.texteditor.save = (cmd) => {
-      Log.send("Set command to '" + cmd + "'", [200, 200, 200], "italic");
+      Log.send(`#-iSet command to '${cmd}'`);
       this._command = cmd;
     };
     ui.waitingForMouseUp = true;
@@ -334,4 +300,5 @@ class CommandExecutorBlock extends Block {
     this._message = txt;
   }
 }
-export { StructureReaderBlock, CommandExecutorBlock, ItemCatalogBlock };
+export { CommandExecutorBlock, ItemCatalogBlock, StructureReaderBlock };
+

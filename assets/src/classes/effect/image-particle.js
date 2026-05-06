@@ -1,3 +1,4 @@
+import { col } from "../../core/color.js";
 import { rotatedImg } from "../../core/ui.js";
 import { Particle } from "./particle.js";
 // A particle which shows an image.
@@ -19,7 +20,7 @@ class ImageParticle extends Particle {
     rotateSpeed,
     space = false
   ) {
-    super(x, y, direction, lifetime, speed, decel, [[0, 0, 0]], rotateSpeed, 0, space);
+    super(x, y, direction, lifetime, speed, decel, [col.black], rotateSpeed, 0, space);
     this.image = image;
     this.opacityFrom = opacityFrom;
     this.opacityTo = opacityTo;
@@ -50,3 +51,4 @@ class ImageParticle extends Particle {
   }
 }
 export { ImageParticle };
+

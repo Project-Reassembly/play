@@ -1,11 +1,11 @@
 import { construct } from "../../../core/constructor.js";
-import { RegisteredItem } from "../../../core/registered-item.js";
 import { ui } from "../../../core/ui.js";
+import Integrate from "../../../lib/integrate.js";
 import { Entity } from "../entity.js";
 import { AI } from "./ai.js";
 
 /**Always returns true or false. Don't use directly, instead use `"always"` or `"never"`.*/
-export class AICondition extends RegisteredItem{
+export class AICondition extends Integrate.RegisteredItem {
   /** @readonly */
   static ALWAYS = new this(true);
   /**@readonly */
@@ -72,7 +72,7 @@ export class MouseDownCondition extends AICondition {
    * @param {Entity} entity
    */
   eval(ai, entity) {
-    return mouseIsPressed && ui.mouseButton === this.button;
+    return mouseIsPressed && ui.mouse.button === this.button;
   }
 }
 /**True if a button on the keyboard is pressed. The button is a number - a keyCode. Use this: https://www.toptal.com/developers/keycode. */
@@ -115,9 +115,7 @@ export class CombinedCondition extends AICondition {
   /**@type {AICondition[]} */
   conditions = [];
   init() {
-    this.conditions = this.conditions.map((c) =>
-      construct(c, "aicon.constant")
-    );
+    this.conditions = this.conditions.map((c) => construct(c, "aicon.constant"));
   }
   /**
    * @param {AI} ai
@@ -134,9 +132,7 @@ export class AlternativeCondition extends AICondition {
   /**@type {AICondition[]} */
   conditions = [];
   init() {
-    this.conditions = this.conditions.map((c) =>
-      construct(c, "aicon.constant")
-    );
+    this.conditions = this.conditions.map((c) => construct(c, "aicon.constant"));
   }
   /**
    * @param {AI} ai

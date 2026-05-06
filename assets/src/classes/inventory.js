@@ -1,12 +1,12 @@
 import { ItemStack } from "../classes/item/item-stack.js";
-import { Registries } from "../core/registry.js";
-import { construct } from "../core/constructor.js";
+import { col } from "../core/color.js";
+import { construct, constructFromType } from "../core/constructor.js";
+import { dynamicSort, shortenedNumber, tru } from "../core/number.js";
+import { lookup, Registries } from "../core/registry.js";
 import { drawImg, ui } from "../core/ui.js";
 import { fonts } from "../play/game.js";
+import { DroppedItemStack } from "./item/dropped-itemstack.js";
 import { Item } from "./item/item.js";
-import { dynamicSort } from "../core/number.js";
-import { roundNum, shortenedNumber } from "../core/number.js";
-import { process } from "../core/text.js";
 /**
  * @typedef SerialisedInventory
  * @prop {SerialisedItemStack[]} storage
@@ -21,23 +21,19 @@ class Inventory {
     stacks ??= [];
     this.size = size;
     if (stacks instanceof Inventory) this.storage = stacks.storage;
-    else this.storage = stacks.map((x) => construct(x, "itemstack"));
+    else this.storage = stacks.map((x) => constructFromType(x, ItemStack));
     this.storage.length = this.size;
   }
   /**@returns {SerialisedInventory} */
   serialise() {
-    return {
-      size: this.size,
-      storage: this.storage.map((x) => x.serialise()),
-    };
+    return { size: this.size, storage: this.storage.map((x) => x.serialise()) };
   }
   /**@param {SerialisedInventory} created  */
   static deserialise(created) {
     let inv = new this(0);
     inv.storage = created?.storage ?? [];
     inv.size = inv.storage.length = created?.size ?? inv.size;
-    if (created?.storage)
-      inv.storage = created.storage.map((x) => ItemStack.deserialise(x));
+    if (created?.storage) inv.storage = created.storage.map((x) => ItemStack.deserialise(x));
     return inv;
   }
 
@@ -79,10 +75,7 @@ class Inventory {
   removeItem(item, number = 1) {
     let toRemove = number;
     this.iterate((content, slot, stop) => {
-      if (
-        (content.item === item || item === "*") &&
-        this.canPickupFromSlot(slot)
-      ) {
+      if ((content.item === item || item === "*") && this.canPickupFromSlot(slot)) {
         if (content.count > toRemove) {
           content.count -= toRemove;
           toRemove = 0;
@@ -129,7 +122,7 @@ class Inventory {
   clean() {
     for (let index = 0; index < this.storage.length; index++) {
       let item = this.storage[index];
-      if (!item || !item instanceof ItemStack || item.isEmpty())
+      if (!item || !(item instanceof ItemStack) || item.isEmpty())
         this.storage[index] = ItemStack.EMPTY;
     }
   }
@@ -191,8 +184,7 @@ class Inventory {
         mIS.count += transferAmount;
         this.storage[index].count -= transferAmount;
 
-        if (this.storage[index].count === 0)
-          this.storage[index] = ItemStack.EMPTY;
+        if (this.storage[index].count === 0) this.storage[index] = ItemStack.EMPTY;
       } else if (this.canPlaceInSlot(index)) {
         transferAmount = mISItem.stackSize - this.storage[index].count;
 
@@ -227,13 +219,13 @@ class Inventory {
   }
   /**
    * Counts the number of a type of item in this inventory.
-   * @param {string} item The item to look for.
+   * @param {string} item The item to look for. Leave empty (or use `*`) to count all items.
    * @param {int[]} [excludedSlots=[]] The slots to ignore while searching.
    */
-  count(item, excludedSlots = []) {
+  count(item = "*", excludedSlots = null) {
     let found = 0;
     this.iterate((slotContent, slot) => {
-      if (excludedSlots.includes(slot)) return;
+      if (excludedSlots && excludedSlots.includes(slot)) return;
       if (slotContent.item === item || item === "*") found += slotContent.count;
     }, true);
     return found;
@@ -260,12 +252,12 @@ class Inventory {
   canAddItem(item, number = 1, stack = true) {
     let toAdd = number;
     /**@type {Item} */
-    let ritem = construct(Registries.items.get(item), "item");
+    const stackSize = lookup("items", item, "stackSize") ?? 100;
     //Check for any stacks that can be filled
     this.iterate((content, slot, stop) => {
       if (content.item === item && stack && this.canPlaceInSlot(slot)) {
-        if (content.count < ritem.stackSize) {
-          let space = ritem.stackSize - content.count;
+        if (content.count < stackSize) {
+          let space = stackSize - content.count;
           if (space < toAdd) {
             toAdd -= space;
           } else {
@@ -280,7 +272,7 @@ class Inventory {
     this.iterate((content, slot, stop) => {
       if (!content) this.storage[slot] = ItemStack.EMPTY;
       if (content.isEmpty() && this.canPlaceInSlot(slot)) {
-        toAdd -= Math.min(toAdd, ritem.stackSize);
+        toAdd -= Math.min(toAdd, stackSize);
       }
       if (toAdd <= 0) stop();
     });
@@ -297,7 +289,47 @@ class Inventory {
    * @returns True if the items could fit in this inventory, false if not.
    */
   canAddItems(stacks, stack = true) {
-    return stacks.every((v, i, a) => this.canAddItem(v.item, v.count, stack));
+    let freesUsed = 0;
+    for (const { item, count } of stacks) {
+      let toAdd = count;
+      const stackSize = lookup("items", item, "stackSize") ?? 100;
+      //Check for any stacks that can be filled
+      this.iterate((content, slot, stop) => {
+        if (content.item === item && stack && this.canPlaceInSlot(slot)) {
+          if (content.count < stackSize) {
+            let space = stackSize - content.count;
+            if (space < toAdd) {
+              toAdd -= space;
+            } else {
+              toAdd = 0;
+              stop();
+            }
+          }
+        }
+      }, true);
+      if (toAdd <= 0) return true;
+      // now we fill empty slots
+      let skipped = 0;
+      this.iterate((content, slot, stop) => {
+        if (skipped < freesUsed) {
+          skipped++;
+          return;
+        }
+        if (!content) this.storage[slot] = ItemStack.EMPTY;
+        if (content.isEmpty() && this.canPlaceInSlot(slot)) {
+          toAdd -= Math.min(toAdd, stackSize);
+          freesUsed++;
+        }
+        if (toAdd <= 0) stop();
+      });
+      if (toAdd !== 0) return false;
+    }
+    return true;
+  }
+  drop(world, x, y) {
+    this.iterate((stack) => {
+      if (tru(stack.dropChance)) DroppedItemStack.create(stack, world, x, y);
+    }, true);
   }
 
   //oh god i need this for everything
@@ -335,9 +367,9 @@ class Inventory {
     rows = null,
     cols = null,
     itemSize = 40,
-    outlineColour = [50, 50, 50],
-    backgroundColour = [95, 100, 100, 160],
-    reverseVertical = false
+    outlineColour = col.mono(50),
+    backgroundColour = col.from(95,100,100,160),
+    reverseVertical = false,
   ) {
     push();
     if (!rows && !cols) return;
@@ -352,22 +384,20 @@ class Inventory {
         let invitemstack = this.storage[index];
         if (!invitemstack) invitemstack = ItemStack.EMPTY;
         if (!(invitemstack instanceof ItemStack))
-          throw new TypeError(
-            "Item " + index + "(" + invitemstack + ") is not an ItemStack!"
-          );
+          throw new TypeError(`Item ${index}(${invitemstack}) is not an ItemStack!`);
         let invitem = invitemstack.getItem();
         displayX = x + item * (itemSize * 1.2);
         displayY = y + row * (itemSize * 1.2) * (reverseVertical ? -1 : 1);
         push();
-        stroke(...outlineColour);
+        col.stroke(outlineColour);
         strokeWeight(5);
-        fill(...backgroundColour);
+        col.fill(backgroundColour);
         rect(displayX, displayY, itemSize, itemSize);
         let selected =
-          ui.mouse.x < displayX + itemSize / 2 &&
-          ui.mouse.x > displayX - itemSize / 2 &&
-          ui.mouse.y < displayY + itemSize / 2 &&
-          ui.mouse.y > displayY - itemSize / 2;
+          ui.mouse.x < displayX + itemSize * 0.5 &&
+          ui.mouse.x > displayX - itemSize * 0.5 &&
+          ui.mouse.y < displayY + itemSize * 0.5 &&
+          ui.mouse.y > displayY - itemSize * 0.5;
         if (invitemstack.item !== "nothing" && invitem) {
           if (selected) {
             if (
@@ -379,11 +409,8 @@ class Inventory {
               //Mouse to inv
               if (!keyIsDown(SHIFT) && this.canPlaceInSlot(index)) {
                 ui.waitingForMouseUp = true;
-                if (ui.mouseButton === "left")
-                  if (
-                    invitemstack.count + Inventory.mouseItemStack.count <=
-                    invitem.stackSize
-                  ) {
+                if (ui.mouse.button === "left")
+                  if (invitemstack.count + Inventory.mouseItemStack.count <= invitem.stackSize) {
                     //Place items
                     invitemstack.count += Inventory.mouseItemStack.count;
                     Inventory.mouseItemStack = ItemStack.EMPTY;
@@ -393,7 +420,7 @@ class Inventory {
                     invitemstack.count = invitem.stackSize;
                     Inventory.mouseItemStack.count -= toMove;
                   }
-                else if (ui.mouseButton === "right")
+                else if (ui.mouse.button === "right")
                   if (invitemstack.count + 1 <= invitem.stackSize) {
                     //Place items
                     invitemstack.count++;
@@ -402,17 +429,13 @@ class Inventory {
               } else if (this.canPickupFromSlot(index)) {
                 ui.waitingForMouseUp = true;
                 //Move from inv to mouse
-                if (
-                  invitemstack.count + Inventory.mouseItemStack.count <=
-                  invitem.stackSize
-                ) {
+                if (invitemstack.count + Inventory.mouseItemStack.count <= invitem.stackSize) {
                   //Place items
                   Inventory.mouseItemStack.count += invitemstack.count;
                   this.storage[index] = ItemStack.EMPTY;
                 } else {
                   //
-                  let toMove =
-                    invitem.stackSize - Inventory.mouseItemStack.count;
+                  let toMove = invitem.stackSize - Inventory.mouseItemStack.count;
                   Inventory.mouseItemStack.count = invitem.stackSize;
                   invitemstack.count -= toMove;
                 }
@@ -432,15 +455,15 @@ class Inventory {
               if (Inventory.mouseItemStack.isEmpty()) {
                 if (this.canPickupFromSlot(index)) {
                   ui.waitingForMouseUp = true;
-                  if (ui.mouseButton === "left") {
+                  if (ui.mouse.button === "left") {
                     Inventory.mouseItemStack = this.storage[index];
                     this.storage[index] = ItemStack.EMPTY;
-                  } else if (ui.mouseButton === "right") {
+                  } else if (ui.mouse.button === "right") {
                     Inventory.mouseItemStack = new ItemStack(
                       invitemstack.item,
-                      Math.ceil(invitemstack.count / 2)
+                      Math.ceil(invitemstack.count * 0.5),
                     );
-                    invitemstack.count = Math.floor(invitemstack.count / 2);
+                    invitemstack.count = Math.floor(invitemstack.count * 0.5);
                     if (invitemstack.count === 0) {
                       this.storage[index] = ItemStack.EMPTY;
                     }
@@ -449,10 +472,7 @@ class Inventory {
               } else {
                 //(if both itemstacks are different, and mouse is full)
                 //swap
-                if (
-                  this.canPickupFromSlot(index) &&
-                  this.canPlaceInSlot(index)
-                ) {
+                if (this.canPickupFromSlot(index) && this.canPlaceInSlot(index)) {
                   ui.waitingForMouseUp = true;
                   [Inventory.mouseItemStack, this.storage[index]] = [
                     this.storage[index],
@@ -462,26 +482,20 @@ class Inventory {
               }
             }
           }
-          drawImg(
-            invitem?.image ?? "error",
-            displayX,
-            displayY,
-            itemSize,
-            itemSize
-          );
+          drawImg(invitem?.image ?? "error", displayX, displayY, itemSize, itemSize);
           noStroke();
           fill(invitemstack.count > invitem.stackSize ? "red" : 255);
           textFont(fonts.ocr);
-          textSize(itemSize / 2);
+          textSize(itemSize * 0.5);
           push();
           textAlign(RIGHT, BASELINE);
           if (invitemstack.count > 1)
             text(
-              invitemstack.count > 999
-                ? shortenedNumber(invitemstack.count, 0)
-                : invitemstack.count,
-              displayX + itemSize / 2,
-              displayY + itemSize / 2
+              invitemstack.count > 999 ?
+                shortenedNumber(invitemstack.count, 0)
+              : invitemstack.count,
+              displayX + itemSize * 0.5,
+              displayY + itemSize * 0.5,
             );
           pop();
         } else {
@@ -492,12 +506,12 @@ class Inventory {
             !ui.waitingForMouseUp &&
             this.canPlaceInSlot(index)
           ) {
-            if (ui.mouseButton === "right") {
+            if (ui.mouse.button === "right") {
               ui.waitingForMouseUp = true;
               invitemstack.item = Inventory.mouseItemStack.item;
               invitemstack.count = 1;
               Inventory.mouseItemStack.count--;
-            } else if (ui.mouseButton === "left") {
+            } else if (ui.mouse.button === "left") {
               ui.waitingForMouseUp = true;
               this.storage[index] = Inventory.mouseItemStack;
               Inventory.mouseItemStack = ItemStack.EMPTY;
@@ -511,39 +525,27 @@ class Inventory {
   }
   static drawMIS(itemSize) {
     if (!Inventory.mouseItemStack.isEmpty()) {
-      drawImg(
-        Inventory.mouseItemStack.getItem().image,
-        ui.mouse.x,
-        ui.mouse.y,
-        itemSize,
-        itemSize
-      );
+      drawImg(Inventory.mouseItemStack.getItem().image, ui.mouse.x, ui.mouse.y, itemSize, itemSize);
       push();
       noStroke();
       fill(
-        Inventory.mouseItemStack.count >
-          Inventory.mouseItemStack.getItem().stackSize
-          ? "red"
-          : 255
+        Inventory.mouseItemStack.count > Inventory.mouseItemStack.getItem().stackSize ? "red" : 255,
       );
       textFont(fonts.ocr);
       textSize(20);
       textAlign(RIGHT, BASELINE);
       if (Inventory.mouseItemStack.count > 1)
         text(
-          Inventory.mouseItemStack.count > 999
-            ? shortenedNumber(Inventory.mouseItemStack.count, 0)
-            : Inventory.mouseItemStack.count,
-          ui.mouse.x + itemSize / 2,
-          ui.mouse.y + itemSize / 2
+          Inventory.mouseItemStack.count > 999 ?
+            shortenedNumber(Inventory.mouseItemStack.count, 0)
+          : Inventory.mouseItemStack.count,
+          ui.mouse.x + itemSize * 0.5,
+          ui.mouse.y + itemSize * 0.5,
         );
       pop();
     }
   }
-  static drawTooltip(
-    outlineColour = [50, 50, 50],
-    backgroundColour = [95, 100, 100, 160]
-  ) {
+  static drawTooltip(outlineColour = col.mono(50), backgroundColour = col.from(95,100,100,160)) {
     if (!this?.tooltip?.item) return;
 
     // let itt = this.tooltip.item.getInformativeTooltip();
@@ -577,7 +579,7 @@ class Inventory {
       ui.mouse.x + 10,
       ui.mouse.y + 10,
       undefined,
-      Item.getColourFromRarity(this.tooltip.item.rarity, "light")
+      Item.getColourFromRarity(this.tooltip.item.rarity, "light"),
     );
 
     //this.tooltip.item.tooltip.draw(ui.mouse.x + 10, ui.mouse.y + 30);
@@ -600,22 +602,22 @@ class Inventory {
     //   let lw = textWidth(line);
     //   if (lw > maxWidth) maxWidth = lw + 12;
     // }
-    // let displayX = ui.mouse.x + maxWidth / 2;
+    // let displayX = ui.mouse.x + maxWidth * 0.5;
     // textSize(25);
-    // let displayY = ui.mouse.y + (lines * 12) / 2;
+    // let displayY = ui.mouse.y + (lines * 12) * 0.5;
     // //Stop vertical overflow
-    // if (displayY + lines * 6 > height / 2) {
-    //   displayY = height / 2 - lines * 6;
+    // if (displayY + lines * 6 > height * 0.5) {
+    //   displayY = height * 0.5 - lines * 6;
     // }
     // //Stop horizontal overflow
-    // if (displayX + maxWidth / 2 > width / 2) {
-    //   displayX = width / 2 - maxWidth / 2;
+    // if (displayX + maxWidth * 0.5 > width * 0.5) {
+    //   displayX = width * 0.5 - maxWidth * 0.5;
     // }
     // rect(displayX, displayY, maxWidth, lines * 12);
     // fill(Item.getColourFromRarity(this.tooltip.item.rarity, "light"));
     // stroke(Item.getColourFromRarity(this.tooltip.item.rarity, "light"));
     // strokeWeight(1);
-    // let textX = displayX - maxWidth / 2 + 10;
+    // let textX = displayX - maxWidth * 0.5 + 10;
     // let textY = displayY - lines * 6 + 28;
     // text(header, textX, textY - 5);
     // fill(Item.getColourFromRarity(0, "light"));
@@ -629,112 +631,5 @@ class Inventory {
   }
 }
 
-function drawMultilineText(
-  x,
-  y,
-  txt,
-  header,
-  colour = [0],
-  outlineColour = [50, 50, 50],
-  backgroundColour = [95, 100, 100, 160],
-  txtSize = 20,
-  headerColourOverride = null
-) {
-  push();
-  //Setup
-  textAlign(LEFT);
-  textFont(fonts.ocr);
-  textSize(txtSize);
-  strokeWeight(txtSize / 10);
-  //Max width
-  let maxWidth = header ? textWidth(header) + txtSize * 1.2 : 0;
-  let boxH = header ? txtSize * 2 : txtSize * 0.6;
-  let body = txt.split("\n");
-  let descLines = txt.split("\n").length;
-  let lines = (header ? 1 : 0) + Math.ceil(descLines);
-  textSize(txtSize * 0.9);
-  //Max width of body text, plus small buffer, and also height
-  for (let line of body) {
-    let lw = textWidth(line);
-    boxH += txtSize * 0.9;
-    if (lw > maxWidth) maxWidth = lw + txtSize * 1.2;
-  }
-  //X pos
-  let displayX = x + maxWidth / 2;
-  //Y pos, can't go offscreen
-  let displayY = y + boxH / 2;
-  if (displayY + boxH / 2 > height / 2) {
-    displayY = height / 2 - boxH / 2;
-  }
-  //Stop horizontal overflow
-  if (displayX + maxWidth / 2 > width / 2) {
-    displayX = width / 2 - maxWidth / 2;
-  }
-  textSize(txtSize);
-  fill(backgroundColour);
-  strokeWeight(5);
-  stroke(outlineColour);
-  //Box, with padding
-  rect(displayX, displayY, maxWidth, boxH);
-  fill(headerColourOverride ?? colour);
-  stroke(headerColourOverride ?? colour);
-  strokeWeight(1);
-  let textX = displayX - maxWidth / 2 + 10;
-  let textY = displayY - boxH / 2 + (header ? txtSize * 0.5 : -txtSize) + 5;
-  if (header) text(header, textX, textY - 5);
-  textSize(txtSize * 0.9);
-  fill(colour);
-  noStroke();
-  for (let line = 0; line < lines; line++) {
-    coltxt(body[line], textX, textY + txtSize + line * txtSize * 0.9, colour);
-  }
-  pop();
-}
+export { Inventory };
 
-const textcolours = {
-  "🟥": [255, 60, 60],
-  "🟧": [255, 180, 80],
-  "🟨": [255, 220, 50],
-  "🟩": [50, 255, 50],
-  "🟦": [50, 220, 255],
-  "🟪": [200, 0, 255],
-  "🟫": [165, 105, 83],
-  "⬛": [0, 0, 0],
-  "⬜": "reset",
-};
-function findTextColourPrefix(str = "") {
-  for (let key of Object.getOwnPropertyNames(textcolours)) {
-    if (str.startsWith(key)) return key;
-  }
-  return "";
-}
-function findTextColourSuffix(str = "") {
-  for (let key of Object.getOwnPropertyNames(textcolours)) {
-    if (str.endsWith(key)) return key;
-  }
-  return "";
-}
-
-function coltxt(textToShow = "", x, y, defcolour) {
-  if (!textToShow) return;
-  let trimmed = textToShow.trim();
-  let colcode = findTextColourPrefix(trimmed);
-  let endcolcode = findTextColourSuffix(trimmed);
-  //Log.send(textToShow + " => " + colcode + ", " + endcolcode);
-  let colour = textcolours[colcode];
-  let endcolour = textcolours[endcolcode];
-
-  if (colour === "reset") fill(defcolour);
-  else if (colour) fill(colour);
-  text(
-    (colour || endcolour
-      ? textToShow.replace(colcode, "").replace(endcolcode, "")
-      : textToShow).replaceAll(/#../g, ""),//since this text doesnt support colour codes like #ci, remove them to avoid confusion
-    x,
-    y
-  );
-  if (endcolour === "reset") fill(defcolour);
-  else if (endcolour) fill(endcolour);
-}
-
-export { Inventory, drawMultilineText };

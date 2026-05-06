@@ -1,5 +1,5 @@
-import { Registries } from "../core/registry.js";
 import { construct } from "../core/constructor.js";
+import { Registries } from "../core/registry.js";
 Registries.statuses.add(
   "burning",
   construct(
@@ -77,6 +77,19 @@ Registries.statuses.add(
         resistances: 0,
         speed: 0.5,
       },
+    },
+    "status-effect"
+  )
+);
+Registries.statuses.add(
+  "nuclear-fire",
+  construct(
+    {
+      name: "Nuclear Fire",
+      damage: 45,
+      interval: 5,
+      damageType: "fire",
+      effect: "burning",
     },
     "status-effect"
   )

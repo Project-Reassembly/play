@@ -1,4 +1,4 @@
-import { construct } from "../../core/constructor.js";
+import { col } from "../../core/color.js";
 import { Registries } from "../../core/registry.js";
 import { blockSize } from "../../scaling.js";
 import { Block } from "../block/block.js";
@@ -8,7 +8,7 @@ import { SignBlock } from "../block/decoration.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
 import { Weapon } from "../item/weapon.js";
 import { World } from "../world/world.js";
-import { Component, WeaponisedComponent } from "./component.js";
+import { WeaponisedComponent } from "./component.js";
 import { InventoryEntity } from "./inventory-entity.js";
 
 class ModularTankEntity extends InventoryEntity {
@@ -36,8 +36,8 @@ class ModularTankEntity extends InventoryEntity {
             0,
             "square",
             [
-              [255, 0, 0],
-              [255, 0, 0, 0],
+              col.red,
+              col.hide(col.red),
             ],
             blockSize,
             blockSize,
@@ -147,3 +147,4 @@ class ModularTankEntity extends InventoryEntity {
 }
 
 export { ModularTankEntity };
+

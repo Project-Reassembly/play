@@ -1,11 +1,12 @@
-import { rotatedImg, rotatedShape } from "../../core/ui.js";
+import { col } from "../../core/color.js";
 import { rnd, tru, Vector } from "../../core/number.js";
+import { rotatedImg, rotatedShape } from "../../core/ui.js";
 import { createLinearEffect, repeat } from "../../play/effects.js";
-import { PhysicalObject } from "../physical.js";
-import { ShapeParticle } from "../effect/shape-particle.js";
-import { Fire } from "../effect/fire.js";
 import { blockSize } from "../../scaling.js";
+import { Fire } from "../effect/fire.js";
+import { ShapeParticle } from "../effect/shape-particle.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
+import { PhysicalObject } from "../physical.js";
 import { patternedBulletExpulsion } from "./yeeter.js";
 class Bullet extends PhysicalObject {
   extraUpdates = 0;
@@ -26,22 +27,17 @@ class Bullet extends PhysicalObject {
 
   //trails
   trail = false;
-  trailColours = [[255, 255, 255, 200]];
+  trailColours = [col.from(255,255,255,200)];
   trailShape = "rhombus";
   trailWidth = 0;
   trailLength = 0;
   trailLife = 0;
   trailLight = 0;
+  trailSpacing = "speed";
   //
   remove = false;
   light = 0;
-  drawer = {
-    shape: "circle",
-    fill: "red",
-    image: "error",
-    width: 10,
-    height: 10,
-  };
+  drawer = { shape: "circle", fill: col.red, image: "error", width: 10, height: 10 };
   entity = null;
   //bonc
   knockback = 0;
@@ -115,7 +111,9 @@ class Bullet extends PhysicalObject {
 
   init() {
     super.init();
+    this.trailColours = this.trailColours.map(col.convert);
     this.maxLife = this.lifetime;
+    if(this.drawer.fill) this.drawer.fill = col.convert(this.drawer.fill);
     this.trailInterval ??= this.hitSize * 4;
     this.world ??= this.entity?.world;
   }
@@ -167,8 +165,12 @@ class Bullet extends PhysicalObject {
   }
   spawnTrail(dt) {
     //This got too long
+    let s =
+      this.trailSpacing === "speed" ? this.speed * dt
+      : this.trailSpacing === "timed" ? dt
+      : 0;
 
-    for (let e = 0; e < this.speed * dt; e++) {
+    for (let e = 0; e < s; e++) {
       this._trailCounter--;
       if (this._trailCounter <= 1) {
         if (this.world?.particles != null && this.trail) {
@@ -186,7 +188,7 @@ class Bullet extends PhysicalObject {
               0,
               (this.trailLength || this.hitSize) * this.trailInterval * 0.25,
               (this.trailLength || this.hitSize) * this.trailInterval * 0.25,
-              0
+              0,
             );
             trailparticle.light = this.trailLight;
             this.world.particles.push(trailparticle);
@@ -205,19 +207,19 @@ class Bullet extends PhysicalObject {
           this.y,
           this.drawer.width,
           this.drawer.height,
-          this.directionRad
+          this.directionRad,
         );
       } else {
         //If no image, draw shape instead
         noStroke();
-        fill(this.drawer.fill);
+        col.fill(this.drawer.fill);
         rotatedShape(
           this.drawer.shape,
           this.x,
           this.y,
           this.drawer.width,
           this.drawer.height,
-          this.directionRad
+          this.directionRad,
         );
       }
     super.draw();
@@ -228,23 +230,23 @@ class Bullet extends PhysicalObject {
         if (tru(this.fireChance))
           Fire.create(
             Object.assign(this.fire, {
-              x: this.x + rnd(this.fireSpread, -this.fireSpread),
-              y: this.y + rnd(this.fireSpread, -this.fireSpread),
+              x: this.x + rnd.float(this.fireSpread, -this.fireSpread),
+              y: this.y + rnd.float(this.fireSpread, -this.fireSpread),
               world: this.world,
               team: this.entity.team,
-            })
+            }),
           );
       });
     else if (tru(this.fireChance))
       repeat(this.fires, () =>
         Fire.create(
           Object.assign(this.fire, {
-            x: this.x + rnd(this.fireSpread, -this.fireSpread),
-            y: this.y + rnd(this.fireSpread, -this.fireSpread),
+            x: this.x + rnd.float(this.fireSpread, -this.fireSpread),
+            y: this.y + rnd.float(this.fireSpread, -this.fireSpread),
             world: this.world,
             team: this.entity.team,
-          })
-        )
+          }),
+        ),
       );
   }
   frag() {
@@ -259,7 +261,7 @@ class Bullet extends PhysicalObject {
       this.world,
       this.entity,
       this.fragSpeedMin,
-      this.fragSpeedMax
+      this.fragSpeedMax,
     );
   }
   spawn() {
@@ -274,7 +276,7 @@ class Bullet extends PhysicalObject {
       this.world,
       this.entity,
       this.spawnSpeedMin,
-      this.spawnSpeedMax
+      this.spawnSpeedMax,
     );
   }
   interval() {
@@ -287,7 +289,7 @@ class Bullet extends PhysicalObject {
       this.intervalSpread,
       this.intervalSpacing,
       this.world,
-      this.entity
+      this.entity,
     );
   }
   intervalTick() {
@@ -307,7 +309,7 @@ class Bullet extends PhysicalObject {
           Math.floor(this.x / blockSize),
           Math.floor(this.y / blockSize),
           Math.ceil(this.hitSize / blockSize),
-          "blocks"
+          "blocks",
         )
         .forEach((block) => {
           if (
@@ -329,10 +331,7 @@ class Bullet extends PhysicalObject {
         !this.damaged.includes(entity) &&
         this.collidesWith(entity)
       ) {
-        if (
-          (this.collidesGround && !entity.flying) ||
-          (this.collidesAir && entity.flying)
-        )
+        if ((this.collidesGround && !entity.flying) || (this.collidesAir && entity.flying))
           this.hit(entity);
       }
     });
@@ -350,8 +349,7 @@ class Bullet extends PhysicalObject {
       for (let instance of this.damage) {
         if (!instance.spread) instance.spread = 0;
         let todeal =
-          instance.amount +
-          (this.conditionalPierce ? 0 : rnd(instance.spread, -instance.spread));
+          instance.amount + (this.conditionalPierce ? 0 : rnd.float(instance.spread, -instance.spread));
         let taken = Math.min(todeal, physobj.health);
         if (!instance.radius) {
           physobj.damage(instance.type, todeal, this.entity);
@@ -378,3 +376,4 @@ class Bullet extends PhysicalObject {
   }
 }
 export { Bullet };
+

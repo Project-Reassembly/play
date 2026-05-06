@@ -4,8 +4,8 @@ Registries.entities.add("tonk", {
 });
 Registries.entities.add("scrap-player", {
   type: "player",
-  name: "Player",
-  health: 100,
+  name: "",
+  health: 150,
   light: 100,
   components: [
     {
@@ -31,7 +31,7 @@ Registries.entities.add("scrap-player", {
     yOffset: 13,
     image: "arm.scrap",
   },
-  team: "player",
+  team: "scrap",
   width: 25,
   height: 25,
   speed: 3,
@@ -113,6 +113,17 @@ Registries.entities.add("scrap-player", {
       time: 600,
     },
   ],
+  rightHand: [
+    {
+      item: "scrap-shooter"
+    },
+  ],
+  ammo: [
+    {
+      item: "scrap-bullet",
+      count: 1000
+    },
+  ],
 });
 Registries.entities.add("iti-player", {
   type: "player",
@@ -144,7 +155,7 @@ Registries.entities.add("iti-player", {
     yOffset: 13,
     image: "arm.iti",
   },
-  team: "player",
+  team: "iti",
   width: 25,
   height: 25,
   speed: 4,
@@ -224,6 +235,11 @@ Registries.entities.add("iti-player", {
         },
       ],
       time: 600,
+    },
+  ],
+  rightHand: [
+    {
+      item: "iti-laser-pistol"
     },
   ],
 });
@@ -257,7 +273,7 @@ Registries.entities.add("ccc-player", {
     yOffset: 13,
     image: "arm.ccc",
   },
-  team: "player",
+  team: "ccc",
   width: 25,
   height: 25,
   speed: 4,
@@ -340,6 +356,167 @@ Registries.entities.add("ccc-player", {
     },
   ],
 });
+Registries.entities.add("peti-player", {
+  type: "player",
+  name: "Proton",
+  health: 100,
+  light: 100,
+  components: [
+    {
+      image: "npc.peti.player.head",
+      width: 32,
+      height: 32,
+      xOffset: -3,
+    },
+    {
+      image: "npc.peti.generic.body",
+      width: 32,
+      height: 32,
+    },
+    {
+      type: "leg-component",
+      image: "npc.peti.generic.legs",
+      width: 32,
+      height: 32,
+    },
+  ],
+  armType: {
+    width: 32,
+    height: 11,
+    yOffset: 13,
+    image: "arm.peti",
+  },
+  team: "peti",
+  width: 25,
+  height: 25,
+  speed: 5,
+  assemblySlots: 4,
+  assemblyRecipes: [
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 20,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-storage",
+          count: 1,
+        },
+      ],
+      time: 150,
+    },
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 10,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-drill",
+          count: 1,
+        },
+      ],
+      time: 300,
+    },
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 25,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-assembler",
+          count: 1,
+        },
+      ],
+      time: 600,
+    },
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 40,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-compressor",
+          count: 1,
+        },
+      ],
+      time: 600,
+    },
+    {
+      inputs: [
+        {
+          item: "scrap",
+          count: 30,
+        },
+      ],
+      outputs: [
+        {
+          item: "scrap-smelter",
+          count: 1,
+        },
+      ],
+      time: 600,
+    },
+  ],
+  rightHand: [
+    {
+      item: "peti-charged-laser-blaster"
+    },
+  ],
+});
+Registries.entities.add("v-player", {
+  type: "player",
+  name: "->--<-",
+  health: 10,
+  armour: 1000,
+  light: 100,
+  components: [
+    {
+      image: "npc.v.player.head",
+      width: 32,
+      height: 32,
+      xOffset: -3,
+    },
+    {
+      image: "npc.v.generic.body",
+      width: 32,
+      height: 32,
+    },
+    {
+      type: "leg-component",
+      image: "npc.v.generic.legs",
+      width: 32,
+      height: 32,
+    },
+  ],
+  armType: {
+    width: 32,
+    height: 11,
+    yOffset: 13,
+    image: "arm.v",
+  },
+  team: "v",
+  width: 25,
+  height: 25,
+  speed: 6,
+  assemblySlots: 0,
+  rightHand: [
+    {
+      item: "peti-charged-laser-blaster"
+    },
+  ],
+});
+
 
 Registries.entities.add("scavenger", {
   name: "Scavenger",
@@ -479,6 +656,7 @@ Registries.entities.add("scrap-sentinel", {
 });
 Registries.entities.add("iti-corporate-merchant", {
   type: "npc",
+  team: "iti",
   name: "InfiniTech Industries Corporate Merchant",
   inventorySize: 1,
   components: [
@@ -737,7 +915,7 @@ Registries.entities.add("*", {
             ],
           },
         },
-        pattern: { amount: 2, spacing: 40 },
+        // pattern: { amount: 2, spacing: 40 },
         condition: {
           type: "aicon.mouse",
         },

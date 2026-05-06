@@ -1,6 +1,7 @@
-import { EquippedEntity } from "./inventory-entity.js";
-import { colinterp, roundNum, tru } from "../../core/number.js";
+import { col } from "../../core/color.js";
+import { roundNum, tru } from "../../core/number.js";
 import { game } from "../../play/game.js";
+import { EquippedEntity } from "./inventory-entity.js";
 /** Character that the player can interact with.
  * Technically enemies should be classed as NPCs too, but this class is used for specifically *friendly* NPCs which the player can talk to.
  * Can have trades
@@ -76,20 +77,14 @@ class NPC extends EquippedEntity {
     if (this.relation > 100) this.relation = 100;
     if (
       this.ispassive() &&
-      tru(
-        (this.defensiveness * -this.relation) /
-          (Math.abs(this.relation) ** 2 / 100 + 1)
-      )
+      tru((this.defensiveness * -this.relation) / (Math.abs(this.relation) ** 2 / 100 + 1))
     ) {
       this.defend();
     }
     if (!this.ishostile() && tru((this.aggression * -this.relation) / 100)) {
       this.anger();
     }
-    if (
-      !this.ispassive() &&
-      tru((this.forgiveness * (this.relation + 100)) / 1000)
-    ) {
+    if (!this.ispassive() && tru((this.forgiveness * (this.relation + 100)) / 1000)) {
       this.pacify();
     }
     super.doAI();
@@ -120,32 +115,15 @@ class NPC extends EquippedEntity {
     fill(0);
     rect(this.x, this.y - this.height / 2, this.width, 6);
     //bar 2
-    fill(
-      ...colinterp(
-        [
-          [255, 0, 0],
-          [255, 255, 0],
-          [0, 255, 0],
-        ],
-        (this.relation + 100) / 200
-      )
-    );
+    col.fill(col.interp([col.red, col.yellow, col.green], (this.relation + 100) / 200));
     rectMode(CORNER);
-    rect(
-      this.x,
-      this.y - this.height / 2 - 3,
-      (this.width * this.relation) / 200,
-      6
-    );
+    rect(this.x, this.y - this.height / 2 - 3, (this.width * this.relation) / 200, 6);
     //text 2
     let txt = roundNum(this.relation, 1) + "%";
-    text(
-      txt,
-      this.x - this.width / 2 + textWidth(txt) / 2,
-      this.y - this.height / 2 - 6
-    );
+    text(txt, this.x - this.width / 2 + textWidth(txt) / 2, this.y - this.height / 2 - 6);
     pop();
     super.postDraw();
   }
 }
 export { NPC };
+

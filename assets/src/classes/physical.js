@@ -1,16 +1,10 @@
-import { RegisteredItem } from "../core/registered-item.js";
-import { Block } from "./block/block.js";
-import {
-  Vector,
-  rnd,
-  colinterp,
-  roundNum,
-  clamp,
-  turn,
-} from "../core/number.js";
+import { col } from "../core/color.js";
+import { Vector, clamp, rnd, roundNum, turn } from "../core/number.js";
+import Integrate from "../lib/integrate.js";
 import { emitEffect } from "../play/effects.js";
+import { blockSize } from "../scaling.js";
 import { TextParticle } from "./effect/text-particle.js";
-class PhysicalObject extends RegisteredItem {
+export class PhysicalObject extends Integrate.RegisteredItem {
   static debug = false;
   x = 0;
   y = 0;
@@ -44,14 +38,7 @@ class PhysicalObject extends RegisteredItem {
    * @param {PhysicalObject} other
    */
   collidesWith(other) {
-    return !other
-      ? false
-      : hitboxesIntersect(
-          this,
-          other,
-          this instanceof Block,
-          other instanceof Block
-        );
+    return !other ? false : hitboxesIntersect(this, other);
   }
 
   moveVct(vct, ignoresBlocks = false) {
@@ -59,8 +46,8 @@ class PhysicalObject extends RegisteredItem {
   }
 
   move(dx, dy, ignoresBlocks = false) {
-    let hx = Math.floor(this.x / Block.size);
-    let hy = Math.floor(this.y / Block.size);
+    let hx = Math.round(this.x / blockSize);
+    let hy = Math.round(this.y / blockSize);
     this._moveX(dx, ignoresBlocks);
     this._moveY(dy, ignoresBlocks);
     //time to die
@@ -76,8 +63,8 @@ class PhysicalObject extends RegisteredItem {
     this.x += dx;
     if (ignoresBlocks) return;
     //COLLISION DETECTION AAAA
-    let hx = Math.floor(this.x / Block.size);
-    let hy = Math.floor(this.y / Block.size);
+    let hx = Math.round(this.x / blockSize);
+    let hy = Math.round(this.y / blockSize);
     //Blocks
     let upright = this.world.getBlock(hx + 1, hy - 1, "blocks");
     let downright = this.world.getBlock(hx + 1, hy + 1, "blocks");
@@ -86,46 +73,46 @@ class PhysicalObject extends RegisteredItem {
     let right = this.world.getBlock(hx + 1, hy, "blocks");
     let downleft = this.world.getBlock(hx - 1, hy + 1, "blocks");
     //Entity colliders
-    let topcollision = this.y + this.height / 2;
-    let bottomcollision = this.y - this.height / 2;
-    let leftcollision = this.x - this.width / 2;
-    let rightcollision = this.x + this.width / 2;
+    let topcollision = this.y + this.height * 0.5;
+    let bottomcollision = this.y - this.height * 0.5;
+    let leftcollision = this.x - this.width * 0.5;
+    let rightcollision = this.x + this.width * 0.5;
     //Intermediary
     let hitsupleft =
       upleft &&
       !upleft.walkable &&
-      bottomcollision < upleft.y + Block.size &&
-      leftcollision < upleft.x + Block.size;
+      bottomcollision < upleft.y + blockSize * 0.5 &&
+      leftcollision < upleft.x + blockSize * 0.5;
     let hitsupright =
       upright &&
       !upright.walkable &&
-      bottomcollision < upright.y + Block.size &&
-      rightcollision > upright.x;
+      bottomcollision < upright.y + blockSize * 0.5 &&
+      rightcollision > upright.x - blockSize * 0.5;
     let hitsdownleft =
       downleft &&
       !downleft.walkable &&
-      topcollision > downleft.y &&
-      leftcollision < downleft.x + Block.size;
+      topcollision > downleft.y - blockSize * 0.5 &&
+      leftcollision < downleft.x + blockSize * 0.5;
     let hitsdownright =
       downright &&
       !downright.walkable &&
-      topcollision > downright.y &&
-      rightcollision > downright.x;
+      topcollision > downright.y - blockSize * 0.5 &&
+      rightcollision > downright.x - blockSize * 0.5;
     //Movement
     let noleft =
-      (left && !left.walkable && leftcollision < left.x + Block.size) ||
+      (left && !left.walkable && leftcollision < left.x + blockSize * 0.5) ||
       hitsupleft ||
       hitsdownleft;
     let noright =
-      (right && !right.walkable && rightcollision > right.x) ||
+      (right && !right.walkable && rightcollision > right.x - blockSize * 0.5) ||
       hitsdownright ||
       hitsupright;
     //Final judgement
     if (noright) {
-      this.x = (right ?? upright ?? downright).x - this.width / 2;
+      this.x = (right ?? upright ?? downright).x - this.width * 0.5 - blockSize * 0.5;
     }
     if (noleft) {
-      this.x = (left ?? upleft ?? downleft).x + this.width / 2 + Block.size;
+      this.x = (left ?? upleft ?? downleft).x + this.width * 0.5 + blockSize * 0.5;
     }
   }
 
@@ -133,8 +120,8 @@ class PhysicalObject extends RegisteredItem {
     this.y += dy;
     if (ignoresBlocks) return;
     //COLLISION DETECTION AAAA
-    let hx = Math.floor(this.x / Block.size);
-    let hy = Math.floor(this.y / Block.size);
+    let hx = Math.round(this.x / blockSize);
+    let hy = Math.round(this.y / blockSize);
     //Blocks
     let up = this.world.getBlock(hx, hy - 1, "blocks");
     let upright = this.world.getBlock(hx + 1, hy - 1, "blocks");
@@ -143,46 +130,44 @@ class PhysicalObject extends RegisteredItem {
     let upleft = this.world.getBlock(hx - 1, hy - 1, "blocks");
     let downleft = this.world.getBlock(hx - 1, hy + 1, "blocks");
     //Entity colliders
-    let topcollision = this.y + this.height / 2;
-    let bottomcollision = this.y - this.height / 2;
-    let leftcollision = this.x - this.width / 2;
-    let rightcollision = this.x + this.width / 2;
+    let topcollision = this.y + this.height * 0.5;
+    let bottomcollision = this.y - this.height * 0.5;
+    let leftcollision = this.x - this.width * 0.5;
+    let rightcollision = this.x + this.width * 0.5;
     //Intermediary
     let hitsupleft =
       upleft &&
       !upleft.walkable &&
-      bottomcollision < upleft.y + Block.size &&
-      leftcollision < upleft.x + Block.size;
+      bottomcollision < upleft.y + blockSize * 0.5 &&
+      leftcollision < upleft.x + blockSize * 0.5;
     let hitsupright =
       upright &&
       !upright.walkable &&
-      bottomcollision < upright.y + Block.size &&
-      rightcollision > upright.x;
+      bottomcollision < upright.y + blockSize * 0.5 &&
+      rightcollision > upright.x - blockSize * 0.5;
     let hitsdownleft =
       downleft &&
       !downleft.walkable &&
-      topcollision > downleft.y &&
-      leftcollision < downleft.x + Block.size;
+      topcollision > downleft.y - blockSize * 0.5 &&
+      leftcollision < downleft.x + blockSize * 0.5;
     let hitsdownright =
       downright &&
       !downright.walkable &&
-      topcollision > downright.y &&
-      rightcollision > downright.x;
+      topcollision > downright.y - blockSize * 0.5 &&
+      rightcollision > downright.x - blockSize * 0.5;
     //Movement
     let noup =
-      (up && !up.walkable && bottomcollision < up.y + Block.size) ||
-      hitsupleft ||
-      hitsupright;
+      (up && !up.walkable && bottomcollision < up.y + blockSize * 0.5) || hitsupleft || hitsupright;
     let nodown =
-      (down && !down.walkable && topcollision > down.y) ||
+      (down && !down.walkable && topcollision > down.y - blockSize * 0.5) ||
       hitsdownright ||
       hitsdownleft;
     //Final judgement
     if (noup) {
-      this.y = (up ?? upleft ?? upright).y + this.height / 2 + Block.size;
+      this.y = (up ?? upleft ?? upright).y + this.height * 0.5 + blockSize * 0.5;
     }
     if (nodown) {
-      this.y = (down ?? downleft ?? downright).y - this.height / 2;
+      this.y = (down ?? downleft ?? downright).y - this.height * 0.5 - blockSize * 0.5;
     }
   }
 
@@ -254,7 +239,7 @@ class PhysicalObject extends RegisteredItem {
     return ((this.y - y) ** 2 + (this.x - x) ** 2) ** 0.5;
   }
   get size() {
-    return (this.width + this.height) / 2;
+    return (this.width + this.height) * 0.5;
   }
   /**
    * @param {PhysicalObject[]} array Array to find objects in.
@@ -262,12 +247,12 @@ class PhysicalObject extends RegisteredItem {
    * @param {(obj: PhysicalObject) => boolean} where Predicate for targeted objects.
    * @returns {PhysicalObject | null} The closest `PhysicalObject`, or `null` if the array had no `PhysicalObject`s
    */
-  closestFrom(array, maxDist, where = () => true) {
+  closestFrom(array, maxDist = Infinity, where = null) {
     let mindist = Infinity;
     let chosen = null;
     for (let obj of array) {
       if (!obj) continue;
-      if (!where(obj)) continue;
+      if (where && !where(obj)) continue;
       let dist = this.distanceTo(obj);
       if (dist > maxDist) continue;
       if (dist < mindist) {
@@ -290,10 +275,10 @@ class PhysicalObject extends RegisteredItem {
   }
 }
 
-class ShootableObject extends PhysicalObject {
+export class ShootableObject extends PhysicalObject {
   health = 100;
   maxHealth = 0;
-  team = "enemy";
+  team = "scrap";
   dead = false;
   hasHealthbar = true;
   _healthbarShowTime = 0;
@@ -321,7 +306,7 @@ class ShootableObject extends PhysicalObject {
     if (amount === 0) return 0;
     this.createDamageNumber(Math.min(amount, this.health));
     this.health -= amount;
-    if (this.health <= 0) {
+    if (!(this.health > 0)) {
       this.health = 0;
       if (!this.dead) {
         this.dead = true;
@@ -333,43 +318,57 @@ class ShootableObject extends PhysicalObject {
   createDamageNumber(amount) {
     this._baseDamageNumber(amount, this.x, this.y);
   }
+  createShieldDamageNumber(amount) {
+    this._shieldDamageNumber(amount, this.x, this.y);
+  }
   _baseDamageNumber(amount, x, y) {
+    const frac = amount / this.maxHealth;
     this.world.particles.push(
       new TextParticle(
         x,
         y,
-        rnd(0, Math.PI * 2),
+        rnd.float(0, Math.PI * 2),
         60,
-        this.size / 30,
-        0.1,
+        this.size / 30 + Math.sqrt(frac),
+        0.025,
         roundNum(Math.abs(amount), 1),
 
         createFlashingColourArray(
-          amount > 0
-            ? colinterp(
-                [
-                  [255, 255, 0],
-                  [255, 0, 0],
-                  [0, 0, 0],
-                ],
-                clamp(amount / this.maxHealth, 0, 1)
-              )
-            : colinterp(
-                [
-                  [200, 255, 0],
-                  [0, 255, 0],
-                  [255, 255, 255],
-                ],
-                clamp(amount / this.maxHealth, 0, 1)
-              ),
-          65
+          amount > 0 ?
+            col.interp([col.yellow, col.red, col.black], clamp(frac, 0, 1))
+          : col.interp([col.from(200, 255, 0), col.green, col.white], clamp(frac, 0, 1)),
+          65,
         ),
 
-        (1 + amount / this.maxHealth / 2) * 20,
+        (1 + (amount / this.maxHealth) * 0.5) * 20,
         (1 + amount / this.maxHealth / 6) * 10,
         0,
-        true
-      )
+        true,
+      ),
+    );
+  }
+  _shieldDamageNumber(amount, x, y) {
+    const frac = amount / this._lastMaxShield;
+    this.world.particles.push(
+      new TextParticle(
+        x,
+        y,
+        rnd.float(0, Math.PI * 2),
+        60,
+        this.size / 30 + Math.sqrt(frac),
+        0.025,
+        roundNum(Math.abs(amount), 1),
+
+        createFlashingColourArray(
+          amount > 0 ? col.interp([col.blue, col.cyan, col.white], clamp(frac, 0, 1)) : col.magenta,
+          65,
+        ),
+
+        (1 + frac * 0.5) * 20,
+        (1 + frac / 6) * 10,
+        0,
+        true,
+      ),
     );
   }
   onHealthZeroed(type, source) {}
@@ -383,8 +382,10 @@ class ShootableObject extends PhysicalObject {
     this._healthbarShowTime = 180;
     this._shieldShowTime = 30;
     if (this.shield > 0) {
-      let oldshield = this.shield;
-      this.shield -= Math.max(this.calcShield(amount), 0);
+      const oldshield = this.shield;
+      const sdam = Math.max(this.calcShield(amount), 0);
+      this.createShieldDamageNumber(sdam);
+      this.shield -= sdam;
       if (this.shield <= 0) {
         this.breakShield();
         amount -= oldshield;
@@ -392,21 +393,19 @@ class ShootableObject extends PhysicalObject {
     }
     return this.takeDamage(type, Math.max(this.calcArmour(amount), 0), source);
   }
+  /**@readonly Natural logarithm of 1.4 */
+  static LN1p4 = Math.log(1.4);
   /** Calculate the damage to deal to this entity after applying armour. */
   calcArmour(amount) {
+    let at = Math.log1p(this.armourToughness) / ShootableObject.LN1p4;
     return (
       amount *
-      (1 -
-        ((1 -
-          (this.armourToughness + 1) /
-            (this.armour + this.armourToughness + 1)) **
-          0.3) **
-          (amount ** (1 - (this.armourToughness + 1) / 10)))
+      (1 - ((1 - (at + 1) / (this.armour + at + 1)) ** 0.3) ** (amount ** (1 - (at + 1) / 10)))
     );
   }
   /** Calculate the damage to do to the entity's shield. */
   calcShield(amount) {
-    return this.shield > 0 ? amount ** (1 / (this.shieldRating / 400 + 1)) : 0;
+    return this.shield > 0 ? (amount + 1) ** (1 / (this.shieldRating / 400 + 1)) - 1 : 0;
   }
   addShield(amount) {
     if (this.shield == 0) this._lastMaxShield = amount;
@@ -434,28 +433,14 @@ class ShootableObject extends PhysicalObject {
       stroke(0);
       strokeWeight(1);
       fill(0);
-      rect(
-        this.x - this.width / 2,
-        this.y + this.height / 2 - 5,
-        this.width,
-        5
-      );
-      fill(
-        colinterp(
-          [
-            [255, 0, 0],
-            [255, 255, 0],
-            [0, 255, 0],
-          ],
-          this.health / this.maxHealth
-        )
-      );
+      rect(this.x - this.width / 2, this.y + this.height * 0.5 - 5, this.width, 5);
+      col.fill(col.interp([col.red, col.yellow, col.green], this.health / this.maxHealth));
       noStroke();
       rect(
         this.x - this.width / 2,
-        this.y + this.height / 2 - 5,
+        this.y + this.height * 0.5 - 5,
         (this.width * this.health) / this.maxHealth,
-        5
+        5,
       );
       pop();
       this._healthbarShowTime--;
@@ -484,14 +469,14 @@ class ShootableObject extends PhysicalObject {
  */
 function hitboxesIntersect(hb1, hb2, isHB1Block, isHB2Block) {
   return rectanglesIntersect(
-    hb1.x + (isHB1Block ? Block.size / 2 : 0),
-    hb1.y + (isHB1Block ? Block.size / 2 : 0),
+    hb1.x,
+    hb1.y,
     hb1.width / 2,
     hb1.height / 2,
-    hb2.x + (isHB2Block ? Block.size / 2 : 0),
-    hb2.y + (isHB2Block ? Block.size / 2 : 0),
+    hb2.x,
+    hb2.y,
     hb2.width / 2,
-    hb2.height / 2
+    hb2.height / 2,
   );
 }
 /**
@@ -507,19 +492,12 @@ function hitboxesIntersect(hb1, hb2, isHB1Block, isHB2Block) {
  * @returns True if the rectangles are colliding or not.
  */
 function rectanglesIntersect(ox, oy, odx, ody, cx, cy, dx, dy) {
-  return (
-    ox + odx >= cx - dx &&
-    ox - odx <= cx + dx &&
-    oy + ody >= cy - dy &&
-    oy - ody <= cy + dy
-  );
+  return ox + odx >= cx - dx && ox - odx <= cx + dx && oy + ody >= cy - dy && oy - ody <= cy + dy;
 }
 
 function createFlashingColourArray(basecol, lightness = 255) {
-  let lcol = basecol.map((x) => clamp(x + lightness, 0, 255));
+  let lcol = col.lighten(basecol, lightness);
   return [basecol, lcol, basecol, lcol, basecol, lcol, basecol, lcol, basecol];
 }
 
 window.debug = () => (PhysicalObject.debug = !PhysicalObject.debug);
-
-export { ShootableObject, PhysicalObject };

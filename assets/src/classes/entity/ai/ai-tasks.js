@@ -1,12 +1,9 @@
 import { construct, constructFromType } from "../../../core/constructor.js";
 import { Vector } from "../../../core/number.js";
-import { RegisteredItem } from "../../../core/registered-item.js";
 import { ui } from "../../../core/ui.js";
+import Integrate from "../../../lib/integrate.js";
 import { autoScaledEffect } from "../../../play/effects.js";
-import {
-  ShootPattern,
-  WeaponShootConfiguration,
-} from "../../item/weapon-exts.js";
+import { ShootPattern } from "../../item/weapon-exts.js";
 import { patternedBulletExpulsion } from "../../projectile/yeeter.js";
 import { Timer } from "../../timer.js";
 import { Entity } from "../entity.js";
@@ -14,7 +11,7 @@ import { AICondition } from "./ai-conditions.js";
 import { AI } from "./ai.js";
 
 //Base class, counts as just waiting
-export class AITask extends RegisteredItem{
+export class AITask extends Integrate.RegisteredItem {
   started = false;
   duration = 1;
   #timer = 0;
@@ -94,15 +91,13 @@ export class ShootBulletsTask extends AITask {
   start(ai, entity) {
     this.timer.repeat(
       () => {
-        let pos = entity.pos.add(
-          new Vector(this.shootX, this.shootY).rotate(entity.direction)
-        );
+        let pos = entity.pos.add(new Vector(this.shootX, this.shootY).rotate(entity.direction));
         autoScaledEffect(
           this.effect,
           entity.world,
           pos.x,
           pos.y,
-          entity.directionRad + radians(this.shootD)
+          entity.directionRad + radians(this.shootD),
         );
         patternedBulletExpulsion(
           pos.x,
@@ -113,11 +108,11 @@ export class ShootBulletsTask extends AITask {
           this.pattern.spread,
           this.pattern.spacing,
           entity.world,
-          entity
+          entity,
         );
       },
       this.pattern.burst,
-      this.pattern.interval
+      this.pattern.interval,
     );
   }
 }
@@ -144,16 +139,9 @@ export class CreateBulletsTask extends AITask {
   start(ai, entity) {
     this.timer.repeat(
       (i) => {
-        let pos = this.relativeToCamera
-          ? ui.camera.pos.addXY(this.x, this.y)
-          : new Vector(this.x, this.y);
-        autoScaledEffect(
-          this.effect,
-          entity.world,
-          pos.x,
-          pos.y,
-          radians(this.direction)
-        );
+        let pos =
+          this.relativeToCamera ? ui.camera.pos.addXY(this.x, this.y) : new Vector(this.x, this.y);
+        autoScaledEffect(this.effect, entity.world, pos.x, pos.y, radians(this.direction));
         patternedBulletExpulsion(
           pos.x,
           pos.y,
@@ -163,11 +151,11 @@ export class CreateBulletsTask extends AITask {
           this.pattern.spread,
           this.pattern.spacing,
           entity.world,
-          entity
+          entity,
         );
       },
       this.pattern.burst,
-      this.pattern.interval
+      this.pattern.interval,
     );
     this.timer.tick();
   }
@@ -188,26 +176,25 @@ export class RetargetTask extends AITask {
    * @param {Entity} entity
    */
   start(ai, entity) {
-    let centity = this.checkEntities
-      ? entity.closestFrom(
+    let centity =
+      this.checkEntities ?
+        entity.closestFrom(
           entity.world.entities,
           this.range || entity.targetRange,
-          (ent) =>
-            !ent.dead &&
-            (!this.mustBeOtherTeam || ent.team !== entity.team) &&
-            ent.visible
+          (ent) => !ent.dead && (!this.mustBeOtherTeam || ent.team !== entity.team) && ent.visible,
         )
       : null;
-    let cblock = attackBlocks
-      ? entity.closestFrom(
+    let cblock =
+      attackBlocks ?
+        entity.closestFrom(
           entity.world.blocksInSquare(
             Math.floor(entity.x / blockSize),
             Math.floor(entity.y / blockSize),
             Math.floor((this.range || entity.attackRange) / blockSize),
-            "blocks"
+            "blocks",
           ),
           this.range || entity.attackRange,
-          (blk) => !this.mustBeOtherTeam || blk.team !== entity.team
+          (blk) => !this.mustBeOtherTeam || blk.team !== entity.team,
         )
       : null;
     ai.target = entity.closestFrom([centity, cblock], entity.targetRange);
@@ -226,7 +213,7 @@ export class TrackTargetTask extends AITask {
       entity.moveTowards(
         (ai.target instanceof Block ? blockSize / 2 : 0) + ai.target.x,
         (ai.target instanceof Block ? blockSize / 2 : 0) + ai.target.y,
-        true
+        true,
       );
   }
 }

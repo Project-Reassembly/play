@@ -1,3 +1,4 @@
+import { col } from "../../../core/color.js";
 import { construct, constructFromType } from "../../../core/constructor.js";
 import { turn, Vector } from "../../../core/number.js";
 import { autoScaledEffect } from "../../../play/effects.js";
@@ -6,13 +7,10 @@ import { WeaponComponent } from "../../entity/component.js";
 import { Entity } from "../../entity/entity.js";
 import { DroppedItemStack } from "../../item/dropped-itemstack.js";
 import { WeaponBulletConfiguration, WeaponShootConfiguration } from "../../item/weapon-exts.js";
-import {
-  Weapon
-} from "../../item/weapon.js";
-import { PhysicalObject } from "../../physical.js";
+import { Weapon } from "../../item/weapon.js";
+import { PhysicalObject, ShootableObject } from "../../physical.js";
 import { patternedBulletExpulsion } from "../../projectile/yeeter.js";
 import { Timer } from "../../timer.js";
-import { Block } from "../block.js";
 import { Container } from "../container.js";
 
 /**Standalone turret block, fires a single weapon which can't be replaced. */
@@ -45,6 +43,7 @@ class Turret extends Container {
   #lastCharge = 0;
   #lastAmmo = "none";
 
+  /**@import {ShootableObject} from "../../physical.js" @type {ShootableObject} */
   target = null;
 
   /** @type {Component} */
@@ -72,50 +71,37 @@ class Turret extends Container {
     this.decelerate();
     this.component?.tick(this);
     if (this.target) {
+      let t = this.target;
       let d =
-        this.target instanceof Block
-          ? Vector.fromScalar(blockSize / 2)
-          : this.target instanceof Entity
-          ? this.target.predictMotionDS(
-              this.distanceTo(this.target),
-              this.bullets.getAmmo(this.#lastAmmo)?.speed ?? 10
-            )
-          : Vector.ZERO;
+        t instanceof Entity ?
+          t.predictMotionDS(this.bullets.getAmmo(this.#lastAmmo)?.speed ?? 10, this.distanceTo(t))
+        : Vector.ZERO;
       let res = turn(
         this.gunDirection,
-        this.x + blockSize / 2,
-        this.y + blockSize / 2,
+        this.x,
+        this.y,
         this.target.x + d.x,
         this.target.y + d.y,
-        this.turnSpeed
+        this.turnSpeed,
       );
       this.gunDirection = res.direction;
       this.gunCanFire =
         Math.abs(
           this.gunDirection -
-            new Vector(this.target.x, this.target.y).sub(
-              new Vector(this.x, this.y).add(Vector.fromScalar(blockSize / 2))
-            )
+            new Vector(this.target.x, this.target.y).sub(new Vector(this.x, this.y)).angle,
         ) < this.shootCone;
     }
     if (this.#cooldown > 0) {
       this.#cooldown--;
       if (this.#cooldown <= 0) {
         let pos = this._getShootPos();
-        autoScaledEffect(
-          this.shoot.readyEffect,
-          this.world,
-          pos.x,
-          pos.y,
-          pos.direction
-        );
+        autoScaledEffect(this.shoot.readyEffect, this.world, pos.x, pos.y, pos.direction);
       }
     }
     this.ai((phys) => !(phys instanceof DroppedItemStack));
   }
   getAcceleratedReloadRate(shoot) {
-    if (this.#acceleration <= -1 || this.#acceleration > this.maxAccel)
-      return shoot.reload; //If bad acceleration then ignore it
+    if (this.#acceleration <= -1 || this.#acceleration > this.maxAccel) return shoot.reload; //If bad acceleration then ignore it
     return shoot.reload / (1 + this.#acceleration); //2 acceleration = 200% fire rate increase = 3x fire rate
   }
   accelerate(shoot) {
@@ -144,14 +130,8 @@ class Turret extends Container {
   _getShootPos() {
     let pos = this.component.getPosOn(this);
     pos.direction = this.gunDirectionRad;
-    pos.x +=
-      Math.cos(pos.direction) * this.shootX +
-      Math.sin(pos.direction) * this.shootY +
-      blockSize / 2;
-    pos.y +=
-      Math.sin(pos.direction) * this.shootX +
-      Math.cos(pos.direction) * this.shootY +
-      blockSize / 2;
+    pos.x += Math.cos(pos.direction) * this.shootX + Math.sin(pos.direction) * this.shootY;
+    pos.y += Math.sin(pos.direction) * this.shootX + Math.cos(pos.direction) * this.shootY;
     return pos;
   }
   fire(shoot = this.shoot, bulletConfig = this.bullets) {
@@ -159,10 +139,7 @@ class Turret extends Container {
       //choose ammo
       let ammoType = "-";
       for (let ammo in bulletConfig.ammos) {
-        if (
-          bulletConfig.getAmmo(ammo) !== null &&
-          this.inventory.hasItem(ammo, this.ammoUse)
-        ) {
+        if (bulletConfig.getAmmo(ammo) !== null && this.inventory.hasItem(ammo, this.ammoUse)) {
           ammoType = ammo;
           break;
         }
@@ -175,13 +152,8 @@ class Turret extends Container {
       this.#lastAmmo = ammoType;
       if (shoot.charge > 0) {
         let pos = this._getShootPos();
-        autoScaledEffect(
-          shoot.chargeEffect,
-          this.world,
-          pos.x,
-          pos.y,
-          pos.direction,
-          () => this._getShootPos()
+        autoScaledEffect(shoot.chargeEffect, this.world, pos.x, pos.y, pos.direction, () =>
+          this._getShootPos(),
         );
         this.#cooldown = shoot.reload + shoot.charge;
         this.timer.do(() => {
@@ -216,14 +188,14 @@ class Turret extends Container {
           shoot.pattern.spread,
           shoot.pattern.spacing,
           this.world,
-          this
+          this,
         );
         if (this.component instanceof WeaponComponent) {
           this.component.trigger(shoot.recoilScale, 0);
         }
       },
       shoot.pattern.burst,
-      shoot.pattern.interval
+      shoot.pattern.interval,
     );
   }
   createProgressBar() {
@@ -234,10 +206,7 @@ class Turret extends Container {
         .substring(0, 15);
     else
       return ""
-        .padEnd(
-          15 - ((this.#cooldown - this.#lastReload) / this.#lastCharge) * 15,
-          "■"
-        )
+        .padEnd(15 - ((this.#cooldown - this.#lastReload) / this.#lastCharge) * 15, "■")
         .padEnd(15, "□")
         .substring(0, 15);
   }
@@ -258,50 +227,63 @@ class Turret extends Container {
    * @param {boolean} [shoots=true] Whether or not the entity should shoot at the new target.
    * @returns {boolean} `true` if an entity is being targeted, `false` if not.
    */
-  ai(
-    conditions = () => true,
-    shoots = true,
-    attackBlocks = true,
-    attackEntities = true
-  ) {
+  ai(conditions = () => true, shoots = true, attackBlocks = true, attackEntities = true) {
     let tempTarget = this.target;
-    let entity = attackEntities
-      ? this.closestFrom(
+    let entity =
+      attackEntities ?
+        this.closestFrom(
           this.world.entities,
           this.range,
-          (ent) =>
-            !ent.dead &&
-            ent.team !== this.team &&
-            ent.visible &&
-            conditions(ent)
+          (ent) => !ent.dead && ent.team !== this.team && ent.visible && conditions(ent),
         )
       : null;
-    let block = attackBlocks
-      ? this.closestFrom(
+    let block =
+      attackBlocks ?
+        this.closestFrom(
           this.world.blocksInSquare(
-            Math.floor(this.gridX),
-            Math.floor(this.gridY),
-            Math.floor(this.range / blockSize),
-            "blocks"
+            this.gridX,
+            this.gridY,
+            Math.round(this.range / blockSize),
+            "blocks",
           ),
           this.range,
-          (blk) => blk.team !== this.team && conditions(blk)
+          (blk) => blk.team !== this.team && conditions(blk),
         )
       : null;
     this.target = this.closestFrom([entity, block], this.range);
     if (this.target) {
-      if (
-        this.gunCanFire &&
-        shoots &&
-        this.distanceTo(this.target) < this.range
-      )
-        this.fire();
+      if (this.gunCanFire && shoots && this.distanceTo(this.target) < this.range) this.fire();
       return true;
     } else {
       this.target = tempTarget;
       return false;
     }
   }
+  postDraw2() {
+    if (PhysicalObject.debug) this._debugAI();
+  }
+  _debugAI() {
+    push();
+    noFill();
+    stroke(this.target instanceof ShootableObject ? col.red : col.green);
+    strokeWeight(4);
+    if (this.target) {
+      square(this.target.x, this.target.y, this.size);
+      line(this.x, this.y, this.target.x, this.target.y);
+    }
+    let directionLine = this.pos.add(Vector.fromAngleRad(this.gunDirectionRad).scale(this.range));
+    if (this.gunCanFire) stroke(0, 255, 255);
+    else stroke(100, 0, 255);
+    line(this.x, this.y, directionLine.x, directionLine.y);
+    stroke(
+      this.target instanceof ShootableObject ?
+        col.from(200, 0, 255, 100)
+      : col.from(255, 255, 0, 100),
+    );
+    circle(this.x, this.y, this.attackRange * 2);
+    pop();
+  }
 }
 
 export { Turret };
+

@@ -1,6 +1,6 @@
-import { Registries } from "../core/registry.js";
 import { createLinkedBlockAndItem } from "../classes/block/block.js";
 import { Item } from "../classes/item/item.js";
+import { Registries } from "../core/registry.js";
 //## TILES ##
 Registries.blocks.add("grass", {
   type: "tile",
@@ -289,7 +289,8 @@ createLinkedBlockAndItem(
   {
     type: "crafter",
     title: "Scrap Assembler",
-    inventorySize: 6,
+    inventorySize: 4,
+    resultSize: 3,
     recipes: [
       {
         inputs: [
@@ -662,7 +663,8 @@ createLinkedBlockAndItem(
   {
     type: "uncrafter",
     title: "Scrap Disassembler",
-    inventorySize: 6,
+    inventorySize: 3,
+    resultSize: 4,
     counterpart: "scrap-assembler",
   },
   {

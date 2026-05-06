@@ -1,60 +1,62 @@
+import * as CMFT from "../core/cmft.js";
+import { col } from "../core/color.js";
 import { fonts } from "./font.js";
-import {} from "../core/text.js";
+class InGameMessage {
+  msg = "";
+  timer = 0;
+  count = 1;
+  /** @type {CMFT.Drawer} */
+  cmft;
+  constructor(message, time, charSize, maxChars) {
+    this.msg = message;
+    this.cmft = CMFT.drawer(message, charSize, maxChars).noBG();
+    this.timer = time;
+  }
+}
 class InGameMessageBox {
   x = 0;
   y = -100;
+  /**@type {InGameMessage[]} */
   _messages = [];
-  constructor(x, y, width = 500, maxLines = 10, textSize = 20) {
+  constructor(x, y, minWidth, chars = 100, maxLines = 30, textSize = 25) {
+    this.minWidth = minWidth;
     this.x = x;
     this.y = y;
-    this.width = width;
+    this.maxChars = chars;
     this.maxLines = maxLines;
-    this.textSize = textSize;
+    this.charSize = textSize;
   }
-  draw(backgroundColour = [0, 0, 0, 100]) {
+  draw(backgroundColour = 100) {
     //[95, 100, 100, 160]
     if (this._messages.length === 0) return;
-    let actualY = this.y < 0 ? height + this.y : this.y;
-    let actualX = this.x < 0 ? width + this.x : this.x;
-    let w = this.width;
+    let actualY = this.y;
+    let w = this.minWidth;
     push();
     textFont(fonts.ocr);
     textAlign(LEFT, TOP);
-    textSize(this.textSize);
+    textSize(this.charSize);
     rectMode(CORNER);
     noStroke();
+    fill(0, 100);
     let len = Math.min(this._messages.length, this.maxLines);
-    for (let msg of this._messages) {
-      let text = msg.msg;
-      if ((msg.count ?? 1) > 1) text = "[" + msg.count + "]" + text;
-      let measured = textWidth(text);
+    for (const msg of this._messages) {
+      const measured = msg.cmft.width;
       if (measured > w) w = measured;
     }
-    for (let index = 0; index < len; index++) {
-      push();
-      let message = this._messages[this.y < 0 ? len - index : index];
-      if (!message) continue;
-      let drawY =
-        this.y > 0
-          ? actualY + this.textSize * index
-          : actualY - this.textSize * index;
-      let txtbg = backgroundColour.slice(0);
-      let txtcol = message.colour.slice(0);
-      txtcol[3] ??= 255;
-      txtbg[3] *= Math.min(message.timer / 120, 1);
-      txtcol[3] *= Math.min(message.timer / 120, 1);
-      fill(txtbg);
-      rect(actualX, drawY, w, this.textSize);
-      fill(txtcol);
-      let txt = message.msg;
-      if ((message.count ?? 1) > 1) txt = "[" + message.count + "]" + txt;
-      textStyle(message.style);
-      text(txt, actualX, drawY);
-      pop();
+    actualY -= len * this.charSize;
+    for (let m = len; m > 0; m--) {
+      const msg = this._messages.at(-m);
+      if (!msg) continue;
+
+      let actualX = this.x;
+      if (msg.timer < 100) {
+        actualX -= w * (1 - msg.timer * 0.01);
+      }
+      rect(actualX, actualY, w, msg.cmft.height);
+      msg.cmft.draw(actualX, actualY, col.white, col.from(255,220,0,));
+      actualY += msg.cmft.height;
     }
     pop();
-    textStyle("normal");
-    rectMode(CENTER);
   }
   tick() {
     let len = this._messages.length;
@@ -62,38 +64,29 @@ class InGameMessageBox {
       let message = this._messages[index];
       if (!message) continue;
       message.timer--;
-      if (message.timer <= 0) {
+      if (!(message.timer > 0)) {
         this._messages.splice(index, 1);
+        index--;
       }
     }
   }
-  send(message, colour = [255, 255, 255, 255], style = "normal", time = 240) {
-    let count = 1;
-    if (this.read() === message) {
-      count = this._messages.at(-1).count + 1;
-      this._messages.pop();
-    }
-    this._messages.push({
-      msg: message,
-      timer: time,
-      colour: colour,
-      count: count,
-      style: style,
-    });
+  send(message, time = 240) {
+    let pm = this.read();
+    if (pm?.msg === message) {
+      pm.count += 1;
+      pm.timer = time;
+    } else this._messages.push(new InGameMessage(message, time, this.charSize, this.maxChars));
   }
   read() {
-    return this._messages.at(-1)?.msg;
+    return this._messages.at(-1);
   }
   clear() {
     this._messages.splice(0);
   }
 }
-const Log = new InGameMessageBox(0, -100, 600, 20);
-notify = () =>
-  Log.send(
-    "Update available! Save the game with /save and reload the page.",
-    [255, 220, 0],
-    "bold",
-    600
-  );
-export { Log, InGameMessageBox };
+const Log = new InGameMessageBox(-960, 400, 750);
+globalThis.notify = () =>
+  Log.send("#@bUpdate available! Save the game with /save or ctrl+j and reload the page.", 600);
+globalThis.plog = Log;
+export { InGameMessageBox, Log };
+

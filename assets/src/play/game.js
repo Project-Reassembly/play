@@ -1,32 +1,36 @@
-import { Block, BreakType, PlaceType } from "../classes/block/block.js";
+import { Block, BreakType } from "../classes/block/block.js";
 import { Container } from "../classes/block/container.js";
+import { Player, respawnTimer } from "../classes/entity/player.js";
+import { Inventory } from "../classes/inventory.js";
+import { Equippable } from "../classes/item/equippable.js";
+import { ItemStack } from "../classes/item/item-stack.js";
+import { PlaceableItem } from "../classes/item/placeable.js";
 import { Chunk } from "../classes/world/chunk.js";
 import { World } from "../classes/world/world.js";
-import { Registries } from "../core/registry.js";
-import { Log } from "./messaging.js";
-import { ui, rotatedShape, ImageContainer } from "../core/ui.js";
-import { Inventory } from "../classes/inventory.js";
-import { UIComponent } from "../core/ui.js";
-import {} from "../lib/isl.js";
-import { Serialiser } from "../core/serialiser.js";
-import { createEffect, effectTimer, emitEffect, Explosion } from "./effects.js";
-import { Player, respawnTimer } from "../classes/entity/player.js";
-import { clamp, rnd, roundNum, tru } from "../core/number.js";
-import { PlaceableItem } from "../classes/item/placeable.js";
-import { ItemStack } from "../classes/item/item-stack.js";
-import { Equippable } from "../classes/item/equippable.js";
 import { construct } from "../core/constructor.js";
-//Make the ui exist
-import { cmdHistory } from "../definitions/screens/in-game.js";
-import {} from "../definitions/screens/title.js";
+import { clamp, rnd, roundNum, tru } from "../core/number.js";
+import { PreloadRegistries, Registries } from "../core/registry.js";
+import { Serialiser } from "../core/serialiser.js";
+import { ImageContainer, rotatedShape, ui, UIComponent } from "../core/ui.js";
+import { } from "../lib/isl.js";
+import { createEffect, effectTimer, emitEffect, Explosion } from "./effects.js";
+import { Log } from "./messaging.js";
 //is integration time
-import {} from "../lib/int-setup.js";
-import { ExecutionContext, exec } from "../lib/isl.js";
-import { DroppedItemStack } from "../classes/item/dropped-itemstack.js";
-import { fonts } from "./font.js";
-import { patternedBulletExpulsion } from "../classes/projectile/yeeter.js";
-import { blockSize } from "../scaling.js";
 import { Space } from "../classes/effect/space-renderer.js";
+import { DroppedItemStack } from "../classes/item/dropped-itemstack.js";
+import { patternedBulletExpulsion } from "../classes/projectile/yeeter.js";
+import { } from "../lib/int-setup.js";
+import { exec, ExecutionContext } from "../lib/isl.js";
+import { blockSize, totalSize } from "../scaling.js";
+import { fonts } from "./font.js";
+//Make the ui exist
+import { iterate2DArray } from "../core/2D-array.js";
+import { Decoration } from "../core/cmft.js";
+import { Cutscene } from "../core/cutscene.js";
+import { } from "../definitions/screens/in-game.js";
+import { creation } from "../definitions/screens/new-game.js";
+import { loadStats, setupTips } from "../definitions/screens/title.js";
+import { cmdHistory } from "../definitions/text-edit.js";
 let histIndex = 0;
 const game = {
   saveslot: 1,
@@ -36,17 +40,19 @@ const game = {
   player: null,
   paused: false,
   money: 10000,
-  get mouse() {
-    return {
-      x: ui.lastMousePos.x / ui.camera.zoom + ui.camera.x,
-      blockX: Math.floor(
-        (ui.lastMousePos.x / ui.camera.zoom + ui.camera.x) / Block.size
-      ),
-      y: ui.lastMousePos.y / ui.camera.zoom + ui.camera.y,
-      blockY: Math.floor(
-        (ui.lastMousePos.y / ui.camera.zoom + ui.camera.y) / Block.size
-      ),
-    };
+  mouse: {
+    get x() {
+      return ui.lastMousePos.x / ui.camera.zoom + ui.camera.x;
+    },
+    get blockX() {
+      return Math.round(this.x / blockSize); //* contentScale;
+    },
+    get y() {
+      return ui.lastMousePos.y / ui.camera.zoom + ui.camera.y;
+    },
+    get blockY() {
+      return Math.round(this.y / blockSize); //* contentScale;
+    },
   },
   reset() {
     this.player = null;
@@ -54,9 +60,10 @@ const game = {
     this.paused = false;
   },
 };
+globalThis.ui = ui;
 //Slightly laggy effect stuff
 const effects = {
-  lighting: false, //You need this for insanity
+  lighting: false,
   shadeColour: [0, 230],
   lightColour: [255, 100],
   lightScale: 1,
@@ -88,20 +95,21 @@ const effects = {
         a.splice(i, 1);
       } else {
         let int =
-          (v.intensity *
-            (v.duration / v.originalDuration) *
-            this.screenShakeScale *
-            100) /
+          (v.intensity * (v.duration / v.originalDuration) * this.screenShakeScale * 100) /
           Math.max(game.player.distanceToPoint(v.x, v.y), 50);
         intensity += int;
       }
     });
-    ui.camera.x += rnd(-intensity, intensity);
-    ui.camera.y += rnd(-intensity, intensity);
+    ui.camera.x += rnd.float(-intensity, intensity);
+    ui.camera.y += rnd.float(-intensity, intensity);
   },
 };
-let worldSize = Block.size * Chunk.size * World.size;
-const borders = () => [0, 0, worldSize, worldSize];
+const borders = () => [
+  -blockSize * 0.5,
+  -blockSize * 0.5,
+  totalSize - blockSize * 0.5,
+  totalSize - blockSize * 0.5,
+];
 let preloadTicks = 100;
 let timePerFrame = 1000 / 60;
 let time = 0;
@@ -125,22 +133,32 @@ const gen = {
 //
 let freecam = false;
 
-if (!window.Worker) {
-  const errmsg =
-    "This browser does not support Web Workers; World generation cannot proceed.";
-  console.error(errmsg);
-  Log.send(errmsg, [255, 0, 0]);
+//Initial values for canvas width and height
+const baseWidth = 1920;
+const baseHeight = 1080;
+//scale everything
+export let contentScale = 1;
+globalThis.contentScale = () => contentScale;
+
+//Get the biggest possible canvas that fits on the current screen, preserving aspect ratio
+function getCanvasDimensions(baseWidth, baseHeight) {
+  const aspectRatio = baseWidth / baseHeight;
+  let [canvasWidth, canvasHeight] = [windowWidth, windowHeight];
+  let [widthRatio, heightRatio] = [canvasWidth / baseWidth, canvasHeight / baseHeight];
+  if (widthRatio < heightRatio) {
+    [canvasWidth, canvasHeight] = [windowWidth, windowWidth / aspectRatio];
+    contentScale = canvasWidth / baseWidth;
+  } else {
+    [canvasWidth, canvasHeight] = [windowHeight * aspectRatio, windowHeight];
+    contentScale = canvasHeight / baseHeight;
+  }
+  return [canvasWidth, canvasHeight];
 }
-/** @type {Worker | null} */
-let worldGenWorker = null;
-try {
-  worldGenWorker = new Worker("assets/src/worker/generator.js", {
-    name: "[World Gen]",
-    type: "module",
-  });
-} catch (error) {
-  console.error("Could not create worker:", error);
-  Log.send("World generation could not be started.", [255, 0, 0]);
+
+if (!window.Worker) {
+  const errmsg = "This browser does not support Web Workers; World generation cannot proceed.";
+  console.error(errmsg);
+  Log.send("#4-" + errmsg);
 }
 //
 
@@ -151,216 +169,237 @@ let stats = {
   failed: 0,
   structures: Object.create(null),
   structs: 0,
+  spawned: Object.create(null),
+  spawns: 0,
 };
 //Create or load world
 const world = new World();
+function sortByE1(a, b) {
+  const a0 = a[0],
+    b0 = b[0];
+  return (
+    a0 < b0 ? -1
+    : a0 > b0 ? 1
+    : 0
+  );
+}
+/** @type {Worker | null} */
+let worldGenWorker = null;
+try {
+  worldGenWorker = new Worker("assets/src/worker/generator.js", {
+    name: "[World Gen]",
+    type: "module",
+  });
+  worldGenWorker.onmessage = (ev) => {
+    try {
+      if (ev.data === "finish") {
+        console.log("Generation finished.");
+        gen.msg = "Entering World";
+        for (let tick = 0; tick < preloadTicks; tick++) world.tickAll();
+        //make player
+        deliverPlayer(null, totalSize / 2, totalSize / 2, true, creation.corporation, world);
 
-worldGenWorker.onmessage = (ev) => {
-  if (ev.data === "finish") {
-    console.log("Generation finished.");
-    gen.msg = "Entering World";
-    for (let tick = 0; tick < preloadTicks; tick++) world.tickAll();
-    //make player
-    deliverPlayer(
-      null,
-      worldSize / 2,
-      worldSize / 2,
-      true,
-      true,
-      "iti-player",
-      world
-    );
+        //make events
+        eventify(world);
 
-    //make events
-    eventify(world);
-
-    gen.inprogress = false;
-    worldGenWorker.terminate();
-    //Worldgen stats
-    let log = "\n";
-    stats.total = Object.values(stats.placed).reduce((a, b) => a + b, 0);
-    stats.structs = Object.values(stats.structures).reduce((a, b) => a + b, 0);
-    log += "\n#### WORLD GENERATED ####";
-    log += "\n//// World Breakdown ////";
-    log += "\n--- Tiles and Blocks: ---";
-    for (let key in stats.placed) {
-      let val = stats.placed[key];
-      log +=
-        "\n| " +
-        key +
-        ": " +
-        val +
-        " (" +
-        roundNum((val / stats.total) * 100, 2) +
-        "%)";
-    }
-    log += "\n" + stats.total + " total blocks";
-    log +=
-      "\n" +
-      stats.failed +
-      " failed placements (" +
-      roundNum((stats.failed / stats.total) * 100, 2) +
-      "%)";
-    log += "\n------ Structures: ------";
-    for (let key in stats.structures) {
-      let val = stats.structures[key];
-      log += "\n| " + key + ": " + val;
-    }
-    log += "\n" + stats.structs + " total structures";
-    log += "\n-------------------------";
-    log += "\n#########################";
-
-    console.log(log);
-  } else if (typeof ev.data === "object") {
-    if (ev.data.type === "genstage") {
-      gen.msg = ev.data.stage;
-    }
-    if (ev.data.type === "progress") {
-      gen.progress = ev.data.progress;
-    }
-    if (ev.data.type === "progress-stage") {
-      gen.stageProgress = ev.data.progress;
-    }
-    if (ev.data.type === "chunk") {
-      let def = ev.data.def;
-      let chunk = new Chunk();
-      for (let tile of def.chunk) {
-        //Create block, and overwrite properties
-        try {
-          Object.assign(
-            chunk.addBlock(tile.block, tile.x, tile.y, "tiles"),
-            def.construction ?? {}
-          );
-
-          stats.placed[tile.block] ??= 0;
-          stats.placed[tile.block]++;
-        } catch (e) {
-          console.warn("Worldgen Error:\n" + e);
-          stats.failed++;
-
-          stats.placed["(" + tile.block + ")"] ??= 0;
-          stats.placed["(" + tile.block + ")"]++;
+        gen.inprogress = false;
+        //Worldgen stats
+        let log = "\n";
+        stats.total = Object.values(stats.placed).reduce((a, b) => a + b, 0);
+        stats.structs = Object.values(stats.structures).reduce((a, b) => a + b, 0);
+        stats.spawns = Object.values(stats.spawned).reduce((a, b) => a + b, 0);
+        log += "\n#### WORLD GENERATED ####";
+        log += "\n//// World Breakdown ////";
+        log += "\n--- Tiles and Blocks: ---";
+        for (const [key, val] of Object.entries(stats.placed).sort(sortByE1)) {
+          log += `\n| ${key}: ${val} (${roundNum((val / stats.total) * 100, 2)}%)`;
         }
-      }
-      chunk.world = world;
-      chunk.i = def.i;
-      chunk.j = def.j;
-      world.chunks[def.j][def.i] = chunk;
-    }
-    if (ev.data.type === "build") {
-      let successful = true;
-      for (let block of ev.data.blocks) {
-        //Create block, and overwrite properties
-        if (
-          world.isPositionFree(ev.data.x + block.x, ev.data.y + block.y) &&
-          (!(ev.data.target || block.target) ||
-            world.getBlock(
-              ev.data.x + block.x,
-              ev.data.y + block.y,
-              "tiles"
-            ) === (block.target ?? ev.data.target))
-        ) {
-          if (block.block)
-            try {
-              let blk = world.placeAt(
-                block.block,
-                ev.data.x + block.x,
-                ev.data.y + block.y,
-                block.layer ?? "blocks"
-              );
-              Object.assign(blk, block.construction ?? {});
+        log += "\n------- Entities: -------";
+        for (const [key, val] of Object.entries(stats.spawned).sort(sortByE1)) {
+          log += `\n| ${key}: ${val}`;
+        }
+        log += "\n------ Structures: ------";
+        for (const [key, val] of Object.entries(stats.structures).sort(sortByE1)) {
+          log += `\n| ${key}: ${val}`;
+        }
+        log += "\n-------------------------";
+        log += `\n${stats.total} total blocks`;
+        log += `\n${stats.spawns} total entities`;
+        log += `\n${stats.structs} total structures`;
+        log += `\n${stats.failed} failed spawns and placements (${roundNum((stats.failed / (stats.total + stats.spawns)) * 100, 2)}%)`;
+        log += "\n#########################";
 
-              blk.direction = Block.dir.fromEnum(block.direction);
-
-              stats.placed["[Struct] " + block.block] ??= 0;
-              stats.placed["[Struct] " + block.block]++;
-            } catch (e) {
-              console.warn("Worldgen Error:\n" + e);
-              successful = false;
+        console.log(log);
+      } else if (typeof ev.data === "object") {
+        if (ev.data.type === "genstage") {
+          gen.msg = ev.data.stage;
+        }
+        if (ev.data.type === "progress") {
+          gen.progress = ev.data.progress;
+        }
+        if (ev.data.type === "progress-stage") {
+          gen.stageProgress = ev.data.progress;
+        }
+        if (ev.data.type === "chunk") {
+          let def = ev.data.def;
+          let chunk = new Chunk();
+          chunk.tiles = def.tiles;
+          iterate2DArray(chunk.tiles, (e, y, x) => {
+            if (Registries.blocks.has(e)) {
+              stats.placed[e] ??= 0;
+              stats.placed[e]++;
+            } else {
+              chunk.tiles[y][x] = null;
               stats.failed++;
 
-              stats.placed["[Struct] (" + block.block + ")"] ??= 0;
-              stats.placed["[Struct] (" + block.block + ")"]++;
+              stats.placed[`~${e}`] ??= 0;
+              stats.placed[`~${e}`]++;
             }
-          else if (block.entity)
+          });
+          for (let tile of def.blocks) {
+            //Create block, and overwrite properties
             try {
-              let ent = construct(
-                Registries.entities.get(block.entity),
-                "entity"
-              );
-              ent.addToWorld(
-                world,
-                (ev.data.x + block.x + 0.5) * blockSize,
-                (ev.data.y + block.y + 0.5) * blockSize
+              Object.assign(
+                chunk.addBlock(tile.block, tile.x, tile.y, "blocks"),
+                def.construction ?? {},
               );
 
-              ent.direction = Block.dir.fromEnum(block.direction);
-
-              stats.placed["[Entity] " + block.entity] ??= 0;
-              stats.placed["[Entity] " + block.entity]++;
+              stats.placed[tile.block] ??= 0;
+              stats.placed[tile.block]++;
             } catch (e) {
               console.warn("Worldgen Error:\n" + e);
-              successful = false;
               stats.failed++;
 
-              stats.placed["[Entity] (" + block.entity + ")"] ??= 0;
-              stats.placed["[Entity] (" + block.entity + ")"]++;
+              stats.placed[`~${tile.block}`] ??= 0;
+              stats.placed[`~${tile.block}`]++;
+            }
+          }
+          chunk.world = world;
+          chunk.i = def.i;
+          chunk.j = def.j;
+          world.chunks[def.j][def.i] = chunk;
+        }
+        if (ev.data.type === "build") {
+          let successful = true;
+          for (let block of ev.data.blocks) {
+            //Create block, and overwrite properties
+            if (
+              world.isPositionFree(ev.data.x + block.x, ev.data.y + block.y) &&
+              (!(ev.data.target || block.target) ||
+                world.getBlock(ev.data.x + block.x, ev.data.y + block.y, "tiles") ===
+                  (block.target ?? ev.data.target))
+            ) {
+              if (block.block)
+                try {
+                  let blk = world.placeAt(
+                    block.block,
+                    ev.data.x + block.x,
+                    ev.data.y + block.y,
+                    block.layer ?? "blocks",
+                  );
+                  Object.assign(blk, block.construction ?? {});
+
+                  blk.direction = Block.dir.fromEnum(block.direction);
+
+                  stats.placed[`​[Struct] ${block.block}`] ??= 0;
+                  stats.placed[`​[Struct] ${block.block}`]++;
+                } catch (e) {
+                  console.warn("Worldgen Error:\n" + e);
+                  successful = false;
+                  stats.failed++;
+
+                  stats.placed[`​[Struct] ~${block.block}`] ??= 0;
+                  stats.placed[`​[Struct] ~${block.block}`]++;
+                }
+              else if (block.entity)
+                try {
+                  let ent = construct(Registries.entities.get(block.entity), "entity");
+                  ent.addToWorld(
+                    world,
+                    (ev.data.x + block.x) * blockSize,
+                    (ev.data.y + block.y) * blockSize,
+                  );
+
+                  ent.direction = Block.dir.fromEnum(block.direction);
+
+                  stats.spawned[`​[Struct] ${block.entity}`] ??= 0;
+                  stats.spawned[`​[Struct] ${block.entity}`]++;
+                } catch (e) {
+                  console.warn("Worldgen Error:\n" + e);
+                  successful = false;
+                  stats.failed++;
+
+                  stats.spawned[`​[Struct] ~${block.entity}`] ??= 0;
+                  stats.spawned[`​[Struct] ~${block.entity}`]++;
+                }
+            }
+          }
+          stats.structures[successful ? ev.data.name : `~${ev.data.name}`] ??= 0;
+          stats.structures[successful ? ev.data.name : `~${ev.data.name}`]++;
+        }
+        if (ev.data.type === "place") {
+          if (!ev.data.target || world.getTile(ev.data.x, ev.data.y) === ev.data.target)
+            if (
+              ev.data.layer !== "blocks" ||
+              (world.isPositionFree(ev.data.x, ev.data.y) &&
+                (world.getTileData(ev.data.x, ev.data.y, "tiles")?.buildable ||
+                  (ev.data.layer !== "floor" &&
+                    world.getBlock(ev.data.x, ev.data.y, "floor")?.buildable)))
+            ) {
+              try {
+                Object.assign(
+                  world.placeAt(ev.data.block, ev.data.x, ev.data.y, ev.data.layer),
+                  ev.data.construction ?? {},
+                );
+                stats.placed[`​[Ore] ${ev.data.block}`] ??= 0;
+                stats.placed[`​[Ore] ${ev.data.block}`]++;
+              } catch (e) {
+                console.warn("Worldgen Error:\n" + e);
+                stats.failed++;
+
+                stats.placed[`​[Ore] ~${ev.data.block}`] ??= 0;
+                stats.placed[`​[Ore] ~${ev.data.block}`]++;
+              }
+            } else {
+              stats.failed++;
+
+              stats.placed[`​[Ore] ~${ev.data.block}`] ??= 0;
+              stats.placed[`​[Ore] ~${ev.data.block}`]++;
             }
         }
       }
-      stats.structures[
-        successful ? ev.data.name : "(" + ev.data.name + ")"
-      ] ??= 0;
-      stats.structures[successful ? ev.data.name : "(" + ev.data.name + ")"]++;
+    } catch (e) {
+      //oh shit
+      console.error("Worldgen failed:\n", e);
+      gen.reset();
+      gen.msg = "Error!";
+      ui.menuState = "title";
+
+      Log.send(`#4-   [${e.constructor.name}] ${e.message}`);
+      e.stack
+        .split("\n")
+        .slice(1)
+        .forEach((el) => Log.send("#4-  " + el));
     }
-    if (ev.data.type === "place") {
-      if (
-        (ev.data.layer !== "blocks" ||
-          world.isPositionFree(ev.data.x, ev.data.y)) &&
-        (!ev.data.target ||
-          world.getBlock(ev.data.x, ev.data.y, "tiles")?.registryName ===
-            ev.data.target) &&
-        (world.getBlock(ev.data.x, ev.data.y, "tiles")?.buildable ||
-          world.getBlock(ev.data.x, ev.data.y, "floor")?.buildable)
-      )
-        try {
-          Object.assign(
-            world.placeAt(ev.data.block, ev.data.x, ev.data.y, ev.data.layer),
-            ev.data.construction ?? {}
-          );
+  };
 
-          stats.placed["[Ore] " + ev.data.block] ??= 0;
-          stats.placed["[Ore] " + ev.data.block]++;
-        } catch (e) {
-          console.warn("Worldgen Error:\n" + e);
-          stats.failed++;
+  worldGenWorker.onerror = (ev) => {
+    if (ev.message) {
+      let errmsg = `[World Gen] Error: \n${ev.message}\n - in ${ev.filename}\nat ${ev.lineno}:${ev.colno}`;
+      console.error(errmsg, ev.error, ev);
+      Log.send("#4-" + errmsg);
+    } else console.error("[World Gen] Error!", ev);
+    ev.preventDefault();
+  };
 
-          stats.placed["[Ore] (" + ev.data.block + ")"] ??= 0;
-          stats.placed["[Ore] (" + ev.data.block + ")"]++;
-        }
-    }
-  }
-};
-
-worldGenWorker.onerror = (ev) => {
-  let errmsg =
-    "[World Gen] Error: \n" +
-    ev.message +
-    "\n - in " +
-    ev.filename +
-    "\nat " +
-    ev.lineno +
-    ":" +
-    ev.colno;
-  console.error(errmsg, ev);
-  ev.preventDefault();
-  Log.send(errmsg, [255, 0, 0]);
-};
-
-worldGenWorker.onmessageerror = (ev) => {
-  console.warn("Message could not be deserialised.");
-  Log.send("Message could not be deserialised.", [255, 255, 0]);
-};
+  worldGenWorker.onmessageerror = (ev) => {
+    console.warn("Message could not be deserialised.");
+    Log.send("#y-Message could not be deserialised.");
+  };
+} catch (error) {
+  console.error("Could not create worker:", error);
+  Log.send("#4-World generation could not be started.");
+}
 
 const propertyReplacements = [
   ['"health":', "ḣ"],
@@ -449,7 +488,11 @@ const escapeJSON = function (str) {
     .replace(/[\r]/g, "\\r")
     .replace(/[\t]/g, "\\t");
 };
-
+globalThis.gg = getGame;
+function getGame(name) {
+  name ??= "save.game";
+  return Serialiser.get(name);
+}
 function saveGame(name) {
   name ??= "save.game";
   //Create file
@@ -467,13 +510,13 @@ function saveGame(name) {
   //Dictionary replacement:
   let dict = [];
   let num = 0;
-  Registries.blocks.forEach((name) => {
+  Registries.blocks.forEach((item, name) => {
     if (file.includes(name)) {
       dict.push([num, name]);
       num++;
     }
   });
-  Registries.items.forEach((name) => {
+  Registries.items.forEach((item, name) => {
     if (file.includes(name)) {
       if (!hasNameInDictArray(name, dict)) {
         dict.push([num, name]);
@@ -481,44 +524,37 @@ function saveGame(name) {
       }
     }
   });
-  Registries.entities.forEach((name) => {
+  Registries.entities.forEach((item, name) => {
     dict.push([num, name]);
     num++;
   });
   dict.forEach((val) => {
-    file = file.replaceAll('"' + val[1] + '"', "⁝" + val[0]);
+    file = file.replaceAll('"' + val[1] + '"', "⁝" + val[0] + "⁝");
   });
   //Dictionary compression: Tiles
-  file = file.replaceAll(/{ḃ⁝[0-9]+}/gi, (tile) => {
-    return "…" + tile.substring(3, tile.length - 1);
-  });
+  // file = file.replaceAll(/[0-9]+,/gi, (tile) => {
+  //   return "…" + tile.substring(3, tile.length - 1);
+  // });
   //Dictionary compression: RLE
-  file = file.replaceAll(/(…[0-9]+),?(?:\1,?)*/gi, (tile) => {
+  file = file.replaceAll(/(⁝[0-9]+⁝),?(?:\1,?)*/gi, (tile) => {
     let arr = tile.split(",").filter((x) => x.length > 0);
-    return "×" + arr.length + arr[0];
+    return `×${arr.length}${arr[0]}`;
   });
   //Postdict replacers
   for (let replacer of postDictReplacers) {
     file = file.replaceAll(replacer[0], replacer[1]);
   }
   //Add dictionary to save
-  file =
-    "DICT<" +
-    dict.map((entry) => entry[0] + "=" + entry[1]).join("|") +
-    ">" +
-    file;
+  file = `DICT<${dict.map((entry) => `${entry[0]}=${entry[1]}`).join("|")}>${file}`;
   let spaceUsed = sizeKB(name + file);
   Serialiser.set(name, file);
-  console.log("Game saved (" + roundNum(spaceUsed, 2) + "KB).");
-  Log.send(
-    "Game has been saved (" + roundNum(spaceUsed, 2) + "KB).",
-    [0, 255, 0]
-  );
+  console.log(`Game saved (${roundNum(spaceUsed, 2)}KB).`);
+  Log.send(`#a-Game has been saved (${roundNum(spaceUsed, 2)}KB).`);
 }
 
 function clearData() {
   console.log("All saves deleted.");
-  Log.send("Stored saves deleted.", [255, 0, 0]);
+  Log.send("#4-Stored saves deleted.");
   Serialiser.clear("pr");
 }
 
@@ -528,7 +564,7 @@ function loadGame(name) {
   /**@type {string} */
   let file = Serialiser.get(name);
   if (!file) {
-    Log.send("There is no save at '" + name + "'", [255, 255, 0]);
+    Log.send(`#y-There is no save at '${name}'`);
     return false;
   }
   //Deminify the file
@@ -537,22 +573,21 @@ function loadGame(name) {
   for (let replacer of reversedPDReplacers.reverse()) {
     file = file.replaceAll(
       replacer[1],
-      (typeof replacer[0] === "string" ? replacer[0] : replacer[2]) ??
-        replacer[0]
+      (typeof replacer[0] === "string" ? replacer[0] : replacer[2]) ?? replacer[0],
     );
   }
   //Dictionary decompression: Run Length Decoding
   file = file
-    .replaceAll(/×[0-9]+…[0-9]+/gi, (tile) => {
-      let str = tile.match(/…[0-9]+/)[0] + ",";
-      let out = str.repeat(parseInt(tile.match(/(?<=×)[0-9]+(?=…)/)[0]));
+    .replaceAll(/×[0-9]+⁝[0-9]+⁝/gi, (tile) => {
+      let str = tile.match(/⁝[0-9]+⁝/)[0] + ",",
+        count = parseInt(tile.match(/(?<=×)[0-9]+(?=⁝)/)[0]);
+      // console.log("rle'd "+count+" times '"+str+"'")
+      let out = str.repeat(count);
       return out;
     })
-    .replaceAll(/,]/g, "]");
-  //Dictionary decompression: untile
-  file = file.replaceAll(/…[0-9]+/gi, (tile) => {
-    return "{ḃ⁝" + tile.substring(1) + "}";
-  });
+    .replaceAll(/,]/g, "]")
+    .replaceAll(/,}/g, "}");
+  // console.log(file)
   let dict = [];
   file = file.replace(/DICT<.*?>/gim, (dictionary) => {
     let encoded = dictionary.substring(5, dictionary.length - 1);
@@ -560,19 +595,18 @@ function loadGame(name) {
     return "";
   });
   dict.forEach((entry) => {
-    file = file.replaceAll("⁝" + entry[0] + ",", '"' + entry[1] + '",');
-    file = file.replaceAll("⁝" + entry[0] + "}", '"' + entry[1] + '"}');
-    file = file.replaceAll("⁝" + entry[0] + ":", '"' + entry[1] + '":');
+    file = file.replaceAll("⁝" + entry[0] + "⁝", '"' + entry[1] + '"');
   });
+  // console.log(file)
   //Unreplace
   let reversedReplacers = propertyReplacements.map((x) => x.slice(0));
   for (let replacer of reversedReplacers.reverse()) {
     file = file.replaceAll(
       replacer[1],
-      (typeof replacer[0] === "string" ? replacer[0] : replacer[2]) ??
-        replacer[0]
+      (typeof replacer[0] === "string" ? replacer[0] : replacer[2]) ?? replacer[0],
     );
   }
+  // console.log(file)
   effectTimer.cancel("*");
   effects.screenShakeInstances.splice(0);
 
@@ -581,7 +615,7 @@ function loadGame(name) {
   world.become(World.deserialise(file.world));
   eventify(world);
   console.log("Game loaded.");
-  Log.send("You are now playing on '" + world.name + "'.", [0, 255, 0]);
+  Log.send(`#a-You are now playing on '${world.name}'.`);
   return true;
 }
 
@@ -597,22 +631,29 @@ function localStorageSpace() {
 function sizeKB(string) {
   return string ? string.length / 512 : 0;
 }
-
 globalThis.preload = async function () {
-  ImageContainer.total = Registries.images.size;
-  ImageContainer.loaded = 0;
-  await Registries.images.forEachAsync((name, el) => el.load());
-  console.log(
-    "Loaded " + ImageContainer.loaded + "/" + ImageContainer.total + " images."
-  );
   await fonts.load();
   console.log("Loaded fonts.");
+  PreloadRegistries.images.forEach((el, name) =>
+    Registries.images.add(name, new ImageContainer(el.path)),
+  );
+  await Registries.images.forEachAsync(async (el, name) => {
+    await el.load();
+    loadStats.images++;
+  });
+  console.log(`Loaded ${loadStats.images}/${loadStats.totalImages} images.`);
+  await PreloadRegistries.cutscenes.forEachAsync(async (el, name) => {
+    Registries.cutscenes.add(name, await Cutscene.from(el.path));
+    loadStats.cutscenes++;
+  });
+  console.log(`Loaded ${loadStats.cutscenes}/${loadStats.totalCutscenes} cutscenes.`);
 
+  loadStats.hide();
   console.log("All assets loaded.");
 };
 //Set up the canvas, using the previous function
 globalThis.setup = function () {
-  let cnv = createCanvas(windowWidth, windowHeight);
+  let cnv = createCanvas(...getCanvasDimensions(baseWidth, baseHeight));
   cnv.addEventListener("contextmenu", (event) => event.preventDefault());
   rectMode(CENTER);
   imageMode(CENTER);
@@ -620,13 +661,8 @@ globalThis.setup = function () {
   textFont(fonts.darktech);
   textStyle("normal");
   Space.setup();
+  setupTips();
 };
-
-async function delay(ms) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => resolve(), ms);
-  });
-}
 
 async function generateWorld(seed) {
   gen.started = true;
@@ -634,6 +670,7 @@ async function generateWorld(seed) {
   gen.progress = 0;
   gen.msg = "Generating World...";
   world.prepareForGeneration();
+  world.name = creation.name;
   console.log("Generation started");
   worldGenWorker.postMessage({ type: "generate", seed: seed });
   framesToDraw = 0;
@@ -641,7 +678,7 @@ async function generateWorld(seed) {
 
 //Change the size if the screen size changes
 window.windowResized = function () {
-  resizeCanvas(windowWidth, windowHeight);
+  resizeCanvas(...getCanvasDimensions(baseWidth, baseHeight));
 };
 
 function frameSkippingFunction(func) {
@@ -659,30 +696,36 @@ function frameSkippingFunction(func) {
 
 let errored = false;
 window.draw = function () {
+  push();
+  translate(width / 2, height / 2);
+  scale(contentScale);
   Log.tick();
   try {
     //Draw the void
-    background(128 + Math.sin(frameCount / 120) * 128, 255);
+    clear(128 + Math.sin(frameCount / 120) * 128, 255);
+    noStroke();
+    noFill();
     if (!errored) frame();
+    else {
+      drawNeutralBackground();
+    }
     if (keyIsDown(32)) errored = false;
   } catch (error) {
     errored = true;
-    console.error(error);
-    Log.send("Project: Reassembly has encountered an error:", [255, 50, 50]);
-    Log.send(
-      "   [" + error.constructor.name + "] " + error.message,
-      [255, 0, 0]
-    );
+    console.error("caught:\n", error);
+    Log.send("#4-Project: Reassembly has encountered an error:");
+    Log.send(`#4-   [${error.constructor.name}] ${error.message}`);
     error.stack
       .split("\n")
       .slice(1)
-      .forEach((el) => Log.send("  " + el, [255, 30, 30]));
-    Log.send("Press [Space] to continue", [255, 50, 50]);
+      .forEach((el) => Log.send("#4-  " + el));
+    Log.send("#4-Press [Space] to continue");
     //addEventListener("keydown", fixError);
     noLoop();
     loop();
   }
   Log.draw();
+  pop();
 };
 
 window.postProcess = function () {
@@ -691,19 +734,19 @@ window.postProcess = function () {
   imageMode(CORNER);
   if (effects.corruption)
     for (let i = 0; i < effects.corruptionCount; i++) {
-      let x = random(-effects.corruptionOffset, width),
-        y = random(-effects.corruptionOffset, height);
+      let x = random(-effects.corruptionOffset, 1920),
+        y = random(-effects.corruptionOffset, 1080);
       let tile = get(
         x,
         y,
-        random(effects.corruptionSize, width + effects.corruptionOffset),
-        random(effects.corruptionHeight / 2, effects.corruptionHeight)
+        random(effects.corruptionSize, 1920 + effects.corruptionOffset),
+        random(effects.corruptionHeight / 2, effects.corruptionHeight),
       );
       for (let j = 0; j < effects.corruptionCopies; j++)
         image(
           tile,
-          x + rnd(-effects.corruptionOffset, effects.corruptionOffset),
-          y + rnd(-effects.corruptionOffset, effects.corruptionOffset)
+          x + rnd.float(-effects.corruptionOffset, effects.corruptionOffset),
+          y + rnd.float(-effects.corruptionOffset, effects.corruptionOffset),
         );
     }
   pop();
@@ -712,53 +755,47 @@ window.postProcess = function () {
 function frame() {
   //Frameskip stuff
   framesToDraw += deltaTime / timePerFrame;
+  Decoration.timer.tick();
   if (gen.inprogress) {
-    push();
-    translate(width / 2, height / 2);
-    frameSkippingFunction(drawNeutralBackground);
-    pop();
-    push();
+    drawNeutralBackground();
+
+    // pop();
+    // push();
     textFont(fonts.darktech);
     fill(0);
     stroke(255, 200, 0);
     strokeWeight(6);
     textAlign(CENTER);
     textSize(40);
-    text(gen.msg, width / 2, height / 2);
+    text(gen.msg, 0, 0);
     strokeWeight(3);
     fill(0);
-    rectMode(CENTER);
-    rect(width / 2, height / 2 + 60, width * 0.6, 30);
-    rect(width / 2, height / 2 + 120, width * 0.4, 20);
-    fill(230, 170, 0);
-    let w = width * 0.6 * gen.progress;
-    let w2 = width * 0.4 * gen.stageProgress;
     rectMode(CORNER);
-    rect(width * 0.2, height / 2 + 45, w, 30);
-    rect(width * 0.3, height / 2 + 110, w2, 20);
+    rect(-600, 45, 1200, 30);
+    rect(-400, 120, 800, 20);
+    fill(230, 170, 0);
+    let w = 1200 * gen.progress;
+    let w2 = 800 * gen.stageProgress;
+    rect(-600, 45, w, 30);
+    rect(-400, 120, w2, 20);
     textFont(fonts.ocr);
     textAlign(CENTER, CENTER);
     fill(255);
     noStroke();
     textSize(18);
-    text((gen.progress * 100).toFixed(2) + "%", width / 2, height / 2 + 60);
+    text(`${(gen.progress * 100).toFixed(2)}%`, 0, 60);
     textSize(12);
     text(
-      "Stage " +
-        Registries.worldgen.size * gen.stageProgress +
-        "/" +
-        Registries.worldgen.size,
-      width / 2,
-      height / 2 + 120
+      `Stage ${Registries.worldgen.size * gen.stageProgress}/${Registries.worldgen.size}`,
+      0,
+      130,
     );
-    pop();
   } else {
-    push();
-    translate(width / 2, height / 2);
     //Draw everything else
     if (ui.menuState === "in-game") {
       if (!gen.started) {
-        if (gen.mode === "create") generateWorld(); //2147483647
+        if (gen.mode === "create")
+          generateWorld(); //2147483647
         else if (gen.mode === "load") {
           if (loadGame()) gen.started = true;
           else gen.mode = "create";
@@ -766,45 +803,43 @@ function frame() {
         return;
       }
       gameFrame();
-      if (effects.lighting)
-        lighting(effects.shadeColour, effects.lightColour, effects.lightScale);
-    } else if (ui.menuState === "title") {
+      if (effects.lighting) lighting(effects.shadeColour, effects.lightColour, effects.lightScale);
+    } else if (ui.menuState === "new-game") {
+    } else {
       drawNeutralBackground();
     }
     fpsUpdate();
     uiFrame();
     if (!ui.waitingForMouseUp) mouseInteraction();
-    pop();
   }
 }
 
-function drawNeutralBackground() {
+export function drawNeutralBackground(yo = 0) {
   time++;
-  let size = Math.max(width, height);
-  background(0);
+  push();
+  fill(0);
+  rect(0, yo, 1920, 1080);
   noStroke();
-  strokeWeight(30);
   fill(255, 200, 0);
   // rotatedShape("square", 0, 0, size * 0.6, size * 0.6, frameCount / 100);
   // rotatedShape("square", 0, 0, size * 0.8, size * 0.8, 2 + -frameCount / 100);
-  for (let offset = 0; offset < Math.ceil((width * 2) / 3); offset += 20) {
-    rotatedShape(
-      "rect",
-      -width + (((time + offset) * 3) % (width * 2)),
-      0,
-      20,
-      height * 1.43,
-      PI / 4
-    );
+  for (let offset = 0; offset < Math.ceil((1920 * 2) / 3); offset += 20) {
+    rotatedShape("rect", -1920 + (((time + offset) * 3) % (1920 * 2)), yo, 20, 1080 * 1.43, PI / 4);
   }
   fill(40);
-  rotatedShape("rect", 0, 0, width, height * 0.85, 0);
+  rect(0, yo, 1920, 1080 * 0.85);
   noFill();
   stroke(60);
+  strokeWeight(15);
+  rect(0, yo, 1920 * 1.2, 1080);
   strokeWeight(10);
-  rotatedShape("rect", 0, 0, width * 1.2, height, 0);
-  strokeWeight(5);
-  rotatedShape("rect", 0, 0, width * 1.2, height * 0.85, 0);
+  rect(0, yo, 1920 * 1.2, 1080 * 0.85);
+  noStroke();
+  fill(80);
+  rect(0, yo - 555, 1920, 20);
+  fill(20);
+  rect(0, yo + 555, 1920, 20);
+  pop();
 }
 
 function fpsUpdate() {
@@ -821,12 +856,17 @@ function fpsUpdate() {
   //
 }
 
+ui.addReset("paused:false");
+ui.addReset("menu:none");
+ui.addReset("containerselected:false");
+ui.addReset("dead:no");
+ui.addReset("boss:no");
+ui.addReset("mode:build");
+
 function uiFrame() {
   Inventory.tooltip = null;
   //Tick UI
-  UIComponent.setCondition(
-    "containerselected:" + (Container.selectedBlock instanceof Container)
-  );
+  UIComponent.setCondition("containerselected:" + (Container.selectedBlock instanceof Container));
   updateUIActivity();
   tickUI();
   //Reset mouse held status
@@ -839,8 +879,8 @@ function uiFrame() {
     if (conblock) {
       conblock.highlight(true);
       conblock.drawTooltip(
-        conblock.uiX + Block.size * ui.camera.zoom,
-        conblock.uiY
+        conblock.uiX + blockSize * 0.5 * ui.camera.zoom,
+        conblock.uiY - blockSize * 0.5 * ui.camera.zoom,
       );
     }
   }
@@ -916,31 +956,19 @@ function movePlayer() {
     }
   } else {
     freecam = false;
-    if (
-      keyIsDown(87) &&
-      game.player.y > borders()[1] /* Top */ + game.player.hitSize
-    ) {
+    if (keyIsDown(87) && game.player.y > borders()[1] /* Top */ + game.player.hitSize) {
       //If 'W' pressed
       game.player.move(0, -game.player.speed);
     }
-    if (
-      keyIsDown(83) &&
-      game.player.y < borders()[3] /* Bottom */ - game.player.hitSize
-    ) {
+    if (keyIsDown(83) && game.player.y < borders()[3] /* Bottom */ - game.player.hitSize) {
       //If 'S' pressed
       game.player.move(0, game.player.speed);
     }
-    if (
-      keyIsDown(65) &&
-      game.player.x > borders()[0] /* Left */ + game.player.hitSize
-    ) {
+    if (keyIsDown(65) && game.player.x > borders()[0] /* Left */ + game.player.hitSize) {
       //If 'A' pressed
       game.player.move(-game.player.speed, 0);
     }
-    if (
-      keyIsDown(68) &&
-      game.player.x < borders()[2] /* Right */ - game.player.hitSize
-    ) {
+    if (keyIsDown(68) && game.player.x < borders()[2] /* Right */ - game.player.hitSize) {
       //If 'D' pressed
       game.player.move(game.player.speed, 0);
     }
@@ -950,11 +978,10 @@ function movePlayer() {
 }
 
 function updateUIActivity() {
-  if (!keyIsDown(CONTROL))
-    ui.lastMousePos = {
-      x: mouseX - width / 2,
-      y: mouseY - height / 2,
-    };
+  if (!keyIsDown(CONTROL)) {
+    ui.lastMousePos.x = ui.mouse.x;
+    ui.lastMousePos.y = ui.mouse.y;
+  }
   //Check each component, but only do it once.
   for (let component of ui.components) {
     component.updateActivity();
@@ -965,6 +992,7 @@ function drawUI() {
   textFont(fonts.ocr);
   textStyle("normal");
   textSize(20);
+  textAlign(LEFT, CENTER);
   for (let component of ui.components) {
     if (component.active) {
       component.draw();
@@ -973,6 +1001,7 @@ function drawUI() {
 }
 
 function tickUI() {
+  ui.timer.tick();
   for (let component of ui.components) {
     if (component.active && component.isInteractive) {
       component.checkMouse();
@@ -987,7 +1016,7 @@ function tickUI() {
 
 function showMousePos() {
   push();
-  if (ui.menuState === "in-game" && keyIsDown(ALT)) {
+  if (keyIsDown(ALT)) {
     textAlign(CENTER, CENTER);
     textFont(fonts.ocr);
     stroke(0);
@@ -997,23 +1026,28 @@ function showMousePos() {
     text(
       "UI X:" + Math.round(ui.mouse.x) + " Y:" + Math.round(ui.mouse.y),
       ui.mouse.x,
-      ui.mouse.y - 60
+      ui.mouse.y - (ui.menuState === "in-game" ? 80 : 20),
     );
-    fill(0, 200, 255);
-    text(
-      "Player X:" +
-        Math.round(game.player.x) +
-        " Y:" +
-        Math.round(game.player.y),
-      ui.mouse.x,
-      ui.mouse.y - 40
-    );
-    fill(255);
-    text(
-      "Mouse X:" + Math.round(game.mouse.x) + " Y:" + Math.round(game.mouse.y),
-      ui.mouse.x,
-      ui.mouse.y - 20
-    );
+    if (ui.menuState === "in-game") {
+      fill(0, 200, 255);
+      text(
+        "Block X:" + Math.round(game.mouse.blockX) + " Y:" + Math.round(game.mouse.blockY),
+        ui.mouse.x,
+        ui.mouse.y - 60,
+      );
+      fill(0, 255, 200);
+      text(
+        "Player X:" + Math.round(game.player.x) + " Y:" + Math.round(game.player.y),
+        ui.mouse.x,
+        ui.mouse.y - 40,
+      );
+      fill(255);
+      text(
+        "Mouse X:" + Math.round(game.mouse.x) + " Y:" + Math.round(game.mouse.y),
+        ui.mouse.x,
+        ui.mouse.y - 20,
+      );
+    }
   }
   const mouseSize = 15;
   stroke(255, 0, 0);
@@ -1022,13 +1056,13 @@ function showMousePos() {
     ui.lastMousePos.x - mouseSize,
     ui.lastMousePos.y,
     ui.lastMousePos.x + mouseSize,
-    ui.lastMousePos.y
+    ui.lastMousePos.y,
   );
   line(
     ui.lastMousePos.x,
     ui.lastMousePos.y - mouseSize,
     ui.lastMousePos.x,
-    ui.lastMousePos.y + mouseSize
+    ui.lastMousePos.y + mouseSize,
   );
   stroke(255);
   line(ui.mouse.x - mouseSize, ui.mouse.y, ui.mouse.x + mouseSize, ui.mouse.y);
@@ -1038,22 +1072,10 @@ function showMousePos() {
 /**
  * @param {Player | null} player
  */
-function createPlayer(
-  player = null,
-  x,
-  y,
-  arm = true,
-  playerType = "iti-player"
-) {
+function createPlayer(player = null, x, y, playerType = "iti-player") {
   if (!player) {
     player = construct(Registries.entities.get(playerType));
-    if (arm) {
-      if (playerType === "iti-player") {
-        if (tru(1 / 11)) player.leftHand.addItem("iti-laser-pistol");
-        else player.rightHand.addItem("iti-laser-pistol");
-      }
-    }
-    player.addToWorld(world, x ?? worldSize / 2, y ?? worldSize / 2);
+    player.addToWorld(world, x ?? totalSize / 2, y ?? totalSize / 2);
   }
   game.player = player;
   if (x !== undefined) game.player.x = x;
@@ -1068,18 +1090,11 @@ function createPlayer(
 }
 
 // Makes a player with a bang
-function deliverPlayer(
-  player = null,
-  x,
-  y,
-  arm = true,
-  moveCamera = false,
-  playerType = "iti-player",
-  iworld = world
-) {
-  createPlayer(player, x, y, arm, playerType);
+function deliverPlayer(player = null, x, y, moveCamera = false, corp = "iti", iworld = world) {
+  createPlayer(player, x, y, corp + "-player");
   game.player.health = game.player.maxHealth;
   game.player.statuses = {};
+  game.player.team = corp;
   if (game.player.dead) {
     game.player.dead = false;
     game.player.addToWorld(iworld);
@@ -1106,17 +1121,12 @@ function deliverEntity(ent, add = false, world, clearArea = false) {
       {
         lifetime: life - 1,
         speed: 20,
+        trail: true,
         trailEffect: "land-trail",
         drawer: { hidden: true },
         collides: false,
         fires: 9,
-        fire: {
-          damage: 6,
-          lifetime: 2880,
-          interval: 20,
-          status: "burning",
-          statusDuration: 120,
-        },
+        fire: { damage: 6, lifetime: 2880, interval: 20, status: "burning", statusDuration: 120 },
         fireSpread: 50,
         fragNumber: 9,
         fragSpacing: 40,
@@ -1126,35 +1136,18 @@ function deliverEntity(ent, add = false, world, clearArea = false) {
           speed: 30,
           decel: 1.5,
           pierce: 2,
+          trail: true,
           trailEffect: "fire",
           status: "burning",
           statusDuration: 360,
-          drawer: {
-            shape: "rhombus",
-            fill: "gray",
-            width: 30,
-            height: 8,
-          },
+          drawer: { shape: "rhombus", fill: "gray", width: 30, height: 8 },
           damage: [
-            {
-              amount: 20,
-              type: "ballistic",
-            },
-            {
-              amount: 40,
-              type: "explosion",
-              radius: 30,
-            },
+            { amount: 20, type: "ballistic" },
+            { amount: 40, type: "explosion", radius: 30 },
           ],
           despawnEffect: "explosion~30",
           fires: 2,
-          fire: {
-            damage: 6,
-            lifetime: 1440,
-            interval: 20,
-            status: "burning",
-            statusDuration: 120,
-          },
+          fire: { damage: 6, lifetime: 1440, interval: 20, status: "burning", statusDuration: 120 },
           fireSpread: 10,
         },
       },
@@ -1163,7 +1156,7 @@ function deliverEntity(ent, add = false, world, clearArea = false) {
       0,
       0,
       world,
-      ent
+      ent,
     );
     effectTimer.do(() => {
       new Explosion({
@@ -1189,12 +1182,12 @@ function deliverEntity(ent, add = false, world, clearArea = false) {
       createEffect("land-scorch", world, ent.x, ent.y, -Math.PI / 2, 1);
       for (let tick = 0; tick < 10; tick++)
         DroppedItemStack.create(
-          new ItemStack("scrap", roundNum(rnd(2, 20))),
+          new ItemStack("scrap", roundNum(rnd.float(2, 20))),
           world,
           ent.x,
           ent.y,
-          rnd(4, 10),
-          rnd(0, 360)
+          rnd.float(4, 10),
+          rnd.float(0, 360),
         );
       ent.visible = true;
       ent.controllable = true;
@@ -1208,10 +1201,10 @@ function mouseInteraction() {
     ui.menuState === "in-game" &&
     mouseIsPressed &&
     !ui.waitingForMouseUp &&
-    game.player.controllable &&
+    game.player?.controllable &&
     UIComponent.evaluateCondition("menu:none")
   ) {
-    if (ui.mouseButton === "right") secondaryInteract();
+    if (ui.mouse.button === "right") secondaryInteract();
     else interact();
   }
 }
@@ -1219,11 +1212,7 @@ function mouseInteraction() {
 function secondaryInteract() {
   if (Inventory.mouseItemStack.item === "nothing") {
     let block = world.getBlock(game.mouse.blockX, game.mouse.blockY);
-    if (
-      block &&
-      block.team === game.player.team &&
-      UIComponent.evaluateCondition("mode:build")
-    )
+    if (block && block.team === game.player.team && UIComponent.evaluateCondition("mode:build"))
       if (block.dropItem) {
         //Break breakables
 
@@ -1250,7 +1239,7 @@ function secondaryInteract() {
       game.player.x,
       game.player.y,
       10,
-      game.player.direction + rnd(-10, 10)
+      game.player.direction + rnd.float(-10, 10),
     );
     Inventory.mouseItemStack.clear();
     ui.waitingForMouseUp = true;
@@ -1267,19 +1256,20 @@ function interact() {
       clickedBlock.interaction(game.player, Inventory.mouseItemStack)
     )
       return;
-    let clickedTile =
-      world.getBlock(game.mouse.blockX, game.mouse.blockY, "floor") ??
-      world.getBlock(game.mouse.blockX, game.mouse.blockY, "tiles");
-    //If space is free, and buildable
-    if (clickedTile?.buildable) {
-      //Place items on free space
-      if (heldItem instanceof PlaceableItem) {
+    //Place items on free space
+    if (heldItem instanceof PlaceableItem) {
+      //If space is free, and buildable
+      if (
+        world.getBlock(game.mouse.blockX, game.mouse.blockY, "floor")?.buildable ||
+        (Registries.blocks.get(world.getTile(game.mouse.blockX, game.mouse.blockY)).buildable ??
+          true)
+      ) {
         if (
           heldItem.place(
             Inventory.mouseItemStack,
             game.mouse.blockX,
             game.mouse.blockY,
-            selectedDirection
+            selectedDirection,
           )
         )
           return;
@@ -1292,11 +1282,7 @@ function interact() {
       return;
     }
     //If block is (not) interacted with
-    if (
-      clickedBlock &&
-      clickedBlock.selectable &&
-      clickedBlock.team === game.player.team
-    ) {
+    if (clickedBlock && clickedBlock.selectable && clickedBlock.team === game.player.team) {
       Container.selectedBlock = clickedBlock;
       ui.waitingForMouseUp = true;
       return;
@@ -1308,16 +1294,11 @@ function interact() {
       }
     }
     if (heldItem !== null)
-      Inventory.mouseItemStack
-        .getItem()
-        .useInAir(game.player, Inventory.mouseItemStack);
-    if (Inventory.mouseItemStack?.isEmpty())
-      Inventory.mouseItemStack = ItemStack.EMPTY;
+      Inventory.mouseItemStack.getItem().useInAir(game.player, Inventory.mouseItemStack);
+    if (Inventory.mouseItemStack?.isEmpty()) Inventory.mouseItemStack = ItemStack.EMPTY;
   } else {
     if (Inventory.mouseItemStack.getItem() !== null) {
-      Inventory.mouseItemStack
-        .getItem()
-        .useInAir(game.player, Inventory.mouseItemStack);
+      Inventory.mouseItemStack.getItem().useInAir(game.player, Inventory.mouseItemStack);
       return;
     }
     if (ui.waitingForMouseUp) return;
@@ -1375,10 +1356,7 @@ window.keyPressed = function (ev) {
       }
     }
     if (key === "backspace")
-      ui.texteditor.text = ui.texteditor.text.substring(
-        0,
-        ui.texteditor.text.length - 1
-      );
+      ui.texteditor.text = ui.texteditor.text.substring(0, ui.texteditor.text.length - 1);
     return false;
   }
   //hold grave to log keys
@@ -1388,12 +1366,14 @@ window.keyPressed = function (ev) {
   if (key === " ")
     //Pause / unpause
     togglePause();
-  else if (key === "escape" && !UIComponent.evaluateCondition("menu:none"))
+  else if (ev.ctrlKey && ui.menuState === "in-game") {
+    if (key === "j") saveGame();
+    if (key === "k") loadGame();
+  } else if (key === "escape" && !UIComponent.evaluateCondition("menu:none"))
     UIComponent.setCondition("menu:none");
   else if (key === "e") {
     //Inventory
-    if (UIComponent.evaluateCondition("menu:inventory"))
-      UIComponent.setCondition("menu:none");
+    if (UIComponent.evaluateCondition("menu:inventory")) UIComponent.setCondition("menu:none");
     else UIComponent.setCondition("menu:inventory");
   }
   //DevTools and fullscreen
@@ -1407,8 +1387,7 @@ window.keyPressed = function (ev) {
   else if (key === "/") openCommandLine();
   //Hotkeys
   else if (key === "b") {
-    if (UIComponent.evaluateCondition("mode:build"))
-      UIComponent.setCondition("mode:fight");
+    if (UIComponent.evaluateCondition("mode:build")) UIComponent.setCondition("mode:fight");
     else UIComponent.setCondition("mode:build");
   } else if (UIComponent.evaluateCondition("mode:build")) {
     if (key === "1") game.player.inventory.hotkeySlot(0, true);
@@ -1434,10 +1413,7 @@ function openCommandLine() {
   ui.texteditor.title = "Command Line";
   ui.texteditor.isCommandLine = true;
   ui.texteditor.save = (command) => {
-    exec(
-      command,
-      new ExecutionContext(game.player.x, game.player.y, game.player)
-    );
+    exec(command, new ExecutionContext(game.player.x, game.player.y, game.player));
     cmdHistory.unshift(command);
     histIndex = -1;
   };
@@ -1447,9 +1423,7 @@ window.keyTyped = function (ev) {
   if (!ui.texteditor.active) return false;
   if (key !== "/") {
     ui.texteditor.text +=
-      ev.shiftKey || ev.getModifierState("CapsLock")
-        ? key.toUpperCase()
-        : key.toLowerCase();
+      ev.shiftKey || ev.getModifierState("CapsLock") ? key.toUpperCase() : key.toLowerCase();
   }
   return false;
 };
@@ -1467,18 +1441,15 @@ const zoomSpeed = 0.00125;
 window.mouseWheel = function (ev) {
   //CTRL + scroll to zoom
   if (ev.ctrlKey) {
-    ui.camera.zoom = roundNum(
-      clamp(ui.camera.zoom - ev.delta * zoomSpeed, 0.25, 5),
-      2
-    );
+    ui.camera.zoom = roundNum(clamp(ui.camera.zoom - ev.delta * zoomSpeed, 0.25, 5), 2);
     //fix zooming holes
     world.resetRenderer();
   }
   //scroll normally to change block placement direction
   else
-    selectedDirection = (
-      ev.delta > 0 ? Block.dir.rotateAntiClockwise : Block.dir.rotateClockwise
-    )(selectedDirection);
+    selectedDirection = (ev.delta > 0 ? Block.dir.rotateAntiClockwise : Block.dir.rotateClockwise)(
+      selectedDirection,
+    );
   return false;
 };
 /**
@@ -1487,25 +1458,22 @@ window.mouseWheel = function (ev) {
 function eventify(world) {
   //spawn an iti merchant in 5 mins
   world.addEvent("iticorpspawn", 18000, (world) => {
-    Log.send("ITI have sent a merchant to trade", [0, 200, 255]);
-    let entiti = construct(
-      Registries.entities.get("iti-corporate-merchant"),
-      "entity"
-    );
-    entiti.x = game.player.x + rnd(300, 800) * (tru(0.5) ? -1 : 1);
-    entiti.y = game.player.y + rnd(300, 800) * (tru(0.5) ? -1 : 1);
+    Log.send("#i-ITI have sent a merchant to trade");
+    let entiti = construct(Registries.entities.get("iti-corporate-merchant"), "entity");
+    entiti.x = game.player.x + rnd.float(300, 800) * (tru(0.5) ? -1 : 1);
+    entiti.y = game.player.y + rnd.float(300, 800) * (tru(0.5) ? -1 : 1);
     deliverEntity(entiti, true, world);
   });
   //bossfight in 3-ish mins
   world.addEvent("scrapboss-warning", 36000, (world) => {
-    Log.send("The Scrapper is descending...", [255, 150, 150]);
+    Log.send("#d-The Scrapper is descending...");
   });
   //bossfight
   world.addEvent("scrapboss", 46800, (world) => {
-    Log.send("The Scrapper has descended!", [255, 50, 50]);
+    Log.send("#4-The Scrapper has descended!");
     let entiti = construct(Registries.entities.get("scrapper"), "entity");
-    entiti.x = game.player.x + rnd(300, 800) * (tru(0.5) ? -1 : 1);
-    entiti.y = game.player.y + rnd(300, 800) * (tru(0.5) ? -1 : 1);
+    entiti.x = game.player.x + rnd.float(300, 800) * (tru(0.5) ? -1 : 1);
+    entiti.y = game.player.y + rnd.float(300, 800) * (tru(0.5) ? -1 : 1);
     deliverEntity(entiti, true, world);
   });
 }
@@ -1541,15 +1509,18 @@ window.mousePressed = function () {
   return false;
 };
 
+window.world = world;
+
 export {
-  game,
-  effects,
+  clearData,
   createPlayer,
-  world,
+  deliverPlayer,
+  effects,
   fonts,
+  game,
+  gen,
   loadGame,
   saveGame,
-  clearData,
-  gen,
-  deliverPlayer,
+  world
 };
+

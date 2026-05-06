@@ -1,0 +1,11 @@
+// + cutscenes
+#>>icon.iti#i- InfiniTech Industries
+ <rtime:60>#i-[    Launching in 3...    ]
+ <rtime:60>#i-[    Launching in 2...    ]
+ <rtime:60>#i-[    Launching in 1...    ]
+ <rtime:90>#i-[    Launching capsule    ]
+ <wait:180>
+ <rtime:30>#i-[    Atmospheric entry    ]
+ <rtime:30>#i-[  Activating air brakes  ]
+ <rtime:30>#c-[    Impact Imminent!     ]
+<command>ng-stage:intro

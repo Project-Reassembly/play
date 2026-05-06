@@ -1,16 +1,13 @@
-import { ShootableObject } from "../physical.js";
+import { col } from "../../core/color.js";
 import { construct, constructFromType } from "../../core/constructor.js";
+import { clamp, rnd, roundNum, tru, Vector } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
-import { World } from "../world/world.js";
-import { rnd, tru, roundNum, Vector, clamp } from "../../core/number.js";
-import { PhysicalObject } from "../physical.js";
-import {
-  liquidDestructionBlast,
-  createDestructionExplosion,
-} from "../../play/effects.js";
-import { blockSize, totalSize, worldSize } from "../../scaling.js";
+import { createDestructionExplosion, liquidDestructionBlast } from "../../play/effects.js";
 import { game } from "../../play/game.js";
-import { Block } from "../block/block.js";
+import { blockSize, totalSize } from "../../scaling.js";
+import { GroundTile } from "../block/ground-tile.js";
+import { PhysicalObject, ShootableObject } from "../physical.js";
+import { World } from "../world/world.js";
 import { AI } from "./ai/ai.js";
 import { AttributeMap } from "./attribute.js";
 /**
@@ -22,7 +19,7 @@ import { AttributeMap } from "./attribute.js";
  * @prop {number} x
  * @prop {number} y
  * @prop {number} spawnX
- * @prop {number} spawnY
+ * @prop {number} spawnYs
  * @prop {boolean} isMainPlayer
  */
 /** */
@@ -79,10 +76,10 @@ class Entity extends ShootableObject {
   //Status effects
   /** @type {AttributeMap} */
   attributes = new AttributeMap({
-    speed: 10,
-    turnSpeed: 10,
-    health: 1,
-    resistances: 1,
+    "speed": 5,
+    "turnSpeed": 10,
+    "health": 1,
+    "resistances": 1,
     "fire-rate": 1,
   });
 
@@ -128,19 +125,16 @@ class Entity extends ShootableObject {
     super.moveTowards(
       x,
       y,
-      this.speed *
-        (this.aiType === "passive" ? this.passiveIncentiveModifier : 1),
+      this.speed * (this.aiType === "passive" ? this.passiveIncentiveModifier : 1),
       this.turnSpeed,
-      rotate
+      rotate,
     );
   }
 
   addToWorld(world, x, y) {
     if (!(world instanceof World))
       throw new TypeError(
-        "Cannot add entity to non-world object of type '" +
-          world?.constructor?.name +
-          "'"
+        "Cannot add entity to non-world object of type '" + world?.constructor?.name + "'",
       );
     world.entities.push(this);
     this.world = world;
@@ -155,7 +149,7 @@ class Entity extends ShootableObject {
     direction = -this.direction,
     kineticKnockback = false,
     resolution = 1,
-    collided = []
+    collided = [],
   ) {
     if (resolution < 0) resolution *= -1; //Fix possilility of infinite loop
     if (resolution == 0) resolution = 1;
@@ -190,7 +184,7 @@ class Entity extends ShootableObject {
               direction,
               true,
               resolution,
-              collided
+              collided,
             ); //Pass on collided entities to prevent infinite loop
           }
         }
@@ -206,10 +200,10 @@ class Entity extends ShootableObject {
     if (bullet.entity.team === this.team) return;
     if (bullet.controlledKnockback) {
       //Get direction to the target
-      let direction = new Vector(
-        bullet.entity.target.x,
-        bullet.entity.target.y
-      ).subXY(bullet.x, bullet.y).angle;
+      let direction = new Vector(bullet.entity.target.x, bullet.entity.target.y).subXY(
+        bullet.x,
+        bullet.y,
+      ).angle;
       this.knock(bullet.knockback, direction, bullet.kineticKnockback); //Knock with default resolution
     } else {
       this.knock(bullet.knockback, bullet.direction, bullet.kineticKnockback); //Knock with default resolution
@@ -249,17 +243,8 @@ class Entity extends ShootableObject {
       if (this.target) {
         this._waiting--;
         if (this._waiting <= 0) {
-          if (
-            this.distanceToPoint(this.target.x, this.target.y) >
-            this.size / 2
-          )
-            this.moveTowards(
-              (this.target instanceof Block ? blockSize / 2 : 0) +
-                this.target.x,
-              (this.target instanceof Block ? blockSize / 2 : 0) +
-                this.target.y,
-              true
-            );
+          if (this.distanceToPoint(this.target.x, this.target.y) > this.size / 2)
+            this.moveTowards(this.target.x, this.target.y, true);
         }
       }
     }
@@ -275,25 +260,22 @@ class Entity extends ShootableObject {
       this.target = { x: this.x, y: this.y };
     if (this.distanceTo(this.target) < this.size) {
       let xOffset =
-        rnd(this.targetRange, this.targetRange / 4) *
+        rnd.float(this.targetRange, this.targetRange / 4) *
         (tru(0.5) ? -1 : 1) *
         this.passiveIncentiveModifier;
       let yOffset =
-        rnd(this.targetRange, this.targetRange / 4) *
+        rnd.float(this.targetRange, this.targetRange / 4) *
         (tru(0.5) ? -1 : 1) *
         this.passiveIncentiveModifier;
 
       this.target.x += xOffset;
       this.target.y += yOffset;
-      if (this.target.x > totalSize)
-        this.target.x = totalSize * 2 - this.target.x;
-      if (this.target.y > totalSize)
-        this.target.y = totalSize * 2 - this.target.y;
+      if (this.target.x > totalSize) this.target.x = totalSize * 2 - this.target.x;
+      if (this.target.y > totalSize) this.target.y = totalSize * 2 - this.target.y;
 
       if (this.target.x < 0) this.target.x = -this.target.x;
       if (this.target.y < 0) this.target.y = -this.target.y;
-      this._waiting =
-        this.waitTime + rnd(this.waitVariance, -this.waitVariance);
+      this._waiting = this.waitTime + rnd.float(this.waitVariance, -this.waitVariance);
     }
   }
 
@@ -302,8 +284,7 @@ class Entity extends ShootableObject {
    * - Acts as Passive when no entity can be found.
    */
   _hostileAI() {
-    if (!this._generic_AttackerAI((ent) => !ent.item, true, true))
-      this._passiveAI();
+    if (!this._generic_AttackerAI((ent) => !ent.item, true, true)) this._passiveAI();
   }
 
   /**Scavenger AI
@@ -312,14 +293,8 @@ class Entity extends ShootableObject {
    * - Acts as Passive when no entity can be found.
    */
   _scavengerAI() {
-    if (
-      !this.inventory ||
-      !this._generic_AttackerAI((ent) => !!ent.item, false, false)
-    )
-      if (
-        !this._generic_AttackerAI((blk) => !!blk.inventory, true, true, false)
-      )
-        this._hostileAI();
+    if (!this.inventory || !this._generic_AttackerAI((ent) => !!ent.item, false, false))
+      if (!this._generic_AttackerAI((blk) => !!blk.inventory, true, true, false)) this._hostileAI();
   }
 
   /**Guard AI
@@ -330,9 +305,7 @@ class Entity extends ShootableObject {
   _guardAI() {
     if (
       !this._generic_AttackerAI(
-        (ent) =>
-          !ent.item &&
-          ent.distanceToPoint(this.spawnX, this.spawnY) < this.targetRange
+        (ent) => !ent.item && ent.distanceToPoint(this.spawnX, this.spawnY) < this.targetRange,
       )
     )
       this.target = { x: this.spawnX, y: this.spawnY };
@@ -347,37 +320,34 @@ class Entity extends ShootableObject {
     conditions = () => true,
     shoots = true,
     attackBlocks = true,
-    attackEntities = true
+    attackEntities = true,
   ) {
     this.#firing = false;
     let tempTarget = this.target;
-    let entity = attackEntities
-      ? this.closestFrom(
+    let entity =
+      attackEntities ?
+        this.closestFrom(
           this.world.entities,
           this.targetRange,
-          (ent) =>
-            !ent.dead &&
-            ent.team !== this.team &&
-            ent.visible &&
-            conditions(ent)
+          (ent) => !ent.dead && ent.team !== this.team && ent.visible && conditions(ent),
         )
       : null;
-    let block = attackBlocks
-      ? this.closestFrom(
+    let block =
+      attackBlocks ?
+        this.closestFrom(
           this.world.blocksInSquare(
-            Math.floor(this.x / blockSize),
-            Math.floor(this.y / blockSize),
-            Math.floor(this.attackRange / blockSize),
-            "blocks"
+            Math.round(this.x / blockSize),
+            Math.round(this.y / blockSize),
+            Math.round(this.attackRange / blockSize),
+            "blocks",
           ),
           this.attackRange,
-          (blk) => blk.team !== this.team && conditions(blk)
+          (blk) => blk.team !== this.team && conditions(blk),
         )
       : null;
     this.target = this.closestFrom([entity, block], this.targetRange);
     if (this.target) {
-      if (shoots && this.distanceTo(this.target) < this.attackRange)
-        this.#firing = true;
+      if (shoots && this.distanceTo(this.target) < this.attackRange) this.#firing = true;
       return true;
     } else {
       this.target = tempTarget;
@@ -388,25 +358,16 @@ class Entity extends ShootableObject {
   attack() {}
 
   tickGroundEffects() {
-    let blockIn = this.world.getBlock(
-      Math.floor(this.x / blockSize),
-      Math.floor(this.y / blockSize),
-      "blocks"
-    );
-    let blockOn =
-      this.world.getBlock(
-        Math.floor(this.x / blockSize),
-        Math.floor(this.y / blockSize),
-        "floor"
-      ) ??
-      this.world.getBlock(
-        Math.floor(this.x / blockSize),
-        Math.floor(this.y / blockSize),
-        "tiles"
-      );
+    const bx = Math.round(this.x / blockSize);
+    const by = Math.round(this.y / blockSize);
+    let blockIn = this.world.getBlock(bx, by, "blocks");
+    let blockOn = this.world.getBlock(bx, by, "floor");
     if (blockIn && blockIn.walkable) blockIn.steppedOnBy(this);
-    else if (blockOn?.speedMultiplier)
-      this.attributes.multiply("speed", blockOn.speedMultiplier);
+    else if (blockOn?.speedMultiplier) this.attributes.multiply("speed", blockOn.speedMultiplier);
+    else if (!blockIn && !blockOn) {
+      let tile = this.world.getTile(bx, by);
+      if (tile) GroundTile.entityWalksOn(this, tile);
+    }
   }
   draw() {
     for (let component of this.components) {
@@ -419,34 +380,22 @@ class Entity extends ShootableObject {
   _debugAI() {
     push();
     noFill();
-    stroke(this.target instanceof ShootableObject ? [255, 0, 0] : [0, 255, 0]);
+    col.stroke(this.target instanceof ShootableObject ? col.red : col.green);
     strokeWeight(4);
     if (this.target) {
       square(this.target.x, this.target.y, this.size);
       line(this.x, this.y, this.target.x, this.target.y);
     }
     if (this.aiType === "hostile" || this.aiType === "guard") {
-      stroke(
-        this.target instanceof ShootableObject
-          ? [200, 0, 255, 100]
-          : [255, 255, 0, 100]
-      );
+      col.stroke(this.target instanceof ShootableObject ? col.from(200,0,255,100) : col.from(255,255,0,100));
       circle(this.x, this.y, this.attackRange * 2);
     }
     if (this.aiType === "hostile" || this.aiType === "scavenger") {
-      stroke(
-        this.target instanceof ShootableObject
-          ? [255, 0, 0, 100]
-          : [0, 255, 0, 100]
-      );
+      col.stroke(this.target instanceof ShootableObject ? col.from(255,0,0,100) : col.from(0,255,0,100));
       circle(this.x, this.y, this.targetRange * 2);
     }
     if (this.aiType === "guard") {
-      stroke(
-        this.target instanceof ShootableObject
-          ? [255, 128, 0, 100]
-          : [0, 255, 255, 100]
-      );
+      col.stroke(this.target instanceof ShootableObject ? col.from(255,128,0,100) : col.from(0,255,255,100));
       circle(this.spawnX, this.spawnY, this.targetRange * 2);
     }
     pop();
@@ -465,8 +414,8 @@ class Entity extends ShootableObject {
       if (tru(effect.effectChance))
         this.emit(
           effect.effect,
-          rnd(-this.width / 2, this.width / 2),
-          rnd(-this.height / 2, this.height / 2)
+          rnd.float(-this.width / 2, this.width / 2),
+          rnd.float(-this.height / 2, this.height / 2),
         );
       if (time % effect.interval === clamp(10, 0, effect.interval - 1)) {
         this.damage(effect.damageType, effect.damage);
@@ -475,7 +424,8 @@ class Entity extends ShootableObject {
       for (let key in effect.attributeModifiers) {
         this.attributes.multiply(key, effect.attributeModifiers[key]);
       }
-      if (time > 0) this.statuses[status]--; //Tick timer
+      if (time > 0)
+        this.statuses[status]--; //Tick timer
       else delete this.statuses[status];
     }
   }
@@ -504,11 +454,11 @@ class Entity extends ShootableObject {
       this.x,
       this.y,
       this.width * this.height, //this.maxHealth,
-      [0, 0, 0],
-      [0, 0, 0],
-      [0, 0, 0],
+      col.black,
+      col.black,
+      col.black,
       this.components,
-      this.world
+      this.world,
     );
     createDestructionExplosion(this.x, this.y, this);
   }
@@ -548,3 +498,4 @@ class Entity extends ShootableObject {
   static applyExtraProps(entity, created) {}
 }
 export { Entity };
+

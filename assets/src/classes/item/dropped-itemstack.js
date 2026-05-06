@@ -1,11 +1,11 @@
-import { ItemStack } from "./item-stack.js";
-import { Entity } from "../entity/entity.js";
-import { EquippedEntity, InventoryEntity } from "../entity/inventory-entity.js";
 import { rnd } from "../../core/number.js";
-import { Block } from "../block/block.js";
 import { drawImg } from "../../core/ui.js";
 import { game } from "../../play/game.js";
 import { Log } from "../../play/messaging.js";
+import { Block } from "../block/block.js";
+import { Entity } from "../entity/entity.js";
+import { EquippedEntity, InventoryEntity } from "../entity/inventory-entity.js";
+import { ItemStack } from "./item-stack.js";
 class DroppedItemStack extends Entity {
   item = ItemStack.EMPTY;
   delay = 30;
@@ -17,11 +17,11 @@ class DroppedItemStack extends Entity {
     item.addToWorld(world, x, y);
     item.speed = speed;
     if (!isNaN(direction)) item.direction = direction;
-    else item.direction = rnd(0, 360);
+    else item.direction = rnd.float(0, 360);
   }
   init() {
     this.#delayLeft = this.delay;
-    this.speed = rnd(2, 4);
+    this.speed = rnd.float(2, 4);
     this.components = [];
     this.width = 10;
     this.height = 10;
@@ -64,7 +64,7 @@ class DroppedItemStack extends Entity {
                   let newcount = this.item.count - leftOver2;
                   if (newcount > 0)
                     Log.send(
-                      "Picked up " + this.item.getItem().name + " x" + newcount
+                      "Picked up " + this.item.getItem().name + "#-- x" + newcount
                     );
                 }
                 this.item.count = leftOver2;
@@ -109,3 +109,4 @@ class DroppedItemStack extends Entity {
   }
 }
 export { DroppedItemStack };
+

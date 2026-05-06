@@ -1,21 +1,15 @@
-import { Block, BreakType } from "../block.js";
-import { drawImg } from "../../../core/ui.js";
-import {
-  autoScaledEffect,
-  Explosion,
-  NuclearExplosion,
-} from "../../../play/effects.js";
-import { DroppedItemStack } from "../../item/dropped-itemstack.js";
+import { col } from "../../../core/color.js";
+import { rnd, roundNum } from "../../../core/number.js";
 import { Registries } from "../../../core/registry.js";
+import { drawImg } from "../../../core/ui.js";
+import { autoScaledEffect, Explosion, NuclearExplosion } from "../../../play/effects.js";
+import { game } from "../../../play/game.js";
+import { DroppedItemStack } from "../../item/dropped-itemstack.js";
 import { VirtualBullet } from "../../projectile/virtual-bullet.js";
 import { Timer } from "../../timer.js";
-import { game } from "../../../play/game.js";
-import { rnd, roundNum } from "../../../core/number.js";
+import { Block, BreakType } from "../block.js";
 class Bomb extends Block {
-  explosion = {
-    radius: 100,
-    amount: 100,
-  };
+  explosion = { radius: 100, amount: 100 };
   explosionEffect = "explosion";
   autoDetonationRange = 50;
   triggerEffect = "none";
@@ -34,6 +28,7 @@ class Bomb extends Block {
   wasActivated = false;
   init() {
     super.init();
+    col.autonorm(this.explosion);
     if (this.hiddenImg === "inherit") this.hiddenImg = this.image;
   }
   draw() {
@@ -44,7 +39,7 @@ class Bomb extends Block {
         this.x,
         this.y,
         this.tileSize * Block.size,
-        this.tileSize * Block.size
+        this.tileSize * Block.size,
       );
   }
   interaction(ent, item) {
@@ -57,44 +52,35 @@ class Bomb extends Block {
   }
   activated() {
     if (!this.wasActivated) {
-      this.emit(this.triggerEffect, Block.size / 2, Block.size / 2);
+      this.emit(this.triggerEffect);
       this.wasActivated = true; // stop recursive death
       this.health = 0;
       let detdelay =
-        (this.detonationDelay +
-          (this.accelerable ? rnd(-this.delaySpread, this.delaySpread) : 0)) *
+        (this.detonationDelay + (this.accelerable ? rnd.float(-this.delaySpread, this.delaySpread) : 0)) *
         (this.accelerable && this.#wasAccelerated ? 0.6 : 1);
       this._healthbarShowTime = 0;
       this.#detTimer.repeat(
-        () => this.emit(this.fuseEffect, Block.size / 2, Block.size / 2),
-        detdelay
+        () => this.emit(this.fuseEffect),
+        detdelay,
       );
       this.#detTimer.do(() => this._explode(), detdelay);
     }
   }
   _explode() {
     this.break(BreakType.explode);
+    autoScaledEffect(this.impactFrame, this.world, this.x, this.y, 0, undefined, true);
     autoScaledEffect(
-      this.impactFrame,
+      this.explosionEffect.includes("~") ?
+        this.explosionEffect
+      : this.explosionEffect + "~" + (this.explosion.radius ?? 0),
       this.world,
-      this.x + Block.size / 2,
-      this.y + Block.size / 2,
+      this.x,
+      this.y,
       0,
-      undefined,
-      true
-    );
-    autoScaledEffect(
-      this.explosionEffect.includes("~")
-        ? this.explosionEffect
-        : this.explosionEffect + "~" + (this.explosion.radius ?? 0),
-      this.world,
-      this.x + Block.size / 2,
-      this.y + Block.size / 2,
-      0
     );
     let ex = new Explosion(this.explosion);
-    ex.x = this.x + Block.size / 2;
-    ex.y = this.y + Block.size / 2;
+    ex.x = this.x;
+    ex.y = this.y;
     ex.world = this.world;
     ex.source = this;
     ex.dealDamage();
@@ -127,34 +113,24 @@ class Bomb extends Block {
       "🟨 -------------------- ⬜",
       "Explosion:",
       "  " + roundNum((this.explosion.radius ?? 0) / 30, 1) + " blocks range",
+      "  " + (this.explosion.amount ?? 0) + (this.explosion.type ?? " explosion") + " damage",
       "  " +
-        (this.explosion.amount ?? 0) +
-        (this.explosion.type ?? " explosion") +
-        " damage",
-      "  " +
-        roundNum(
-          this.explosion.knockback ?? (this.explosion.amount ?? 0) ** 0.5,
-          1
-        ) +
+        roundNum(this.explosion.knockback ?? (this.explosion.amount ?? 0) ** 0.5, 1) +
         " knockback",
       "  " +
-        (this.explosion.status
-          ? "🟨" +
-            Registries.statuses.get(this.explosion.status).name +
-            " for " +
-            roundNum((this.explosion.statusDuration ?? 0) / 60, 1) +
-            "s⬜"
-          : ""),
-      this.autoDetonationRange > 0
-        ? "🟨" +
-          roundNum(this.autoDetonationRange / 30, 1) +
-          " blocks detection range⬜"
-        : "",
+        (this.explosion.status ?
+          "🟨" +
+          Registries.statuses.get(this.explosion.status).name +
+          " for " +
+          roundNum((this.explosion.statusDuration ?? 0) / 60, 1) +
+          "s⬜"
+        : ""),
+      this.autoDetonationRange > 0 ?
+        "🟨" + roundNum(this.autoDetonationRange / 30, 1) + " blocks detection range⬜"
+      : "",
       roundNum(this.detonationDelay / 60, 1) +
         "s fuse" +
-        (this.accelerable
-          ? " (±" + roundNum(this.delaySpread / 60, 1) + "s)"
-          : " (exactly)"),
+        (this.accelerable ? " (±" + roundNum(this.delaySpread / 60, 1) + "s)" : " (exactly)"),
       this.volatile ? "🟥volatile⬜" : "",
       "🟨 -------------------- ⬜",
     ];
@@ -168,35 +144,24 @@ class Bomb extends Block {
   }
 }
 class NuclearBomb extends Bomb {
-  explosion = {
-    radius: 250,
-    amount: 1000,
-  };
+  explosion = { radius: 250, amount: 1000 };
   autoDetonationRange = 100;
   explosionEffect = "nuke";
   _explode() {
     this.break(BreakType.explode);
+    autoScaledEffect(this.impactFrame, this.world, this.x, this.y, 0, undefined, true);
     autoScaledEffect(
-      this.impactFrame,
+      this.explosionEffect.includes("~") ?
+        this.explosionEffect
+      : this.explosionEffect + "~" + (this.explosion.radius ?? 0),
       this.world,
-      this.x + Block.size / 2,
-      this.y + Block.size / 2,
+      this.x,
+      this.y,
       0,
-      undefined,
-      true
-    );
-    autoScaledEffect(
-      this.explosionEffect.includes("~")
-        ? this.explosionEffect
-        : this.explosionEffect + "~" + (this.explosion.radius ?? 0),
-      this.world,
-      this.x + Block.size / 2,
-      this.y + Block.size / 2,
-      0
     );
     let ex = new NuclearExplosion(this.explosion);
-    ex.x = this.x + Block.size / 2;
-    ex.y = this.y + Block.size / 2;
+    ex.x = this.x;
+    ex.y = this.y;
     ex.world = this.world;
     ex.source = this;
     ex.dealDamage();
@@ -214,32 +179,25 @@ class NuclearBomb extends Bomb {
       "  " +
         roundNum(
           this.explosion.knockback ??
-            (((this.explosion.amount ?? 0) /
-              ((this.explosion.radius ?? 0) / 4.5)) *
-              10) **
-              0.5,
-          1
+            (((this.explosion.amount ?? 0) / ((this.explosion.radius ?? 0) / 4.5)) * 10) ** 0.5,
+          1,
         ) +
         " knockback per tick",
       "  " +
-        (this.explosion.status
-          ? "🟨" +
-            Registries.statuses.get(this.explosion.status).name +
-            " for " +
-            roundNum((this.explosion.statusDuration ?? 0) / 60, 1) +
-            "s⬜"
-          : ""),
+        (this.explosion.status ?
+          "🟨" +
+          Registries.statuses.get(this.explosion.status).name +
+          " for " +
+          roundNum((this.explosion.statusDuration ?? 0) / 60, 1) +
+          "s⬜"
+        : ""),
       "  " + roundNum((this.explosion.radius ?? 0) / 4.5 / 6, 1) + "s duration",
-      this.autoDetonationRange > 0
-        ? "🟨" +
-          roundNum(this.autoDetonationRange / 30, 1) +
-          " blocks detection range⬜"
-        : "",
+      this.autoDetonationRange > 0 ?
+        "🟨" + roundNum(this.autoDetonationRange / 30, 1) + " blocks detection range⬜"
+      : "",
       roundNum(this.detonationDelay / 60, 1) +
         "s fuse" +
-        (this.accelerable
-          ? " (±" + roundNum(this.delaySpread / 60, 1) + "s)"
-          : " (exactly)"),
+        (this.accelerable ? " (±" + roundNum(this.delaySpread / 60, 1) + "s)" : " (exactly)"),
       this.volatile ? "🟥volatile⬜" : "",
       "🟨 -------------------- ⬜",
     ];
@@ -247,3 +205,4 @@ class NuclearBomb extends Bomb {
 }
 
 export { Bomb, NuclearBomb };
+

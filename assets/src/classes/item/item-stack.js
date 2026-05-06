@@ -1,29 +1,28 @@
-import { RegisteredItem } from "../../core/registered-item.js";
-import { Item } from "./item.js";
 import { construct } from "../../core/constructor.js";
+import { rnd, roundNum } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
-import { roundNum, rnd } from "../../core/number.js";
+import { Item } from "./item.js";
 /**
  * @typedef SerialisedItemStack
  * @prop {string} item
- * @prop {int} count
- * @prop {[string, int][]} tags
+ * @prop {number} count
+ * @prop {[string, string|number|boolean][]} tags
  */
 /** */
-class ItemStack extends RegisteredItem {
+class ItemStack /* extends Integrate.RegisteredItem **/ {
   item = "nothing";
   count = 1;
   //Non-copiable attributes
   min = null;
   max = null;
   dropChance = 1;
-  //
+  /** @type {Map<string, string|number|boolean>} */
   tags = new Map();
   //Internal
   #itemCache = null;
   init() {
     if (this.min != null && this.max != null) {
-      this.count = roundNum(rnd(this.min, this.max));
+      this.count = roundNum(rnd.float(this.min, this.max));
     }
   }
   /**
@@ -97,16 +96,16 @@ class ItemStack extends RegisteredItem {
   copy() {
     let ist = new ItemStack(this.item, this.count);
     ist.init();
-    this.tags.forEach((v, k) => ist.addTag(k, structuredClone(v)));
+    this.tags.forEach((v, k) => ist.addTag(k, v));
     return ist;
   }
   constructor(item = "nothing", count = 1) {
-    super();
+    // super();
     this.item = item;
     this.count = count;
   }
   toString(useDisplay = false) {
-    return (useDisplay ? this.getItem().name : this.item) + " x" + this.count;
+    return `${useDisplay ? this.getItem().name : this.item} x${this.count}`;
   }
   clear() {
     this.item = "nothing";
@@ -124,16 +123,13 @@ class ItemStack extends RegisteredItem {
   }
   /**@returns {SerialisedItemStack} */
   serialise() {
-    return { item: this.item, count: this.count, tags: this._getTagArray() };
+    return { item: this.item, count: this.count, tags: [...this.tags.entries()] };
   }
-  _getTagArray() {
-    let arr = [];
-    this.tags.forEach((v, k) => arr.push([k, v]));
-    return arr;
-  }
+  /**@param {string} name   @param {string|number|boolean} value  */
   addTag(name, value) {
     this.tags.set(name, value);
   }
 }
 
 export { ItemStack };
+

@@ -29,17 +29,18 @@ class Weapon extends Equippable {
 
   range = 180;
 
+  showArm = false;
   //Internal
   #delay = 0;
-  #cooldown = 0;
+  _cooldown = 0;
   //Special weapon effects
   accel = 0;
   accelDecay = 0;
   maxAccel = 2;
   #acceleration = 0;
   #accelerated = 0;
-  #lastReload = 0;
-  #lastCharge = 0;
+  _lastReload = 0;
+  _lastCharge = 0;
 
   //wooooooooooooo recoil
   recoil = 0;
@@ -65,9 +66,9 @@ class Weapon extends Equippable {
     super.tick(holder);
     this.timer.tick();
     this.decelerate();
-    if (this.#cooldown > 0) {
-      this.#cooldown -= holder.attributes.getValue("fire-rate");
-      if (this.#cooldown <= 0) {
+    if (this._cooldown > 0) {
+      this._cooldown -= holder.attributes.getValue("fire-rate");
+      if (this._cooldown <= 0) {
         let pos = this._getShootPos(holder);
         autoScaledEffect(
           this.shoot.readyEffect,
@@ -121,7 +122,7 @@ class Weapon extends Equippable {
    * @param {EquippedEntity} holder
    */
   fire(holder, shoot = this.shoot, bulletConfig = this.bullets) {
-    if (this.#cooldown <= 0) {
+    if (this._cooldown <= 0) {
       //choose ammo
       let ammoType = "-";
       for (let ammo in bulletConfig.ammos) {
@@ -136,8 +137,8 @@ class Weapon extends Equippable {
       // stop if no ammo type found
       if (ammoType === "-") return;
       // fire
-      this.#lastReload = shoot.reload;
-      this.#lastCharge = shoot.charge;
+      this._lastReload = shoot.reload;
+      this._lastCharge = shoot.charge;
       if (shoot.charge > 0) {
         let pos = this._getShootPos(holder);
         autoScaledEffect(
@@ -148,7 +149,7 @@ class Weapon extends Equippable {
           pos.direction,
           () => this._getShootPos(holder)
         );
-        this.#cooldown = shoot.reload + shoot.charge;
+        this._cooldown = shoot.reload + shoot.charge;
         this.timer.do(() => {
           this._internalFire(holder, shoot, ammoType, bulletConfig);
         }, shoot.charge);
@@ -170,7 +171,7 @@ class Weapon extends Equippable {
   ) {
     if (!this._useAmmo(holder, ammoType)) return;
 
-    this.#cooldown = this.getAcceleratedReloadRate(shoot);
+    this._cooldown = this.getAcceleratedReloadRate(shoot);
     this.accelerate(shoot); //Apply acceleration effects
 
     this.timer.repeat(
@@ -250,15 +251,15 @@ class Weapon extends Equippable {
     );
   }
   createProgressBar() {
-    if (this.#cooldown <= this.#lastReload)
+    if (this._cooldown <= this._lastReload)
       return ""
-        .padEnd((this.#cooldown / this.#lastReload) * 15, "■")
+        .padEnd((this._cooldown / this._lastReload) * 15, "■")
         .padEnd(15, "□")
         .substring(0, 15);
     else
       return ""
         .padEnd(
-          15 - ((this.#cooldown - this.#lastReload) / this.#lastCharge) * 15,
+          15 - ((this._cooldown - this._lastReload) / this._lastCharge) * 15,
           "■"
         )
         .padEnd(15, "□")
@@ -447,4 +448,4 @@ function crop(text, length) {
   return text.length <= length ? text : text.substring(0, length - 1) + "…";
 }
 
-export { Weapon };
+export { Weapon,crop };

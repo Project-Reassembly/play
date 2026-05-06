@@ -1,27 +1,45 @@
-import { Integrate } from "../lib/integrate.js";
-/** Generic type constructor. Uses `Registry.genericType` as the source for any template.
- * @param {{type: string | undefined}} object Source to construct from. This object is left unchanged. Type must be present in `Registry.genericType`, or else `Object` is used instead.
- * @param {string} [defaultType="object"] Default fallback type for when the source has no `type` property.
+import Integrate from "../lib/integrate.js";
+/// <reference path="../lib/integrate"/>
+/**
+ * @import {Unconstructed,ctor} from "../lib/integrate.js"
+ */
+
+
+/** Generic type constructor. Uses `Integrate.types` as the source for any template.
+ * @template T
+ * @param {Unconstructed<T>} object Source to construct from. This object is left unchanged. Type must be present in `Integrate.types`, or else `Object` is used instead.
+ * @param {string} [defaultType="object"] Default fallback type name for when the source has no `type` property.
+ * @returns {T}
  */
 function construct(object, defaultType = "generic") {
   if (!object) return; //Catch accidental calls using null, undefined or similar
   object.type ??= defaultType;
   return constructFromRegistry(object, Integrate.types);
 }
-
+/** Generic type constructor. Uses the specified registry as the source for any template.
+ * @template T
+ * @param {Unconstructed<T>} object Source to construct from. This object is left unchanged. Type must be present in the given registry, or else `Object` is used instead.
+ * @param {Integrate.TypeRegistry} registry Registry to get types from.
+ * @returns {T}
+ */
 function constructFromRegistry(object, registry) {
-  if (!(registry instanceof Integrate.Registry))
-    throw new ReferenceError("'" + registry + "' is not a valid registry!"); //Catch bad (nonexistent or non-registry) registry
+  if (!(registry instanceof Integrate.TypeRegistry))
+    throw new TypeError("Invalid type registry!"); //Catch bad (nonexistent or non-registry) registry
   if (!object) return; //Catch accidental calls using null, undefined or similar
   return constructFromType(object, registry.get(object.type));
 }
-
-function constructFromType(object, type) {
+/** Specific type constructor. Uses a given type directly, and ignores the `type` property.
+ * @template T
+ * @param {Unconstructed<T>} object Source to construct from. This object is left unchanged. Type must be present in the given registry, or else `Object` is used instead.
+ * @param {ctor} ctor Constructor to use.
+ * @returns {T}
+ */
+function constructFromType(object, ctor) {
   if (!object) return;
   //Constructs an instance using type from registry, if it exists. If not, the error will throw.
-  let instantiated = new type();
+  let instantiated = new ctor();
   let cloned = {};
-  //Clone the object if possible, to copy stuff like bullet drawers, or weapon.shoot.pattern. If it fails, just use the original.
+  //Clone the object if possible, to copy nested objects like bullet drawers, or weapon.shoot.pattern. If it fails, just use the original.
   try {
     cloned = structuredClone(object);
   } catch (error) {
@@ -29,12 +47,15 @@ function constructFromType(object, type) {
     console.warn("Could not clone object:", error);
   }
   assign(instantiated, cloned);
-  instantiated.init ? instantiated.init() : {}; //Initialise if possible.
+  instantiated.init ? instantiated.init() : null; //Initialise if possible.
   return instantiated;
 }
 
 /**A version of `Object.assign()` which only copies keys present on both objects, and will not allow functions to be overridden.\
  * Mutates the original object, and returns it.
+ * @template T
+ * @param {Unconstructed<T>} source Object to get overrides from.
+ * @param {T} target Object to override.
  */
 function assign(target, source) {
   if (!target || !source) return;
@@ -47,13 +68,11 @@ function assign(target, source) {
       } else console.warn("Cannot replace an object's method: " + key);
     } else {
       console.warn(
-        "Cannot create properties using `construct()`-derived functions: " +
-          key +
-          " is not present on type " +
-          target.constructor.name
+        `Cannot create properties using 'construct()'-derived functions: ${key} is not present on type ${target.constructor.name}`
       );
     }
   }
   return target;
 }
-export { construct, constructFromRegistry, constructFromType, assign };
+export { assign, construct, constructFromRegistry, constructFromType };
+

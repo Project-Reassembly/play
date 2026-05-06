@@ -1,7 +1,6 @@
-import { Block } from "./block.js";
 import { Inventory } from "../inventory.js";
-import { blockSize } from "../../scaling.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
+import { Block } from "./block.js";
 class Container extends Block {
   /** @type {Inventory} */
   inventory = null;
@@ -25,18 +24,13 @@ class Container extends Block {
       30,
       outlineColour,
       backgroundColour,
-      forceVReverse
+      forceVReverse,
     );
   }
   break(type) {
     if (super.break(type))
       this.inventory.iterate((stack) => {
-        DroppedItemStack.create(
-          stack,
-          this.world,
-          this.x + blockSize / 2,
-          this.y + blockSize / 2
-        );
+        DroppedItemStack.create(stack, this.world, this.x, this.y);
       }, true);
     return true;
   }
@@ -70,3 +64,4 @@ class Container extends Block {
   }
 }
 export { Container };
+

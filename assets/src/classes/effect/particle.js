@@ -1,4 +1,5 @@
-import { Vector, colinterp } from "../../core/number.js";
+import { col } from "../../core/color.js";
+import { Vector } from "../../core/number.js";
 import { rotatedShape, rotatedShapeExt } from "../../core/ui.js";
 class Particle {
   _rotOffset = 0;
@@ -10,7 +11,7 @@ class Particle {
     lifetime = 30,
     speed = 4,
     decel = 0,
-    colours = [[255, 0, 0]],
+    colours = [col.red],
     rotateSpeed = 0,
     light = 0,
     space = false
@@ -22,8 +23,8 @@ class Particle {
     this.lifetime = lifetime;
     this.decel = decel;
     this.remove = false;
-    this.colours = colours;
-    this.colour = this.colours[0];
+    this.colours = colours.map(col.convert);
+    this.colour = this.colours[0] ?? 0;
     this.maxLifetime = lifetime;
     this.rotateSpeed = rotateSpeed;
     this.light = light;
@@ -75,14 +76,14 @@ class Particle {
   step(dt) {
     if (this.lifetime >= dt) {
       //Interpolate size
-      let lf = this.calcLifeFract();
+      const lf = this.calcLifeFract();
       this.calcSizes(lf);
       this.calcDecels(dt);
 
       this.movement(dt);
 
       //Colours
-      this.colour = colinterp(this.colours, 1 - lf);
+      this.colour = col.interp(this.colours, 1 - lf);
       //Lifetime
       this.lifetime -= dt;
     } else {
@@ -101,7 +102,7 @@ class Particle {
       g.push();
       g.noStroke();
       //Interpolate colour
-      g.fill(this.colour);
+      col.fillOn(g, this.colour);
       //Draw the particle
       this.actualDraw(g);
       g.pop();
@@ -110,7 +111,7 @@ class Particle {
     push();
     noStroke();
     //Interpolate colour
-    fill(this.colour);
+    col.fill(this.colour);
     //Draw the particle
     this.actualDraw();
     pop();
@@ -123,3 +124,4 @@ class Particle {
   }
 }
 export { Particle };
+

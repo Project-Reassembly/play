@@ -1,3 +1,4 @@
+import { col } from "../../core/color.js";
 import { Vector } from "../../core/number.js";
 import { createLinearEffect } from "../../play/effects.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
@@ -6,13 +7,13 @@ import { Bullet } from "./bullet.js";
 class PointBullet extends Bullet {
   lifetime = 1;
   #moved = false; //If the bullet has teleported to the target entity or not.
-  hitColours = [[255, 255, 0]];
+  hitColours = [col.yellow];
   lineEffect = "snipe-trail";
   init() {
+    this.hitColours = this.hitColours.map(col.convert);
     this.speed = 0; //Remove speed
     if (this.hitColours.length === 1) {
-      this.hitColours[1] = this.hitColours[0].slice(0); //Copy colour
-      this.hitColours[1][3] = 0; //Add alpha
+      this.hitColours[1] = col.hide(this.hitColours); //Copy colour
     }
   }
   step(dt) {
@@ -122,3 +123,4 @@ class PointBullet extends Bullet {
   }
 }
 export { PointBullet };
+

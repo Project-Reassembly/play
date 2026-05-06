@@ -1,4 +1,4 @@
-import { rnd, tru, Vector } from "../../core/number.js";
+import { rnd, Vector } from "../../core/number.js";
 import { LinearParticle } from "./linear-particle.js";
 
 class LightningParticle extends LinearParticle {
@@ -40,7 +40,7 @@ class LightningParticle extends LinearParticle {
       let curr = this.positions[p];
       let direction = curr.sub(prev);
       let pvec = Vector.fromAngle(direction.angle + 90);
-      this.points.push(curr.add(pvec.scale(deviation * rnd(1, -1))))
+      this.points.push(curr.add(pvec.scale(deviation * rnd.float(1, -1))))
       prev = curr;
     }
 
@@ -61,3 +61,4 @@ class LightningParticle extends LinearParticle {
 }
 
 export { LightningParticle };
+

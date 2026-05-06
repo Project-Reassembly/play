@@ -1,12 +1,14 @@
+import { create2DArray, iterate2DArray, mapJagged2DArray } from "../../core/2D-array.js";
 import { construct } from "../../core/constructor.js";
+import { tru } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { blockSize, chunkSize, Direction } from "../../scaling.js";
-import { tru } from "../../core/number.js";
+import { GroundTile } from "../block/ground-tile.js";
 import { World } from "./world.js";
 /**
  * @typedef SerialisedChunk
  * @prop {SerialisedBlock[][]} blocks
- * @prop {SerialisedBlock[][]} tiles
+ * @prop {string[][]} tiles
  * @prop {SerialisedBlock[][]} floors
  * @prop {int} i
  * @prop {int} j
@@ -18,17 +20,19 @@ class Chunk {
   static Layer = {
     /**@readonly*/
     blocks: "blocks",
-    /**@readonly*/
-    tiles: "tiles",
     /** @readonly */
     floor: "floor",
   };
   static get size() {
     return chunkSize;
   }
-  tiles = create2DArray(Chunk.size);
-  blocks = create2DArray(Chunk.size);
-  floor = create2DArray(Chunk.size);
+  /** @import {Block} from "../block/block.js" */
+  /** @type {(string|null)[][]} */
+  tiles = create2DArray(chunkSize);
+  /** @type {(Block|null)[][]} */
+  blocks = create2DArray(chunkSize);
+  /** @type {(Block|null)[][]} */
+  floor = create2DArray(chunkSize);
   //Not representative of the actual position of the blocks, though
   i = 0;
   get x() {
@@ -46,7 +50,7 @@ class Chunk {
    * @param {number} x X position offset from the chunk
    * @param {number} y Y position offset from the chunk
    * @param {keyof Chunk.Layer} layer Layer that blocks should be placed on.
-   * @returns {Block} Block added.
+   * @returns {Block?} Block added, or null if it was a tile.
    */
   addBlock(block, x = 0, y = 0, layer = Chunk.Layer.blocks) {
     if (
@@ -54,15 +58,26 @@ class Chunk {
       this[layer][y] === undefined ||
       this[layer][y][x] === undefined
     )
-      throw new Error(
-        "Can't place block outside of chunk (at " + x + ", " + y + " in chunk)"
-      );
+      throw new Error("Can't place block outside of chunk (at " + x + ", " + y + " in chunk)");
+
     let blockToAdd = construct(Registries.blocks.get(block), "block");
     blockToAdd.blockX = x;
     blockToAdd.blockY = y;
     blockToAdd.chunk = this;
     this[layer][y][x] = blockToAdd;
     return blockToAdd;
+  }
+  /**
+   * Adds a tile to the chunk.
+   * @param {string} block Registry name of the tile
+   * @param {number} x X position offset from the chunk
+   * @param {number} y Y position offset from the chunk
+   */
+  addTile(block, x = 0, y = 0) {
+    if (this.tiles[y] === undefined || this.tiles[y][x] === undefined)
+      throw new Error("Can't place tile outside of chunk (at " + x + ", " + y + " in chunk)");
+
+    this.tiles[y][x] = block;
   }
   /**
    * Removes a block from the chunk.
@@ -77,11 +92,24 @@ class Chunk {
       this[layer][y] === undefined ||
       this[layer][y][x] === undefined
     )
-      throw new Error(
-        "Can't remove block outside of chunk (at " + x + ", " + y + " in chunk)"
-      );
+      throw new Error("Can't remove block outside of chunk (at " + x + ", " + y + " in chunk)");
     if (this[layer][y][x]) {
       this[layer][y][x] = null;
+      return true;
+    }
+    return false;
+  }
+  /**
+   * Removes a tile from the chunk.
+   * @param {number} x X position offset from the chunk
+   * @param {number} y Y position offset from the chunk
+   * @returns {Boolean} True if the block was removed, false if not.
+   */
+  removeTile(x, y) {
+    if (this.tiles[y] === undefined || this.tiles[y][x] === undefined)
+      throw new Error("Can't remove block outside of chunk (at " + x + ", " + y + " in chunk)");
+    if (this.tiles[y][x]) {
+      this.tiles[y][x] = null;
       return true;
     }
     return false;
@@ -99,61 +127,78 @@ class Chunk {
       this[layer][y] === undefined ||
       this[layer][y][x] === undefined
     )
-      throw new Error(
-        "Can't get block outside of chunk (at " + x + ", " + y + " in chunk)"
-      );
+      throw new Error("Can't get block outside of chunk (at " + x + ", " + y + " in chunk)");
     return this[layer][y][x];
+  } /**
+   * Gets a tile from the chunk.
+   * @param {number} x X position offset from the chunk
+   * @param {number} y Y position offset from the chunk
+   * @returns {string?} The tile's registry name, or null if no block is present.
+   */
+  getTile(x, y) {
+    if (this.tiles[y] === undefined || this.tiles[y][x] === undefined)
+      throw new Error("Can't get tile outside of chunk (at " + x + ", " + y + " in chunk)");
+    return this.tiles[y][x];
   }
   randomTick() {
     iterate2DArray(
       this.tiles,
-      (tile) => tile && tru(World.randomTick) && tile.tick()
+      (tile, y, x) => tile && tru(World.randomTick) && GroundTile.randomTick(tile, x, y),
     );
-    iterate2DArray(
-      this.floor,
-      (floor) => floor && tru(World.randomTick) && floor.tick()
-    );
+    iterate2DArray(this.floor, (floor) => floor && tru(World.randomTick) && floor.tick());
   }
   tick() {
-    iterate2DArray(
-      this.blocks,
-      (block) => block && !block.disabled && block.tick()
-    );
+    iterate2DArray(this.blocks, (block) => block && !block.disabled && block.tick());
   }
   draw() {
+    this.drawTiles();
     this.drawFloorsOnly();
     this.drawBlocksOnly();
   }
+  drawTiles() {
+    push();
+    // translate(blockSize / 2, blockSize / 2);
+    iterate2DArray(
+      this.tiles,
+      (tile, y, x) =>
+        tile &&
+        GroundTile.draw(
+          tile,
+          (x + this.i * chunkSize) * blockSize,
+          (y + this.j * chunkSize) * blockSize,
+        ),
+    );
+    pop();
+  }
   drawFloorsOnly() {
     push();
-    translate(blockSize / 2, blockSize / 2);
-    iterate2DArray(this.tiles, (tile) => tile && tile.draw());
+    // translate(blockSize / 2, blockSize / 2);
     iterate2DArray(this.floor, (floor) => floor && floor.draw());
     pop();
   }
   drawBlocksOnly() {
     push();
-    translate(blockSize / 2, blockSize / 2);
+    // translate(blockSize / 2, blockSize / 2);
     iterate2DArray(this.blocks, (block) => block && block.draw());
     pop();
   }
   postDrawBlocksOnly() {
     push();
-    translate(blockSize / 2, blockSize / 2);
+    // translate(blockSize / 2, blockSize / 2);
     iterate2DArray(this.blocks, (block) => block && block.postDraw());
     pop();
   }
   postDraw2BlocksOnly() {
     push();
-    translate(blockSize / 2, blockSize / 2);
+    // translate(blockSize / 2, blockSize / 2);
     iterate2DArray(this.blocks, (block) => block?.postDraw2 && block.postDraw2());
     pop();
   }
   /**@returns {SerialisedChunk} */
   serialise() {
     return {
-      blocks: this.blocks.map((x) => x.map((y) => (y ? y.serialise() : null))),
-      tiles: this.tiles.map((x) => x.map((y) => (y ? y.serialise() : null))),
+      blocks: mapJagged2DArray(this.blocks, (y) => (y ? y.serialise() : null)),
+      tiles: structuredClone(this.tiles),
       floors: this.floor.map((x) => x.map((y) => (y ? y.serialise() : null))),
       i: this.i,
       j: this.j,
@@ -164,55 +209,35 @@ class Chunk {
     let chunk = new this();
     chunk.i = created.i;
     chunk.j = created.j;
-    for (let y = 0; y < Chunk.size; y++) {
-      for (let x = 0; x < Chunk.size; x++) {
+    for (let y = 0; y < chunkSize; y++) {
+      for (let x = 0; x < chunkSize; x++) {
         let sblock = created.blocks[y][x];
         let sfloor = created.floors[y][x];
         let stile = created.tiles[y][x];
+        //Floor, Tile
+        if (stile) chunk.addTile(stile ?? "stone", x, y);
+        if (sfloor && sfloor.block) chunk.addBlock(sfloor.block, x, y, "floor");
         if (sblock) {
           //Block
-          let blk = chunk.addBlock(
-            sblock.block ?? "scrap-wall",
-            x,
-            y,
-            "blocks"
-          );
-          if (sblock.direction)
-            blk.direction = Direction.fromEnum(sblock.direction);
+          let blk = chunk.addBlock(sblock.block ?? "scrap-wall", x, y, "blocks");
+          if (sblock.direction) blk.direction = Direction.fromEnum(sblock.direction);
           if (sblock.health) blk.health = sblock.health ?? 0;
           if (sblock.team) blk.team = sblock.team ?? "enemy";
           if (sblock.power) blk.power = sblock.power ?? 0;
           //Specific saves
           blk.constructor.applyExtraProps(blk, sblock);
         }
-        //Floor, Tile
-        if (sfloor && sfloor.block) chunk.addBlock(sfloor.block, x, y, "floor");
-        if (stile) chunk.addBlock(stile.block ?? "stone", x, y, "tiles");
       }
     }
     return chunk;
   }
-}
 
-/**
- * Runs a function on each element on a 2D array. Array does not have to be square.
- * @param {Array} array 2D Array to iterate.
- * @param {(element:any) => void} func Function to iterate with.
- */
-function iterate2DArray(array, func) {
-  array.forEach((row) => row.forEach((element) => void func(element)));
-}
-
-/** Creates a square 2D array for use in the block grid. */
-function create2DArray(size = 1) {
-  let array = [];
-  for (let i = 0; i < size; i++) {
-    let row = [];
-    for (let i = 0; i < size; i++) {
-      row.push(null);
-    }
-    array.push(row);
+  print() {
+    iterate2DArray(this.tiles, (t, y, x) =>
+      console.log(`${t}: ${x},${y} -> ${x + this.i * chunkSize},${y + this.j * chunkSize}\n  `),
+    );
   }
-  return array;
 }
-export { Chunk, create2DArray, iterate2DArray };
+
+export { Chunk };
+

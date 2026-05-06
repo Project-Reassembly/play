@@ -81,9 +81,7 @@ Registries.vfx.add("crafter-craft", {
 
 //Explosions
 
-Registries.vfx.add("explosion", {
-  type: "explosion",
-});
+Registries.vfx.add("explosion", { type: "explosion" });
 Registries.vfx.add("construction-hit", {
   type: "explosion",
   waveColours: [
@@ -183,6 +181,28 @@ Registries.vfx.add("shoot", {
       },
     },
   ],
+});
+Registries.vfx.add("stab", {
+  type: "particle-emission",
+  cone: 0,
+  amount: 1,
+  particle: {
+    lifetime: 15,
+    speed: 0,
+    shape: "moved-triangle",
+    direction: -90,
+    colours: [
+      [255, 255, 255, 100],
+      [255, 240, 210],
+      [255, 230, 175, 0],
+    ],
+    widthFrom: 32,
+    widthTo: 40,
+    heightFrom: 14,
+    heightTo: 0,
+    rotateSpeed: 0,
+    light: 30,
+  },
 });
 
 Registries.vfx.add("tonk-shoot", {
@@ -1042,9 +1062,7 @@ Registries.vfx.add("deathbringer-shot-impact", {
 
 //Nuclear
 
-Registries.vfx.add("nuke", {
-  type: "nuclear-explosion",
-});
+Registries.vfx.add("nuke", { type: "nuclear-explosion" });
 Registries.vfx.add("deathbringer-nuke", {
   type: "nuclear-explosion",
   flashColours: [
@@ -1433,6 +1451,98 @@ Registries.vfx.add("tonk-build-square", {
     light: 20,
     rotateSpeed: 0,
   },
+});
+
+// launch/landing pads
+
+Registries.vfx.add("iti-pad-trail", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      amount: 1,
+      particle: {
+        shape: "rhombus",
+        lifetime: 45,
+        speed: 0.66,
+        decel: 0.03,
+        widthFrom: 8,
+        widthTo: 12,
+        heightFrom: 8,
+        heightTo: 12,
+        colours: [
+          [255, 255, 255],
+          [0, 255, 255,192],
+          [0, 0, 255, 50,128],
+          [50, 50, 50, 0],
+        ],
+        rotateSpeed: 2,
+        light: 80,
+      },
+    },
+    {
+      type: "particle-emission",
+      cone: 360,
+      particle: {
+        lifetime: 120,
+        speed: 0.1,
+        decel: 0.0015,
+        shape: "circle",
+        colours: [
+          [50, 50, 50, 30],
+          [100, 100, 100, 0],
+        ],
+        widthFrom: 20,
+        widthTo: 60,
+        heightFrom: 20,
+        heightTo: 60,
+        rotateSpeed: 0,
+        light: 0,
+      },
+    },
+    {
+      type: "particle-emission",
+      cone: 360,
+      amount: 2,
+      particle: {
+        lifetime: 5,
+        speed: 0,
+        decel: 0,
+        shape: "rhombus",
+        colours: [
+          [255,255, 255, 200],
+          [150, 255, 255, 0],
+        ],
+        widthFrom: 20,
+        widthTo: 70,
+        heightFrom: 10,
+        heightTo: 10,
+        rotateSpeed: 5,
+        light: 100,
+      },
+    },
+    {
+      type: "image-particle-emission",
+      cone: 0,
+      amount: 1,
+      particle: {
+        lifetime: 1,
+        speed: 0,
+        decel: 0,
+        image: "capitalism.iti.pod",
+        colours: [
+          [255,255, 255, 200],
+          [150, 255, 255, 0],
+        ],
+        widthFrom: 30 ,
+        widthTo: 30 ,
+        heightFrom: 30,
+        heightTo: 30 ,
+        rotateSpeed: 0,
+        light: 100,
+      },
+    },
+  ],
 });
 
 //Misc

@@ -30,12 +30,12 @@ export function patternedBulletExpulsion(
       bulletToFire.direction += currentAngle;
       currentAngle += spacing;
       //Apply random spread
-      bulletToFire.direction += rnd(spread, -spread);
+      bulletToFire.direction += rnd.float(spread, -spread);
       //Add entity and world
       bulletToFire.entity = entity;
       bulletToFire.world = world;
       //Spawn it in
-      bulletToFire.speed *= rnd(speedMultMin, speedMultMax);
+      bulletToFire.speed *= rnd.float(speedMultMin, speedMultMax);
       world.bullets.push(bulletToFire);
       bulletToFire.oncreated();
     }

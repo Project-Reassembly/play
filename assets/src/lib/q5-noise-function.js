@@ -16,7 +16,7 @@ function setNoiseParams(scale = 1, octaves = 4, falloff = 0.5) {
 }
 
 const noiseSeed = function (seed) {
-  let iseed = (seed == undefined || isNaN(seed)) ? Math.random() * 4294967295 : seed;
+  let iseed = seed == undefined || isNaN(seed) ? Math.random() * 4294967295 : seed;
   let jsr = iseed;
   if (!p_perlin) {
     p_perlin = new Float32Array(PERLIN_SIZE + 1);
@@ -98,24 +98,31 @@ const noise = function (x, y, z) {
   return r;
 };
 
-const Shr3 = function () {
-  let jsr, seed;
-  let m = 4294967295;
-  return {
-    setSeed(val) {
-      jsr = seed = (val == null ? Math.random() * m : val) >>> 0;
-    },
-    getSeed() {
-      return seed;
-    },
-    rand() {
-      jsr ^= jsr << 17;
-      jsr ^= jsr >> 13;
-      jsr ^= jsr << 5;
-      return (jsr >>> 0) / m;
-    },
-  };
-};
-let rng1 = Shr3();
+class Shr3 {
+  constructor(seed) {
+    this.setSeed(seed);
+  }
+  setSeed(val) {
+    this.jsr = this.seed = (val == null ? Math.random() * 4294967295 : val) >>> 0;
+  }
+  getSeed() {
+    return this.seed;
+  }
+  rand() {
+    this.jsr ^= this.jsr << 17;
+    this.jsr ^= this.jsr >> 13;
+    this.jsr ^= this.jsr << 5;
+    return (this.jsr >>> 0) / 4294967295;
+  }
+  static next(prev) {
+    prev = prev >>> 0;
+    prev ^= prev << 17;
+    prev ^= prev >> 13;
+    prev ^= prev << 5;
+    return (prev >>> 0) / 4294967295;
+  }
+}
+let rng1 = new Shr3();
 rng1.setSeed();
-export { setNoiseParams, noise, noiseSeed, rng1, Shr3};
+export { noise, noiseSeed, rng1, setNoiseParams, Shr3 };
+

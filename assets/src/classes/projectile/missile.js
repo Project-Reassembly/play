@@ -1,11 +1,11 @@
-import { Bullet } from "./bullet.js";
+import { col } from "../../core/color.js";
 import { game } from "../../play/game.js";
-import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
+import { DroppedItemStack } from "../item/dropped-itemstack.js";
+import { Bullet } from "./bullet.js";
 class Missile extends Bullet {
   target = null;
-  trailColour = [255, 255, 100];
-  trailColourTo = [255, 0, 0];
+  trailColours = [col.from(255,255,100), col.red];
   flameLength = 200;
   trail = true;
   trailInterval = -1;
@@ -119,3 +119,4 @@ class Missile extends Bullet {
   }
 }
 export { Missile };
+

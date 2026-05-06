@@ -1,95 +1,72 @@
-import {
-  createUIComponent,
-  UIComponent,
-  createUIImageComponent,
-  createUIInventoryComponent,
-  createMultilineUIComponent,
-  createHealthbarComponent,
-} from "../../core/ui.js";
 import { Block } from "../../classes/block/block.js";
-import { ui } from "../../core/ui.js";
-import { deliverPlayer, game, gen, world } from "../../play/game.js";
 import { Container } from "../../classes/block/container.js";
 import { DroppedItemStack } from "../../classes/item/dropped-itemstack.js";
+import { col } from "../../core/color.js";
 import { roundNum, shortenedNumber } from "../../core/number.js";
+import {
+  createCustomComponent,
+  createHealthbarComponent,
+  createMultilineUIComponent,
+  createUIComponent,
+  createUIImageComponent,
+  createUIInventoryComponent,
+  ui,
+  UIComponent,
+} from "../../core/ui.js";
+import { deliverPlayer, game, gen, world } from "../../play/game.js";
 import { Log } from "../../play/messaging.js";
 import { totalSize } from "../../scaling.js";
+ui.reset();
 //##############################################################
 
 //                        INDICATORS
 
 //##############################################################
-ui.reset();
-Object.defineProperty(
-  createUIComponent(
-    ["in-game"],
-    ["paused:true"],
-    0,
-    0,
-    150,
-    30,
-    "both",
-    null,
-    "Paused",
-    true,
-    20
-  ),
-  "y",
-  { get: () => -height / 2 + 50 }
-);
-Object.defineProperties(
-  createUIComponent(
-    ["in-game"],
-    ["paused:true"],
-    0,
-    0,
-    150,
-    15,
-    "left",
-    null,
-    "",
-    true,
-    20
-  ).anchorRight(),
-  { y: { get: () => -height / 2 + 50 }, width: { get: () => width / 2 - 75 } }
-);
-Object.defineProperties(
-  createUIComponent(
-    ["in-game"],
-    ["paused:true"],
-    0,
-    0,
-    150,
-    15,
-    "right",
-    null,
-    "",
-    true,
-    20
-  ).anchorLeft(),
-  { y: { get: () => -height / 2 + 50 }, width: { get: () => width / 2 - 75 } }
-);
+// damage overlay
+createCustomComponent(["in-game"], [], 0, 0, 1920, 1080, null, () => {
+  let intensity =
+    (1 - game.player.health / game.player.maxHealth) *
+    (UIComponent.evaluateCondition("mode:build") ? 0.5 : 1);
+  if (intensity > 0.5) {
+    intensity = (intensity - 0.35) * 2;
+    for (let i = 0; i < 5; i++) {
+      let f = (frameCount * 0.1 + i) % 5;
+      stroke(255, 0, 0, (255 - f * 51) * intensity);
+      strokeWeight((5 - f) * 5);
+      rect(0, 0, 1930 - f * 45 * intensity, 1090 - f * 45 * intensity);
+    }
+    stroke(255, 0, 0, 255 * intensity);
+    strokeWeight(10 * intensity);
+    rect(0, 0, 1920, 1080);
+  }
+});
+// pause
+createUIComponent(
+  ["in-game"],
+  ["paused:true"],
+  0,
+  0,
+  225,
+  45,
+  "both",
+  null,
+  "Paused",
+  true,
+  30,
+).anchorTop(85);
+createUIComponent(["in-game"], ["paused:true"], 0, 0, 847.5, 15, "left", null, "", true, 20)
+  .anchorRight()
+  .anchorTop(100);
+createUIComponent(["in-game"], ["paused:true"], 0, 0, 847.5, 15, "right", null, "", true, 20)
+  .anchorLeft()
+  .anchorTop(100);
 //FPS
-Object.defineProperty(
-  createUIComponent(
-    ["in-game"],
-    [],
-    0,
-    20,
-    75,
-    30,
-    "right",
-    null,
-    "[FPS]",
-    true,
-    15
-  ),
-  "text",
-  { get: () => Math.round(ui.currentFPS) + " fps" }
-)
+createUIComponent(["in-game"], [], 0, 20, 100, 35, "right", null, "[FPS]", true, 20)
   .alignLeft()
   .anchorLeft()
-  .anchorTop();
+  .anchorTop()
+  .define("text", () => Math.round(ui.currentFPS) + " fps");
+
 //##############################################################
 
 //                          HOTBAR
@@ -98,165 +75,81 @@ Object.defineProperty(
 
 //fight mode
 
-createUIComponent(
-  ["in-game"],
-  [],
-  0,
-  0,
-  400,
-  60,
-  "trapezium",
-  null,
-  "",
-  true,
-  20
-).anchorBottom();
+createUIComponent(["in-game"], [], 0, 0, 530, 90, "trapezium", null, "", true, 20).anchorBottom();
 
-Object.defineProperty(
-  createMultilineUIComponent(
-    ["in-game"],
-    ["mode:fight"],
-    -85,
-    210,
-    0,
-    0,
-    "none",
-    null,
-    "NOTHING",
-    true,
-    13
-  ),
-  "text",
-  {
-    get: () =>
-      game.player?.leftHand
-        .get(0)
-        ?.getItem()
-        ?.getContextualisedInfo(game.player) ?? "",
-  }
+createMultilineUIComponent(
+  ["in-game"],
+  ["mode:fight"],
+  -140,
+  210,
+  0,
+  0,
+  "none",
+  null,
+  "NOTHING",
+  true,
+  18,
 )
-  .anchorBottom(55)
+  .define(
+    "text",
+    () => game.player?.leftHand.get(0)?.getItem()?.getContextualisedInfo(game.player) ?? "",
+  )
+  .anchorBottom(100)
   .alignRight();
 
-Object.defineProperty(
-  createUIInventoryComponent(
-    ["in-game"],
-    ["mode:fight"],
-    -35,
-    250,
-    null,
-    1,
-    1,
-    40
-  ),
-  "inventory",
-  {
-    get: () => game.player?.leftHand,
-  }
-).anchorBottom(30);
-Object.defineProperty(
-  createUIInventoryComponent(
-    ["in-game"],
-    ["mode:fight"],
-    35,
-    250,
-    null,
-    1,
-    1,
-    40
-  ),
-  "inventory",
-  {
-    get: () => game.player?.rightHand,
-  }
-).anchorBottom(30);
+createUIInventoryComponent(["in-game"], ["mode:fight"], -45, 250, null, 1, 1, 55)
+  .define("inventory", () => game.player?.leftHand)
+  .anchorBottom(45);
 
-Object.defineProperty(
-  createMultilineUIComponent(
-    ["in-game"],
-    ["mode:fight"],
-    60,
-    210,
-    0,
-    0,
-    "none",
-    null,
-    "NOTHING",
-    true,
-    13
-  ),
-  "text",
-  {
-    get: () =>
-      game.player?.rightHand
-        .get(0)
-        ?.getItem()
-        ?.getContextualisedInfo(game.player) ?? "",
-  }
-).anchorBottom(55);
+createUIInventoryComponent(["in-game"], ["mode:fight"], 45, 250, null, 1, 1, 55)
+  .define("inventory", () => game.player?.rightHand)
+  .anchorBottom(45);
+
+createMultilineUIComponent(
+  ["in-game"],
+  ["mode:fight"],
+  80,
+  210,
+  0,
+  0,
+  "none",
+  null,
+  "NOTHING",
+  true,
+  18,
+)
+  .define(
+    "text",
+    () => game.player?.rightHand.get(0)?.getItem()?.getContextualisedInfo(game.player) ?? "",
+  )
+  .anchorBottom(100);
 
 //fight mode, ammo part
-createUIComponent(
-  ["in-game"],
-  ["mode:fight"],
-  0,
-  0,
-  315,
-  60,
-  "left",
-  null,
-  "",
-  true,
-  20
-)
-  .anchorRight(-127)
+createUIComponent(["in-game"], ["mode:fight"], 0, 0, 400, 80, "left", null, "", true, 20)
+  .anchorRight(-155)
   .rotate(-Math.PI / 2);
 
-createUIComponent(
-  ["in-game"],
-  ["mode:build"],
-  0,
-  0,
-  315,
-  60,
-  "left",
-  null,
-  "",
-  true,
-  20
-)
-  .anchorRight(-177)
+createUIComponent(["in-game"], ["mode:build"], 0, 0, 400, 80, "left", null, "", true, 20)
+  .anchorRight(-227)
   .rotate(-Math.PI / 2);
 
-Object.defineProperty(
-  createUIInventoryComponent(
-    ["in-game"],
-    ["mode:fight"],
-    0,
-    -100,
-    null,
-    null,
-    1
-  ),
-  "inventory",
-  {
-    get: () => game.player?.ammo,
-  }
-).anchorRight(30);
+createUIInventoryComponent(["in-game"], ["mode:fight"], 0, -120, null, null, 1, 50)
+  .define("inventory", () => game.player?.ammo)
+  .anchorRight(45);
 
 createUIComponent(
   ["in-game"],
   ["mode:fight"],
   0,
-  -140,
+  -170,
   0,
   0,
   "none",
   null,
   "Ammo",
   true,
-  20
-).anchorRight(30);
+  30,
+).anchorRight(45);
 
 //build mode
 createUIComponent(
@@ -264,13 +157,13 @@ createUIComponent(
   ["mode:build"],
   0,
   0,
-  540,
-  60,
+  740,
+  75,
   "trapezium",
   null,
   "",
   true,
-  20
+  20,
 ).anchorBottom();
 
 createUIComponent(
@@ -278,98 +171,62 @@ createUIComponent(
   ["mode:fight"],
   0,
   0,
-  540,
-  60,
+  740,
+  75,
   "trapezium",
   null,
   "",
   true,
-  20
-).anchorBottom(-57);
+  20,
+).anchorBottom(-63);
 
-createUIComponent(
-  ["in-game"],
-  ["mode:build"],
-  315,
-  0,
-  80,
-  50,
-  "reverse",
-  () => {
-    UIComponent.setCondition("menu:inventory");
-  }
-).anchorBottom();
+createUIComponent(["in-game"], ["mode:build"], 420, 0, 80, 50, "reverse", () => {
+  if (!UIComponent.evaluateCondition("menu:inventory")) UIComponent.setCondition("menu:inventory");
+  else UIComponent.setCondition("menu:none");
+}).anchorBottom();
 
 createUIImageComponent(
   ["in-game"],
   ["mode:build"],
-  315,
+  420,
   0,
   50,
   50,
   null,
   "icon.chest",
   false,
-  0.5
+  0.5,
 ).anchorBottom();
 
-createUIComponent(["in-game"], ["mode:build"], -315, 0, 80, 50, "both", () => {
-  selectedDirection = keyIsDown(SHIFT)
-    ? Block.direction.rotateAntiClockwise(selectedDirection)
+createUIComponent(["in-game"], ["mode:build"], -420, 0, 80, 50, "both", () => {
+  selectedDirection =
+    keyIsDown(SHIFT) ?
+      Block.direction.rotateAntiClockwise(selectedDirection)
     : Block.direction.rotateClockwise(selectedDirection);
 }).anchorBottom();
 
-let selectedDirection = Block.direction.UP;
-export { selectedDirection };
+export let selectedDirection = Block.direction.UP;
 
-Object.defineProperties(
-  createUIImageComponent(
-    ["in-game"],
-    ["mode:build"],
-    -315,
-    0,
-    50,
-    50,
-    null,
-    "icon.arrow",
-    false,
-    0.5
-  ).anchorBottom(),
-  {
-    rotation: {
-      get: () => selectedDirection,
-    },
-  }
-);
+createUIImageComponent(["in-game"], ["mode:build"], -420, 0, 50, 50, null, "icon.arrow", false, 0.5)
+  .anchorBottom()
+  .define("rotation", () => selectedDirection);
 
-Object.defineProperty(
-  createUIInventoryComponent(
-    ["in-game"],
-    ["mode:build"],
-    -215,
-    250,
-    null,
-    1,
-    10
-  ),
-  "inventory",
-  {
-    get: () => game.player?.inventory,
-  }
-).anchorBottom(30);
+createUIInventoryComponent(["in-game"], ["mode:build"], -270, 250, null, 1, 10, 50)
+  .define("inventory", () => game.player?.inventory)
+  .anchorBottom(37.5);
 
 //indicators
 createUIImageComponent(
   ["in-game"],
   ["mode:build"],
-  400,
+  500,
   0,
   50,
   50,
   () => UIComponent.setCondition("mode:fight"),
   "icon.arrow",
   false,
-  0.5
+  0.5,
 )
   .anchorBottom()
   .rotate(Math.PI / 2);
@@ -377,190 +234,165 @@ createUIImageComponent(
 createUIImageComponent(
   ["in-game"],
   ["mode:fight"],
-  400,
+  500,
   0,
   50,
   50,
   () => UIComponent.setCondition("mode:build"),
   "icon.arrow",
   false,
-  0.5
+  0.5,
 )
   .anchorBottom(-20)
   .rotate(-Math.PI / 2);
 
 //universal
 // mone
-createUIComponent(["in-game"], [], 0, 0, 100, 40, "left", null, "", true, 20)
+createUIComponent(["in-game"], [], 0, 0, 150, 60, "left", null, "", true, 20)
   .invert()
   .anchorBottom()
   .anchorRight();
-Object.defineProperty(
-  createUIComponent(["in-game"], [], 0, 0, 0, 0, "none", null, "", true, 20)
-    .anchorTop(20)
-    .anchorRight(50),
-  "text",
-  { get: () => "$" + shortenedNumber(game.money) }
-);
+createUIComponent(["in-game"], [], 0, 0, 0, 0, "none", null, "", true, 30)
+  .anchorTop(30)
+  .anchorRight(75)
+  .define("text", () => "$" + shortenedNumber(game.money, 2, 4));
+// bottom left corner deco
+createUIComponent(["in-game"], ["mode:fight"], 0, 0, 100, 150, "right", null, "", true, 20)
+  .anchorTop()
+  .anchorLeft()
+  .invert();
+createUIComponent(["in-game"], ["mode:build"], 0, 0, 100, 90, "right", null, "", true, 20)
+  .anchorTop()
+  .anchorLeft()
+  .invert();
 
-Object.defineProperties(
-  createUIComponent(
-    ["in-game"],
-    [],
-    10,
-    10,
-    200,
-    0,
-    "none",
-    null,
-    "Name Here",
-    true,
-    18
-  )
-    .anchorLeft(40)
-    .anchorBottom(75)
-    .setBackgroundColour([0, 0, 0]),
-  {
-    text: { get: () => game.player?.name },
-    width: { get: () => textWidth(game.player?.name ?? "e") },
-  }
-);
-Object.defineProperties(
-  createUIImageComponent(
-    ["in-game"],
-    [],
-    10,
-    10,
-    25,
-    25,
-    null,
-    "error",
-    false,
-    1
-  )
-    .anchorLeft(10)
-    .anchorBottom(65)
-    .setBackgroundColour([0, 0, 0]),
-  {
-    image: {
-      get: () =>
-        game.player?.registryName.includes("iti")
-          ? "icon.iti"
-          : game.player?.registryName.includes("peti")
-          ? "icon.peti"
-          : game.player?.registryName.includes("ccc")
-          ? "icon.ccc"
-          : "scrap",
-    },
-  }
-);
+createUIComponent(["in-game"], ["mode:fight"], 10, 10, 200, 0, "none", null, "Name Here", true, 30)
+  .anchorLeft(60)
+  .anchorBottom(145)
+  .setBackgroundColour(col.from(0, 0, 0))
+  .rotate(-0.1)
+  .define("text", () => game.player?.name)
+  .define("width", () => textWidth(game.player?.name ?? "e"));
+
+createUIImageComponent(["in-game"], [], 10, 10, 50, 50, null, "error", false, 1)
+  .anchorLeft(10)
+  .anchorBottom(10)
+  .setBackgroundColour(col.from(0, 0, 0))
+  .define("image", () => "icon." + game.player.team);
+
 //healthbar
-Object.defineProperties(
-  createHealthbarComponent(
-    ["in-game"],
-    [],
-    10,
-    10,
-    200,
-    20,
-    "reverse",
-    null,
-    "HP",
-    true,
-    15,
-    () => game.player,
-    [[255, 200, 0]]
-  )
-    .anchorLeft(50)
-    .anchorBottom(10)
-    .setBackgroundColour([0, 0, 0]),
-
-  {
-    text: {
-      get: () =>
-        "HP | " +
-        roundNum(
-          game.player?.health * game.player?.attributes.getValue("health")
-        ) +
-        "/" +
-        roundNum(
-          game.player.maxHealth * game.player?.attributes.getValue("health")
-        ),
-    },
-    width: { get: () => width / 5 },
-  }
-);
+createHealthbarComponent(
+  ["in-game"],
+  ["mode:fight"],
+  10,
+  10,
+  384,
+  30,
+  "reverse",
+  null,
+  "HP",
+  true,
+  25,
+  () => game.player,
+  [col.from(255, 200, 0)],
+)
+  .anchorLeft(75)
+  .anchorBottom(50)
+  .setBackgroundColour(col.from(0, 0, 0))
+  .rotate(-0.1)
+  .define(
+    "text",
+    () =>
+      `HP | ${shortenedNumber(game.player?.health * game.player?.attributes.getValue("health"), 2, 4)}/${shortenedNumber(game.player.maxHealth * game.player?.attributes.getValue("health"), 2, 4)}`,
+  );
 //shield bar
-Object.defineProperties(
-  createHealthbarComponent(
-    ["in-game"],
-    [],
-    10,
-    10,
-    200,
-    20,
-    "reverse",
-    null,
-    "",
-    true,
-    15,
-    () => game.player,
-    [[0, 255, 255, 150]]
-  )
-    .anchorLeft(50)
-    .anchorBottom(10)
-    .setBackgroundColour([0, 0, 0, 0])
-    .setGetters("shield", "_lastMaxShield")
-    .setOutlineColour([0, 0, 0, 0]),
-  {
-    width: { get: () => width / 5 },
-    text: {
-      get: () =>
-        game.player?.shield > 0
-          ? "Shield | " +
-            roundNum(game.player?.shield) +
-            "/" +
-            game.player?._lastMaxShield
-          : "",
-    },
-  }
-);
+createHealthbarComponent(
+  ["in-game"],
+  ["mode:fight"],
+  10,
+  10,
+  384,
+  30,
+  "reverse",
+  null,
+  "Shield",
+  true,
+  25,
+  () => game.player,
+  [col.from(0, 255, 255, 150)],
+)
+  .anchorLeft(75)
+  .anchorBottom(50)
+  .rotate(-0.1)
+  .removeBackground()
+  .removeOutline()
+  .setGetters("shield", "_lastMaxShield")
+  .define("text", () =>
+    game.player?.shield > 0 ?
+      "Shield | " +
+      shortenedNumber(game.player?.shield, 2, 4) +
+      "/" +
+      shortenedNumber(game.player?._lastMaxShield, 2, 4)
+    : "",
+  );
 //energy bar
-Object.defineProperties(
-  createHealthbarComponent(
-    ["in-game"],
-    [],
-    10,
-    10,
-    200,
-    20,
-    "reverse",
-    null,
-    "Energy",
-    true,
-    15,
-    () => game.player,
-    [
-      [100, 255, 255],
-      [0, 255, 255],
-      [0, 200, 200],
-    ]
-  )
-    .anchorLeft(25)
-    .anchorBottom(35)
-    .setBackgroundColour([0, 0, 0])
-    .setGetters("energy", "maxEnergy"),
-  {
-    text: {
-      get: () =>
-        "Energy | " +
-        roundNum(game.player?.energy) +
-        "/" +
-        game.player.maxEnergy,
-    },
-    width: { get: () => width / 5 },
-  }
-);
+createHealthbarComponent(
+  ["in-game"],
+  ["mode:fight"],
+  10,
+  10,
+  384,
+  30,
+  "reverse",
+  null,
+  "Energy",
+  true,
+  25,
+  () => game.player,
+  [col.from(0, 255, 255)],
+)
+  .anchorLeft(50)
+  .anchorBottom(100)
+  .rotate(-0.1)
+  .setBackgroundColour(col.from(0, 0, 0))
+  .setGetters("energy", "maxEnergy")
+  .define(
+    "text",
+    () =>
+      "Energy | " +
+      shortenedNumber(game.player?.energy, 2, 4) +
+      "/" +
+      shortenedNumber(game.player.maxEnergy, 2, 4),
+  );
+
+//build mode energy bar
+createHealthbarComponent(
+  ["in-game"],
+  ["mode:build"],
+  10,
+  10,
+  384,
+  30,
+  "reverse",
+  null,
+  "Energy",
+  true,
+  25,
+  () => game.player,
+  [col.from(0, 255, 255)],
+)
+  .anchorLeft(85)
+  .anchorBottom(40)
+  .setBackgroundColour(col.from(0, 0, 0))
+  .setGetters("energy", "maxEnergy")
+  .define(
+    "text",
+    () =>
+      "Energy | " +
+      shortenedNumber(game.player?.energy, 2, 4) +
+      "/" +
+      shortenedNumber(game.player.maxEnergy, 2, 4),
+  );
 
 //##############################################################
 
@@ -568,59 +400,50 @@ Object.defineProperties(
 
 //##############################################################
 
-Object.defineProperties(
-  createHealthbarComponent(
-    ["in-game"],
-    ["boss:yes"],
-    10,
-    10,
-    200,
-    20,
-    "both",
-    null,
-    "Boss HP",
-    true,
-    15,
-    () => world.firstBoss(),
-    [[255, 0, 0]]
-  )
-    .anchorTop(10)
-    .setBackgroundColour([0, 0, 0]),
-  {
-    width: { get: () => width * 0.667 },
-    text: { get: () => world.firstBoss()?.name },
-  }
-);
-Object.defineProperties(
-  createHealthbarComponent(
-    ["in-game"],
-    ["boss:yes"],
-    10,
-    10,
-    200,
-    20,
-    "both",
-    null,
-    "",
-    true,
-    15,
-    () => world.firstBoss(),
-    [[0, 255, 255, 150]]
-  )
-    .anchorTop(10)
-    .setBackgroundColour([0, 0, 0, 0])
-    .setGetters("shield", "_lastMaxShield")
-    .setOutlineColour([0, 0, 0, 0]),
-  {
-    width: { get: () => width * 0.667 },
-    text: {
-      get: () =>
-        world.firstBoss()?.shield > 0
-          ? world.firstBoss().name + " [Shield]"
-          : "",
-    },
-  }
-);
+createHealthbarComponent(
+  ["in-game"],
+  ["boss:yes"],
+  10,
+  10,
+  1280,
+  20,
+  "both",
+  null,
+  "Boss HP",
+  true,
+  15,
+  () => world.boss,
+  [col.from(255, 0, 0)],
+)
+  .anchorTop(10)
+  .setBackgroundColour(col.from(0, 0, 0))
+  .define(
+    "text",
+    () =>
+      world.boss.name + " | " + roundNum((world.boss.health / world.boss.maxHealth) * 100, 2) + "%",
+  );
+createHealthbarComponent(
+  ["in-game"],
+  ["boss:yes"],
+  10,
+  10,
+  1280,
+  20,
+  "both",
+  null,
+  "",
+  true,
+  15,
+  () => world.firstBoss(),
+  [col.from(0, 255, 255, 150)],
+)
+  .anchorTop(10)
+  .setBackgroundColour(col.from(0, 0, 0, 0))
+  .setGetters("shield", "_lastMaxShield")
+  .setOutlineColour(col.from(0, 0, 0, 0))
+  .define("text", () =>
+    world.firstBoss()?.shield > 0 ? world.firstBoss().name + " [Shield]" : "",
+  );
 
 //##############################################################
 
@@ -629,94 +452,76 @@ Object.defineProperties(
 //##############################################################
 // Selected block inventory controls
 //Yoink all
-Object.defineProperties(
-  createUIComponent(
-    ["in-game"],
-    ["containerselected:true"],
-    0,
-    0,
-    60,
-    20,
-    "left",
-    () => {
-      if (Container.selectedBlock instanceof Container) {
-        Container.selectedBlock.inventory.transfer(
-          game.player?.ammo,
-          true,
-          (ist) => game.player?.ammo?.hasItem(ist.item)
-        );
-        Container.selectedBlock.inventory.transfer(game.player?.inventory);
-      }
-    },
-    "Loot",
-    true,
-    15
-  ),
-  {
-    x: { get: () => (Container.selectedBlock?.uiX ?? 0) - 30 },
-    y: { get: () => (Container.selectedBlock?.uiY ?? 0) + 40 },
-  }
-);
+createUIComponent(
+  ["in-game"],
+  ["containerselected:true"],
+  0,
+  0,
+  60,
+  20,
+  "left",
+  () => {
+    if (Container.selectedBlock instanceof Container) {
+      Container.selectedBlock.inventory.transfer(game.player?.ammo, true, (ist) =>
+        game.player?.ammo?.hasItem(ist.item),
+      );
+      Container.selectedBlock.inventory.transfer(game.player?.inventory);
+    }
+  },
+  "Loot",
+  true,
+  15,
+)
+  .define("x", () => (Container.selectedBlock?.uiCornerX ?? 0) - 30)
+  .define("y", () => (Container.selectedBlock?.uiCornerY ?? 0) + 40);
+
 //Unyoink all
-Object.defineProperties(
-  createUIComponent(
-    ["in-game"],
-    ["containerselected:true"],
-    0,
-    0,
-    60,
-    20,
-    "left",
-    () => {
-      if (Container.selectedBlock instanceof Container) {
-        game.player?.ammo.transfer(Container.selectedBlock.inventory);
-        game.player?.inventory.transfer(Container.selectedBlock.inventory);
-      }
-    },
-    "Store",
-    true,
-    15
-  ),
-  {
-    x: { get: () => (Container.selectedBlock?.uiX ?? 0) - 30 },
-    y: { get: () => (Container.selectedBlock?.uiY ?? 0) + 15 },
-  }
-);
+createUIComponent(
+  ["in-game"],
+  ["containerselected:true"],
+  0,
+  0,
+  60,
+  20,
+  "left",
+  () => {
+    if (Container.selectedBlock instanceof Container) {
+      game.player?.ammo.transfer(Container.selectedBlock.inventory);
+      game.player?.inventory.transfer(Container.selectedBlock.inventory);
+    }
+  },
+  "Store",
+  true,
+  15,
+)
+  .define("x", () => (Container.selectedBlock?.uiCornerX ?? 0) - 30)
+  .define("y", () => (Container.selectedBlock?.uiCornerY ?? 0) + 15);
+
 //Unyoink present
-Object.defineProperties(
-  createUIComponent(
-    ["in-game"],
-    ["containerselected:true"],
-    0,
-    0,
-    70,
-    20,
-    "left",
-    () => {
-      if (Container.selectedBlock instanceof Container) {
-        game.player?.ammo.transfer(
-          Container.selectedBlock.inventory,
-          true,
-          (itemstack) =>
-            Container.selectedBlock.inventory.hasItem(itemstack.item)
-        );
-        game.player?.inventory.transfer(
-          Container.selectedBlock.inventory,
-          true,
-          (itemstack) =>
-            Container.selectedBlock.inventory.hasItem(itemstack.item)
-        );
-      }
-    },
-    "Restock",
-    true,
-    15
-  ),
-  {
-    x: { get: () => (Container.selectedBlock?.uiX ?? 0) - 35 },
-    y: { get: () => (Container.selectedBlock?.uiY ?? 0) + 65 },
-  }
-);
+createUIComponent(
+  ["in-game"],
+  ["containerselected:true"],
+  0,
+  0,
+  70,
+  20,
+  "left",
+  () => {
+    if (Container.selectedBlock instanceof Container) {
+      game.player?.ammo.transfer(Container.selectedBlock.inventory, true, (itemstack) =>
+        Container.selectedBlock.inventory.hasItem(itemstack.item),
+      );
+      game.player?.inventory.transfer(Container.selectedBlock.inventory, true, (itemstack) =>
+        Container.selectedBlock.inventory.hasItem(itemstack.item),
+      );
+    }
+  },
+  "Restock",
+  true,
+  15,
+)
+  .define("x", () => (Container.selectedBlock?.uiCornerX ?? 0) - 35)
+  .define("y", () => (Container.selectedBlock?.uiCornerY ?? 0) + 65);
 //##############################################################
 
 //                        INVENTORY
@@ -737,7 +542,7 @@ createUIComponent(
   },
   "X",
   false,
-  40
+  40,
 );
 createUIComponent(
   ["in-game"],
@@ -750,23 +555,12 @@ createUIComponent(
   null,
   "Inventory",
   false,
-  30
+  30,
 );
 
-Object.defineProperty(
-  createUIInventoryComponent(
-    ["in-game"],
-    ["menu:inventory"],
-    -420,
-    -160,
-    null,
-    null,
-    10
-  ),
+createUIInventoryComponent(["in-game"], ["menu:inventory"], -420, -160, null, null, 10).define(
   "inventory",
-  {
-    get: () => game.player?.inventory,
-  }
+  () => game.player?.inventory,
 );
 
 createUIComponent(
@@ -782,7 +576,7 @@ createUIComponent(
   },
   "Stack All",
   true,
-  15
+  15,
 );
 
 createUIComponent(
@@ -798,7 +592,7 @@ createUIComponent(
   },
   "Sort By: Name",
   true,
-  15
+  15,
 );
 
 createUIComponent(
@@ -814,7 +608,7 @@ createUIComponent(
   },
   "Sort By: Count",
   true,
-  15
+  15,
 );
 
 createUIComponent(
@@ -830,7 +624,7 @@ createUIComponent(
   },
   "Store Ammunition",
   true,
-  15
+  15,
 );
 createUIComponent(
   ["in-game"],
@@ -842,12 +636,12 @@ createUIComponent(
   "both",
   () => {
     game.player?.inventory.transfer(game.player?.ammo, true, (stack) =>
-      game.player.ammo.hasItem(stack.item)
+      game.player.ammo.hasItem(stack.item),
     );
   },
   "Refill Ammo",
   true,
-  15
+  15,
 );
 createUIComponent(
   ["in-game"],
@@ -859,40 +653,28 @@ createUIComponent(
   "both",
   () => {
     game.player?.inventory.iterate(
-      (stack) =>
-        DroppedItemStack.create(
-          stack,
-          world,
-          game.player?.x,
-          game.player?.y,
-          5
-        ),
-      true
+      (stack) => DroppedItemStack.create(stack, world, game.player?.x, game.player?.y, 5),
+      true,
     );
     game.player?.inventory.clear();
   },
   "Dump",
   true,
-  15
+  15,
 );
 
-Object.defineProperty(
-  createUIInventoryComponent(
-    ["in-game"],
-    ["menu:inventory"],
-    -320,
-    90,
-    null,
-    null,
-    2
-  ),
+// assembly
+
+createUIInventoryComponent(["in-game"], ["menu:inventory"], -400, 90, null, null, 2).define(
   "inventory",
-  {
-    get: () => game.player?.assemblyInventory,
-  }
+  () => game.player?.assemblyInventory,
+);
+createUIInventoryComponent(["in-game"], ["menu:inventory"], -275, 110, null, null, 1).define(
+  "inventory",
+  () => game.player?.assemblyResult,
 );
 
-createUIComponent(
+createMultilineUIComponent(
   ["in-game"],
   ["menu:inventory"],
   -100,
@@ -900,42 +682,32 @@ createUIComponent(
   250,
   90,
   "none",
-  () => game.player?.nextRecipe()
-);
-Object.defineProperty(
-  createMultilineUIComponent(
-    ["in-game"],
-    ["menu:inventory"],
-    -220,
-    70,
-    0,
-    0,
-    "none",
-    null,
-    "txt",
-    true,
-    20
-  ),
-  "text",
-  {
-    get: () => game.player?.getRecipeInfo(),
-  }
-);
+  () => game.player?.nextRecipe(),
+  "txt",
+  true,
+  20,
+).define("text", () => game.player?.getRecipeInfo());
 
-Object.defineProperty(
-  createUIInventoryComponent(
-    ["in-game"],
-    ["menu:inventory"],
-    100,
-    -200,
-    null,
-    null,
-    5
-  ),
+createHealthbarComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  -100,
+  180,
+  250,
+  20,
+  "none",
+  null,
+  "Progress",
+  true,
+  15,
+  () => game.player,
+).setGetters("_progress", "_maxprog");
+
+// ammo invs
+
+createUIInventoryComponent(["in-game"], ["menu:inventory"], 100, -200, null, null, 5).define(
   "inventory",
-  {
-    get: () => game.player?.ammo,
-  }
+  () => game.player?.ammo,
 );
 
 createUIImageComponent(
@@ -947,293 +719,152 @@ createUIImageComponent(
   40,
   null,
   "icon.bullet",
-  false
+  false,
 );
 
-Object.defineProperty(
-  createUIInventoryComponent(
-    ["in-game"],
-    ["menu:inventory"],
-    360,
-    -72,
-    null,
-    5,
-    1
-  ),
+// extra invs
+
+createUIInventoryComponent(["in-game"], ["menu:inventory"], 360, -72, null, 5, 1).define(
   "inventory",
-  {
-    get: () => game.player?.equipment,
-  }
+  () => game.player?.equipment,
 );
 
 //90, 25
-Object.defineProperty(
-  createUIInventoryComponent(
-    ["in-game"],
-    ["menu:inventory"],
-    90,
-    25,
-    null,
-    null,
-    2
-  ),
+createUIInventoryComponent(["in-game"], ["menu:inventory"], 90, 25, null, null, 2).define(
   "inventory",
-  {
-    get: () => game.player?.rightHand,
-  }
+  () => game.player?.rightHand,
 );
-Object.defineProperty(
-  createUIInventoryComponent(
-    ["in-game"],
-    ["menu:inventory"],
-    300,
-    25,
-    null,
-    null,
-    2
-  ),
+createUIInventoryComponent(["in-game"], ["menu:inventory"], 300, 25, null, null, 2).define(
   "inventory",
-  {
-    get: () => game.player?.leftHand,
-  }
+  () => game.player?.leftHand,
 );
 //Body parts
-Object.defineProperty(
-  createUIImageComponent(
-    ["in-game"],
-    ["menu:inventory"],
-    195,
-    -75,
-    100,
-    100,
-    null,
-    "error",
-    false,
-    1,
-    true
-  ).rotate(Block.dir.DOWN),
-  "image",
-  {
-    get: () => game.player?.headPart?.image ?? "error",
-  }
-);
-Object.defineProperty(
-  createUIImageComponent(
-    ["in-game"],
-    ["menu:inventory"],
-    195,
-    25,
-    100,
-    100,
-    null,
-    "error",
-    false,
-    1,
-    true
-  ).rotate(Block.dir.DOWN),
-  "image",
-  {
-    get: () => game.player?.bodyPart?.image ?? "error",
-  }
-);
-Object.defineProperty(
-  createUIImageComponent(
-    ["in-game"],
-    ["menu:inventory"],
-    195,
-    125,
-    100,
-    100,
-    null,
-    "error",
-    false,
-    1,
-    true
-  ).rotate(Block.dir.DOWN),
-  "image",
-  {
-    get: () => game.player?.legsPart?.image ?? "error",
-  }
-);
-Object.defineProperty(
-  createUIImageComponent(
-    ["in-game"],
-    ["menu:inventory"],
-    195,
-    125,
-    100,
-    100,
-    null,
-    "error",
-    false,
-    1,
-    true
-  )
-    .rotate(Block.dir.DOWN)
-    .invert(),
-  "image",
-  {
-    get: () => game.player?.legsPart?.image ?? "error",
-  }
-);
+createUIImageComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  195,
+  -75,
+  100,
+  100,
+  null,
+  "error",
+  false,
+  1,
+  true,
+)
+  .rotate(Block.dir.DOWN)
+  .define("image", () => game.player?.headPart?.image ?? "error");
+
+createUIImageComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  195,
+  25,
+  100,
+  100,
+  null,
+  "error",
+  false,
+  1,
+  true,
+)
+  .rotate(Block.dir.DOWN)
+  .define("image", () => game.player?.bodyPart?.image ?? "error");
+
+createUIImageComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  195,
+  125,
+  100,
+  100,
+  null,
+  "error",
+  false,
+  1,
+  true,
+)
+  .rotate(Block.dir.DOWN)
+  .define("image", () => game.player?.legsPart?.image ?? "error");
+
+createUIImageComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  195,
+  125,
+  100,
+  100,
+  null,
+  "error",
+  false,
+  1,
+  true,
+)
+  .rotate(Block.dir.DOWN)
+  .invert()
+  .define("image", () => game.player?.legsPart?.image ?? "error");
+
 //Held stuff
-Object.defineProperties(
-  createUIImageComponent(
-    ["in-game"],
-    ["menu:inventory"],
-    255,
-    25,
-    100,
-    100,
-    null,
-    "error",
-    false,
-    1,
-    true
+createUIImageComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  255,
+  25,
+  100,
+  100,
+  null,
+  "error",
+  false,
+  1,
+  true,
+)
+  .rotate(Block.dir.DOWN)
+  .invert()
+  .define("image", () =>
+    game.player ?
+      (game.player?.leftHand.get(0)?.getItem()?.component ?? game.player?.armType)?.image
+    : "error",
   )
-    .rotate(Block.dir.DOWN)
-    .invert(),
-  {
-    image: {
-      get: () =>
-        game.player
-          ? (
-              game.player?.leftHand.get(0)?.getItem()?.component ??
-              game.player?.armType
-            )?.image
-          : "error",
-    },
-    width: {
-      get: () =>
-        game.player
-          ? (
-              game.player?.leftHand.get(0)?.getItem()?.component ??
-              game.player?.armType
-            )?.width * 3.33
-          : 0,
-    },
-    height: {
-      get: () =>
-        game.player
-          ? (
-              game.player?.leftHand.get(0)?.getItem()?.component ??
-              game.player?.armType
-            )?.height * 3.33
-          : 0,
-    },
-  }
-);
-Object.defineProperties(
-  createUIImageComponent(
-    ["in-game"],
-    ["menu:inventory"],
-    135,
-    25,
-    100,
-    100,
-    null,
-    "error",
-    false,
-    1,
-    true
-  ).rotate(Block.dir.DOWN),
-  {
-    image: {
-      get: () =>
-        game.player
-          ? (
-              game.player?.rightHand.get(0)?.getItem()?.component ??
-              game.player?.armType
-            )?.image
-          : "error",
-    },
-    width: {
-      get: () =>
-        game.player
-          ? (
-              game.player?.rightHand.get(0)?.getItem()?.component ??
-              game.player?.armType
-            )?.width * 3.33
-          : 0,
-    },
-    height: {
-      get: () =>
-        game.player
-          ? (
-              game.player?.rightHand.get(0)?.getItem()?.component ??
-              game.player?.armType
-            )?.height * 3.33
-          : 0,
-    },
-  }
-);
+  .define("width", () =>
+    game.player ?
+      (game.player?.leftHand.get(0)?.getItem()?.component ?? game.player?.armType)?.width * 3.33
+    : 0,
+  )
+  .define("height", () =>
+    game.player ?
+      (game.player?.leftHand.get(0)?.getItem()?.component ?? game.player?.armType)?.height * 3.33
+    : 0,
+  );
 
-//##############################################################
-
-//                        TEXT EDITOR
-
-//##############################################################
-export let cmdHistory = [];
-//Command Line Input
-Object.defineProperties(
-  createUIComponent(
-    ["in-game"],
-    ["texteditor:true"],
-    0,
-    0,
-    500,
-    40,
-    "both"
-  ).anchorBottom(100),
-  {
-    width: {
-      get: () => {
-        textSize(20);
-        return Math.max(400, textWidth(ui.texteditor.text) + 100);
-      },
-    },
-  }
-);
-Object.defineProperties(
-  createUIComponent(
-    ["in-game"],
-    ["texteditor:true"],
-    0,
-    0,
-    0,
-    40,
-    "none",
-    null,
-    "editor text",
-    true,
-    20
-  ).anchorBottom(100),
-  {
-    text: {
-      get: () => ui.texteditor.text + "_",
-    },
-  }
-);
-Object.defineProperties(
-  createUIComponent(
-    ["in-game"],
-    ["texteditor:true"],
-    0,
-    0,
-    0,
-    40,
-    "none",
-    null,
-    "editor title",
-    true,
-    20
-  ).anchorBottom(130),
-  {
-    text: {
-      get: () => ui.texteditor.title,
-    },
-  }
-);
+createUIImageComponent(
+  ["in-game"],
+  ["menu:inventory"],
+  135,
+  25,
+  100,
+  100,
+  null,
+  "error",
+  false,
+  1,
+  true,
+)
+  .rotate(Block.dir.DOWN)
+  .define("image", () =>
+    game.player ?
+      (game.player?.rightHand.get(0)?.getItem()?.component ?? game.player?.armType)?.image
+    : "error",
+  )
+  .define("width", () =>
+    game.player ?
+      (game.player?.rightHand.get(0)?.getItem()?.component ?? game.player?.armType)?.width * 3.33
+    : 0,
+  )
+  .define("height", () =>
+    game.player ?
+      (game.player?.rightHand.get(0)?.getItem()?.component ?? game.player?.armType)?.height * 3.33
+    : 0,
+  );
 
 //##############################################################
 
@@ -1241,19 +872,7 @@ Object.defineProperties(
 
 //##############################################################
 createUIComponent(["in-game"], ["dead:yes"], 0, 30, 600, 340, "none");
-createUIComponent(
-  ["in-game"],
-  ["dead:yes"],
-  0,
-  -170,
-  700,
-  60,
-  "both",
-  null,
-  "You Died",
-  false,
-  50
-);
+createUIComponent(["in-game"], ["dead:yes"], 0, -170, 700, 60, "both", null, "You Died", false, 50);
 createUIComponent(
   ["in-game"],
   ["dead:yes"],
@@ -1265,7 +884,7 @@ createUIComponent(
   null,
   "Choose Respawn Option:",
   true,
-  20
+  20,
 );
 createUIComponent(
   ["in-game"],
@@ -1278,13 +897,13 @@ createUIComponent(
   () => {
     if (game.money < 1200) return;
     game.money -= 1200;
-    Log.send("Spent $1200 on [Basic Respawn]", [80, 200, 80]);
+    Log.send("#a-Spent $1200 on [#@-Basic Respawn#a-]");
     UIComponent.setCondition("dead:no");
-    deliverPlayer(null, totalSize / 2, totalSize / 2, true, false);
+    deliverPlayer(null, totalSize / 2, totalSize / 2, false, game.player.team);
   },
-  ">> New Player <<\nSend a new robot\nwith the basic\nITI equipment\nto the drop\npoint.\n\n$1200",
+  ">> New Player <<\nSend a new robot\nwith the basic\ncorp equipment\nto the drop\npoint.\n\n$1200",
   true,
-  15
+  15,
 );
 createUIComponent(
   ["in-game"],
@@ -1296,18 +915,11 @@ createUIComponent(
   "none",
   () => {
     UIComponent.setCondition("dead:no");
-    deliverPlayer(
-      null,
-      totalSize / 2,
-      totalSize / 2,
-      false,
-      false,
-      "scrap-player"
-    );
+    deliverPlayer(null, totalSize / 2, totalSize / 2, false, "scrap");
   },
   ">> Scrap Player <<\nSend a robot\nmade of scrap\nto the drop\npoint.\n\nFree",
   true,
-  15
+  15,
 );
 createUIComponent(
   ["in-game"],
@@ -1320,13 +932,13 @@ createUIComponent(
   () => {
     if (game.money < 2000) return;
     game.money -= 2000;
-    Log.send("Spent $2000 on [Convenience Respawn]", [80, 200, 80]);
+    Log.send("#a-Spent $2000 on [#@-Convenience Respawn#a-]");
     UIComponent.setCondition("dead:no");
-    deliverPlayer(null, game.player?.x, game.player?.y, true, false);
+    deliverPlayer(null, game.player?.x, game.player?.y, false, game.player.team);
   },
-  "> Convenience <\n>>> Respawn <<<\nSend a new robot\nwith the basic\nITI equipment\nto the point\nwhere you died.\n\n$2000",
+  "> Convenience <\n>>> Respawn <<<\nSend a new robot\nwith the basic\ncorp equipment\nto the point\nwhere you died.\n\n$2000",
   true,
-  15
+  15,
 );
 createUIComponent(
   ["in-game"],
@@ -1344,5 +956,5 @@ createUIComponent(
   },
   "End Game",
   true,
-  15
+  15,
 );

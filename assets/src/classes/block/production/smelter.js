@@ -1,7 +1,5 @@
-import { autoScaledEffect } from "../../../play/effects.js";
-import { Crafter } from "./crafter.js";
 import { tru } from "../../../core/number.js";
-import { Block } from "../block.js";
+import { Crafter } from "./crafter.js";
 /**Extended Crafter which uses fuel items. */
 class Smelter extends Crafter {
   activeTickEffect = "smelter-sparks";
@@ -30,13 +28,7 @@ class Smelter extends Crafter {
   }
   createTickEffect() {
     if (tru(this.activeTickEffectChance))
-      autoScaledEffect(
-        this.activeTickEffect,
-        this.world,
-        this.x + Block.size / 2,
-        this.y + Block.size / 2,
-        this.direction
-      );
+      this.emit(this.activeTickEffect)
   }
   serialise() {
     let c = super.serialise();
@@ -69,3 +61,4 @@ class Smelter extends Crafter {
   }
 }
 export { Smelter };
+

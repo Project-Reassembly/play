@@ -1,0 +1,92 @@
+// + cutscenes
+<wait:180>
+<rtime:90>#8i\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n...
+<wait:180>
+<rtime:90>#8i\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n...
+<wait:180>
+<rtime:60>#8i\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nwhat's going on?
+<rtime:60>#8i
+<wait:180>
+<rtime:90>#8i\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nthe damn thing won't boot
+<wait:180>
+<rtime:90>#8i\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n#8bturn it off and on again?
+<wait:180>
+<rtime:60>#7i\n\n\n\n\n\n\n\nPowering on
+<rtime:20>#7-\n\n\n\n\n\n\n\n[>    ]
+<rtime:20>#7-\n\n\n\n\n\n\n\n[>>   ]
+<rtime:20>#7-\n\n\n\n\n\n\n\n[>>>  ]
+<rtime:20>#7-\n\n\n\n\n\n\n\n[>>>> ]
+<rtime:20>#7-\n\n\n\n\n\n\n\n[>>>>>]
+<rtime:20>#7-\n\n\n\n\n\n\n\nStarting OS
+<rtime:20>#7-\n\n\n\n\n\n\n\nStarting OS.
+<rtime:20>#7-\n\n\n\n\n\n\n\nStarting OS..
+<rtime:20>#7-\n\n\n\n\n\n\n\nStarting OS...
+<wait:60>
+  <rtime:10>#>>icon.reassembly#@- [          ] 0%  
+  <rtime:10>#>>icon.reassembly#@- [-         ] 5%  
+  <rtime:10>#>>icon.reassembly#@- [=         ] 10% 
+  <rtime:10>#>>icon.reassembly#@- [=-        ] 15% 
+  <rtime:10>#>>icon.reassembly#@- [==        ] 20% 
+  <rtime:10>#>>icon.reassembly#@- [==-       ] 25% 
+  <rtime:10>#>>icon.reassembly#@- [===       ] 30% 
+  <rtime:10>#>>icon.reassembly#@- [===-      ] 35% 
+  <rtime:10>#>>icon.reassembly#@- [====      ] 40% 
+  <rtime:10>#>>icon.reassembly#@- [====-     ] 45% 
+  <rtime:10>#>>icon.reassembly#@- [=====     ] 50% 
+  <rtime:10>#>>icon.reassembly#@- [=====-    ] 55% 
+ <rtime:200>#>>icon.reassembly#@- [======    ] 60% 
+ <rtime:200>\n\n\n\n\n\n\n\n\n\n#>>icon.reassembly#@- [======    ] 60% \n\n\n\n\n\n\n\n\n\n#8iwhy'd it stop?
+ <rtime:200>#>>icon.reassembly#@- [======    ] 60% 
+ <rtime:120>#>>icon.reassembly#@- [======    ] 61% 
+ <rtime:120>#>>icon.reassembly#@- [======    ] 62% 
+ <rtime:120>#>>icon.reassembly#@- [======    ] 60% 
+ <rtime:120>\n\n\n\n\n\n\n\n\n\n\n#>>icon.reassembly#@- [=====-    ] 57% \n\n\n\n\n\n\n\n\n\n#8iand now it's\nreversing?!
+ <rtime:120>#>>icon.reassembly#@- [=====-    ] 55% 
+ <rtime:120>#>>icon.reassembly#@- [=====-    ] 57% 
+ <rtime:120>#>>icon.reassembly#@- [=====-    ] 59% 
+ <rtime:120>#>>icon.reassembly#@- [======    ] 60% 
+ <rtime:120>#>>icon.reassembly#@- [======    ] 61% 
+ <rtime:120>#>>icon.reassembly#@- [======    ] 62% 
+ <rtime:120>#>>icon.reassembly#@- [======    ] 63% 
+ <rtime:120>#>>icon.reassembly#@- [======    ] 64% 
+ <rtime:120>#>>icon.reassembly#@- [======-   ] 65% 
+  <rtime:20>#>>icon.reassembly#@- [=======   ] 70% 
+  <rtime:20>#>>icon.reassembly#@- [=======-  ] 75% 
+  <rtime:20>#>>icon.reassembly#@- [========  ] 80% 
+  <rtime:20>#>>icon.reassembly#@- [========- ] 85% 
+  <rtime:20>#>>icon.reassembly#@- [========= ] 90% 
+  <rtime:20>#>>icon.reassembly#@- [=========-] 95% 
+  <rtime:20>#>>icon.reassembly#@- [==========] 100%
+#>>icon.reassembly#@- Project: Reassembly
+   <wait:60>
+ <rtime:60>#@-[  No User Registered!  ]
+ <rtime:60>#@-[ Registering New User. ]
+ <rtime:20>#@-[                       ]
+ <rtime:20>#@-[          .            ]
+ <rtime:20>#@-[          ..           ]
+ <rtime:20>#@-[          ...          ]
+ <rtime:20>#@-[                       ]
+ <rtime:20>#@-[          .            ]
+ <rtime:20>#@-[          ..           ]
+ <rtime:20>#@-[          ...          ]
+ <rtime:20>#@-[                       ]
+ <rtime:20>#@-[          .            ]
+ <rtime:20>#@-[          ..           ]
+ <rtime:20>#@-[          ...          ]
+ <rtime:120>#c-[ Automatic Registration Failed ]
+ <rtime:120>#c-[  Requesting Manual Override.  ]
+ <wait:300>
+  #8i...
+  #0-You. Get in here, the computer's broken.
+  #8iuh... me?
+  #0-Who else would I be talking to? The f#0Xucking#0- wall?
+  #8ii'm not... qualified? 
+  #0-Fix it, or you're fired.
+  #8ifine...
+  <wait:60>
+ <rtime:120>#a-[   Manual Override Initiated   ]
+  #7-Hi! Sorry about the computer, no idea what happened to it.
+  #7-I'm- No, it's not relevant. I'll help you register.
+  #7-All we need is some basic information:
+  #7-First of all, #@-where are you from?
+ <command>ng-stage:corp

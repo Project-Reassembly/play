@@ -1,5 +1,5 @@
-import { Registries } from "../core/registry.js";
 import { Item } from "../classes/item/item.js";
+import { Registries } from "../core/registry.js";
 Registries.items.add("nothing", {});
 //Materials
 Registries.items.add("scrap", {
@@ -454,9 +454,9 @@ Registries.items.add("scrap-launcher", {
     types: [
       {
         speed: 0,
-        decel: -0.05,
-        extraUpdates: 2,
-        lifetime: 240,
+        decel: -0.01,
+        extraUpdates: 10,
+        lifetime: 600,
         hitSize: 6,
         trailEffect: "burning",
         knockback: 20,
@@ -538,7 +538,6 @@ Registries.items.add("scrap-launcher", {
     recoilSpeed: 0.1,
   },
 });
-
 Registries.items.add("construction-gun", {
   type: "block-launcher",
   marketValue: 1500,
@@ -590,7 +589,8 @@ Registries.items.add("iti-laser-pistol", {
   name: "Laser Pistol",
   marketValue: 0,
   rarity: Item.rarity.ITI,
-  description: "Shoots medium-range small laser beams which inflict #i-Plasma Burn#-- on enemies.\n#6iStandard Issue",
+  description:
+    "Shoots medium-range small laser beams which inflict #i-Plasma Burn#-- on enemies.\n#6iStandard Issue",
   image: "weapon.iti-laser-pistol.item",
   range: 300,
   shootX: 0,

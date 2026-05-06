@@ -140,9 +140,14 @@ class WeaponComponent extends Component {
   recoilSpeed = 1;
   _recoiled = 0;
   _rotRecoiled = 0;
+
+  cumulative = false;
+  postRecoil = false;
   getPosFrom(x, y, direction, mirrored = false, xoff = 0, yoff = 0) {
     let facing = radians(
-      direction + (this.rotation + this._rotRecoiled) * (mirrored ? -1 : 1)
+      direction +
+        (this.rotation + (this.postRecoil ? 0 : this._rotRecoiled)) *
+          (mirrored ? -1 : 1)
     );
     return {
       x:
@@ -153,20 +158,29 @@ class WeaponComponent extends Component {
         y +
         (this.xOffset - this._recoiled + xoff) * Math.sin(facing) +
         (this.yOffset + yoff) * Math.cos(facing) * (mirrored ? -1 : 1),
-      direction: facing + this.postRot,
+      direction:
+        facing + radians(this.postRot + (this.postRecoil ? this._rotRecoiled : 0)) *
+          (mirrored ? -1 : 1),
     };
   }
   trigger(recoilFactor = 1, rotationalRecoilFactor = 1) {
-    this._recoiled = this.recoil * recoilFactor;
-    this._rotRecoiled = this.rotationalRecoil * rotationalRecoilFactor;
+    this._recoiled =
+      (this.cumulative ? this._recoiled : 0) + this.recoil * recoilFactor;
+    this._rotRecoiled =
+      (this.cumulative ? this._rotRecoiled : 0) +
+      this.rotationalRecoil * rotationalRecoilFactor;
   }
   tick(entity) {
     super.tick(entity);
     if (this._recoiled >= this.recoilSpeed) {
       this._recoiled -= this.recoilSpeed;
+    } else if (this._recoiled <= -this.recoilSpeed) {
+      this._recoiled += this.recoilSpeed;
     }
     if (this._rotRecoiled >= this.recoilSpeed) {
       this._rotRecoiled -= this.recoilSpeed;
+    } else if (this._rotRecoiled <= -this.recoilSpeed) {
+      this._rotRecoiled += this.recoilSpeed;
     }
   }
   serialise() {
@@ -270,16 +284,17 @@ class WeaponisedComponent extends Component {
 
     if (entity.target) {
       let pos = this.getPosOn(entity);
-      this.postRot = radians(
-        turn(
-          degrees(this.postRot + entity.directionRad),
-          pos.x,
-          pos.y,
-          entity.target.x,
-          entity.target.y,
-          entity.turnSpeed * 2
-        ).direction
-      ) - entity.directionRad;
+      this.postRot =
+        radians(
+          turn(
+            degrees(this.postRot + entity.directionRad),
+            pos.x,
+            pos.y,
+            entity.target.x,
+            entity.target.y,
+            entity.turnSpeed * 2
+          ).direction
+        ) - entity.directionRad;
 
       // new Vector(entity.target.x, entity.target.y).sub(this.getPosOn(entity))
       //   .angleRad - entity.directionRad || this.postRot;

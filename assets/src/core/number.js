@@ -1,40 +1,60 @@
+import { Randomiser } from "./randomiser.js";
+
 //Goes up to a decillion (1 000 000 000 000 000 000 000 000 000 000). No-one will ever need that much stuff, so it should be enough.
 const sizes = ["", "k", "m", "b", "t", "q", "Q", "s", "S", "o", "n", "d"];
 
 /**Shortens a number with human-friendly notation.
  * Does not round, but truncates instead, e.g. 12850 -> 1.28k
+ * @param {number} [digits=3] Number of digits to round to. Only has an effect if <= 10.
+ * @param {number} [threshold=3] Number of digits before compression happens
  */
-function shortenedNumber(num = 0, digits = 3) {
-  let exponential = num.toExponential();
-  //Split the first bit and the power of 10
-  let parts = exponential.split("e");
-  let shownNum = parseFloat(parts[0].substring(0, digits + 1)); //Only use first N digits
-  let poT = parseInt(parts[1]);
+function shortenedNumber(num = 0, digits = 2, threshold = 3) {
+  if (num < 0) return "-" + shortenedNumber(-num, digits);
+  if (num === 0) return "0";
+  let l10 = Math.log10(num);
+  if (l10 < threshold) return `${truncNum(num)}`;
+
+  let poT = Math.floor(l10);
+  let shownNum = 10 ** (l10 - poT);
+
   //Get size part
   let sizeIndex = Math.max(Math.floor(poT / 3), 0);
   let shownNumSize = poT % 3;
+
+  // console.log(l10, "->",poT,"\n",shownNum,sizeIndex,shownNum * 10 ** shownNumSize)
   //Assemble
   let suffix = sizes[sizeIndex];
-  return suffix
-    ? `${roundNum(shownNum * 10 ** shownNumSize, 2)}${suffix}`
-    : "∞";
+  return suffix ? `${truncNum(roundNum(shownNum * 10 ** shownNumSize, 11), digits)}${suffix}` : "∞";
 }
+globalThis.shortenedNumber = shortenedNumber;
 function clamp(x, min, max) {
   return Math.max(min, Math.min(max, x));
 }
 /**Rounds a number to a specified number of decimal places. */
 function roundNum(number, dp = 0) {
   return Math.round(number * 10 ** dp) / 10 ** dp;
+} /**Truncates a number to a specified number of decimal places. */
+function truncNum(number, dp = 0) {
+  return Math.floor(number * 10 ** dp) / 10 ** dp;
 }
 /**Returns a random number between `a` and `b`. If `b` is missing, `-a` will be substituted.*/
-function rnd(a, b) {
-  if (b == undefined) return rnd(a, -a);
-  if (a === b) return a;
-  return a + Math.random() * (b - a);
+// function rnd.float(a, b) {
+//   if (b == undefined) return rnd.float(a, -a);
+//   if (a === b) return a;
+//   return a + Math.random() * (b - a);
+// }
+/**Returns a random element of an array.
+ * @template T
+ * @param {T[]} array
+ */
+function oneOf(array) {
+  return array[Math.floor(rnd.float(0, array.length))];
 }
-/**Returns `true` with a specified chance. */
-function tru(chance) {
-  return rnd(0, 1) < chance;
+/**Returns a random index of an array.
+ * @param {*[]} array
+ */
+function someIndexOf(array) {
+  return Math.floor(rnd.float(0, array.length));
 }
 /**Creates a sort function based on an object property. Use `"-(property)"`, such as `"-health"`, to sort in reverse. Works on string and number values.*/
 function dynamicSort(property) {
@@ -44,8 +64,9 @@ function dynamicSort(property) {
     property = property.substring(1);
   }
   return (a, b) =>
-    (a[property] < b[property] ? -1 : a[property] > b[property] ? 1 : 0) *
-    sortOrder;
+    (a[property] < b[property] ? -1
+    : a[property] > b[property] ? 1
+    : 0) * sortOrder;
 }
 
 /**
@@ -70,8 +91,7 @@ function colinterp(cols, factor, forceint = false) {
       //Interpolate between the 2 chosen colours
       let o = Math.max(c1.length, c2.length); //Allows colour arrays of any length
       let out = [];
-      for (let i = 0; i < o; i++)
-        out.push((c1[i] ?? 255) * (1 - fact) + (c2[i] ?? 255) * fact);
+      for (let i = 0; i < o; i++) out.push((c1[i] ?? 255) * (1 - fact) + (c2[i] ?? 255) * fact);
       return forceint ? out.map((x) => Math.round(x)) : out;
     }
   }
@@ -258,8 +278,7 @@ function turn(direction, x, y, toX, toY, amount) {
   //Define variables
   let currentDirection = Vector.fromAngle(direction).angle; //Find current angle, standardised
   let targetDirection = delta.angle; //Find target angle, standardised
-  if (targetDirection === currentDirection)
-    return { direction: direction, done: true }; //Do nothing if facing the right way
+  if (targetDirection === currentDirection) return { direction: direction, done: true }; //Do nothing if facing the right way
   let deltaRot = targetDirection - currentDirection;
   //Rotation correction
   if (deltaRot < -180) {
@@ -282,16 +301,11 @@ function turn(direction, x, y, toX, toY, amount) {
   return { direction: direction + deltaD, done: done };
 }
 
-globalThis["PRVec"] = Vector;
+/**Returns `true` with a specified chance. */
+function tru(chance) {
+  return rnd.bool(chance);
+}
 
-export {
-  shortenedNumber,
-  clamp,
-  roundNum,
-  rnd,
-  tru,
-  dynamicSort,
-  colinterp,
-  turn,
-  Vector,
-};
+export const rnd = new Randomiser();
+export { clamp, colinterp, dynamicSort, roundNum, shortenedNumber, tru, turn, Vector };
+

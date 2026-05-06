@@ -3,20 +3,20 @@ import { ui } from "../../core/ui.js";
 import { totalSize } from "../../scaling.js";
 import { Particle } from "./particle.js";
 
-let minRad = rnd(0.1, 1.3);
-let maxRad = rnd(1, 9);
-let density = rnd(0.2, 1) * 1.2;
+let minRad = rnd.float(0.1, 1.3);
+let maxRad = rnd.float(1, 9);
+let density = rnd.float(0.2, 1) * 1.2;
 // faster particle class for dots in space
 class PerformantSpaceParticle {
   // setting the co-ordinates, radius and the
   // speed of a particle in both the co-ordinates axes.
   constructor() {
-    this.x = rnd(0, totalSize);
-    this.y = rnd(0, totalSize);
-    this.r = rnd(minRad, maxRad);
-    this.d = rnd(0, Math.PI);
-    this.xSpeed = rnd(-0.2, 0.2);
-    this.ySpeed = rnd(-0.2, 0.2);
+    this.x = rnd.float(0, totalSize);
+    this.y = rnd.float(0, totalSize);
+    this.r = rnd.float(minRad, maxRad);
+    this.d = rnd.float(0, Math.PI);
+    this.xSpeed = rnd.float(-0.2, 0.2);
+    this.ySpeed = rnd.float(-0.2, 0.2);
   }
   draw(g) {
     if (!Space.config.drawStars) return;

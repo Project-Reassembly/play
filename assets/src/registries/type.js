@@ -1,5 +1,61 @@
-import { Registries } from "../core/registry.js";
-import { RegisteredItem } from "../core/registered-item.js";
+import { Block } from "../classes/block/block.js";
+import {
+  LandingPad,
+  LaunchPad,
+} from "../classes/block/capitalism/launch-pad.js";
+import { Container } from "../classes/block/container.js";
+import { Conveyor, Unloader } from "../classes/block/conveyor.js";
+import { SignBlock } from "../classes/block/decoration.js";
+import { Bomb, NuclearBomb } from "../classes/block/defense/bomb.js";
+import {
+  TurretBase,
+  TurretController,
+  TurretItem,
+} from "../classes/block/defense/turret-components.js";
+import { Turret } from "../classes/block/defense/turret.js";
+import { Wall } from "../classes/block/defense/wall.js";
+import {
+  CommandExecutorBlock,
+  ItemCatalogBlock,
+  StructureReaderBlock,
+} from "../classes/block/devblocks.js";
+import {
+  PlasmaCompressor,
+  PlasmaDecompressor,
+  PlasmaGenerator,
+} from "../classes/block/plasma-gen-and-compressor.js";
+import {
+  PlasmaBlock,
+  PlasmaPipe,
+  PlasmaTank,
+} from "../classes/block/plasma-pipe.js";
+import { Crafter, Uncrafter } from "../classes/block/production/crafter.js";
+import { Drill } from "../classes/block/production/drill.js";
+import { Smelter } from "../classes/block/production/smelter.js";
+import { TileProducer } from "../classes/block/production/tile-producer.js";
+import { Ore, Tile } from "../classes/block/tile.js";
+import { TankAssemblyBay } from "../classes/block/tonq/tank-assembly-bay.js";
+import { StatusEffect } from "../classes/effect/status-effect.js";
+import {
+  AICondition,
+  AlternativeCondition,
+  CombinedCondition,
+  DataComparisonCondition,
+  HasTargetCondition,
+  KeyDownCondition,
+  MouseDownCondition,
+  NearTargetCondition,
+  StoredTargetCondition,
+} from "../classes/entity/ai/ai-conditions.js";
+import {
+  AIAttackTask,
+  AITask,
+  CreateBulletsTask,
+  RetargetTask,
+  SetDataTask,
+  ShootBulletsTask,
+  TrackTargetTask,
+} from "../classes/entity/ai/ai-tasks.js";
 import {
   Component,
   DestructibleComponent,
@@ -12,42 +68,30 @@ import {
   EquippedEntity,
   InventoryEntity,
 } from "../classes/entity/inventory-entity.js";
+import { ModularTankEntity } from "../classes/entity/modular-tank.js";
 import { NPC } from "../classes/entity/npc.js";
 import { Player } from "../classes/entity/player.js";
-import { Bullet } from "../classes/projectile/bullet.js";
-import { LaserBullet } from "../classes/projectile/laser-bullet.js";
-import { ContinuousLaserBullet } from "../classes/projectile/continuous-laser-bullet.js";
-import { Missile } from "../classes/projectile/missile.js";
-import { CriticalBullet } from "../classes/projectile/critical.js";
-import { PointBullet } from "../classes/projectile/point-bullet.js";
+import { Equippable } from "../classes/item/equippable.js";
+import { ItemStack } from "../classes/item/item-stack.js";
+import { Item } from "../classes/item/item.js";
+import { PlaceableItem } from "../classes/item/placeable.js";
 import {
   BlockLaunchedBullet,
   BlockLauncher,
 } from "../classes/item/special-weapons/block-launcher.js";
-import { Item } from "../classes/item/item.js";
-import { PlaceableItem } from "../classes/item/placeable.js";
-import { ItemStack } from "../classes/item/item-stack.js";
 import { Throwable } from "../classes/item/throwable.js";
 import { Weapon } from "../classes/item/weapon.js";
-import { World } from "../classes/world/world.js";
+import { Bullet } from "../classes/projectile/bullet.js";
+import { ContinuousLaserBullet } from "../classes/projectile/continuous-laser-bullet.js";
+import { CriticalBullet } from "../classes/projectile/critical.js";
+import { LaserBullet } from "../classes/projectile/laser-bullet.js";
+import { Missile } from "../classes/projectile/missile.js";
+import { PointBullet } from "../classes/projectile/point-bullet.js";
+import { VirtualBullet } from "../classes/projectile/virtual-bullet.js";
 import { Chunk } from "../classes/world/chunk.js";
-import { Block } from "../classes/block/block.js";
-import { Wall } from "../classes/block/defense/wall.js";
-import { Ore, Tile } from "../classes/block/tile.js";
-import { Container } from "../classes/block/container.js";
-import { Crafter, Uncrafter } from "../classes/block/production/crafter.js";
-import { Smelter } from "../classes/block/production/smelter.js";
-import { TileProducer } from "../classes/block/production/tile-producer.js";
-import { Drill } from "../classes/block/production/drill.js";
-import { Conveyor, Unloader } from "../classes/block/conveyor.js";
-import { SignBlock } from "../classes/block/decoration.js";
-import { Bomb, NuclearBomb } from "../classes/block/defense/bomb.js";
-import {
-  CommandExecutorBlock,
-  ItemCatalogBlock,
-  StructureReaderBlock,
-} from "../classes/block/devblocks.js";
-import { StatusEffect } from "../classes/effect/status-effect.js";
+import { World } from "../classes/world/world.js";
+import { RegisteredItem } from "../core/registered-item.js";
+import { Registries } from "../core/registry.js";
 import {
   ExplosionEffect,
   ImageParticleEmissionEffect,
@@ -58,56 +102,12 @@ import {
   VisualEffect,
   WaveEmissionEffect,
 } from "../play/effects.js";
-import { VirtualBullet } from "../classes/projectile/virtual-bullet.js";
-import { ModularTankEntity } from "../classes/entity/modular-tank.js";
-import { TankAssemblyBay } from "../classes/block/tonq/tank-assembly-bay.js";
-import {
-  LandingPad,
-  LaunchPad,
-} from "../classes/block/capitalism/launch-pad.js";
-import {
-  PlasmaBlock,
-  PlasmaPipe,
-  PlasmaTank,
-} from "../classes/block/plasma-pipe.js";
-import {
-  PlasmaCompressor,
-  PlasmaDecompressor,
-  PlasmaGenerator,
-} from "../classes/block/plasma-gen-and-compressor.js";
-import { Turret } from "../classes/block/defense/turret.js";
-import {
-  TurretBase,
-  TurretController,
-  TurretItem,
-} from "../classes/block/defense/turret-components.js";
 import {
   LightningEmissionEffect,
   LinearEffect,
   LinearMultiEffect,
   LineEmissionEffect,
 } from "../play/line-effects.js";
-import {
-  AIAttackTask,
-  AITask,
-  CreateBulletsTask,
-  RetargetTask,
-  SetDataTask,
-  ShootBulletsTask,
-  TrackTargetTask,
-} from "../classes/entity/ai/ai-tasks.js";
-import {
-  AICondition,
-  AlternativeCondition,
-  CombinedCondition,
-  DataComparisonCondition,
-  HasTargetCondition,
-  KeyDownCondition,
-  MouseDownCondition,
-  NearTargetCondition,
-  StoredTargetCondition,
-} from "../classes/entity/ai/ai-conditions.js";
-import { Equippable } from "../classes/item/equippable.js";
 //Basic
 Registries.type.add("generic", RegisteredItem);
 //Entities and parts
@@ -214,6 +214,4 @@ Registries.type.add("aicon.keydown", KeyDownCondition);
 Registries.type.add("aicon.data", DataComparisonCondition);
 
 Registries.type.add("aicon.all", CombinedCondition);
-Registries.type.alias("aicon.all", "aicon.combined");
 Registries.type.add("aicon.any", AlternativeCondition);
-Registries.type.alias("aicon.any", "aicon.alternative");

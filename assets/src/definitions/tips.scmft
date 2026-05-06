@@ -1,0 +1,20 @@
+// #ri is the purple italic formatting for image values, and #l- is the blue format for codes themselves
+Some text can be #@-formatted#--: add #l-\#cs#-- to the text, where #l-c#-- is a #@-colour code#--, and #l-s#-- is a #@-style code#--, and anything after it will be formatted in that way - for example, #l-\#4i#-- is #4iitalic red#--, and #l-\#2b#-- is #2bbold green#--.
+There are many possible text formats: #0bA#0iA#0nA#0kA#0*A#0XA#1bA#1iA#1nA#1kA#1*A#1XA#2bA#2iA#2nA#2kA#2*A#2XA#3bA#3iA#3nA#3kA#3*A#3XA#4bA#4iA#4nA#4kA#4*A#4XA#5bA#5iA#5nA#5kA#5*A#5XA#6bA#6iA#6nA#6kA#6*A#6XA#7bA#7iA#7nA#7kA#7*A#7XA#8bA#8iA#8nA#8kA#8*A#8XA#9bA#9iA#9nA#9kA#9*A#9XA#abA#aiA#anA#akA#a*A#aXA#bbA#biA#bnA#bkA#b*A#bXA#cbA#ciA#cnA#ckA#c*A#cXA#dbA#diA#dnA#dkA#d*A#dXA#ebA#eiA#enA#ekA#e*A#eXA#fbA#fiA#fnA#fkA#f*A#fXA#ibA#iiA#inA#ikA#i*A#iXA#nbA#niA#nnA#nkA#n*A#nXA#pbA#piA#pnA#pkA#p*A#pXA#hbA#hiA#hnA#hkA#h*A#hXA#rbA#riA#rnA#rkA#r*A#rXA#ybA#yiA#ynA#ykA#y*A#yXA#lbA#liA#lnA#lkA#l*A#lXA#sbA#siA#snA#skA#s*A#sXA#vbA#viA#vnA#vkA#v*A#vXA#@bA#@iA#@nA#@kA#@*A#@XA#~bA#~iA#~nA#~kA#~*A#~XA#-- (that's 216!)
+Special style codes can add additional effects to text: #l-\#-*#-- causes #-*glowing text#--, and #l-\#-X#-- causes #-Xredacted text#-- (redacted text).
+Images can be inserted into some text with #l-\#>>#riimage#--, where #riimage#-- is the #@-registry name#-- of an image. For example, #l-\#>>#riicon.iti#-- yields #>>icon.iti#--, and #l-\#>>#ribase.copper#-- yields #>>base.copper#--. Just remember to end the image name with #l-\#--#--.
+#>>icon.dev#y-Development Items#-- can be helpful if you are making or testing a #>>icon.int#n-mod#--. Get them with the #@-devset#-- command.
+You can use #@b[b]#-- to toggle build mode, in addition to #@b[up]#--/#@b[down]#--.
+Don't worry about hurting #@-NPCs#-- on your #@-team#--, you can't. Not even with explosives.
+Almost all #@-in-game UI buttons#-- have a keyboard equivalent.
+Other #>>icon.iti#>>icon.ccc#>>icon.peti#@-corporations#-- won't like your presence in the world, so be #@-prepared to defend#-- your factory.
+The game #c-doesn't save automatically#-- - use the #@-save#-- command, or #@-[ctrl+j]#--.
+You can quickly #@-load#-- the previous #@-save file#-- in-game by pressing #@-[ctrl+k]#--.
+<eof>
+// these tips aren't true yet
+#a-Trading frequently#-- will help maximise your #@-relations#-- with #@-NPCs#--.
+Try playing all 3 #>>icon.iti#>>icon.ccc#>>icon.peti#@-corporations#--: Each has a different strategy and progression.
+If you want a challenge, try playing as #>>icon.scrap#@-scrap#--. The gameplay is very different, and much harder.
+Don't skip the #@-tutorial#-- unless you have played with your selected #@-corporation#-- before.
+Floor tiles can be destroyed with #c-explosives#--.
+#>>icon.peti#p-PETI#-- weapons are unstable. If used for #@-too long#--, things might not end well...

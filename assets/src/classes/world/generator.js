@@ -1,14 +1,10 @@
+import { create2DArray } from "../../core/2D-array.js";
+import { constructFromRegistry } from "../../core/constructor.js";
+import { roundNum } from "../../core/number.js";
 import { RegisteredItem } from "../../core/registered-item.js";
-import { construct, constructFromRegistry } from "../../core/constructor.js";
-import { Integrate } from "../../lib/integrate.js";
+import Integrate from "../../lib/integrate.js";
+import { noise, noiseSeed, rng1, setNoiseParams } from "../../lib/q5-noise-function.js";
 import { blockSize, chunkSize, worldSize } from "../../scaling.js";
-import {
-  noise,
-  noiseSeed,
-  setNoiseParams,
-  rng1,
-} from "../../lib/q5-noise-function.js";
-import { roundNum, tru, rnd } from "../../core/number.js";
 /*
 || LIST OF WORLDGEN MESSAGE TYPES
 || "genstage", "progress-stage", "finish": Don't use, internal.
@@ -20,6 +16,7 @@ import { roundNum, tru, rnd } from "../../core/number.js";
 ||  - chunk: 1D array of tile definitions, with a registry name
 ||        'block', and x- and y-coordinates within the chunk.
 ||         Extra properties can be set with 'construction'.
+||  - tiles: 2d grid of tiles rnames.
 || "progress": Sets the position of the progress bar.
 ||   - progress: Number from 0-1. 0 means empty bar, 1 means full.
 || "build": Builds a structure.
@@ -28,7 +25,7 @@ import { roundNum, tru, rnd } from "../../core/number.js";
 ||   - name: Name of the structure. Used in world breakdown, and structure location.
 */
 
-class Generator extends RegisteredItem {
+class Generator extends Integrate.RegisteredItem {
   stageTitle = "Generating...";
   /** Runs this generator on the world. */
   generate(seed) {}
@@ -47,28 +44,22 @@ class NoiseGenerator extends Generator {
     //Create grid
     let maxProgress = worldSize ** 2;
     let progress = 0;
-    let newChunk;
-    doNoise(
-      seed,
-      this.noiseLevel,
-      this.noiseScale,
-      this.octaves,
-      this.falloff,
-      {
-        prechunk: (i, j) => (newChunk = []),
-        postchunk: (i, j) => {
-          progress++;
-          this.forEachChunk(newChunk, i, j);
-          postMessage({ type: "progress", progress: progress / maxProgress });
-        },
-        eachpos: (x, y, level) => {
-          this.forEachPosition(level, x, y, newChunk);
-        },
-      }
-    );
+    let newChunk = [];
+    let tiles = create2DArray(chunkSize);
+    doNoise(seed, this.noiseLevel, this.noiseScale, this.octaves, this.falloff, {
+      prechunk: (i, j) => (newChunk = []),
+      postchunk: (i, j) => {
+        progress++;
+        this.forEachChunk(newChunk, tiles, i, j);
+        postMessage({ type: "progress", progress: progress / maxProgress });
+      },
+      eachpos: (x, y, level) => {
+        this.forEachPosition(level, x, y, newChunk, tiles);
+      },
+    });
   }
-  forEachPosition(level, x, y, constructing) {}
-  forEachChunk(chunk, i, j) {}
+  forEachPosition(level, x, y, blocks, tiles) {}
+  forEachChunk(blocks, tiles, i, j) {}
 }
 
 /** Creates the base tile layer for the world. */
@@ -81,20 +72,16 @@ class TileGenerator extends NoiseGenerator {
       return constructFromRegistry(x, wtype);
     });
   }
-  forEachPosition(level, x, y, constructing) {
+  forEachPosition(level, x, y, blocks, tiles) {
     for (let optionsobj of this.tiles) {
       if (optionsobj.valid(level, x, y)) {
-        constructing.push({
-          block: optionsobj.tile,
-          x: x,
-          y: y,
-        });
+        tiles[y][x] = optionsobj.tile;
         break;
       }
     }
   }
-  forEachChunk(chunk, i, j) {
-    postMessage({ type: "chunk", def: { chunk: chunk, i: i, j: j } });
+  forEachChunk(blocks, tiles, i, j) {
+    postMessage({ type: "chunk", def: { blocks: blocks, tiles: tiles, i: i, j: j } });
   }
 }
 
@@ -132,7 +119,7 @@ class BlockGenerator extends Generator {
     if (this.outOfRange(x, y)) {
       postMessage({
         type: "build",
-        name: this.name + (extraName ? " (" + extraName + ")" : ""),
+        name: this.name + (extraName ? ` (${extraName})` : ""),
         blocks: selected.defs,
         x: x,
         y: y,
@@ -143,8 +130,7 @@ class BlockGenerator extends Generator {
   }
   outOfRange(x, y) {
     for (let pos of this._positions) {
-      if (((x - pos.x) ** 2 + (y - pos.y) ** 2) ** 0.5 < this.separation)
-        return false;
+      if (((x - pos.x) ** 2 + (y - pos.y) ** 2) ** 0.5 < this.separation) return false;
     }
     return true;
   }
@@ -166,31 +152,24 @@ class OreGenerator extends Generator {
     let progress = 0;
     for (let o = 0; o < this.ores.length; o++) {
       let ore = this.ores[o];
-      doNoise(
-        (seed) * this.seedManipulator * (o + 1),
-        100,
-        ore.scale,
-        ore.octaves,
-        ore.falloff,
-        {
-          postchunk: (i, j) => {
-            progress++;
-            postMessage({ type: "progress", progress: progress / maxProgress });
-          },
-          eachpos: (x, y, level, i, j) => {
-            if (level > ore.threshold) {
-              postMessage({
-                type: "place",
-                x: x + i * chunkSize,
-                y: y + j * chunkSize,
-                layer: "floor",
-                block: ore.tile,
-                target: ore.target,
-              });
-            }
-          },
-        }
-      );
+      doNoise(seed * this.seedManipulator * (o + 1), 100, ore.scale, ore.octaves, ore.falloff, {
+        postchunk: (i, j) => {
+          progress++;
+          postMessage({ type: "progress", progress: progress / maxProgress });
+        },
+        eachpos: (x, y, level, i, j) => {
+          if (level > ore.threshold) {
+            postMessage({
+              type: "place",
+              x: x + i * chunkSize,
+              y: y + j * chunkSize,
+              layer: "floor",
+              block: ore.tile,
+              target: ore.target,
+            });
+          }
+        },
+      });
     }
   }
 }
@@ -216,7 +195,7 @@ class OreGenerationOptions extends GenerationOptions {
   target = null;
 }
 
-let wtype = new Integrate.Registry();
+let wtype = new Integrate.TypeRegistry();
 
 wtype.add("gen-options", GenerationOptions);
 wtype.add("tile-gen-options", TileGenerationOptions);
@@ -231,14 +210,7 @@ wtype.add("ore-gen-options", OreGenerationOptions);
  * @param {number} falloff Amount each layer contributes, as a fraction of the previous.
  * @param {{prechunk: (i, j)=>void, postchunk: (i,j)=>void, eachpos: (x, y, level, i, j)=>void}} funcs Functions to provide actual functionality.
  */
-function doNoise(
-  seed,
-  level = 100,
-  scale = 1,
-  octaves = 4,
-  falloff = 0.5,
-  funcs
-) {
+function doNoise(seed, level = 100, scale = 1, octaves = 4, falloff = 0.5, funcs) {
   noiseSeed(seed);
   setNoiseParams(1, octaves, falloff);
   //Create grid
@@ -252,18 +224,14 @@ function doNoise(
         //Block coords
         for (let y = 0; y < chunkSize; y++) {
           let nx = roundNum(
-            scale *
-              ((worldSize / 2 + i) * chunkSize * blockSize +
-                (x * blockSize + blockSize / 2)),
-            2
+            scale * ((worldSize / 2 + i) * chunkSize * blockSize + (x * blockSize + blockSize / 2)),
+            2,
           );
           let ny = roundNum(
-            scale *
-              ((worldSize / 2 + j) * chunkSize * blockSize +
-                (y * blockSize + blockSize / 2)),
-            2
+            scale * ((worldSize / 2 + j) * chunkSize * blockSize + (y * blockSize + blockSize / 2)),
+            2,
           );
-          let n = noise(nx, ny)
+          let n = noise(nx, ny);
           let c = level * n;
           ////////////////////////
           if (funcs.eachpos) funcs.eachpos(x, y, c, i, j);
@@ -275,13 +243,14 @@ function doNoise(
   }
 }
 export {
+  BlockGenerator,
+  doNoise,
+  GenerationOptions,
   Generator,
   NoiseGenerator,
-  TileGenerationOptions,
-  TileGenerator,
-  BlockGenerator,
   OreGenerationOptions,
   OreGenerator,
-  GenerationOptions,
-  doNoise,
+  TileGenerationOptions,
+  TileGenerator
 };
+

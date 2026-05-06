@@ -1,3 +1,4 @@
+import { col } from "../../core/color.js";
 import { Vector } from "../../core/number.js";
 import { PhysicalObject } from "../physical.js";
 import { Bullet } from "./bullet.js";
@@ -56,7 +57,7 @@ class LaserBullet extends Bullet {
       );
     } else {
       //Get that laser-y look
-      stroke(this.drawer.fill);
+      col.stroke(this.drawer.fill);
       fill(255);
       strokeWeight(drawnWidth / 3);
       rotatedShape(
@@ -99,3 +100,4 @@ class LaserBullet extends Bullet {
   }
 }
 export { LaserBullet };
+

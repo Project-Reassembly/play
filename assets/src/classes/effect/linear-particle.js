@@ -1,3 +1,4 @@
+import { col } from "../../core/color.js";
 import { Vector } from "../../core/number.js";
 import { Particle } from "./particle.js";
 // An extended particle class which connects 2 points
@@ -39,7 +40,7 @@ class LinearParticle extends Particle {
       push();
       noFill();
       //Interpolate colour
-      stroke(this.colour);
+      col.stroke(this.colour);
       strokeWeight(this.stroke);
       //Draw the particle
       this.actualDraw();
@@ -47,12 +48,12 @@ class LinearParticle extends Particle {
     }
   }
   actualDraw() {
-    let prev = this.positions[0];
-    for (let p = 1; p < this.positions.length; p++) {
-      let curr = this.positions[p];
-      line(prev.x, prev.y, curr.x, curr.y);
-      prev = curr;
-    }
+    beginShape();
+    this.positions.forEach((p) => {
+      vertex(p.x, p.y);
+    });
+    endShape();
   }
 }
 export { LinearParticle };
+

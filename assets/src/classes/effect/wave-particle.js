@@ -1,3 +1,4 @@
+import { col } from "../../core/color.js";
 import { Particle } from "./particle.js";
 // A hollow circular particle.
 class WaveParticle extends Particle {
@@ -31,14 +32,14 @@ class WaveParticle extends Particle {
     if (g) {
       g.push();
       g.noFill();
-      g.stroke(this.colour);
+      col.strokeOn(g, this.colour);
       g.strokeWeight(this.stroke);
       g.circle(this.x, this.y, this.radius * 2);
       g.pop();
     } else {
       push();
       noFill();
-      stroke(this.colour);
+      col.stroke(this.colour);
       strokeWeight(this.stroke);
       circle(this.x, this.y, this.radius * 2);
       pop();
@@ -49,3 +50,4 @@ class WaveParticle extends Particle {
   }
 }
 export { WaveParticle };
+

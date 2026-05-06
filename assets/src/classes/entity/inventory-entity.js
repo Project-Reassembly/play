@@ -1,7 +1,5 @@
 import { construct } from "../../core/constructor.js";
-import { tru } from "../../core/number.js";
 import { Inventory } from "../inventory.js";
-import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { Equippable } from "../item/equippable.js";
 import { ItemStack } from "../item/item-stack.js";
 import { PhysicalObject } from "../physical.js";
@@ -18,10 +16,7 @@ class InventoryEntity extends Entity {
   }
   onHealthZeroed(type, source) {
     //Drop items
-    this.inventory.iterate((stack) => {
-      if (tru(this.dropChance))
-        DroppedItemStack.create(stack, this.world, this.x, this.y);
-    }, true);
+    this.inventory.drop(this.world, this.x, this.y, this.dropChance);
     this.inventory.clear();
     super.onHealthZeroed(type, source);
   }
@@ -32,6 +27,12 @@ class InventoryEntity extends Entity {
   }
   static applyExtraProps(entity, created) {
     entity.inventory = Inventory.deserialise(created.inventory);
+  }
+  tick() {
+    super.tick();
+    this.inventory.iterate((stack) => {
+      stack.getItem().tick(this);
+    }, true);
   }
 }
 
@@ -100,10 +101,7 @@ class EquippedEntity extends InventoryEntity {
   onHealthZeroed(type, source) {
     let invs = this.inventories;
     for (let inv of invs) {
-      inv.iterate((stack) => {
-        if (tru(stack.dropChance))
-          DroppedItemStack.create(stack, this.world, this.x, this.y);
-      }, true);
+      inv.drop(this.world, this.x, this.y);
       inv.clear();
     }
     super.onHealthZeroed(type, source);
@@ -116,32 +114,30 @@ class EquippedEntity extends InventoryEntity {
       this.legsPart.draw(this.x, this.y, this.direction, true);
     }
     //Arms
-    if (this.leftHand.get(0)?.getItem()?.component)
-      this.leftHand
-        .get(0)
-        .getItem()
-        .component.draw(
-          this.x,
-          this.y,
-          this.direction,
-          true,
-          this.armType.xOffset,
-          this.armType.yOffset
-        );
-    else this.armType.draw(this.x, this.y, this.direction, true);
-    if (this.rightHand.get(0)?.getItem()?.component)
-      this.rightHand
-        .get(0)
-        .getItem()
-        .component.draw(
-          this.x,
-          this.y,
-          this.direction,
-          false,
-          this.armType.xOffset,
-          this.armType.yOffset
-        );
-    else this.armType.draw(this.x, this.y, this.direction);
+    let left = this.leftHand.get(0)?.getItem();
+    if (!left || left?.showArm) this.armType.draw(this.x, this.y, this.direction, true);
+    if (left?.component)
+      left.component.draw(
+        this.x,
+        this.y,
+        this.direction,
+        true,
+        this.armType.xOffset,
+        this.armType.yOffset,
+      );
+
+    let right = this.rightHand.get(0)?.getItem();
+    if (!right || right?.showArm) this.armType.draw(this.x, this.y, this.direction);
+    if (right?.component)
+      right.component.draw(
+        this.x,
+        this.y,
+        this.direction,
+        false,
+        this.armType.xOffset,
+        this.armType.yOffset,
+      );
+
     let d = (item) => {
       if (item instanceof Equippable) {
         item.component.draw(this.x, this.y, this.direction);
@@ -197,5 +193,14 @@ class EquippedEntity extends InventoryEntity {
       }
     });
   }
+  tick() {
+    super.tick();
+    for (let key of ["leftHand", "rightHand"]) {
+      this[key].iterate((stack) => {
+        stack.getItem().tick(this);
+      }, true);
+    }
+  }
 }
 export { EquippedEntity, InventoryEntity };
+

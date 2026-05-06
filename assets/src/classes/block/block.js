@@ -1,11 +1,14 @@
-import { ShootableObject } from "../physical.js";
+import { col } from "../../core/color.js";
 import { Registries } from "../../core/registry.js";
-import { Chunk } from "../world/chunk.js";
-import { Direction } from "../../scaling.js";
 import { drawImg, ui } from "../../core/ui.js";
 import { createDestructionExplosion } from "../../play/effects.js";
+import { blockSize, chunkSize, Direction } from "../../scaling.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { ItemStack } from "../item/item-stack.js";
+import { ShootableObject } from "../physical.js";
+import { Chunk } from "../world/chunk.js";
+/** @import {Unconstructed} from "../../lib/integrate" */
+/// <reference path="../../lib/integrate"/>
 /**
  * @typedef SerialisedBlock
  * @prop {int} x
@@ -57,22 +60,8 @@ class Block extends ShootableObject {
     delete this.y;
   }
   draw() {
-    drawImg(
-      this.image,
-      this.x,
-      this.y,
-      this.tileSize * Block.size,
-      this.tileSize * Block.size
-    );
+    drawImg(this.image, this.x, this.y, this.tileSize * blockSize, this.tileSize * blockSize);
     super.draw();
-  }
-
-  createDamageNumber(amount) {
-    this._baseDamageNumber(
-      amount,
-      this.x + Block.size / 2,
-      this.y + Block.size / 2
-    );
   }
   steppedOnBy(entity) {}
   /**
@@ -92,11 +81,7 @@ class Block extends ShootableObject {
   onHealthZeroed(type, source) {
     this.break(BreakType.attack);
     //Block go boom
-    createDestructionExplosion(
-      this.x + Block.size / 2,
-      this.y + Block.size / 2,
-      this
-    );
+    createDestructionExplosion(this.x, this.y, this);
   }
   /** Fired when a block should be broken. Should handle block breaking itself.
    * @param {symbol} [type=BreakType.entity] What broke this block. Should be a property of `BreakType`.
@@ -104,14 +89,13 @@ class Block extends ShootableObject {
    */
   break(type = BreakType.delete) {
     this.world.break(this.gridX, this.gridY, "blocks");
-    if (type !== BreakType.deconstruct && type !== BreakType.replace)
-      return true;
+    if (type !== BreakType.deconstruct && type !== BreakType.replace) return true;
     if (!this.dropItem) return true;
     DroppedItemStack.create(
       new ItemStack(this.dropItem, 1),
       this.world,
-      this.x + Block.size / 2,
-      this.y + Block.size / 2
+      this.x + blockSize / 2,
+      this.y + blockSize / 2,
     );
     return true;
   }
@@ -125,20 +109,14 @@ class Block extends ShootableObject {
   drawTooltip(
     x,
     y,
-    outlineColour = [50, 50, 50],
-    backgroundColour = [95, 100, 100, 160]
+    outlineColour = col.from(50, 50, 50),
+    backgroundColour = col.from(95, 100, 100, 160),
   ) {
     return true;
   }
   highlight(emphasised = false) {
     drawHighlight(emphasised, () => {
-      rectMode(CORNER);
-      rect(
-        this.uiX,
-        this.uiY,
-        Block.size * ui.camera.zoom,
-        Block.size * ui.camera.zoom
-      );
+      rect(this.uiX, this.uiY, blockSize * ui.camera.zoom, blockSize * ui.camera.zoom);
     });
   }
 
@@ -156,16 +134,16 @@ class Block extends ShootableObject {
   }
 
   get x() {
-    return (this.blockX + this.chunk.i * Chunk.size) * Block.size;
+    return (this.blockX + this.chunk.i * chunkSize) * blockSize;
   }
   get y() {
-    return (this.blockY + this.chunk.j * Chunk.size) * Block.size;
+    return (this.blockY + this.chunk.j * chunkSize) * blockSize;
   }
   get gridX() {
-    return this.blockX + this.chunk.i * Chunk.size;
+    return this.blockX + this.chunk.i * chunkSize;
   }
   get gridY() {
-    return this.blockY + this.chunk.j * Chunk.size;
+    return this.blockY + this.chunk.j * chunkSize;
   }
   get uiX() {
     return (this.x - ui.camera.x) * ui.camera.zoom;
@@ -173,11 +151,17 @@ class Block extends ShootableObject {
   get uiY() {
     return (this.y - ui.camera.y) * ui.camera.zoom;
   }
+  get uiCornerX() {
+    return (this.x - ui.camera.x - blockSize * 0.5) * ui.camera.zoom;
+  }
+  get uiCornerY() {
+    return (this.y - ui.camera.y - blockSize * 0.5) * ui.camera.zoom;
+  }
   /**@returns {SerialisedBlock} */
   serialise() {
     return {
       block: this.registryName,
-      direction: Block.dir.toEnum(this.direction),
+      direction: Direction.toEnum(this.direction),
       health: this.health,
       team: this.team,
       power: this.power,
@@ -220,36 +204,18 @@ const PlaceType = {
   /** The block is being changed from another one. */
   replace: Symbol(),
 };
-
-function createLinkedBlockAndItem(
-  regname,
-  displayname,
-  image,
-  blockprops,
-  itemprops
-) {
+/**@param {Unconstructed<Block>} blockprops */
+function createLinkedBlockAndItem(regname, displayname, image, blockprops, itemprops) {
   Registries.blocks.add(
     regname,
-    Object.assign(
-      {
-        name: displayname,
-        image: image,
-        dropItem: regname,
-      },
-      blockprops
-    )
+    Object.assign({ name: displayname, image: image, dropItem: regname }, blockprops),
   );
   Registries.items.add(
     regname,
     Object.assign(
-      {
-        type: "placeable",
-        name: displayname,
-        block: regname,
-        image: image,
-      },
-      itemprops
-    )
+      { type: "placeable", name: displayname, block: regname, image: image },
+      itemprops,
+    ),
   );
 }
 function drawHighlight(emphasised, drawfn) {
@@ -262,4 +228,5 @@ function drawHighlight(emphasised, drawfn) {
   pop();
 }
 
-export { Block, BreakType, PlaceType, createLinkedBlockAndItem, drawHighlight };
+export { Block, BreakType, createLinkedBlockAndItem, drawHighlight, PlaceType };
+

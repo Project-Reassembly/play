@@ -1,8 +1,8 @@
+import * as MLF1 from "../../../core/mlf1.js";
 import { rnd, roundNum, Vector } from "../../../core/number.js";
 import { ui } from "../../../core/ui.js";
 import { blockSize, Direction } from "../../../scaling.js";
 import { ModularTankEntity } from "../../entity/modular-tank.js";
-import { drawMultilineText } from "../../inventory.js";
 import { Item } from "../../item/item.js";
 import { Timer } from "../../timer.js";
 import { Block, drawHighlight } from "../block.js";
@@ -31,9 +31,9 @@ class TankAssemblyBay extends Block {
     if (this.#assemblyTimer.operationCount > 0) return;
     let offset = Direction.vectorOf(this.direction).scale(this.range + 2);
     let centre = offset.addXY(this.gridX, this.gridY);
-    let assTime = roundNum(rnd(6, 20));
+    let assTime = roundNum(rnd.float(6, 20));
     this.#assemblyTimer.repeat(
-      () => this.emit("tonk-build-wave", 0.5 * blockSize, 0.5 * blockSize),
+      () => this.emit("tonk-build-wave"),
       assTime * 5,
       5
     );
@@ -41,8 +41,8 @@ class TankAssemblyBay extends Block {
       () =>
         this.emit(
           "tonk-build-square",
-          (offset.x + 0.5) * blockSize,
-          (offset.y + 0.5) * blockSize
+          (offset.x ) * blockSize,
+          (offset.y ) * blockSize
         ),
       Math.max(0, assTime * 5),
       5,
@@ -52,8 +52,8 @@ class TankAssemblyBay extends Block {
       () =>
         this.emit(
           "tonk-weld",
-          (offset.x + 0.5 + rnd(-this.range, this.range)) * blockSize,
-          (offset.y + 0.5 + rnd(-this.range, this.range)) * blockSize
+          (offset.x +  rnd.float(-this.range, this.range)) * blockSize,
+          (offset.y +  rnd.float(-this.range, this.range)) * blockSize
         ),
       assTime,
       25
@@ -79,13 +79,13 @@ class TankAssemblyBay extends Block {
     drawHighlight(emp, () => {
       rect(centre.x, centre.y, scl, scl);
     });
-    drawMultilineText(
+    MLF1.draw(
       centre.x + scl / 2 + blockSize / 2,
       centre.y - 15,
       "Front",
       ""
     );
-    drawMultilineText(
+    MLF1.draw(
       centre.x - scl / 2 - blockSize * 3,
       centre.y - 15,
       "Back",
@@ -116,7 +116,7 @@ class TankAssemblyBay extends Block {
   }
   drawTooltip(x, y, outlineColour, backgroundColour) {
     super.drawTooltip(x, y, outlineColour, backgroundColour, true);
-    drawMultilineText(
+    MLF1.draw(
       x,
       y,
       "Name: " +
@@ -135,3 +135,4 @@ class TankAssemblyBay extends Block {
 }
 
 export { TankAssemblyBay };
+

@@ -1,9 +1,10 @@
 import { LightningParticle } from "../classes/effect/lightning-particle.js";
 import { LinearParticle } from "../classes/effect/linear-particle.js";
+import { col } from "../core/color.js";
 import { construct } from "../core/constructor.js";
 import { rnd } from "../core/number.js";
 import { RegisteredItem } from "../core/registered-item.js";
-import { effectTimer, repeat, VisualEffect } from "./effects.js";
+import { effectTimer, repeat } from "./effects.js";
 
 // Different enough to not extend
 class LinearEffect extends RegisteredItem {
@@ -25,8 +26,8 @@ class LinearEmissionEffect extends LinearEffect {
   isFloor = false;
   execute(world, positions = [], pos = () => [], impact = false) {
     let fn = () => {
-      let xo = rnd(this.maxXOffset, -this.maxXOffset);
-      let yo = rnd(this.maxYOffset, -this.maxYOffset);
+      let xo = rnd.float(this.maxXOffset, -this.maxXOffset);
+      let yo = rnd.float(this.maxYOffset, -this.maxYOffset);
       this.create(
         world,
         positions.map((v) => v.addXY(xo, yo)),
@@ -37,8 +38,8 @@ class LinearEmissionEffect extends LinearEffect {
     if (this.parentise) {
       fn = () => {
         let p = pos();
-        let xo = rnd(this.maxXOffset, -this.maxXOffset);
-        let yo = rnd(this.maxYOffset, -this.maxYOffset);
+        let xo = rnd.float(this.maxXOffset, -this.maxXOffset);
+        let yo = rnd.float(this.maxYOffset, -this.maxYOffset);
         this.create(
           world,
           p.map((v) => v.addXY(xo, yo)),
@@ -82,6 +83,9 @@ class LineEmissionEffect extends LinearEmissionEffect {
     strokeFrom: 10,
     strokeTo: 0,
   };
+  init(){
+    this.line.colours = (this.line.colours ?? []).map(col.convert)
+  }
   create(world, positions = [], impact = false) {
     repeat(this.amount, () => {
       this.getParticleArray(world, impact).push(
@@ -113,6 +117,9 @@ class LightningEmissionEffect extends LinearEmissionEffect {
     deviation: 20,
     glowEffect: 0,
   };
+  init(){
+    this.line.colours = (this.line.colours ?? []).map(col.convert)
+  }
   create(world, positions = [], impact = false) {
     repeat(this.amount, () => {
       this.getParticleArray(world, impact).push(
@@ -133,9 +140,7 @@ class LightningEmissionEffect extends LinearEmissionEffect {
 }
 
 export {
-  LinearEmissionEffect,
-  LinearEffect,
-  LinearMultiEffect,
-  LineEmissionEffect,
-  LightningEmissionEffect,
+  LightningEmissionEffect, LinearEffect, LinearEmissionEffect, LinearMultiEffect,
+  LineEmissionEffect
 };
+
