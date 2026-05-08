@@ -21,6 +21,7 @@ import { clamp, rnd, roundNum, tru } from "../core/number.js";
 import { PreloadRegistries, Registries } from "../core/registry.js";
 import { Serialiser } from "../core/serialiser.js";
 import { ImageContainer, rotatedShape, ui, UIComponent } from "../core/ui.js";
+import "../definitions/screens/any.js";
 import "../definitions/screens/in-game.js";
 import { creation } from "../definitions/screens/new-game.js";
 import { loadStats, setupTips } from "../definitions/screens/title.js";
@@ -29,6 +30,7 @@ import { cmdHistory } from "../definitions/text-edit.js";
 import "../lib/isl.js";
 import { exec, ExecutionContext } from "../lib/isl.js";
 import { blockSize, totalSize } from "../scaling.js";
+import { debug } from "./debug.js";
 import { createEffect, effectTimer, emitEffect, Explosion } from "./effects.js";
 import { fonts } from "./font.js";
 import { Log } from "./messaging.js";
@@ -247,33 +249,32 @@ try {
             layer = ev.data.layer ?? "tiles",
             target = ev.data.target;
 
-          chunk[layer] = def.entries;
           if (target) {
             // console.log("builder targets: " + target);
-            iterate2DArray(chunk[layer], (e, y, x) => {
+            iterate2DArray(def.entries, (e, y, x) => {
               if (e) {
                 if (chunk.tiles[y][x] === target) {
                   if (Registries.blocks.has(e)) {
+                    chunk[layer][y][x] = e;
                     stats.placed[e] ??= 0;
                     stats.placed[e]++;
                   } else {
-                    chunk[layer][y][x] = null;
                     stats.failed++;
 
                     stats.placed[`~${e}`] ??= 0;
                     stats.placed[`~${e}`]++;
                   }
-                } else chunk[layer][y][x] = null;
+                }
               }
             });
           } else
-            iterate2DArray(chunk[layer], (e, y, x) => {
+            iterate2DArray(def.entries, (e, y, x) => {
               if (e)
                 if (Registries.blocks.has(e)) {
+                  chunk[layer][y][x] = e;
                   stats.placed[e] ??= 0;
                   stats.placed[e]++;
                 } else {
-                  chunk[layer][y][x] = null;
                   stats.failed++;
 
                   stats.placed[`~${e}`] ??= 0;
@@ -893,7 +894,7 @@ function uiFrame() {
   //Reset mouse held status
   if (ui.waitingForMouseUp && !mouseIsPressed) ui.waitingForMouseUp = false;
   //Draw UI and mouse pos
-  if (gen.started && !gen.inprogress && ui.menuState === "in-game") {
+  if (gen.started && !gen.inprogress && ui.menuState === "in-game" && UIComponent.evaluateCondition("mode:build")) {
     ui.hoveredBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
     if (ui.hoveredBlock) ui.hoveredBlock.highlight();
     let conblock = Container.selectedBlock;
@@ -960,8 +961,8 @@ function gameFrame() {
 }
 
 function movePlayer() {
-  if (ui.texteditor.active) return false;
-  if (keyIsDown(SHIFT) || game.player.dead || !game.player.controllable) {
+  if (ui.texteditor.active) return game.player.controllable = false;
+  if (keyIsDown(SHIFT) || game.player.dead) {
     freecam = true;
     if (keyIsDown(87)) {
       ui.camera.y -= 5;
@@ -975,24 +976,10 @@ function movePlayer() {
     if (keyIsDown(68)) {
       ui.camera.x += 5;
     }
+    game.player.controllable = false;
   } else {
     freecam = false;
-    if (keyIsDown(87) && game.player.y > borders()[1] /* Top */ + game.player.hitSize) {
-      //If 'W' pressed
-      game.player.move(0, -game.player.speed);
-    }
-    if (keyIsDown(83) && game.player.y < borders()[3] /* Bottom */ - game.player.hitSize) {
-      //If 'S' pressed
-      game.player.move(0, game.player.speed);
-    }
-    if (keyIsDown(65) && game.player.x > borders()[0] /* Left */ + game.player.hitSize) {
-      //If 'A' pressed
-      game.player.move(-game.player.speed, 0);
-    }
-    if (keyIsDown(68) && game.player.x < borders()[2] /* Right */ - game.player.hitSize) {
-      //If 'D' pressed
-      game.player.move(game.player.speed, 0);
-    }
+    game.player.controllable = true;
   }
   _playerx.value = game.player.x;
   _playery.value = game.player.y;
@@ -1351,6 +1338,7 @@ function reset() {
   game.player = null;
 }
 
+let db = false;
 /**Triggers on any key press
  * @param {KeyboardEvent} ev
  */
@@ -1384,16 +1372,45 @@ window.keyPressed = function (ev) {
   if (keyIsDown("`")) console.log(ev, key);
 
   //Hotkeys
-  if (key === " ")
-    //Pause / unpause
-    togglePause();
+
+  // debug
+  if (key === "f3") {
+    UIComponent.setCondition("debugging:true");
+  } else if (UIComponent.evaluateCondition("debugging:true") && ui.menuState === "in-game") {
+    console.log("debug: " + ev.key);
+    UIComponent.setCondition("debugging:false");
+
+    if (ev.key === "b") {
+      debug.hitboxes = !debug.hitboxes;
+      Log.send(`#7-[#@-Debug#7-] Hitboxes ${debug.hitboxes ? "shown" : "hidden"}`);
+    }
+    else if (ev.key === "a") {
+      debug.ai = !debug.ai;
+      Log.send(`#7-[#@-Debug#7-] AI targets and areas ${debug.ai ? "shown" : "hidden"}`);
+    }
+    else if (ev.key === "c") {
+      debug.chunkBorders = !debug.chunkBorders;
+      Log.send(`#7-[#@-Debug#7-] Chunk borders ${debug.chunkBorders ? "shown" : "hidden"}`);
+    }
+    else if (ev.key === "Escape"){
+      debug.ai = false;
+      debug.chunkBorders = false;
+      debug.hitboxes = false;
+      Log.send(`#7-[#@-Debug#7-] Disabled everything.`);
+    }
+  }
+  //Pause / unpause
+  else if (key === " ") togglePause();
+  // save/load, ctrl buttons
   else if (ev.ctrlKey && ui.menuState === "in-game") {
     if (key === "j") saveGame();
     if (key === "k") loadGame();
-  } else if (key === "escape" && !UIComponent.evaluateCondition("menu:none"))
+  }
+  // close menu
+  else if (key === "escape" && !UIComponent.evaluateCondition("menu:none"))
     UIComponent.setCondition("menu:none");
+  //Inventory
   else if (key === "e") {
-    //Inventory
     if (UIComponent.evaluateCondition("menu:inventory")) UIComponent.setCondition("menu:none");
     else UIComponent.setCondition("menu:inventory");
   }

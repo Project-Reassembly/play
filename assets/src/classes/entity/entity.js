@@ -2,6 +2,7 @@ import { col } from "../../core/color.js";
 import { construct, constructFromType } from "../../core/constructor.js";
 import { clamp, rnd, roundNum, tru, Vector } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
+import { debug } from "../../play/debug.js";
 import { createDestructionExplosion, liquidDestructionBlast } from "../../play/effects.js";
 import { game } from "../../play/game.js";
 import { blockSize, totalSize } from "../../scaling.js";
@@ -93,12 +94,8 @@ class Entity extends ShootableObject {
   //because ai rate limit sucks and the scrapper is  s l o w
   #firing = false;
 
-  get computedVelocity() {
-    return this.pos.sub(this._lastPos);
-  }
-  get computedSpeed() {
-    return this.computedVelocity.magnitude;
-  }
+  computedVelocity = Vector.ZERO;
+  computedSpeed = 0;
 
   predictMotion(timeToImpact) {
     return this.computedVelocity.scale(timeToImpact);
@@ -214,11 +211,13 @@ class Entity extends ShootableObject {
   }
 
   tick() {
+    this._lastPos = new Vector(this.x, this.y);
     this.components.forEach((c) => c.tick(this));
     if (this.controllable) this.doAI();
     super.tick();
     this.calculateAttributeModifiers();
-    this._lastPos = new Vector(this.x, this.y);
+    this.computedVelocity = this.pos.sub(this._lastPos);
+    this.computedSpeed = this.computedVelocity.magnitude;
   }
 
   doAI() {
@@ -373,7 +372,7 @@ class Entity extends ShootableObject {
     for (let component of this.components) {
       component.draw(this.x, this.y, this.direction);
     }
-    if (PhysicalObject.debug) this._debugAI();
+    if (debug.ai) this._debugAI();
     super.draw();
   }
   /**Draws extra lines and stuff for AI debugging. */

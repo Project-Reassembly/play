@@ -164,11 +164,6 @@ class Chunk {
   tick() {
     iterate2DArray(this.blocks, (block) => block && !block.disabled && block.tick());
   }
-  draw() {
-    this.drawTiles();
-    this.drawOres();
-    this.drawBlocksOnly();
-  }
   drawTiles() {
     // translate(blockSize / 2, blockSize / 2);
     iterate2DArray(

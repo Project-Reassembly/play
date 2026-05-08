@@ -6,9 +6,10 @@ import { blockSize, Direction } from "../../scaling.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { ItemStack } from "../item/item-stack.js";
 import { ShootableObject } from "../physical.js";
+import { Block } from "./block.js";
 import { Container } from "./container.js";
 import { Crafter } from "./production/crafter.js";
-class Conveyor extends Container {
+class Conveyor extends Block {
   moveTime = 10;
   _progress = 0;
   rotatable = true;
@@ -18,9 +19,10 @@ class Conveyor extends Container {
   baseImg = "error";
   beltImg = "error";
   walkable = true;
+  istack = ItemStack.EMPTY;
   tick() {
     super.tick();
-    if (!this.inventory.get(0) || this.inventory.get(0).isEmpty()) return;
+    if (!this.istack || this.istack.isEmpty()) return;
     let vct = Direction.vectorOf(this.direction);
     let target =
       this.world.getBlock(this.gridX + vct.x, this.gridY + vct.y) ??
@@ -32,24 +34,26 @@ class Conveyor extends Container {
     if (this._progress >= this.moveTime) {
       if (!target) {
         DroppedItemStack.create(
-          this.inventory.get(0),
+          this.istack,
           this.world,
           posX * blockSize,
           posY * blockSize,
           100 / this.moveTime,
           degrees(this.direction),
         );
-        this.inventory.clear();
+        this.istack = ItemStack.EMPTY;
         this._progress = 0;
       }
-      let i = this.inventory.get(0);
+      let i = this.istack;
       if (target instanceof Container && target.inventory.canAddItem(i.item, i.count)) {
         this._progress = 0;
-        target.inventory.addItem(i.item, i.count);
-        if (target instanceof Conveyor && this.direction !== target.direction) {
-          target._progress = target.moveTime / 2;
-        }
-        this.inventory.clear();
+        target.inventory.addItem(i.item, 1);
+        this.istack.clear();
+      } else if (target instanceof Conveyor && target.istack.isEmpty()) {
+        this._progress = 0;
+        target.istack = this.istack;
+        this.istack = ItemStack.EMPTY;
+        if (this.direction !== target.direction) target._progress = target.moveTime / 2;
       }
     }
   }
@@ -68,10 +72,10 @@ class Conveyor extends Container {
   postDraw() {
     let vct = Direction.vectorOf(this.direction);
     let amt = this._progress / this.moveTime;
-    if (this.inventory.get(0) && !this.inventory.get(0).isEmpty()) {
+    if (this.istack && !this.istack.isEmpty()) {
       if (this.shape === "straight")
         drawImg(
-          this.inventory.get(0).getItem().image,
+          this.istack.getItem().image,
           this.x + vct.x * (amt - 0.5) * blockSize,
           this.y + vct.y * (amt - 0.5) * blockSize,
           20,
@@ -84,11 +88,8 @@ class Conveyor extends Container {
    * @param {Entity} entity
    */
   steppedOnBy(entity) {
-    if (
-      entity instanceof DroppedItemStack &&
-      this.inventory.canAddItem(entity.item.item, entity.item.count)
-    ) {
-      this.inventory.addItem(entity.item.item, entity.item.count);
+    if (entity instanceof DroppedItemStack && this.istack.isEmpty()) {
+      this.istack = entity.item;
       entity.dead = true;
     }
     let vct = Direction.vectorOf(this.direction);
@@ -96,7 +97,7 @@ class Conveyor extends Container {
     entity.move(vct.x * speed, vct.y * speed);
   }
   read() {
-    return this.inventory.get(0).item;
+    return this.istack.item;
   }
   createExtendedTooltip() {
     return [
@@ -104,6 +105,19 @@ class Conveyor extends Container {
       roundNum(60 / this.moveTime, 1) + " items/s",
       "🟨 -------------------- ⬜",
     ];
+  }
+  serialise() {
+    let b = super.serialise();
+    b.item = this.istack.serialise();
+    return b;
+  }
+  /**
+   * @param {Unloader} deserialised
+   * @param {object} creator
+   */
+  static applyExtraProps(deserialised, creator) {
+    super.applyExtraProps(deserialised, creator);
+    deserialised.istack = ItemStack.deserialise(creator.item);
   }
 }
 
@@ -118,15 +132,15 @@ class Unloader extends Conveyor {
     let extractFrom = this.world.getBlock(this.gridX - vct.x, this.gridY - vct.y);
     if (extractFrom instanceof Container) {
       if (extractFrom instanceof Crafter) {
-        if (extractFrom.results.hasItem(this.filter) && this.inventory.canAddItem(this.filter)) {
-          extractFrom.results.removeItem(this.filter);
-          this.inventory.addItem(this.filter);
+        if (extractFrom.results.hasItem(this.filter) && this.istack.isEmpty()) {
+          extractFrom.results.removeItem(this.filter, 1);
+          this.istack = new ItemStack(this.filter);
           return;
         }
       }
-      if (extractFrom.inventory.hasItem(this.filter) && this.inventory.canAddItem(this.filter)) {
-        extractFrom.inventory.removeItem(this.filter);
-        this.inventory.addItem(this.filter);
+      if (extractFrom.inventory.hasItem(this.filter) && this.istack.isEmpty()) {
+        extractFrom.inventory.removeItem(this.filter, 1);
+        this.istack = new ItemStack(this.filter);
       }
     }
   }
@@ -147,7 +161,7 @@ class Unloader extends Conveyor {
     super.highlight(emphasised);
     if (this.filter && this.filter !== "nothing") {
       let img = Registries.items.get(this.filter).image;
-      drawImg(img ?? "error", this.uiX - 9, this.uiY - 9, 15 * ui.camera.zoom, 15 * ui.camera.zoom);
+      drawImg(img, this.uiX - 9, this.uiY - 9, 15 * ui.camera.zoom, 15 * ui.camera.zoom);
     }
   }
   serialise() {

@@ -1,11 +1,13 @@
 import { create2DArray, iterate2DArray } from "../../core/2D-array.js";
+import { col } from "../../core/color.js";
 import { assign, constructFromType } from "../../core/constructor.js";
 import { tru } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { ui } from "../../core/ui.js";
+import { debug } from "../../play/debug.js";
 import { Explosion, NuclearExplosion } from "../../play/effects.js";
 import { contentScale, createPlayer } from "../../play/game.js";
-import { chunkSize, worldSize } from "../../scaling.js";
+import { blockSize, chunkSize, worldSize } from "../../scaling.js";
 import { Block } from "../block/block.js";
 import { GroundTile } from "../block/ground-tile.js";
 import { Particle } from "../effect/particle.js";
@@ -254,6 +256,21 @@ class World {
       if (!World.isInRenderDistance(particle, 1, 0, 0, 0, ui.camera.zoom)) continue;
       particle.draw();
     }
+    if (debug.chunkBorders) {
+      push();
+      rectMode(CORNER);
+      noFill();
+      col.stroke(col.red);
+      this.toRender.forEach((chunk) => {
+        rect(
+          (chunk.i * chunkSize - 0.5) * blockSize,
+          (chunk.y * chunkSize - 0.5) * blockSize,
+          chunkSize * blockSize,
+          chunkSize * blockSize,
+        );
+      });
+      pop();
+    }
   }
   drawSpace() {
     push();
@@ -365,9 +382,9 @@ class World {
     }
   }
   /**@returns {GroundTile?} */
-  getTileData(x,y){
-    let name = this.getTile(x,y);
-    if(!name) return;
+  getTileData(x, y) {
+    let name = this.getTile(x, y);
+    if (!name) return;
     return constructFromType(Registries.blocks.get(name), GroundTile);
   }
   blocksInSquare(x, y, size) {
@@ -408,21 +425,13 @@ class World {
       entities: this.entities.map((x) => x.serialise()),
       seed: this.seed,
       networks: this.networks.map((x) => x.serialise()),
-      events: this.events.map((x) => ({
-        duration: x.time,
-        name: x.name,
-        full: x.full,
-      })),
+      events: this.events.map((x) => ({ duration: x.time, name: x.name, full: x.full })),
     };
   }
   /**@param {SerialisedWorld} created  */
   static deserialise(created) {
     let wrold = new this();
-    wrold.events = created.events?.map((x) => ({
-      name: x.name,
-      time: x.duration,
-      full: x.full,
-    }));
+    wrold.events = created.events?.map((x) => ({ name: x.name, time: x.duration, full: x.full }));
     wrold.chunks = created.chunks?.map((x) => x.map((y) => Chunk.deserialise(y))) ?? [[]];
     created.entities?.forEach((entity) => {
       if (entity["-"]) {

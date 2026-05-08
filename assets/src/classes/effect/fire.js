@@ -1,6 +1,7 @@
-import { PhysicalObject } from "../physical.js";
+import { assign } from "../../core/constructor.js";
 import { tru } from "../../core/number.js";
-import { Block } from "../block/block.js";
+import { blockSize } from "../../scaling.js";
+import { PhysicalObject } from "../physical.js";
 class Fire extends PhysicalObject {
   damage = 1;
   type = "fire";
@@ -23,8 +24,8 @@ class Fire extends PhysicalObject {
     if (this._int <= 0) {
       this._int = this.interval;
       let blocks = this.world.getAdjacent(
-        Math.floor(this.x / Block.size),
-        Math.floor(this.y / Block.size)
+        Math.floor(this.x / blockSize),
+        Math.floor(this.y / blockSize)
       );
       blocks.forEach((blk) => {
         if (blk && blk.team !== this.team && blk.collidesWith(this))
@@ -49,9 +50,10 @@ class Fire extends PhysicalObject {
    */
   static create(opts) {
     let fire = new this();
-    Object.assign(fire, opts);
+    assign(fire, opts);
     opts.world.physobjs.push(fire);
     return fire;
   }
 }
 export { Fire };
+

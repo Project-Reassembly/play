@@ -204,7 +204,7 @@ const PlaceType = {
   /** The block is being changed from another one. */
   replace: Symbol(),
 };
-/**@param {Unconstructed<Block>} blockprops */
+/**@param {Unconstructed<Block>} blockprops @param {Unconstructed<Item>} itemprops @param {string} displayname @param {string} image @param {string} regname */
 function createLinkedBlockAndItem(regname, displayname, image, blockprops, itemprops) {
   Registries.blocks.add(
     regname,

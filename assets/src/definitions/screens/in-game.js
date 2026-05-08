@@ -16,7 +16,7 @@ import {
 import { deliverPlayer, game, gen, world } from "../../play/game.js";
 import { Log } from "../../play/messaging.js";
 import { totalSize } from "../../scaling.js";
-ui.reset();
+
 //##############################################################
 
 //                        INDICATORS
@@ -454,7 +454,7 @@ createHealthbarComponent(
 //Yoink all
 createUIComponent(
   ["in-game"],
-  ["containerselected:true"],
+  ["containerselected:true", "mode:build"],
   0,
   0,
   60,
@@ -478,7 +478,7 @@ createUIComponent(
 //Unyoink all
 createUIComponent(
   ["in-game"],
-  ["containerselected:true"],
+  ["containerselected:true", "mode:build"],
   0,
   0,
   60,
@@ -500,7 +500,7 @@ createUIComponent(
 //Unyoink present
 createUIComponent(
   ["in-game"],
-  ["containerselected:true"],
+  ["containerselected:true", "mode:build"],
   0,
   0,
   70,

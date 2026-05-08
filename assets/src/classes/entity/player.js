@@ -4,7 +4,7 @@ import { Registries } from "../../core/registry.js";
 import { ui, UIComponent } from "../../core/ui.js";
 import { autoScaledEffect } from "../../play/effects.js";
 import { Log } from "../../play/messaging.js";
-import { Direction } from "../../scaling.js";
+import { blockSize, Direction, totalSize } from "../../scaling.js";
 import { Inventory } from "../inventory.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { ItemStack } from "../item/item-stack.js";
@@ -141,8 +141,15 @@ class Player extends EquippedEntity {
           .replaceAll("(1)", this.name)
           .replaceAll("(2)", source?.name),
     );
-    console.log(source)
-    DroppedItemStack.create(Inventory.mouseItemStack, this.world, this.x, this.y, rnd.float(0, 360), 3);
+    console.log(source);
+    DroppedItemStack.create(
+      Inventory.mouseItemStack,
+      this.world,
+      this.x,
+      this.y,
+      rnd.float(0, 360),
+      3,
+    );
     Inventory.mouseItemStack.clear();
     respawnTimer.do(() => {
       ui.waitingForMouseUp = true;
@@ -152,6 +159,31 @@ class Player extends EquippedEntity {
   doAI() {
     if (this.target) {
       this.rotateTowards(this.target.x, this.target.y, this.turnSpeed);
+    }
+    const borders = [
+      -blockSize * 0.5,
+      -blockSize * 0.5,
+      totalSize - blockSize * 0.5,
+      totalSize - blockSize * 0.5,
+    ];
+
+    if (this.controllable) {
+      if (keyIsDown(87) && this.y > borders[1] /* Top */ + this.hitSize) {
+        //If 'W' pressed
+        this.move(0, -this.speed);
+      }
+      if (keyIsDown(83) && this.y < borders[3] /* Bottom */ - this.hitSize) {
+        //If 'S' pressed
+        this.move(0, this.speed);
+      }
+      if (keyIsDown(65) && this.x > borders[0] /* Left */ + this.hitSize) {
+        //If 'A' pressed
+        this.move(-this.speed, 0);
+      }
+      if (keyIsDown(68) && this.x < borders[2] /* Right */ - this.hitSize) {
+        //If 'D' pressed
+        this.move(this.speed, 0);
+      }
     }
   }
   serialise() {

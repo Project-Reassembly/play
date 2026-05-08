@@ -1,6 +1,6 @@
-import { Bullet } from "./bullet.js";
+import { debug } from "../../play/debug.js";
 import { PhysicalObject } from "../physical.js";
-import { Block } from "../block/block.js";
+import { Bullet } from "./bullet.js";
 class VirtualBullet extends Bullet {
   team = "neutral";
   _ent = null;
@@ -9,11 +9,18 @@ class VirtualBullet extends Bullet {
     delete this.entity;
   }
   draw() {
-    PhysicalObject.prototype.draw.call(this);
+    if (debug.hitboxes) {
+        push();
+        noFill();
+        stroke(0, 255, 0);
+        strokeWeight(2);
+        circle(this.x, this.y, this.hitSize);
+        pop();
+      }
   }
   step(dt) {
     if (!this.remove) {
-      if (!this.remove) this.intervalTick();
+      this.intervalTick();
       this.checkCollisions();
       this.remove = true;
     }
@@ -24,5 +31,10 @@ class VirtualBullet extends Bullet {
   set entity(_) {
     this._ent = _;
   }
+  /**@param {PhysicalObject} other  */
+  collidesWith(other){
+    return other && this.pos.sub(other.pos).magnitude < (this.hitSize*0.5 + other.hitSize*0.5)
+  }
 }
 export { VirtualBullet };
+

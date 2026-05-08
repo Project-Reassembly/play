@@ -3,6 +3,7 @@ import { construct, constructFromType } from "../../../core/constructor.js";
 import * as MLF1 from "../../../core/mlf1.js";
 import { turn, Vector } from "../../../core/number.js";
 import { drawImg, rotatedImg } from "../../../core/ui.js";
+import { debug } from "../../../play/debug.js";
 import { autoScaledEffect } from "../../../play/effects.js";
 import { blockSize } from "../../../scaling.js";
 import { TextParticle } from "../../effect/text-particle.js";
@@ -135,7 +136,7 @@ export class TurretController extends TurretBase {
     if (this.shootCone === -1) this.shootCone = this.turnSpeed * 2;
   }
   postDraw2() {
-    if (PhysicalObject.debug) this._debugAI();
+    if (debug.ai) this._debugAI();
     this.turret?.component?.draw(
       this.x,
       this.y,

@@ -1,4 +1,5 @@
 import { construct } from "../../core/constructor.js";
+import { debug } from "../../play/debug.js";
 import { Inventory } from "../inventory.js";
 import { Equippable } from "../item/equippable.js";
 import { ItemStack } from "../item/item-stack.js";
@@ -148,7 +149,7 @@ class EquippedEntity extends InventoryEntity {
     d(this.body.get(0)?.getItem());
     d(this.head.get(0)?.getItem());
     PhysicalObject.prototype.draw.call(this);
-    if (PhysicalObject.debug) this._debugAI();
+    if (debug.ai) this._debugAI();
   }
   serialise() {
     let e = super.serialise();

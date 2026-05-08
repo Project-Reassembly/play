@@ -29,6 +29,7 @@ Registries.entities.add("scrap-player", {
     width: 32,
     height: 11,
     yOffset: 13,
+    xOffset: 6,
     image: "arm.scrap",
   },
   team: "scrap",
@@ -153,6 +154,7 @@ Registries.entities.add("iti-player", {
     width: 32,
     height: 11,
     yOffset: 13,
+    xOffset: 6,
     image: "arm.iti",
   },
   team: "iti",
@@ -528,6 +530,7 @@ Registries.entities.add("scavenger", {
       image: "entity.scrap-sentinel.head",
       width: 32,
       height: 32,
+      xOffset: -3,
     },
     {
       image: "entity.scrap-sentinel.body",
@@ -566,6 +569,7 @@ Registries.entities.add("scavenger", {
     width: 32,
     height: 11,
     yOffset: 13,
+    xOffset: 6,
     image: "arm.scrap",
   },
   ammo: [
@@ -629,6 +633,7 @@ Registries.entities.add("scrap-sentinel", {
     width: 35,
     height: 12,
     yOffset: 15,
+    xOffset: 7,
     image: "arm.scrap",
   },
   ammo: [
@@ -701,6 +706,7 @@ Registries.entities.add("iti-corporate-merchant", {
     width: 35,
     height: 12,
     yOffset: 15,
+    xOffset: 7,
     image: "arm.iti",
   },
   rightHand: [

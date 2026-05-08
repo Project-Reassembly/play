@@ -18,9 +18,9 @@ Registries.worldgen.add("ore-generator", {
   type: "ore-generator",
   stageTitle: "Exposing Resources...",
   ores: [
-    { threshold: 100, scale: 6, octaves: 3, falloff: 0.8, tile: "coal-ore" },
-    { threshold: 70, scale: 4, tile: "copper-ore" },
-    { threshold: 67, scale: 5, tile: "iron-ore", target: "stone" },
+    { threshold: 98, scale: 2, octaves: 3, falloff: 0.8, tile: "coal-ore" },
+    { threshold: 75, scale: 2, tile: "copper-ore" },
+    { threshold: 65, scale: 7, tile: "iron-ore", target: "stone" },
     { threshold: 72, scale: 3, tile: "electrum-ore", target: "stone" },
   ],
 });

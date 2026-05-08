@@ -1,6 +1,7 @@
 import { col } from "../core/color.js";
 import { Vector, clamp, rnd, roundNum, turn } from "../core/number.js";
 import Integrate from "../lib/integrate.js";
+import { debug } from "../play/debug.js";
 import { emitEffect } from "../play/effects.js";
 import { blockSize } from "../scaling.js";
 import { TextParticle } from "./effect/text-particle.js";
@@ -219,7 +220,7 @@ export class PhysicalObject extends Integrate.RegisteredItem {
   }
 
   draw() {
-    if (PhysicalObject.debug) {
+    if (debug.hitboxes) {
       push();
       noFill();
       stroke(0, 255, 0);
@@ -499,5 +500,3 @@ function createFlashingColourArray(basecol, lightness = 255) {
   let lcol = col.lighten(basecol, lightness);
   return [basecol, lcol, basecol, lcol, basecol, lcol, basecol, lcol, basecol];
 }
-
-window.debug = () => (PhysicalObject.debug = !PhysicalObject.debug);

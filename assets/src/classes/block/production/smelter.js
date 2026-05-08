@@ -16,7 +16,7 @@ class Smelter extends Crafter {
         super.createTickEffect();
       }
     } else {
-      for (let item of Object.keys(this.fuelTypes)) {
+      for (let item in this.fuelTypes) {
         let time = this.fuelTypes[item];
         if (this.inventory.hasItem(item)) {
           this.setFuel(time);

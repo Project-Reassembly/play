@@ -1,6 +1,7 @@
 import { col } from "../../../core/color.js";
 import { construct, constructFromType } from "../../../core/constructor.js";
 import { turn, Vector } from "../../../core/number.js";
+import { debug } from "../../../play/debug.js";
 import { autoScaledEffect } from "../../../play/effects.js";
 import { blockSize } from "../../../scaling.js";
 import { WeaponComponent } from "../../entity/component.js";
@@ -260,7 +261,7 @@ class Turret extends Container {
     }
   }
   postDraw2() {
-    if (PhysicalObject.debug) this._debugAI();
+    if (debug.ai) this._debugAI();
   }
   _debugAI() {
     push();

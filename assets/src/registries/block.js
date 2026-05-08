@@ -1020,7 +1020,7 @@ createLinkedBlockAndItem(
   "conveyor.scrap-conveyor.ui",
   {
     type: "conveyor",
-    moveTime: 180,
+    moveTime: 18,
     baseImg: "base.scrap",
     beltImg: "conveyor.scrap-conveyor.belt",
   },
@@ -1036,7 +1036,7 @@ createLinkedBlockAndItem(
   "conveyor.scrap-unloader.ui",
   {
     type: "unloader",
-    moveTime: 180,
+    moveTime: 18,
     baseImg: "base.scrap",
     beltImg: "conveyor.scrap-unloader.belt",
   },
@@ -1053,7 +1053,7 @@ createLinkedBlockAndItem(
   "conveyor.basic-conveyor.ui",
   {
     type: "conveyor",
-    moveTime: 120,
+    moveTime: 15,
     baseImg: "base.basic",
     beltImg: "conveyor.basic-conveyor.belt",
   },
@@ -1068,7 +1068,7 @@ createLinkedBlockAndItem(
   "conveyor.basic-unloader.ui",
   {
     type: "unloader",
-    moveTime: 120,
+    moveTime: 15,
     baseImg: "base.basic",
     beltImg: "conveyor.basic-unloader.belt",
   },
@@ -1178,7 +1178,7 @@ createLinkedBlockAndItem(
     otherPart: "scrap-turret-base"
   },
   {
-    description: "Mounting point for turrets.\nMaximum size depends on number of bases.\nPlace them in a cross-shaped pattern.",
+    description: "Mounting point for turrets.\nMaximum size depends on number of bases.\nPlace them in a cross-shaped pattern, with the controller in the center.",
     marketValue: 100
   }
 );
