@@ -226,6 +226,7 @@ class World {
   drawAll() {
     this.toRender.forEach((chunk) => chunk.drawTiles());
     this.toRender.forEach((chunk) => chunk.drawOres());
+    this.drawSpace();
     for (let particle of this.floorParticles) {
       if (!World.isInRenderDistance(particle, 1, 0, 0, 0, ui.camera.zoom)) continue;
       particle.draw();

@@ -1192,6 +1192,7 @@ createLinkedBlockAndItem(
     otherPart: "peti-turret-controller"
   },
   {
+    corp: "peti",
     description: "Block to increase the maximum size of turrets on a PETI Turret Controller.\n#5iPreview Content",
     marketValue: 200 // 3 plates = 15
   }
@@ -1207,6 +1208,7 @@ createLinkedBlockAndItem(
     maxSize: 6,
   },
   {
+    corp: "peti",
     description: "Mounting point for PETI turrets.\nMaximum size depends on number of bases.\nPlace them in a cross-shaped pattern.\n#5iPreview Content",
     marketValue: 1000
   }
@@ -1222,7 +1224,7 @@ createLinkedBlockAndItem(
   {
     description:
       "Pressurises and superheats gas in the atmosphere into plasma.\n#5iPreview Content",
-    rarity: Item.rarity.PETI,
+    corp: "peti",
     marketValue: 5200,
   }
 );
@@ -1237,7 +1239,7 @@ createLinkedBlockAndItem(
   },
   {
     description: "Stores plasma for later use.\n#5iPreview Content",
-    rarity: Item.rarity.PETI,
+    corp: "peti",
     marketValue: 3250,
   }
 );
@@ -1257,7 +1259,7 @@ createLinkedBlockAndItem(
   {
     description:
       "A pressurised pipe for moving high-temperature ionised gas, known as plasma.\n#5iPreview Content",
-    rarity: Item.rarity.PETI,
+    corp: "peti",
     marketValue: 500,
   }
 );
@@ -1279,7 +1281,7 @@ createLinkedBlockAndItem(
   {
     description:
       "A specialised pipe for increasing the pressure of plasma, allowing more to fit through the same pipes.\n2 pipes in , 1 pipe out.\n\nCan't compress plasma above 12 bar.\n#5iPreview Content",
-    rarity: Item.rarity.PETI,
+    corp: "peti",
     marketValue: 1500,
   }
 );
@@ -1297,7 +1299,7 @@ createLinkedBlockAndItem(
   {
     description:
       "A specialised pipe for decreasing the pressure of plasma, allowing other blocks to use it.\n1 pipe in , 2 pipes out.\n\nCan't decompress plasma below 1 bar.\n#5iPreview Content",
-    rarity: Item.rarity.PETI,
+    corp: "peti",
     marketValue: 1500,
   }
 );
@@ -1340,7 +1342,7 @@ createLinkedBlockAndItem(
   {
     description:
       "Launches batches of items to space, ready to be collected by ITI.",
-    rarity: Item.rarity.ITI,
+    corp: "iti",
   }
 );
 createLinkedBlockAndItem(
@@ -1354,7 +1356,7 @@ createLinkedBlockAndItem(
   {
     description:
       "Buys items from ITI, and receives them.\nMust be given an item to use for reference.",
-    rarity: Item.rarity.ITI,
+    corp: "iti",
   }
 );
 //## DEV ##

@@ -1,4 +1,5 @@
-import { colinterp, rnd } from "../../core/number.js";
+import { col } from "../../core/color.js";
+import { rnd } from "../../core/number.js";
 import { ui } from "../../core/ui.js";
 import { totalSize } from "../../scaling.js";
 import { Particle } from "./particle.js";
@@ -62,11 +63,11 @@ function setup() {
 }
 
 function draw(g) {
-  g.fill(
-    colinterp(
+  col.fillOn(g,
+    col.interp(
       [
-        [25, 0, 64],
-        [0, 0, 0],
+        col.from(25, 0, 64),
+        col.black,
       ],
       0.5 + Math.sin(frameCount / 60) / 2
     )

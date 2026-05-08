@@ -588,7 +588,7 @@ Registries.items.add("iti-laser-pistol", {
   type: "weapon",
   name: "Laser Pistol",
   marketValue: 0,
-  rarity: Item.rarity.ITI,
+  corp: "iti",
   description:
     "Shoots medium-range small laser beams which inflict #i-Plasma Burn#-- on enemies.\n#6iStandard Issue",
   image: "weapon.iti-laser-pistol.item",
@@ -653,7 +653,7 @@ Registries.items.add("iti-laser-caster", {
   type: "weapon",
   name: "Laser Caster",
   marketValue: 2500,
-  rarity: Item.rarity.ITI,
+  corp: "iti",
   description:
     "Fires fast-moving incendiary bolts of explosive plasma.\nBolts release smaller fragments on hit, which home in on enemies and set them on fire.",
   image: "weapon.iti-laser-caster.item",
@@ -1039,7 +1039,7 @@ Registries.items.add("iti-energy-repeater", {
   type: "weapon",
   name: "Energy Repeater",
   marketValue: 2000,
-  rarity: Item.rarity.ITI,
+  corp: "iti",
   description:
     "Rapid-fire mind-guided laser weapon. Homes in on whatever you want it to.\nShoots quickfire bursts of plasma bolts.\nAlt-fire to charge a larger explosive bolt.",
   image: "weapon.iti-energy-repeater.item",
@@ -1402,7 +1402,7 @@ Registries.items.add("peti-charged-laser-blaster", {
   type: "weapon",
   name: "Charged Laser Blaster",
   marketValue: 0,
-  rarity: Item.rarity.PETI,
+  corp: "peti",
   description:
     "Mid-range laser weapon.\nCharges up and shoots a medium-damage single-target laser, along with a secondary inaccurate burst of low-damage lasers.\n#6iStandard Issue",
   image: "weapon.peti-charged-laser-blaster.item",
@@ -1482,7 +1482,7 @@ Registries.items.add("peti-electrified-plasma-launcher", {
   type: "weapon",
   name: "Electrified Plasma Launcher",
   marketValue: 500,
-  rarity: Item.rarity.PETI,
+  corp: "peti",
   description:
     "Shoots a pair of charged balls of energy.\nBalls explode when near enemies, releasing high-damage lightning which arcs between them.",
   image: "weapon.peti-charged-laser-blaster.item",
@@ -1577,7 +1577,7 @@ Registries.items.add("peti-plasma-railgun", {
   type: "weapon",
   name: "Plasma Railgun",
   marketValue: 10000,
-  rarity: Item.rarity.PETI,
+  corp: "peti",
   description: "Pierces targets with a massive bolt of red plasma.",
   image: "weapon.peti-plasma-railgun.item",
   range: 1000,
@@ -1633,65 +1633,6 @@ Registries.items.add("peti-plasma-railgun", {
   },
 });
 
-Registries.items.add("peti-remote-railgun", {
-  type: "weapon",
-  name: "Remote Railgun",
-  marketValue: 30000,
-  rarity: 8,
-  description: "#~ Pew.\n#5iPreview Content",
-  image: "weapon.peti-remote-railgun.item",
-  range: 1000,
-  recoil: 0,
-  shootX: 42,
-  shootY: -1,
-  bullets: {
-    types: [
-      {
-        lifetime: 100,
-        extraUpdates: 99,
-        light: 70,
-        speed: 10,
-        trail: true,
-        hitSize: 10,
-        conditionalPierce: true,
-        trailShape: "rhombus",
-        trailEffect: "plasma-railgun-trail",
-        hitEffect: "plasma-railgun-hit~70",
-        knockback: 50,
-        drawer: {
-          hidden: true,
-        },
-        damage: [
-          {
-            type: "laser",
-            amount: 4500,
-            spread: 500,
-          },
-        ],
-        despawnEffect: "plasma-railgun-impact~120",
-      },
-    ],
-    ammos: {
-      none: 0,
-    },
-  },
-  shoot: {
-    charge: 100,
-    reload: 360,
-    chargeEffect: "plasma-railgun-charge",
-    effect: "plasma-railgun-fire",
-  },
-  component: {
-    type: "weapon-component",
-    width: 83,
-    height: 20,
-    yOffset: 5,
-    image: "weapon.peti-remote-railgun.component",
-    recoil: 14,
-    rotationalRecoil: 0,
-    recoilSpeed: 0.1,
-  },
-});
 //Weapons > Experimental
 Registries.items.add("astral-blaster", {
   type: "weapon",
@@ -2141,7 +2082,7 @@ Registries.items.add("iti-energy-cell", {
   description:
     "A kind of battery manufactured by InfiniTech Industries.\nCan boost most energy-using things, including you and weapons.",
   image: "item.iti-energy-cell",
-  rarity: Item.rarity.ITI,
+  corp: "iti",
   stackSize: 200,
   attributeModifiers: {
     speed: 1.1,
@@ -2155,14 +2096,14 @@ Registries.items.add("iti-plasma-cell", {
   description:
     "More powerful version of the Energy Cell, designed for better weapon boosting.\nWon't boost players.",
   image: "item.iti-plasma-cell",
-  rarity: Item.rarity.ITI,
+  corp: "iti",
   stackSize: 200,
 });
 Registries.items.add("iti-destabilised-cell", {
-  name: "#c*Destabilised#fn Energy Cell",
+  name: "#c*Destabilised#@n Energy Cell",
   marketValue: 7500,
   description: "Is this even ITI?",
   image: "item.iti-destabilised-cell",
-  rarity: Item.rarity.ITI,
+  corp: "iti",
   stackSize: 200,
 });

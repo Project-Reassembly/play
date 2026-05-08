@@ -37,7 +37,7 @@ export const Decoration = new (class DecorationConsts {
       //Special, cycles yellow to gold and back
       return col.from(
         255,
-        230 + Math.sin(effectTimer.ticks / 30) * 30,
+        230 + Math.sin(effectTimer.ticks / 30) * 25,
         130 + Math.sin(effectTimer.ticks / 30) * 20,
       );
     },

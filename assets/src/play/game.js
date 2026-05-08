@@ -15,7 +15,7 @@ import { Chunk } from "../classes/world/chunk.js";
 import { World } from "../classes/world/world.js";
 import { iterate2DArray } from "../core/2D-array.js";
 import { Decoration } from "../core/cmft.js";
-import { assign, construct } from "../core/constructor.js";
+import { assign, construct, constructFromType } from "../core/constructor.js";
 import { Cutscene } from "../core/cutscene.js";
 import { clamp, rnd, roundNum, tru } from "../core/number.js";
 import { PreloadRegistries, Registries } from "../core/registry.js";
@@ -23,10 +23,12 @@ import { Serialiser } from "../core/serialiser.js";
 import { ImageContainer, rotatedShape, ui, UIComponent } from "../core/ui.js";
 import "../definitions/screens/any.js";
 import "../definitions/screens/in-game.js";
-import { creation } from "../definitions/screens/new-game.js";
+import { creation, selectors } from "../definitions/screens/new-game.js";
 import { loadStats, setupTips } from "../definitions/screens/title.js";
 import { cmdHistory } from "../definitions/text-edit.js";
 
+import { StatusEffect } from "../classes/effect/status-effect.js";
+import { Corporation } from "../classes/item/corporation.js";
 import "../lib/isl.js";
 import { exec, ExecutionContext } from "../lib/isl.js";
 import { blockSize, totalSize } from "../scaling.js";
@@ -670,6 +672,12 @@ globalThis.preload = async function () {
   });
   console.log(`Loaded ${loadStats.cutscenes}/${loadStats.totalCutscenes} cutscenes.`);
 
+  PreloadRegistries.stati.forEach((el, name) => {
+    Registries.statuses.add(name, constructFromType(el, StatusEffect));
+  });
+
+  selectors();
+
   loadStats.hide();
   console.log("All assets loaded.");
 };
@@ -955,8 +963,6 @@ function gameFrame() {
   rect(...borders());
   pop();
 
-  world.drawSpace();
-
   pop();
 }
 
@@ -1099,7 +1105,8 @@ function createPlayer(player = null, x, y, playerType = "iti-player") {
 
 // Makes a player with a bang
 function deliverPlayer(player = null, x, y, moveCamera = false, corp = "iti", iworld = world) {
-  createPlayer(player, x, y, corp + "-player");
+  const crp = constructFromType(Registries.corps.get(corp), Corporation);
+  createPlayer(player, x, y, crp.player);
   game.player.health = game.player.maxHealth;
   game.player.statuses = {};
   game.player.team = corp;

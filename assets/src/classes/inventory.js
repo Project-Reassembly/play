@@ -5,6 +5,7 @@ import { dynamicSort, shortenedNumber, tru } from "../core/number.js";
 import { lookup, Registries } from "../core/registry.js";
 import { drawImg, ui } from "../core/ui.js";
 import { fonts } from "../play/game.js";
+import { Corporation } from "./item/corporation.js";
 import { DroppedItemStack } from "./item/dropped-itemstack.js";
 import { Item } from "./item/item.js";
 /**
@@ -353,7 +354,7 @@ class Inventory {
       if (stopped) break;
     }
   }
-
+  /**@type {({item: Item, count: number, stackSize: number})} */
   static tooltip = {};
   static mouseItemStack = ItemStack.EMPTY;
   /**
@@ -575,10 +576,11 @@ class Inventory {
     //   20,
     //   Item.getColourFromRarity(this.tooltip.item.rarity, "light")
     // );
-    this.tooltip.item.title.draw(
+    this.tooltip.item.tooltip.draw(
       ui.mouse.x + 10,
       ui.mouse.y + 10,
       undefined,
+      Corporation.color(this.tooltip.item.corp) ||
       Item.getColourFromRarity(this.tooltip.item.rarity, "light"),
     );
 

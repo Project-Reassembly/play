@@ -1,25 +1,30 @@
 import * as CMFT from "../../core/cmft.js";
+import { col } from "../../core/color.js";
 import { rnd, tru } from "../../core/number.js";
 import Integrate from "../../lib/integrate.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
+import { Corporation } from "./corporation.js";
 class Item extends Integrate.RegisteredItem {
   image = "error";
   name = "<unnamed item>";
   description = "<no description>";
   rarity = 0;
+  corp = "";
   stackSize = 100;
 
   marketValue = 0;
 
   _cachedTooltip = null;
-  /**@type {CMFTTextDrawer} */
+  /**@type {CMFT.Drawer} */
   tooltip = null;
   init() {
     // this.description = wrapWords(this.description, 40);
-    this.title = CMFT.drawer("#@b" + this.name + "#--", 25, 40).conjoin(
+    this.tooltip = CMFT.drawer(`${this.corp ? `#>>${Corporation.icon(this.corp)}#@b` : "#@b"}${this.name}#--`, 25, 40).conjoin(
       CMFT.drawer(
         this.description +
-          (this.marketValue > 0 ? "\n#a-Sell value: $" + this.marketValue : "\n#4iNo sell value"),
+          (this.marketValue > 0 ?
+            `\n#a-Sell value: \$${shortenedNumber(this.marketValue, 2, 4)}`
+          : "\n#4iNo sell value"),
         20,
         40,
       ),
@@ -57,8 +62,8 @@ class Item extends Integrate.RegisteredItem {
             0,
             "rhombus",
             [
-              Item.getColourFromRarity(Item.rarity.SPECIAL, "light"),
-              Item.getColourFromRarity(Item.rarity.SPECIAL, "dark"),
+              col.lighten(Item.getColourFromRarity(Item.rarity.SPECIAL), 30),
+              col.darken(Item.getColourFromRarity(Item.rarity.SPECIAL), 30),
             ],
             size,
             0,
@@ -71,10 +76,7 @@ class Item extends Integrate.RegisteredItem {
   }
   getContextualisedInfo(entity) {}
   getInformativeTooltip() {
-    if (!this._cachedTooltip)
-      this._cachedTooltip = this.createExtendedTooltip().concat(
-        "🟩Sell value: $" + this.marketValue + "⬜",
-      );
+    if (!this._cachedTooltip) this._cachedTooltip = this.createExtendedTooltip();
     return this._cachedTooltip;
   }
   getTooltipDrawer() {

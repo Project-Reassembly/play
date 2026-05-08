@@ -476,49 +476,6 @@ Registries.entities.add("peti-player", {
     },
   ],
 });
-Registries.entities.add("v-player", {
-  type: "player",
-  name: "->--<-",
-  health: 10,
-  armour: 1000,
-  light: 100,
-  components: [
-    {
-      image: "npc.v.player.head",
-      width: 32,
-      height: 32,
-      xOffset: -3,
-    },
-    {
-      image: "npc.v.generic.body",
-      width: 32,
-      height: 32,
-    },
-    {
-      type: "leg-component",
-      image: "npc.v.generic.legs",
-      width: 32,
-      height: 32,
-    },
-  ],
-  armType: {
-    width: 32,
-    height: 11,
-    yOffset: 13,
-    image: "arm.v",
-  },
-  team: "v",
-  width: 25,
-  height: 25,
-  speed: 6,
-  assemblySlots: 0,
-  rightHand: [
-    {
-      item: "peti-charged-laser-blaster"
-    },
-  ],
-});
-
 
 Registries.entities.add("scavenger", {
   name: "Scavenger",

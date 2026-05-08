@@ -9,6 +9,7 @@ import "../registries/type.js";
 console.log("[Setup] Imported types");
 
 import "../registries/block.js";
+import "../registries/corps.js";
 import "../registries/entity.js";
 import "../registries/item.js";
 
@@ -24,8 +25,8 @@ Integrate.addModdableRegistry(Registries.items, "items");
 Integrate.addModdableRegistry(Registries.entities, "entities");
 Integrate.addModdableRegistry(PreloadRegistries.images, "images");
 Integrate.addModdableRegistry(PreloadRegistries.cutscenes, "cutscenes");
-//Not yet...
-//Integrate.addModdableRegistry(Registries.statuses, "statuses");
+Integrate.addModdableRegistry(Registries.corps, "corporations");
+Integrate.addModdableRegistry(PreloadRegistries.stati, "statuses");
 Integrate.addModdableRegistry(Registries.vfx, "vfx");
-Integrate.addModdableRegistry(Registries.worldgen, "worldgen");
+Integrate.addModdableRegistry(Registries.worldgen, "world-generators");
 console.log("[Setup] Added moddable registries");

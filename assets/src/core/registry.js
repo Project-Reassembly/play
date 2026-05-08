@@ -1,3 +1,4 @@
+
 import Integrate from "../lib/integrate.js";
 /** 
  * @import { Block } from "../classes/block/block.js"
@@ -8,6 +9,7 @@ import Integrate from "../lib/integrate.js";
  * @import { VisualEffect } from "../play/effects.js"
  * @import { Generator } from "../classes/world/generator.js"
  * @import { Cutscene } from "./cutscene.js"
+ * @import { Corporation } from "../classes/item/corporation.js";
  */
 /// <reference path="../lib/integrate"/>
 
@@ -27,6 +29,8 @@ const Registries = Object.freeze({
   vfx: new Integrate.Registry(),
   /**@readonly @type {Integrate.Registry<Generator>} */
   worldgen: new Integrate.Registry(),
+  /**@readonly @type {Integrate.Registry<Corporation>} */
+  corps: new Integrate.Registry(),
   //Slightly odd registries
   /**@readonly @type {Integrate.Registry<[string[], string[]]>} */
   deathmsg: new Integrate.Registry(),
@@ -46,6 +50,8 @@ const PreloadRegistries = Object.freeze({
   images: new Integrate.Registry(),
   /**@readonly @type {Integrate.Registry<PreloadResource>} */
   cutscenes: new Integrate.Registry(),
+  /**@readonly @type {Integrate.Registry<StatusEffect>} */
+  stati: new Integrate.Registry(),
 });
 
 /**
