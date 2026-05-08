@@ -1,36 +1,37 @@
+import "../lib/int-setup.js";
+
+// stuff
 import { Block, BreakType } from "../classes/block/block.js";
 import { Container } from "../classes/block/container.js";
+import { Space } from "../classes/effect/space-renderer.js";
 import { Player, respawnTimer } from "../classes/entity/player.js";
 import { Inventory } from "../classes/inventory.js";
+import { DroppedItemStack } from "../classes/item/dropped-itemstack.js";
 import { Equippable } from "../classes/item/equippable.js";
 import { ItemStack } from "../classes/item/item-stack.js";
 import { PlaceableItem } from "../classes/item/placeable.js";
+import { patternedBulletExpulsion } from "../classes/projectile/yeeter.js";
 import { Chunk } from "../classes/world/chunk.js";
 import { World } from "../classes/world/world.js";
-import { construct } from "../core/constructor.js";
+import { iterate2DArray } from "../core/2D-array.js";
+import { Decoration } from "../core/cmft.js";
+import { assign, construct } from "../core/constructor.js";
+import { Cutscene } from "../core/cutscene.js";
 import { clamp, rnd, roundNum, tru } from "../core/number.js";
 import { PreloadRegistries, Registries } from "../core/registry.js";
 import { Serialiser } from "../core/serialiser.js";
 import { ImageContainer, rotatedShape, ui, UIComponent } from "../core/ui.js";
-import { } from "../lib/isl.js";
-import { createEffect, effectTimer, emitEffect, Explosion } from "./effects.js";
-import { Log } from "./messaging.js";
-//is integration time
-import { Space } from "../classes/effect/space-renderer.js";
-import { DroppedItemStack } from "../classes/item/dropped-itemstack.js";
-import { patternedBulletExpulsion } from "../classes/projectile/yeeter.js";
-import { } from "../lib/int-setup.js";
-import { exec, ExecutionContext } from "../lib/isl.js";
-import { blockSize, totalSize } from "../scaling.js";
-import { fonts } from "./font.js";
-//Make the ui exist
-import { iterate2DArray } from "../core/2D-array.js";
-import { Decoration } from "../core/cmft.js";
-import { Cutscene } from "../core/cutscene.js";
-import { } from "../definitions/screens/in-game.js";
+import "../definitions/screens/in-game.js";
 import { creation } from "../definitions/screens/new-game.js";
 import { loadStats, setupTips } from "../definitions/screens/title.js";
 import { cmdHistory } from "../definitions/text-edit.js";
+
+import "../lib/isl.js";
+import { exec, ExecutionContext } from "../lib/isl.js";
+import { blockSize, totalSize } from "../scaling.js";
+import { createEffect, effectTimer, emitEffect, Explosion } from "./effects.js";
+import { fonts } from "./font.js";
+import { Log } from "./messaging.js";
 let histIndex = 0;
 const game = {
   saveslot: 1,
@@ -241,43 +242,49 @@ try {
           gen.stageProgress = ev.data.progress;
         }
         if (ev.data.type === "chunk") {
-          let def = ev.data.def;
-          let chunk = new Chunk();
-          chunk.tiles = def.tiles;
-          iterate2DArray(chunk.tiles, (e, y, x) => {
-            if (Registries.blocks.has(e)) {
-              stats.placed[e] ??= 0;
-              stats.placed[e]++;
-            } else {
-              chunk.tiles[y][x] = null;
-              stats.failed++;
+          const def = ev.data.def,
+            chunk = world.chunks[def.j][def.i] ?? new Chunk(),
+            layer = ev.data.layer ?? "tiles",
+            target = ev.data.target;
 
-              stats.placed[`~${e}`] ??= 0;
-              stats.placed[`~${e}`]++;
-            }
-          });
-          for (let tile of def.blocks) {
-            //Create block, and overwrite properties
-            try {
-              Object.assign(
-                chunk.addBlock(tile.block, tile.x, tile.y, "blocks"),
-                def.construction ?? {},
-              );
+          chunk[layer] = def.entries;
+          if (target) {
+            // console.log("builder targets: " + target);
+            iterate2DArray(chunk[layer], (e, y, x) => {
+              if (e) {
+                if (chunk.tiles[y][x] === target) {
+                  if (Registries.blocks.has(e)) {
+                    stats.placed[e] ??= 0;
+                    stats.placed[e]++;
+                  } else {
+                    chunk[layer][y][x] = null;
+                    stats.failed++;
 
-              stats.placed[tile.block] ??= 0;
-              stats.placed[tile.block]++;
-            } catch (e) {
-              console.warn("Worldgen Error:\n" + e);
-              stats.failed++;
+                    stats.placed[`~${e}`] ??= 0;
+                    stats.placed[`~${e}`]++;
+                  }
+                } else chunk[layer][y][x] = null;
+              }
+            });
+          } else
+            iterate2DArray(chunk[layer], (e, y, x) => {
+              if (e)
+                if (Registries.blocks.has(e)) {
+                  stats.placed[e] ??= 0;
+                  stats.placed[e]++;
+                } else {
+                  chunk[layer][y][x] = null;
+                  stats.failed++;
 
-              stats.placed[`~${tile.block}`] ??= 0;
-              stats.placed[`~${tile.block}`]++;
-            }
-          }
+                  stats.placed[`~${e}`] ??= 0;
+                  stats.placed[`~${e}`]++;
+                }
+            });
           chunk.world = world;
           chunk.i = def.i;
           chunk.j = def.j;
           world.chunks[def.j][def.i] = chunk;
+          // console.log(chunk, layer);
         }
         if (ev.data.type === "build") {
           let successful = true;
@@ -291,12 +298,7 @@ try {
             ) {
               if (block.block)
                 try {
-                  let blk = world.placeAt(
-                    block.block,
-                    ev.data.x + block.x,
-                    ev.data.y + block.y,
-                    block.layer ?? "blocks",
-                  );
+                  let blk = world.placeAt(block.block, ev.data.x + block.x, ev.data.y + block.y);
                   Object.assign(blk, block.construction ?? {});
 
                   blk.direction = Block.dir.fromEnum(block.direction);
@@ -337,6 +339,25 @@ try {
           stats.structures[successful ? ev.data.name : `~${ev.data.name}`] ??= 0;
           stats.structures[successful ? ev.data.name : `~${ev.data.name}`]++;
         }
+        if (ev.data.type === "ores") {
+          let successful = true;
+          for (let block of ev.data.ores) {
+            if (block.block)
+              try {
+                world.setOre(block.block, ev.data.x + block.x, ev.data.y + block.y);
+
+                stats.placed[`​[Struct Ore] ${block.block}`] ??= 0;
+                stats.placed[`​[Struct Ore] ${block.block}`]++;
+              } catch (e) {
+                console.warn("Worldgen Error:\n" + e);
+                successful = false;
+                stats.failed++;
+
+                stats.placed[`​[Struct Ore] ~${block.block}`] ??= 0;
+                stats.placed[`​[Struct Ore] ~${block.block}`]++;
+              }
+          }
+        }
         if (ev.data.type === "place") {
           if (!ev.data.target || world.getTile(ev.data.x, ev.data.y) === ev.data.target)
             if (
@@ -347,7 +368,7 @@ try {
                     world.getBlock(ev.data.x, ev.data.y, "floor")?.buildable)))
             ) {
               try {
-                Object.assign(
+                assign(
                   world.placeAt(ev.data.block, ev.data.x, ev.data.y, ev.data.layer),
                   ev.data.construction ?? {},
                 );

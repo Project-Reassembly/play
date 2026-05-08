@@ -1,22 +1,22 @@
 import { PreloadRegistries, Registries } from "../core/registry.js";
 import Integrate from "./integrate.js";
 //Set up hardcoded stuff
-import { } from "../registries/cutscene.js";
-import { } from "../registries/images.js";
+import "../registries/cutscene.js";
+import "../registries/images.js";
 console.log("[Setup] Imported preload content");
 
-import { } from "../registries/type.js";
+import "../registries/type.js";
 console.log("[Setup] Imported types");
 
-import { } from "../registries/block.js";
-import { } from "../registries/entity.js";
-import { } from "../registries/item.js";
+import "../registries/block.js";
+import "../registries/entity.js";
+import "../registries/item.js";
 
-import { } from "../registries/status.js";
-import { } from "../registries/vfx.js";
-import { } from "../registries/worldgen.js";
+import "../registries/status.js";
+import "../registries/vfx.js";
+import "../registries/worldgen.js";
 
-import { } from "../registries/deathmsg.js";
+import "../registries/deathmsg.js";
 console.log("[Setup] Imported hardcoded content");
 //Set up mods
 Integrate.addModdableRegistry(Registries.blocks, "blocks");

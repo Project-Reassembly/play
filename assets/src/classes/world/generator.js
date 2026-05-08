@@ -1,27 +1,25 @@
 import { create2DArray } from "../../core/2D-array.js";
-import { constructFromRegistry } from "../../core/constructor.js";
+import { constructFromType } from "../../core/constructor.js";
 import { roundNum } from "../../core/number.js";
-import { RegisteredItem } from "../../core/registered-item.js";
 import Integrate from "../../lib/integrate.js";
 import { noise, noiseSeed, rng1, setNoiseParams } from "../../lib/q5-noise-function.js";
 import { blockSize, chunkSize, worldSize } from "../../scaling.js";
 /*
 || LIST OF WORLDGEN MESSAGE TYPES
 || "genstage", "progress-stage", "finish": Don't use, internal.
-|| "chunk": Adds or replaces a chunk in the world.
+|| "chunk": For marking the completion of a chunk's tile or ore array.
 ||  - i: horizontal offset from the top-left corner of the world.
 ||        The chunk equivalent of an x-coordinate.
 ||  - j: vertical offset from the top-left corner of the world.
 ||        The chunk equivalent of an y-coordinate.
-||  - chunk: 1D array of tile definitions, with a registry name
-||        'block', and x- and y-coordinates within the chunk.
-||         Extra properties can be set with 'construction'.
-||  - tiles: 2d grid of tiles rnames.
+||  - entries: 2D array of tile registry names.
 || "progress": Sets the position of the progress bar.
 ||   - progress: Number from 0-1. 0 means empty bar, 1 means full.
 || "build": Builds a structure.
 ||   - x, y: Coordinates of the centre block.
-||   - blocks: Array of blocks to place. Similar to "chunk"'s 'chunk' property.
+||   - blocks: Array of blocks to place. Each block has 'block' (the registry name), 
+||         and x- and y-coordinates within the chunk.
+||         Extra properties can be set with 'construction'.
 ||   - name: Name of the structure. Used in world breakdown, and structure location.
 */
 
@@ -41,25 +39,26 @@ class NoiseGenerator extends Generator {
   /** How much each additional octave contributes, compared to the previous. */
   falloff = 0.5;
   generate(seed) {
+    this.noise(seed, 0, worldSize ** 2);
+  }
+  noise(seed, progress, maxProgress) {
     //Create grid
-    let maxProgress = worldSize ** 2;
-    let progress = 0;
-    let newChunk = [];
-    let tiles = create2DArray(chunkSize);
+    let newChunk = create2DArray(chunkSize);
     doNoise(seed, this.noiseLevel, this.noiseScale, this.octaves, this.falloff, {
-      prechunk: (i, j) => (newChunk = []),
+      prechunk: (i, j) => (newChunk = create2DArray(chunkSize)),
       postchunk: (i, j) => {
         progress++;
-        this.forEachChunk(newChunk, tiles, i, j);
+        this.forEachChunk(newChunk, i, j);
         postMessage({ type: "progress", progress: progress / maxProgress });
       },
       eachpos: (x, y, level) => {
-        this.forEachPosition(level, x, y, newChunk, tiles);
+        this.forEachPosition(level, x, y, newChunk);
       },
     });
+    return progress;
   }
-  forEachPosition(level, x, y, blocks, tiles) {}
-  forEachChunk(blocks, tiles, i, j) {}
+  forEachPosition(level, x, y, entries) {}
+  forEachChunk(entries, i, j) {}
 }
 
 /** Creates the base tile layer for the world. */
@@ -67,26 +66,23 @@ class TileGenerator extends NoiseGenerator {
   /**@type {TileGenerationOptions[]} */
   tiles = [];
   init() {
-    this.tiles = this.tiles.map((x) => {
-      x.type ??= "tile-gen-options";
-      return constructFromRegistry(x, wtype);
-    });
+    this.tiles = this.tiles.map((x) => constructFromType(x, TileGenerationOptions));
   }
-  forEachPosition(level, x, y, blocks, tiles) {
+  forEachPosition(level, x, y, entries) {
     for (let optionsobj of this.tiles) {
       if (optionsobj.valid(level, x, y)) {
-        tiles[y][x] = optionsobj.tile;
+        entries[y][x] = optionsobj.tile;
         break;
       }
     }
   }
-  forEachChunk(blocks, tiles, i, j) {
-    postMessage({ type: "chunk", def: { blocks: blocks, tiles: tiles, i: i, j: j } });
+  forEachChunk(entries, i, j) {
+    postMessage({ type: "chunk", def: { entries: entries, i: i, j: j } });
   }
 }
 
 class BlockGenerator extends Generator {
-  /**@type {{defs: {x: int, y: int, block: string, direction: int}, weight: int}[]} */
+  /**@type {{defs: {x: int, y: int, block: string, direction: int}[], ores: {x:int, y:int, block:string}[], weight: int}[]} */
   variants = [];
   name = "-";
   attempts = 1000;
@@ -124,66 +120,104 @@ class BlockGenerator extends Generator {
         x: x,
         y: y,
       });
+      if (selected.ores.length > 0)
+        postMessage({
+          type: "ores",
+          ores: selected.ores,
+          x: x,
+          y: y,
+        });
       this._positions.push({ x: x, y: y });
       this._generated++;
     }
   }
   outOfRange(x, y) {
     for (let pos of this._positions) {
-      if (((x - pos.x) ** 2 + (y - pos.y) ** 2) ** 0.5 < this.separation) return false;
+      if ((x - pos.x) ** 2 + (y - pos.y) ** 2 < this.separation * this.separation) return false;
     }
     return true;
   }
 }
 
-class OreGenerator extends Generator {
+class OreGenerator extends NoiseGenerator {
   /**@type {OreGenerationOptions[]} */
   ores = [];
   /** Multiplier for the world seed. */
   seedManipulator = 1.5;
+  noiseLevel = 100;
+  /**@type {OreGenerationOptions?} */
+  #currentore = null;
   init() {
-    this.ores = this.ores.map((x) => {
-      x.type ??= "ore-gen-options";
-      return constructFromRegistry(x, wtype);
-    });
+    this.ores = this.ores.map((x) => constructFromType(x, OreGenerationOptions));
   }
   generate(seed) {
-    let maxProgress = worldSize ** 2 * this.ores.length;
     let progress = 0;
+    const maxProgress = worldSize * worldSize * this.ores.length;
     for (let o = 0; o < this.ores.length; o++) {
-      let ore = this.ores[o];
-      doNoise(seed * this.seedManipulator * (o + 1), 100, ore.scale, ore.octaves, ore.falloff, {
-        postchunk: (i, j) => {
-          progress++;
-          postMessage({ type: "progress", progress: progress / maxProgress });
-        },
-        eachpos: (x, y, level, i, j) => {
-          if (level > ore.threshold) {
-            postMessage({
-              type: "place",
-              x: x + i * chunkSize,
-              y: y + j * chunkSize,
-              layer: "floor",
-              block: ore.tile,
-              target: ore.target,
-            });
-          }
-        },
-      });
+      const ore = this.ores[o];
+      this.noiseScale = ore.scale;
+      this.octaves = ore.octaves;
+      this.falloff = ore.falloff;
+      this.#currentore = ore;
+      progress = this.noise(seed * this.seedManipulator * (o + 1), progress, maxProgress);
+      // console.log("generating for ", ore);
     }
   }
+  forEachPosition(level, x, y, entries) {
+    if (this.#currentore.valid(level, x, y)) {
+      entries[y][x] = this.#currentore.tile;
+      // console.log("generating at ", x, y);
+    } //else console.log(`failed at ${x}, ${y}: ${level} < ${this.#currentore.threshold}`);
+  }
+  forEachChunk(entries, i, j) {
+    if (entries.some((x) => x.some((x) => x)))
+      postMessage({
+        type: "chunk",
+        layer: "ores",
+        target: this.#currentore.target,
+        def: { entries: entries, i: i, j: j },
+      });
+  }
+  // generate(seed) {
+  //   let maxProgress = worldSize ** 2 * this.ores.length;
+  //   let progress = 0;
+  //   for (let o = 0; o < this.ores.length; o++) {
+  //     let ore = this.ores[o];
+  //     doNoise(seed * this.seedManipulator * (o + 1), 100, ore.scale, ore.octaves, ore.falloff, {
+  //       postchunk: (i, j) => {
+  //         progress++;
+  //         postMessage({ type: "progress", progress: progress / maxProgress });
+  //       },
+  //       eachpos: (x, y, level, i, j) => {
+  //         if (level > ore.threshold) {
+  //           postMessage({
+  //             type: "place",
+  //             x: x + i * chunkSize,
+  //             y: y + j * chunkSize,
+  //             layer: "floor",
+  //             block: ore.tile,
+  //             target: ore.target,
+  //           });
+  //         }
+  //       },
+  //     });
+  //   }
+  // }
 }
 
-class GenerationOptions extends RegisteredItem {
-  min = 0;
-  max = 255;
+class GenerationOptions {
   valid(level, x, y) {
-    return this.min <= level && level <= this.max;
+    return false;
   }
 }
 
 class TileGenerationOptions extends GenerationOptions {
   tile = "stone";
+  min = 0;
+  max = 255;
+  valid(level, x, y) {
+    return this.min <= level && level <= this.max;
+  }
 }
 
 class OreGenerationOptions extends GenerationOptions {
@@ -193,14 +227,10 @@ class OreGenerationOptions extends GenerationOptions {
   octaves = 4;
   scale = 1;
   target = null;
+  valid(level, x, y) {
+    return level > this.threshold;
+  }
 }
-
-let wtype = new Integrate.TypeRegistry();
-
-wtype.add("gen-options", GenerationOptions);
-wtype.add("tile-gen-options", TileGenerationOptions);
-wtype.add("ore-gen-options", OreGenerationOptions);
-
 /**
  * Does stuff with a 2D Perlin noise function.
  * @param {int} seed Noise seed.

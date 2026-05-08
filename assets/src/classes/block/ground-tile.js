@@ -18,7 +18,7 @@ export class GroundTile extends RegisteredItem {
   }
   static entityWalksOn(entity, type) {
     let tile = Registries.blocks.get(type);
-    if ((tile.appliedStatus ?? "none") !== "none")
+    if (tile.appliedStatus != null)
       entity.applyStatus(
         Registries.statuses.get(tile.appliedStatus ?? "none"),
         tile.appliedStatusDuration ?? 240,

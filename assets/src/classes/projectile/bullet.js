@@ -308,8 +308,7 @@ class Bullet extends PhysicalObject {
         .blocksInSquare(
           Math.floor(this.x / blockSize),
           Math.floor(this.y / blockSize),
-          Math.ceil(this.hitSize / blockSize),
-          "blocks",
+          Math.ceil(this.hitSize / blockSize)
         )
         .forEach((block) => {
           if (

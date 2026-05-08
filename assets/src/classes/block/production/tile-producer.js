@@ -20,9 +20,10 @@ class TileProducer extends Container {
 
   tick() {
     super.tick();
-    let floor = this.chunk.getBlock(this.blockX, this.blockY, "floor")?.registryName;
-    let tile = this.chunk.getTile(this.blockX, this.blockY);
-    this._blockOn = !floor || floor === "null" ? tile : floor;
+    // let floor = this.chunk.getBlock(this.blockX, this.blockY, "floor")?.registryName;
+    // let tile = this.chunk.getTile(this.blockX, this.blockY);
+    // this._blockOn = !floor || floor === "null" ? tile : floor;
+    this._blockOn = this.chunk.getHighestTile(this.blockX, this.blockY);
     if (!this._blockOn) {
       Log.send("#c-Tile-dependent block is on air!");
       this.chunk.removeBlock(this.blockX, this.blockY, "blocks");

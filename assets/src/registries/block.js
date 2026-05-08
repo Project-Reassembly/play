@@ -20,6 +20,13 @@ Registries.blocks.add("water", {
   buildable: false,
   name: "Water",
 });
+Registries.blocks.add("deep-water", {
+  type: "tile",
+  image: "tile.deep-water",
+  speedMultiplier: 0.4,
+  buildable: false,
+  name: "Deep Water",
+});
 Registries.blocks.add("sand-water", {
   type: "tile",
   image: "tile.sand-water",

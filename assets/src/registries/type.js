@@ -33,7 +33,7 @@ import { Crafter, Uncrafter } from "../classes/block/production/crafter.js";
 import { Drill } from "../classes/block/production/drill.js";
 import { Smelter } from "../classes/block/production/smelter.js";
 import { TileProducer } from "../classes/block/production/tile-producer.js";
-import { Ore, Tile } from "../classes/block/tile.js";
+import { Tile } from "../classes/block/tile.js";
 import { TankAssemblyBay } from "../classes/block/tonq/tank-assembly-bay.js";
 import { StatusEffect } from "../classes/effect/status-effect.js";
 import {
@@ -147,7 +147,6 @@ Registries.type.add("chunk", Chunk);
 Registries.type.add("block", Block);
 Registries.type.add("wall", Wall);
 Registries.type.add("tile", Tile);
-Registries.type.add("ore", Ore);
 Registries.type.add("container", Container);
 Registries.type.add("crafter", Crafter);
 Registries.type.add("smelter", Smelter);

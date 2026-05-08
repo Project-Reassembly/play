@@ -223,7 +223,7 @@ class World {
   }
   drawAll() {
     this.toRender.forEach((chunk) => chunk.drawTiles());
-    this.toRender.forEach((chunk) => chunk.drawFloorsOnly());
+    this.toRender.forEach((chunk) => chunk.drawOres());
     for (let particle of this.floorParticles) {
       if (!World.isInRenderDistance(particle, 1, 0, 0, 0, ui.camera.zoom)) continue;
       particle.draw();
@@ -294,7 +294,7 @@ class World {
     if (!chunk) return false;
     return chunk.getBlock(bx, by, layer) === null;
   }
-  placeAt(block, x, y, layer = "blocks") {
+  placeAt(block, x, y) {
     if (!this.chunks) throw new Error("The world has not been generated!");
     let cx = Math.floor(x / chunkSize),
       bx = x % chunkSize;
@@ -303,9 +303,20 @@ class World {
     let cr = this.chunks[cy];
     let chunk = cr ? cr[cx] : null;
     if (!chunk) throw new Error("There is no chunk at (chunk) x:" + cx + ", y:" + cy);
-    return chunk.addBlock(block, bx, by, layer);
+    return chunk.addBlock(block, bx, by);
   }
-  break(x, y, layer = "blocks") {
+  setOre(block, x, y) {
+    if (!this.chunks) throw new Error("The world has not been generated!");
+    let cx = Math.floor(x / chunkSize),
+      bx = x % chunkSize;
+    let cy = Math.floor(y / chunkSize),
+      by = y % chunkSize;
+    let cr = this.chunks[cy];
+    let chunk = cr ? cr[cx] : null;
+    if (!chunk) throw new Error("There is no chunk at (chunk) x:" + cx + ", y:" + cy);
+    return chunk.addTile(block, bx, by, "ores");
+  }
+  break(x, y) {
     if (!this.chunks) throw new Error("The world has not been generated!");
     let cx = Math.floor(x / chunkSize),
       bx = x % chunkSize;
@@ -313,8 +324,8 @@ class World {
       by = y % chunkSize;
     let chunk = this.chunks[cy][cx];
     if (!chunk) throw new Error("There is no chunk at (chunk) x:" + cx + ", y:" + cy);
-    let broken = chunk.getBlock(bx, by, layer);
-    chunk.removeBlock(bx, by, layer);
+    let broken = chunk.getBlock(bx, by);
+    chunk.removeBlock(bx, by);
     return broken;
   }
   /**@returns `undefined` if no chunk, `null` if no block, or a `Block` otherwise. */
@@ -359,11 +370,11 @@ class World {
     if(!name) return;
     return constructFromType(Registries.blocks.get(name), GroundTile);
   }
-  blocksInSquare(x, y, size, layer = "blocks") {
+  blocksInSquare(x, y, size) {
     let arr = [];
     for (let i = -size; i <= size; i++) {
       for (let j = -size; j <= size; j++) {
-        arr.push(this.getBlock(x + i, y + j, layer));
+        arr.push(this.getBlock(x + i, y + j));
       }
     }
     return arr;

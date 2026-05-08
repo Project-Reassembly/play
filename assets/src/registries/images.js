@@ -101,6 +101,7 @@ add("tile.grass", "assets/textures/block/tile/grass.png")
 add("tile.sand", "assets/textures/block/tile/sand.png")
 add("tile.stone", "assets/textures/block/tile/stone.png")
 add("tile.water", "assets/textures/block/tile/water.png")
+add("tile.deep-water", "assets/textures/block/tile/deep-water.png")
 add("tile.sand-water", "assets/textures/block/tile/sand-water.png")
 add("tile.sand-grass", "assets/textures/block/tile/sandy-grass.png")
 //Ores
