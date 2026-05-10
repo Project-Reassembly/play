@@ -50,7 +50,7 @@ export class LaunchPad extends Container {
         item.clear();
       } else {
         value += (item.getItem()?.marketValue ?? 0) * rem;
-        sold.push(rem + "x " + (item.getItem()?.name ?? "null"));
+        sold.push(`${rem}x ${item.getItem()?.name ?? "null"}`);
         item.count -= rem;
         rem = 0;
       }
@@ -58,7 +58,7 @@ export class LaunchPad extends Container {
     }, true);
     game.money += value;
     Log.send(
-      "#a-Got $" + value + " from selling " + sold.join("#a-, "),
+      `#a-Got \$${value} from selling ${sold.join("#a-, ")}`,
       
     );
     this.inventory.clean();
@@ -91,16 +91,10 @@ export class LaunchPad extends Container {
     MLF1.draw(
       x,
       y,
-      this.inventory.count("*") +
-        "/" +
-        this.launchAmount +
-        "\n" +
-        (this.validateLaunch() ? "Launching!" : "Not ready") +
-        "\n" +
-        ""
-          .padEnd((this.#launchTime / this.launchCooldown) * 20, "■")
-          .padEnd(20, "□")
-          .substring(0, 20),
+      `${this.inventory.count("*")}/${this.launchAmount}\n${this.validateLaunch() ? "Launching!" : "Not ready"}\n${""
+        .padEnd((this.#launchTime / this.launchCooldown) * 20, "■")
+        .padEnd(20, "□")
+        .substring(0, 20)}`,
       this.title,
       Item.getColourFromRarity(0, "light")
     );
@@ -180,7 +174,7 @@ export class LandingPad extends Container {
     let value = item?.marketValue ?? 1;
     game.money -= value;
     Log.send(
-      "#a-Bought 1x " + (item?.name ?? "nothing") + "#a- for $" + value,
+      `#a-Bought 1x ${item?.name ?? "nothing"}#a- for \$${value}`,
     );
     this.timer.do(() => {
       this.world.particles.push(

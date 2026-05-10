@@ -117,15 +117,10 @@ class Crafter extends Container {
    */
   stringifyRecipe(recipe) {
     return (
-      recipe.inputs.map((x) => x.toString(true)).join("\n") +
-      "\n -  - -- \\⬇/ -- -  - \n" +
-      recipe.outputs.map((x) => x.toString(true)).join("\n") +
-      "\n" +
-      ""
+      `${recipe.inputs.map((x) => x.toString(true)).join("\n")}\n -  - -- \\⬇/ -- -  - \n${recipe.outputs.map((x) => x.toString(true)).join("\n")}\n${""
         .padEnd((this.#progress / recipe.time) * 20, "■")
         .padEnd(20, "□")
-        .substring(0, 20) +
-      " "
+        .substring(0, 20)} `
     );
   }
   drawTooltip(x, y, outlineColour, backgroundColour) {
@@ -171,13 +166,7 @@ class Crafter extends Container {
       "Recipes:",
       ...this.recipes.map(
         (rec) =>
-          "  " +
-          rec.inputs.map((stack) => stack.count + "× " + stack.getItem().name).join(", ") +
-          " => " +
-          rec.outputs.map((stack) => stack.count + "× " + stack.getItem().name).join(", ") +
-          " (" +
-          roundNum(rec.time / 60, 1) +
-          "s)",
+          `  ${rec.inputs.map((stack) => stack.count + "× " + stack.getItem().name).join(", ")} => ${rec.outputs.map((stack) => stack.count + "× " + stack.getItem().name).join(", ")} (${roundNum(rec.time / 60, 1)}s)`,
       ),
       "🟨 -------------------- ⬜",
     ];

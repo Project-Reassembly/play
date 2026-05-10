@@ -103,10 +103,7 @@ class Player extends EquippedEntity {
   }
   stringifyRecipe(recipe) {
     return (
-      recipe.inputs.map((x) => x.toString(true)).join("\n") +
-      "\n -  - -- \\⬇/ -- -  - \n" +
-      recipe.outputs.map((x) => x.toString(true)).join("\n") +
-      "\n"
+      `${recipe.inputs.map((x) => x.toString(true)).join("\n")}\n -  - -- \\⬇/ -- -  - \n${recipe.outputs.map((x) => x.toString(true)).join("\n")}\n`
     );
   }
   getRecipeInfo() {
@@ -136,10 +133,9 @@ class Player extends EquippedEntity {
     let messagearray =
       Registries.deathmsg.has(type) ? Registries.deathmsg.get(type)[source ? 1 : 0] : ["(1) died"];
     Log.send(
-      "#4-" +
-        (messagearray[Math.floor(rnd.float(0, messagearray.length))] ?? "(1) died")
-          .replaceAll("(1)", this.name)
-          .replaceAll("(2)", source?.name),
+      `#4-${(messagearray[Math.floor(rnd.float(0, messagearray.length))] ?? "(1) died")
+        .replaceAll("(1)", this.name)
+        .replaceAll("(2)", source?.name)}`,
     );
     console.log(source);
     DroppedItemStack.create(

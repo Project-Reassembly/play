@@ -28,11 +28,7 @@ const Serialiser = {
       }
       if (err instanceof Error)
         console.warn(
-          "Could not save data: " +
-            err.message +
-            " (" +
-            err.constructor?.name +
-            ")"
+          `Could not save data: ${err.message} (${err.constructor?.name})`
         );
       else console.warn("Could not save data: " + err);
     }
@@ -50,11 +46,7 @@ const Serialiser = {
       return true;
     } catch (err) {
       console.warn(
-        "Could not delete data: " +
-          err.message +
-          " (" +
-          err.constructor?.name +
-          ")"
+        `Could not delete data: ${err.message} (${err.constructor?.name})`
       );
       return false;
     }
@@ -95,7 +87,7 @@ class ResourceLocation {
   get qualifier() {
     return this.isNull
       ? "null"
-      : this.namespace + ":" + this.type + "." + this.slot;
+      : `${this.namespace}:${this.type}.${this.slot}`;
   }
   /** Is this a null pointer? */
   isNull = false;
@@ -145,7 +137,7 @@ class ResourceLocation {
       localStorage.setItem(this.nsid(), "{}");
     //Set item
     let namespaceStorage = JSON.parse(localStorage.getItem(this.nsid()));
-    namespaceStorage[this.type + "." + this.slot] = JSON.stringify(data);
+    namespaceStorage[`${this.type}.${this.slot}`] = JSON.stringify(data);
     localStorage.setItem(this.nsid(), JSON.stringify(namespaceStorage));
   }
   /**
@@ -163,7 +155,7 @@ class ResourceLocation {
       throw new ReferenceError("Cannot delete nonexistent location");
     //Set item
     let namespaceStorage = JSON.parse(localStorage.getItem(this.nsid()));
-    delete namespaceStorage[this.type + "." + this.slot];
+    delete namespaceStorage[`${this.type}.${this.slot}`];
     localStorage.setItem(this.nsid(), JSON.stringify(namespaceStorage));
   }
   /** **N**ame**s**pace **Id**entifier: The actual localStorage key name of this location's namespace. */
@@ -201,7 +193,7 @@ function storageAvailable(type) {
 //### Helper functions ###
 
 function namespaceID(namespace) {
-  return "Namespace[" + namespace + "]";
+  return `Namespace[${namespace}]`;
 }
 
 //Seriously why does this not exist
@@ -217,3 +209,4 @@ function iterateStorage(storage, callback) {
   }
 }
 export { Serialiser };
+

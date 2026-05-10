@@ -40,7 +40,7 @@ class PowerNetwork {
       } else this.providers.splice(i, 1);
     }
     if (PowerNetwork.debug)
-      console.log(available + " power available, " + demand + " power wanted");
+      console.log(`${available} power available, ${demand} power wanted`);
     let blocks = this.positions.map((pos) => this.world.getBlock(pos.x, pos.y));
     if (PowerNetwork.debug) console.log("Contributing blocks: ", blocks);
     //Distribute power
@@ -50,15 +50,7 @@ class PowerNetwork {
         let toSend = (block.powerDraw / demand) * available;
         if (PowerNetwork.debug)
           console.log(
-            "Sending " +
-              toSend +
-              " power to " +
-              block.gridX +
-              ", " +
-              block.gridY +
-              " (wants " +
-              block.powerDraw +
-              ")"
+            `Sending ${toSend} power to ${block.gridX}, ${block.gridY} (wants ${block.powerDraw})`
           );
         sent += toSend;
         sent -= block.sendPower(toSend);
@@ -70,7 +62,7 @@ class PowerNetwork {
       if (block.isProvider) {
         if (PowerNetwork.debug)
           console.log(
-            "Taking " + sent + " power from " + block.gridX + ", " + block.gridY
+            `Taking ${sent} power from ${block.gridX}, ${block.gridY}`
           );
         sent = block.drawPower(sent);
         if (PowerNetwork.debug) console.log(sent + " power left to send");
@@ -94,3 +86,4 @@ class PowerNetwork {
   }
 }
 export { PowerNetwork };
+

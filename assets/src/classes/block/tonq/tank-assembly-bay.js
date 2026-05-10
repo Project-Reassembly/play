@@ -119,15 +119,7 @@ class TankAssemblyBay extends Block {
     MLF1.draw(
       x,
       y,
-      "Name: " +
-        this.#naem +
-        "\nHealth: " +
-        this.#health +
-        "\nSpeed: " +
-        roundNum(this.#speed, 2) +
-        "\nInventory: " +
-        this.#inv +
-        " slots",
+      `Name: ${this.#naem}\nHealth: ${this.#health}\nSpeed: ${roundNum(this.#speed, 2)}\nInventory: ${this.#inv} slots`,
       this.name,
       Item.getColourFromRarity(0, "light")
     );

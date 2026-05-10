@@ -1,21 +1,20 @@
-import { Equippable } from "./equippable.js";
-import { Timer } from "../timer.js";
-import { constructFromType } from "../../core/constructor.js";
-import { EquippedEntity, InventoryEntity } from "../entity/inventory-entity.js";
-import { autoScaledEffect } from "../../play/effects.js";
-import { construct } from "../../core/constructor.js";
-import { WeaponComponent } from "../entity/component.js";
-import { roundNum, shortenedNumber } from "../../core/number.js";
-import { PointBullet } from "../projectile/point-bullet.js";
-import { LaserBullet } from "../projectile/laser-bullet.js";
-import { Bullet } from "../projectile/bullet.js";
-import { Missile } from "../projectile/missile.js";
+import { construct, constructFromType } from "../../core/constructor.js";
+import { roundNum } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
+import { autoScaledEffect } from "../../play/effects.js";
+import { WeaponComponent } from "../entity/component.js";
+import { EquippedEntity, InventoryEntity } from "../entity/inventory-entity.js";
+import { Bullet } from "../projectile/bullet.js";
+import { LaserBullet } from "../projectile/laser-bullet.js";
+import { Missile } from "../projectile/missile.js";
+import { PointBullet } from "../projectile/point-bullet.js";
+import { patternedBulletExpulsion } from "../projectile/yeeter.js";
+import { Timer } from "../timer.js";
+import { Equippable } from "./equippable.js";
 import {
   WeaponBulletConfiguration,
   WeaponShootConfiguration,
 } from "./weapon-exts.js";
-import { patternedBulletExpulsion } from "../projectile/yeeter.js";
 class Weapon extends Equippable {
   timer = new Timer();
   ammoUse = 1;
@@ -232,22 +231,15 @@ class Weapon extends Equippable {
       }
     }
     return (
-      crop(this.name, 15) +
-      "\nAmmo: " +
-      (ammoType !== "none"
+      `${crop(this.name, 15)}\nAmmo: ${ammoType !== "none"
         ? ammoType === "-"
           ? ""
           : entityAmmoCount(holder, ammoType)
-        : "∞") +
-      "\n" +
-      (ammoType !== "none"
-        ? ammoType === "-"
-          ? "None Available"
-          : crop(Registries.items.get(ammoType).name, 12) + " ×" + this.ammoUse
-        : "Free") +
-      "\n" +
-      this.createProgressBar() +
-      " "
+        : "∞"}\n${ammoType !== "none"
+          ? ammoType === "-"
+            ? "None Available"
+            : `${crop(Registries.items.get(ammoType).name, 12)} ×${this.ammoUse}`
+          : "Free"}\n${this.createProgressBar()} `
     );
   }
   createProgressBar() {
@@ -289,14 +281,11 @@ class Weapon extends Equippable {
    */
   static infoOfShootPattern(shoot, bulletConfig) {
     return [
-      "Fire Rate: " +
-        (shoot.pattern.amount * shoot.pattern.burst > 1
-          ? shoot.pattern.amount * shoot.pattern.burst + "× "
-          : "") +
-        roundNum(60 / (shoot.reload + shoot.charge), 2) +
-        "/s",
-      shoot.pattern.spread ? shoot.pattern.spread + "° inaccuracy" : "",
-      shoot.pattern.spacing ? shoot.pattern.spacing + "° shot spacing" : "",
+      `Fire Rate: ${shoot.pattern.amount * shoot.pattern.burst > 1
+        ? shoot.pattern.amount * shoot.pattern.burst + "× "
+        : ""}${roundNum(60 / (shoot.reload + shoot.charge), 2)}/s`,
+      shoot.pattern.spread ? `${shoot.pattern.spread}° inaccuracy` : "",
+      shoot.pattern.spacing ? `${shoot.pattern.spacing}° shot spacing` : "",
       "🟨Shots:⬜",
       ...Object.keys(bulletConfig.ammos).flatMap((x) =>
         bulletConfig.unbrowsable.includes(bulletConfig.ammos[x])
@@ -304,7 +293,7 @@ class Weapon extends Equippable {
           : [
               x == "none"
                 ? " "
-                : ind(1) + "🟨" + Registries.items.get(x).name + ":⬜",
+                : `${ind(1)}🟨${Registries.items.get(x).name}:⬜`,
               ...Weapon.getBulletInfo(
                 bulletConfig.getAmmo(x),
                 x == "none" ? 1 : 2
@@ -329,31 +318,21 @@ class Weapon extends Equippable {
           ? "🟪instant⬜"
           : blt instanceof LaserBullet
           ? blt.length
-          : roundNum(
-              //s = ut + ½at²
-              (blt.speed * time + 0.5 * (-blt.decel * time ** 2)) / 30,
-              1
-            ) + " blocks range"),
+          : `${roundNum(
+            //s = ut + ½at²
+            (blt.speed * time + 0.5 * (-blt.decel * time ** 2)) / 30,
+            1
+          )} blocks range`),
 
       ...blt.damage.map(
         (x) =>
-          ind(idl) +
-          (x.amount ?? 0) +
-          (x.spread && x.spread > 0 ? " (±" + x.spread + ")" : "") +
-          " " +
-          (x.type ?? (x.radius > 0 ? "explosion" : "unknown")) +
-          (x.radius > 0 ? " area" : "") +
-          " damage" +
-          (x.radius > 0 ? " ~ " + roundNum(x.radius / 30, 1) + " blocks" : "")
+          `${`${ind(idl) +
+          (x.amount ?? 0)}${x.spread && x.spread > 0 ? ` (±${x.spread})` : ""}`} ${x.type ?? (x.radius > 0 ? "explosion" : "unknown")}${x.radius > 0 ? " area" : ""} damage${x.radius > 0 ? " ~ " + roundNum(x.radius / 30, 1) + " blocks" : ""}`
       ),
 
       ind(idl) +
         (blt.status !== "none"
-          ? "🟨" +
-            Registries.statuses.get(blt.status).name +
-            " for " +
-            roundNum(blt.statusDuration / 60, 1) +
-            "s"
+          ? `🟨${Registries.statuses.get(blt.status).name} for ${roundNum(blt.statusDuration / 60, 1)}s`
           : ""),
 
       ind(idl) +
@@ -365,25 +344,18 @@ class Weapon extends Equippable {
       ind(idl + 1) +
         (blt.fires > 0
           ? blt.isFireBinomial
-            ? blt.fireChance * 100 +
-              "% chance for a fire " +
-              (blt.fires > 1 ? blt.fires + " times" : "")
+            ? `${blt.fireChance * 100}% chance for a fire ${blt.fires > 1 ? blt.fires + " times" : ""}`
             : ((blt.fireChance ?? 1) !== 1
-                ? blt.fireChance * 100 + "% chance for "
+                ? `${blt.fireChance * 100}% chance for `
                 : "") + (blt.fires > 1 ? blt.fires + " fires " : "1 fire ")
           : ""),
       ind(idl + 1) +
         (blt.fires > 0
-          ? (blt.fire.damage ?? 1) +
-            " " +
-            (blt.fire.type ?? "fire") +
-            " damage every " +
-            roundNum((blt.fire.interval ?? 10) / 60, 1) +
-            "s"
+          ? `${blt.fire.damage ?? 1} ${blt.fire.type ?? "fire"} damage every ${roundNum((blt.fire.interval ?? 10) / 60, 1)}s`
           : ""),
       ind(idl + 1) +
         (blt.fires > 0
-          ? roundNum((blt.fire.lifetime ?? 600) / 60, 1) + "s lifetime⬜"
+          ? `${roundNum((blt.fire.lifetime ?? 600) / 60, 1)}s lifetime⬜`
           : ""),
 
       ind(idl) + (blt instanceof Missile ? "🟦homing: " : ""),
@@ -448,4 +420,5 @@ function crop(text, length) {
   return text.length <= length ? text : text.substring(0, length - 1) + "…";
 }
 
-export { Weapon,crop };
+export { crop, Weapon };
+

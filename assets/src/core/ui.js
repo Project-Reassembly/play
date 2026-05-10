@@ -865,7 +865,7 @@ class SliderUIComponent extends UIComponent {
       if (mouseIsPressed) {
         // - But don't wait, so smooth movement
 
-        this.outlineColour = col.from(0, 255, 255);
+        this.outlineColour = col.cyan;
         //Click and change values
         this._current = ((ui.mouse.x - minX) / this.length) * this.max;
         this.change(this._current);

@@ -1,6 +1,5 @@
 //Game info
-const versionGetURL =
-  "https://cdn.jsdelivr.net/gh/Project-Reassembly/play@main/version.json";
+const versionGetURL = "https://cdn.jsdelivr.net/gh/Project-Reassembly/play@main/version.json";
 let gameVersion = "0.0.0";
 let preNumber = -1;
 let isPreview = true;
@@ -22,47 +21,43 @@ async function checkUpdate() {
   let gv = processVersion(gameVersion);
   let ov = processVersion(oldver);
   if (gv !== ov || preNumber > oldpre) {
-    console.log("  Update available (" + gv + "/" + ov + ")");
+    console.log(`  Update available (${gv}/${ov})`);
     notify();
     versiongetter = true;
   } else {
-    console.log("  No update available (" + gv + ").");
+    console.log(`  No update available (${gv}).`);
     versiongetter = false;
   }
   gameVersion = oldver;
   preNumber = oldpre;
 }
 async function getVer() {
-  await import("" + versionGetURL + `?t=${Date.now()}`, {
-    with: { type: "json" },
-  }).then(
-    (val) => {
-      let def = val.default;
+  await fetch(`${versionGetURL}?t=${Date.now()}`, { with: { type: "json" } }).then(
+    async (val) => {
+      let def = await val.json();
       console.log("[v] Got version data", def);
       gameVersion = def?.version ?? "0.0.0";
       preNumber = def?.preview ?? -1;
       isPreview = def?.isPreview ?? true;
     },
     async () => {
-      console.warn(
-        "[v] Failed to get version data, retrying from local data..."
-      );
-      await import(`../../version.json?t=${Date.now()}`, { with: { type: "json" } }).then(
-        (val) => {
-          let def = val.default;
+      console.warn("[v] Failed to get version data, retrying from local data...");
+      await fetch(`../../version.json?t=${Date.now()}`, { with: { type: "json" } }).then(
+        async (val) => {
+          let def = await val.json();
           console.log("[v] Got backup version data", def);
           gameVersion = def?.version ?? "0.0.0";
           preNumber = def?.preview ?? -1;
           isPreview = def?.isPreview ?? true;
-        }
+        },
       );
-    }
+    },
   );
 }
 
 console.log("[v] Getting initial version data...");
-import(`../../version.json?t=${Date.now()}`, { with: { type: "json" } }).then((val) => {
-  let def = val.default;
+fetch(`../../version.json?t=${Date.now()}`, { with: { type: "json" } }).then(async (val) => {
+  let def = await val.json();
   console.log("[v] Got initial version data", def);
   gameVersion = def?.version ?? "0.0.0(error)";
   preNumber = def?.preview ?? -1;

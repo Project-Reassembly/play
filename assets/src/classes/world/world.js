@@ -320,7 +320,7 @@ class World {
       by = y % chunkSize;
     let cr = this.chunks[cy];
     let chunk = cr ? cr[cx] : null;
-    if (!chunk) throw new Error("There is no chunk at (chunk) x:" + cx + ", y:" + cy);
+    if (!chunk) throw new Error(`There is no chunk at (chunk) x:${cx}, y:${cy}`);
     return chunk.addBlock(block, bx, by);
   }
   setOre(block, x, y) {
@@ -331,7 +331,7 @@ class World {
       by = y % chunkSize;
     let cr = this.chunks[cy];
     let chunk = cr ? cr[cx] : null;
-    if (!chunk) throw new Error("There is no chunk at (chunk) x:" + cx + ", y:" + cy);
+    if (!chunk) throw new Error(`There is no chunk at (chunk) x:${cx}, y:${cy}`);
     return chunk.addTile(block, bx, by, "ores");
   }
   break(x, y) {
@@ -341,7 +341,7 @@ class World {
     let cy = Math.floor(y / chunkSize),
       by = y % chunkSize;
     let chunk = this.chunks[cy][cx];
-    if (!chunk) throw new Error("There is no chunk at (chunk) x:" + cx + ", y:" + cy);
+    if (!chunk) throw new Error(`There is no chunk at (chunk) x:${cx}, y:${cy}`);
     let broken = chunk.getBlock(bx, by);
     chunk.removeBlock(bx, by);
     return broken;
@@ -400,8 +400,8 @@ class World {
   /** Similar to `getBlock`, but will always return a block, or throw an error otherwise. */
   getBlockErroring(x, y, layer = "blocks") {
     let block = this.getBlock(x, y, layer);
-    if (block === undefined) throw new Error("There is no chunk at (block) x:" + x + ", y:" + y);
-    if (block === null) throw new Error("There is no block at x:" + x + ", y:" + y);
+    if (block === undefined) throw new Error(`There is no chunk at (block) x:${x}, y:${y}`);
+    if (block === null) throw new Error(`There is no block at x:${x}, y:${y}`);
     return block;
   }
   /**Gets all blocks neighbouring a position. Includes that position.*/

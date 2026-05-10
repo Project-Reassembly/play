@@ -39,11 +39,8 @@ class Equippable extends Item {
             mods.map((key) => {
               let i = this.attributeModifiers[key];
               return (
-                (i < 1 ? "🟥  " : "🟩  +") +
-                roundNum((i - 1) * 100, 1) +
-                "% " +
-                key.replace("-", " ") +
-                "⬜"
+                `${(i < 1 ? "🟥  " : "🟩  +") +
+                roundNum((i - 1) * 100, 1)}% ${key.replace("-", " ")}⬜`
               );
             }),
             "🟨 -------------------- ⬜",
@@ -53,3 +50,4 @@ class Equippable extends Item {
   }
 }
 export { Equippable };
+

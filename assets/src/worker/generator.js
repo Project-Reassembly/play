@@ -18,7 +18,7 @@ onmessage = (ev) => {
       generators.add(name, constructFromRegistry(item, wtype));
     });
 
-    console.log("[World Gen] Constructed " + generators.size + " generators");
+    console.log(`[World Gen] Constructed ${generators.size} generators`);
 
     //generateTiles(data.noiseScale, data.noiseLevel);
     let stage = 1;

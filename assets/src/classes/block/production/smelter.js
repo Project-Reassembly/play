@@ -51,12 +51,10 @@ class Smelter extends Crafter {
   stringifyRecipe(rec) {
     let r = super.stringifyRecipe(rec);
     r +=
-      "\nFuel: " +
-      ""
+      `\nFuel: ${""
         .padEnd((this._fuelLeft / this._fuelMax) * 14, "■")
         .padEnd(14, "□")
-        .substring(0, 14) +
-      " ";
+        .substring(0, 14)} `;
     return r;
   }
 }

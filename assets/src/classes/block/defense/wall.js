@@ -8,7 +8,7 @@ class Wall extends Block {
       this.health + " health",
       this.armour > 0 ? this.armour + " armour" : "",
       this.explosiveness > 0
-        ? "🟥" + this.explosiveness * 100 + "% explosiveness⬜"
+        ? `🟥${this.explosiveness * 100}% explosiveness⬜`
         : "",
       "🟨 -------------------- ⬜",
     ];
@@ -16,3 +16,4 @@ class Wall extends Block {
 }
 
 export { Wall };
+

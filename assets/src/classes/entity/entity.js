@@ -131,7 +131,7 @@ class Entity extends ShootableObject {
   addToWorld(world, x, y) {
     if (!(world instanceof World))
       throw new TypeError(
-        "Cannot add entity to non-world object of type '" + world?.constructor?.name + "'",
+        `Cannot add entity to non-world object of type '${world?.constructor?.name}'`,
       );
     world.entities.push(this);
     this.world = world;

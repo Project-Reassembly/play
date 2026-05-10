@@ -112,25 +112,16 @@ class Bomb extends Block {
     return [
       "🟨 -------------------- ⬜",
       "Explosion:",
-      "  " + roundNum((this.explosion.radius ?? 0) / 30, 1) + " blocks range",
-      "  " + (this.explosion.amount ?? 0) + (this.explosion.type ?? " explosion") + " damage",
-      "  " +
-        roundNum(this.explosion.knockback ?? (this.explosion.amount ?? 0) ** 0.5, 1) +
-        " knockback",
-      "  " +
-        (this.explosion.status ?
-          "🟨" +
-          Registries.statuses.get(this.explosion.status).name +
-          " for " +
-          roundNum((this.explosion.statusDuration ?? 0) / 60, 1) +
-          "s⬜"
-        : ""),
+      `  ${roundNum((this.explosion.radius ?? 0) / 30, 1)} blocks range`,
+      `  ${this.explosion.amount ?? 0}${this.explosion.type ?? " explosion"} damage`,
+      `  ${roundNum(this.explosion.knockback ?? (this.explosion.amount ?? 0) ** 0.5, 1)} knockback`,
+      `  ${this.explosion.status ?
+        `🟨${Registries.statuses.get(this.explosion.status).name} for ${roundNum((this.explosion.statusDuration ?? 0) / 60, 1)}s⬜`
+        : ""}`,
       this.autoDetonationRange > 0 ?
-        "🟨" + roundNum(this.autoDetonationRange / 30, 1) + " blocks detection range⬜"
+        `🟨${roundNum(this.autoDetonationRange / 30, 1)} blocks detection range⬜`
       : "",
-      roundNum(this.detonationDelay / 60, 1) +
-        "s fuse" +
-        (this.accelerable ? " (±" + roundNum(this.delaySpread / 60, 1) + "s)" : " (exactly)"),
+      `${roundNum(this.detonationDelay / 60, 1)}s fuse${this.accelerable ? " (±" + roundNum(this.delaySpread / 60, 1) + "s)" : " (exactly)"}`,
       this.volatile ? "🟥volatile⬜" : "",
       "🟨 -------------------- ⬜",
     ];
@@ -170,34 +161,25 @@ class NuclearBomb extends Bomb {
     return [
       "🟨 -------------------- ⬜",
       "🟩Nuclear Explosion:⬜",
-      "  " + roundNum((this.explosion.radius ?? 0) / 30, 1) + " blocks range",
-      "  " +
-        (this.explosion.amount ?? 0) +
-        " total" +
-        (this.explosion.type ?? " explosion") +
-        " damage",
-      "  " +
-        roundNum(
-          this.explosion.knockback ??
-            (((this.explosion.amount ?? 0) / ((this.explosion.radius ?? 0) / 4.5)) * 10) ** 0.5,
-          1,
-        ) +
-        " knockback per tick",
-      "  " +
-        (this.explosion.status ?
-          "🟨" +
-          Registries.statuses.get(this.explosion.status).name +
-          " for " +
-          roundNum((this.explosion.statusDuration ?? 0) / 60, 1) +
-          "s⬜"
-        : ""),
-      "  " + roundNum((this.explosion.radius ?? 0) / 4.5 / 6, 1) + "s duration",
+      `  ${roundNum((this.explosion.radius ?? 0) / 30, 1)} blocks range`,
+      `  ${this.explosion.amount ?? 0} total${this.explosion.type ?? " explosion"} damage`,
+      `  ${roundNum(
+        this.explosion.knockback ??
+        (((this.explosion.amount ?? 0) / ((this.explosion.radius ?? 0) / 4.5)) * 10) ** 0.5,
+        1
+      )} knockback per tick`,
+      `  ${this.explosion.status ?
+        "🟨" +
+        Registries.statuses.get(this.explosion.status).name +
+        " for " +
+        roundNum((this.explosion.statusDuration ?? 0) / 60, 1) +
+        "s⬜"
+        : ""}`,
+      `  ${roundNum((this.explosion.radius ?? 0) / 4.5 / 6, 1)}s duration`,
       this.autoDetonationRange > 0 ?
-        "🟨" + roundNum(this.autoDetonationRange / 30, 1) + " blocks detection range⬜"
+        `🟨${roundNum(this.autoDetonationRange / 30, 1)} blocks detection range⬜`
       : "",
-      roundNum(this.detonationDelay / 60, 1) +
-        "s fuse" +
-        (this.accelerable ? " (±" + roundNum(this.delaySpread / 60, 1) + "s)" : " (exactly)"),
+      `${roundNum(this.detonationDelay / 60, 1)}s fuse${this.accelerable ? " (±" + roundNum(this.delaySpread / 60, 1) + "s)" : " (exactly)"}`,
       this.volatile ? "🟥volatile⬜" : "",
       "🟨 -------------------- ⬜",
     ];

@@ -52,23 +52,15 @@ class TileProducer extends Container {
   }
   stringifyRecipe() {
     return (
-      (this.results[this._blockOn] ?
-        "--> " +
-        (Registries.items.has(this.results[this._blockOn]) ?
+      `${this.results[this._blockOn] ?
+        `--> ${(Registries.items.has(this.results[this._blockOn]) ?
           Registries.items.get(this.results[this._blockOn])
-        : { name: "Unknown" }
-        )?.name +
-        " x" +
-        this.amount
-      : "No recipe") +
-      "\n" +
-      ""
-        .padEnd((this._progress / this.duration) * 20, "■")
-        .padEnd(20, "□")
-        .substring(0, 20) +
-      " \nSpeed: " +
-      roundNum((60 / this.duration) * this._speed, 2) +
-      "/s"
+          : { name: "Unknown" }
+        )?.name} x${this.amount}`
+        : "No recipe"}\n${""
+          .padEnd((this._progress / this.duration) * 20, "■")
+          .padEnd(20, "□")
+          .substring(0, 20)} \nSpeed: ${roundNum((60 / this.duration) * this._speed, 2)}/s`
     );
   }
   drawTooltip(x, y, outlineColour, backgroundColour) {
@@ -93,11 +85,7 @@ class TileProducer extends Container {
           /**@type {Tile} */
           let blk = construct(Registries.blocks.get(res.in), "tile");
           return [
-            "  " +
-              blk.name +
-              " ≈> " +
-              Registries.items.get(res.out).name +
-              (blk.drillSpeed !== 1 ? " (" + blk.drillSpeed + "× speed)" : ""),
+            `  ${blk.name} ≈> ${Registries.items.get(res.out).name}${blk.drillSpeed !== 1 ? " (" + blk.drillSpeed + "× speed)" : ""}`,
           ];
         }),
       "Base Production: " + roundNum(this.amount * (60 / this.duration), 1) + "/s",

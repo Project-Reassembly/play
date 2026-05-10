@@ -59,7 +59,7 @@ class Chunk {
       this.blocks[y] === undefined ||
       this.blocks[y][x] === undefined
     )
-      throw new Error("Can't place block outside of chunk (at " + x + ", " + y + " in chunk)");
+      throw new Error(`Can't place block outside of chunk (at ${x}, ${y} in chunk)`);
 
     let blockToAdd = construct(Registries.blocks.get(block), "block");
     blockToAdd.blockX = x;
@@ -77,7 +77,7 @@ class Chunk {
    */
   addTile(block, x = 0, y = 0, layer = Chunk.Layer.tiles) {
     if (this[layer][y] === undefined || this[layer][y][x] === undefined)
-      throw new Error("Can't place tile outside of chunk (at " + x + ", " + y + " (not) in chunk)");
+      throw new Error(`Can't place tile outside of chunk (at ${x}, ${y} (not) in chunk)`);
 
     this[layer][y][x] = block;
   }
@@ -107,7 +107,7 @@ class Chunk {
    */
   removeTile(x, y, layer = Chunk.Layer.tiles) {
     if (this[layer][y] === undefined || this[layer][y][x] === undefined)
-      throw new Error("Can't remove time outside of chunk (at " + x + ", " + y + " in chunk)");
+      throw new Error(`Can't remove time outside of chunk (at ${x}, ${y} in chunk)`);
     if (this[layer][y][x]) {
       this[layer][y][x] = null;
       return true;
@@ -125,7 +125,7 @@ class Chunk {
       this.blocks[y] === undefined ||
       this.blocks[y][x] === undefined
     )
-      throw new Error("Can't get block outside of chunk (at " + x + ", " + y + " in chunk)");
+      throw new Error(`Can't get block outside of chunk (at ${x}, ${y} in chunk)`);
     return this.blocks[y][x];
   } /**
    * Gets a tile from the chunk.
@@ -136,7 +136,7 @@ class Chunk {
    */
   getTile(x, y, layer = Chunk.Layer.tiles) {
     if (this[layer][y] === undefined || this[layer][y][x] === undefined)
-      throw new Error("Can't get tile outside of chunk (at " + x + ", " + y + " in chunk)");
+      throw new Error(`Can't get tile outside of chunk (at ${x}, ${y} in chunk)`);
     return this[layer][y][x];
   }/**
    * Gets the tile from the highest occupied layer at a position in the chunk.\
@@ -147,7 +147,7 @@ class Chunk {
    */
   getHighestTile(x, y) {
     if (this.tiles[y] === undefined || this.tiles[y][x] === undefined)
-      throw new Error("Can't get tile outside of chunk (at " + x + ", " + y + " in chunk)");
+      throw new Error(`Can't get tile outside of chunk (at ${x}, ${y} in chunk)`);
     return this.ores[y][x] ?? this.tiles[y][x];
   }
   randomTick() {
