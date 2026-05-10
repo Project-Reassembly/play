@@ -161,7 +161,13 @@ class Unloader extends Conveyor {
     super.highlight(emphasised);
     if (this.filter && this.filter !== "nothing") {
       let img = Registries.items.get(this.filter).image;
-      drawImg(img, this.uiX - 9, this.uiY - 9, 15 * ui.camera.zoom, 15 * ui.camera.zoom);
+      drawImg(
+        img,
+        this.uiX - 9 * ui.camera.zoom,
+        this.uiY - 9 * ui.camera.zoom,
+        15 * ui.camera.zoom,
+        15 * ui.camera.zoom,
+      );
     }
   }
   serialise() {

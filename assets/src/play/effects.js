@@ -94,7 +94,7 @@ class NuclearExplosion extends Explosion {
         e.applyStatus(
           this.status,
           clamp(
-            this.radius * 2 * Math.SQRT2 - e.distanceToPoint(this.x, this.y),
+            this.radius * 16 * Math.SQRT2 - e.distanceToPoint(this.x, this.y),
             0,
             this.statusDuration,
           ),
@@ -107,7 +107,7 @@ class NuclearExplosion extends Explosion {
         super.dealDamage(22, 30, this.radius);
         effects.shake(this.x, this.y, Math.sqrt(this.radius), 240);
       },
-      Math.min(120, this.radius ** 0.4),
+      Math.min(120, this.radius * 3 ** 0.4),
     );
     return this;
   }

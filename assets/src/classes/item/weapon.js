@@ -5,7 +5,6 @@ import { autoScaledEffect } from "../../play/effects.js";
 import { WeaponComponent } from "../entity/component.js";
 import { EquippedEntity, InventoryEntity } from "../entity/inventory-entity.js";
 import { Bullet } from "../projectile/bullet.js";
-import { LaserBullet } from "../projectile/laser-bullet.js";
 import { Missile } from "../projectile/missile.js";
 import { PointBullet } from "../projectile/point-bullet.js";
 import { patternedBulletExpulsion } from "../projectile/yeeter.js";
@@ -316,8 +315,6 @@ class Weapon extends Equippable {
       ind(idl) +
         (blt instanceof PointBullet
           ? "🟪instant⬜"
-          : blt instanceof LaserBullet
-          ? blt.length
           : `${roundNum(
             //s = ut + ½at²
             (blt.speed * time + 0.5 * (-blt.decel * time ** 2)) / 30,

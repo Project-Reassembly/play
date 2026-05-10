@@ -337,7 +337,7 @@ export class ShootableObject extends PhysicalObject {
         createFlashingColourArray(
           amount > 0 ?
             col.interp([col.yellow, col.red, col.black], clamp(frac, 0, 1))
-          : col.interp([col.from(200, 255, 0), col.green, col.white], clamp(frac, 0, 1)),
+          : col.interp([col.from(200, 255, 0), col.green, col.white], clamp(-frac, 0, 1)),
           65,
         ),
 
@@ -361,7 +361,12 @@ export class ShootableObject extends PhysicalObject {
         roundNum(Math.abs(amount), 1),
 
         createFlashingColourArray(
-          amount > 0 ? col.interp([col.blue, col.cyan, col.white], clamp(frac, 0, 1)) : col.magenta,
+          amount > 0 ?
+            col.interp(
+              this.useYellowShield ? [col.yellow, col.white] : [col.blue, col.cyan, col.white],
+              clamp(frac, 0, 1),
+            )
+          : col.magenta,
           65,
         ),
 
@@ -434,11 +439,11 @@ export class ShootableObject extends PhysicalObject {
       stroke(0);
       strokeWeight(1);
       fill(0);
-      rect(this.x - this.width / 2, this.y + this.height * 0.5 - 5, this.width, 5);
+      rect(this.x - this.width * 0.5, this.y + this.height * 0.5 - 5, this.width, 5);
       col.fill(col.interp([col.red, col.yellow, col.green], this.health / this.maxHealth));
       noStroke();
       rect(
-        this.x - this.width / 2,
+        this.x - this.width * 0.5,
         this.y + this.height * 0.5 - 5,
         (this.width * this.health) / this.maxHealth,
         5,
@@ -448,12 +453,13 @@ export class ShootableObject extends PhysicalObject {
     }
     if (this._shieldShowTime > 0 && this.shield > 0) {
       push();
+      const frac = this.shield / this._lastMaxShield;
       if (this.useYellowShield) {
-        fill(255, 255, 100, (this.shield / this._lastMaxShield) * 150);
-        stroke(255, 255, 100, (this.shield / this._lastMaxShield) * 255);
+        fill(255, 255, 100, frac * 150);
+        stroke(255, 255, 100, frac * 255);
       } else {
-        stroke(0, 255, 255, (this.shield / this._lastMaxShield) * 255);
-        fill(0, 255, 255, (this.shield / this._lastMaxShield) * 150);
+        stroke(0, 255, 255, frac * 255);
+        fill(0, 255, 255, frac * 150);
       }
       ellipse(this.x, this.y, this.width * 1.5, this.height * 1.5);
       pop();
@@ -464,20 +470,20 @@ export class ShootableObject extends PhysicalObject {
 
 /**
  * Checks collisions between 2 actual objects.
- * @param {PhysicalObject} hb1 First object to check
- * @param {PhysicalObject} hb2 Second object to check.
+ * @param {PhysicalObject} o1 First object to check
+ * @param {PhysicalObject} o2 Second object to check.
  * @returns True if the objects collide.
  */
-function hitboxesIntersect(hb1, hb2, isHB1Block, isHB2Block) {
+function hitboxesIntersect(o1, o2) {
   return rectanglesIntersect(
-    hb1.x,
-    hb1.y,
-    hb1.width / 2,
-    hb1.height / 2,
-    hb2.x,
-    hb2.y,
-    hb2.width / 2,
-    hb2.height / 2,
+    o1.x,
+    o1.y,
+    o1.width / 2,
+    o1.height / 2,
+    o2.x,
+    o2.y,
+    o2.width / 2,
+    o2.height / 2,
   );
 }
 /**

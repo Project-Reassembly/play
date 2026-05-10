@@ -45,7 +45,7 @@ PreloadRegistries.stati.add("death-burn", {
 });
 PreloadRegistries.stati.add("nuclear-fire", {
   name: "Nuclear Fire",
-  damage: 45,
+  damage: 30,
   interval: 5,
   damageType: "fire",
   effect: "burning",

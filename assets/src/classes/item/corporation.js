@@ -16,13 +16,16 @@ export class Corporation {
   static get(name) {
     return Registries.corps.tryGet(name);
   }
-  static icon(name) {
+  static iconof(name) {
     return this.get(name)?.icon ?? "";
   }
-  static color(name) {
+  static colorof(name) {
     return (this.get(name)?.color ?? 0) | 0;
   }
-  static description(name) {
+  static nameof(name) {
+    return this.get(name)?.name ?? "";
+  }
+  static descriptionof(name) {
     return this.get(name)?.description ?? "";
   }
 }

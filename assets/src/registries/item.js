@@ -454,11 +454,14 @@ Registries.items.add("scrap-launcher", {
     types: [
       {
         speed: 0,
+        maxSpeed: 3,
         decel: -0.01,
         extraUpdates: 10,
         lifetime: 600,
         hitSize: 6,
         trailEffect: "burning",
+        trail: true,
+        trailInterval: 10,
         knockback: 20,
         // trailColours: [
         //   [255, 255, 255],
@@ -703,7 +706,6 @@ Registries.items.add("iti-laser-caster", {
         fragNumber: 6,
         fragSpread: 180,
         fragBullet: {
-          type: "missile",
           targetType: "nearest",
           trackingRange: 100,
           light: 50,
@@ -783,7 +785,6 @@ Registries.items.add("iti-laser-caster", {
         fragNumber: 9,
         fragSpread: 180,
         fragBullet: {
-          type: "missile",
           targetType: "nearest",
           trackingRange: 150,
           light: 50,
@@ -863,7 +864,6 @@ Registries.items.add("iti-laser-caster", {
         fragNumber: 11,
         fragSpread: 180,
         fragBullet: {
-          type: "missile",
           targetType: "nearest",
           trackingRange: 150,
           light: 50,
@@ -944,7 +944,6 @@ Registries.items.add("iti-laser-caster", {
         fragNumber: 6,
         fragSpread: 180,
         fragBullet: {
-          type: "missile",
           targetType: "nearest",
           trackingRange: 150,
           light: 50,
@@ -1047,7 +1046,6 @@ Registries.items.add("iti-energy-repeater", {
   bullets: {
     types: [
       {
-        type: "missile",
         targetType: "hovered",
         trackingRange: 100,
         turnSpeed: 20,
@@ -1083,7 +1081,6 @@ Registries.items.add("iti-energy-repeater", {
         despawnEffect: "laser-caster-frag",
       },
       {
-        type: "missile",
         targetType: "hovered",
         trackingRange: 150,
         turnSpeed: 25,
@@ -1120,7 +1117,6 @@ Registries.items.add("iti-energy-repeater", {
         despawnEffect: "laser-caster-frag",
       },
       {
-        type: "missile",
         targetType: "hovered",
         trackingRange: 200,
         turnSpeed: 20,
@@ -1157,7 +1153,6 @@ Registries.items.add("iti-energy-repeater", {
         despawnEffect: "laser-caster-frag-plasma",
       },
       {
-        type: "missile",
         targetType: "hovered",
         trackingRange: 200,
         turnSpeed: 20,
@@ -1221,7 +1216,6 @@ Registries.items.add("iti-energy-repeater", {
   altBullets: {
     types: [
       {
-        type: "missile",
         targetType: "hovered",
         trackingRange: 150,
         turnSpeed: 7,
@@ -1257,7 +1251,6 @@ Registries.items.add("iti-energy-repeater", {
         despawnEffect: "laser-caster-explosion~30",
       },
       {
-        type: "missile",
         targetType: "hovered",
         trackingRange: 150,
         turnSpeed: 9,
@@ -1293,7 +1286,6 @@ Registries.items.add("iti-energy-repeater", {
         despawnEffect: "laser-caster-explosion~35",
       },
       {
-        type: "missile",
         targetType: "hovered",
         trackingRange: 300,
         turnSpeed: 14,
@@ -1329,7 +1321,6 @@ Registries.items.add("iti-energy-repeater", {
         despawnEffect: "laser-caster-explosion-plasma~45",
       },
       {
-        type: "missile",
         targetType: "hovered",
         trackingRange: 300,
         turnSpeed: 14,
@@ -1427,6 +1418,7 @@ Registries.items.add("peti-charged-laser-blaster", {
           {
             type: "laser",
             amount: 30,
+            spread: 6
           },
         ],
         despawnEffect: "none",
@@ -1435,12 +1427,11 @@ Registries.items.add("peti-charged-laser-blaster", {
         spawnSpeedMin: 0.67,
         spawnSpeedMax: 1.5,
         spawnBullet: {
-          lifetime: 11,
-          extraUpdates: 10,
+          lifetime: 6,
+          extraUpdates: 5,
           light: 70,
           speed: 10,
           hitSize: 3,
-          trail: false,
           endLine: "peti-laser-mini",
           hitEffect: "laser-caster-frag-destabilised",
           knockback: 4,
@@ -1451,6 +1442,7 @@ Registries.items.add("peti-charged-laser-blaster", {
             {
               type: "laser",
               amount: 5,
+              spread: 2
             },
           ],
           despawnEffect: "none",
@@ -1491,7 +1483,6 @@ Registries.items.add("peti-electrified-plasma-launcher", {
   bullets: {
     types: [
       {
-        type: "missile",
         lifetime: 35,
         extraUpdates: 1,
         light: 70,
@@ -1522,7 +1513,6 @@ Registries.items.add("peti-electrified-plasma-launcher", {
         fragNumber: 3,
         fragSpread: 30,
         fragBullet: {
-          type: "missile",
           targetType: "nearest",
           trackingRange: 100,
           turnSpeed: 360,
@@ -1604,8 +1594,7 @@ Registries.items.add("peti-plasma-railgun", {
         damage: [
           {
             type: "laser",
-            amount: 2400,
-            spread: 300,
+            amount: 2400
           },
         ],
         despawnEffect: "plasma-railgun-impact~120",
@@ -1780,7 +1769,6 @@ Registries.items.add("scrap-artillery", {
   image: "weapon.tank-gun.item",
   ammoUse: 4,
   shootX: 30,
-  recoil: 4,
   range: 720,
   bullets: {
     types: [

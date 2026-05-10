@@ -1,7 +1,9 @@
 import { col } from "../../core/color.js";
-import { rnd, tru, Vector } from "../../core/number.js";
+import { clamp, rnd, tru, Vector } from "../../core/number.js";
+import { Registries } from "../../core/registry.js";
 import { rotatedImg, rotatedShape } from "../../core/ui.js";
 import { createLinearEffect, repeat } from "../../play/effects.js";
+import { game } from "../../play/game.js";
 import { blockSize } from "../../scaling.js";
 import { Fire } from "../effect/fire.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
@@ -14,6 +16,7 @@ class Bullet extends PhysicalObject {
   damage = [];
   speed = 20;
   decel = 0;
+  maxSpeed = Infinity;
   lifetime = 60;
   hitSize = 5;
 
@@ -27,7 +30,7 @@ class Bullet extends PhysicalObject {
 
   //trails
   trail = false;
-  trailColours = [col.from(255,255,255,200)];
+  trailColours = [col.from(255, 255, 255, 200)];
   trailShape = "rhombus";
   trailWidth = 0;
   trailLength = 0;
@@ -108,19 +111,21 @@ class Bullet extends PhysicalObject {
   startpos = Vector.ZERO;
   /**All points this bullet has been at. Used for linear effects, and is only populated if `endLine` is not `"none"` */
   positions = [];
+  lastpos = Vector.ZERO;
 
   init() {
     super.init();
     this.trailColours = this.trailColours.map(col.convert);
     this.maxLife = this.lifetime;
-    if(this.drawer.fill) this.drawer.fill = col.convert(this.drawer.fill);
-    this.trailInterval ??= this.hitSize * 4;
+    if (this.drawer.fill) this.drawer.fill = col.convert(this.drawer.fill);
+    this.trailInterval ??= this.speed / this.hitSize;
     this.world ??= this.entity?.world;
+    if (this.targetType !== "none" && this.targetType !== "nearest") this.controlled = true;
   }
   oncreated() {
     this.emit(this.spawnFrame, 0, 0, true);
     this.emit(this.spawnEffect);
-    this.startpos = new Vector(this.x, this.y);
+    this.startpos = this.lastpos = new Vector(this.x, this.y);
     this.spawn();
   }
   ondestroyed() {
@@ -144,10 +149,11 @@ class Bullet extends PhysicalObject {
       moveVector.mult(this.speed * dt);
       //Move
       this.move(moveVector.x, moveVector.y);
+      if (this.trackingRange > 0 && this.targetType !== "none") this.track();
       //hit
       this.checkCollisions();
       //Speed change
-      this.speed = Math.max(this.speed - dt * this.decel, 0);
+      this.speed = clamp(this.speed - dt * this.decel, 0, this.maxSpeed);
       //Tick lifetime
       if (this.lifetime <= 0) {
         this.remove = true;
@@ -158,6 +164,7 @@ class Bullet extends PhysicalObject {
       if (this.endLine !== "none") {
         this.positions.push(this.pos);
       }
+      this.lastpos = this.pos;
     }
   }
   move(x, y) {
@@ -169,12 +176,14 @@ class Bullet extends PhysicalObject {
       this.trailSpacing === "speed" ? this.speed * dt
       : this.trailSpacing === "timed" ? dt
       : 0;
+    const from = this.lastpos,
+      to = this.pos;
 
-    for (let e = 0; e < s; e++) {
-      this._trailCounter--;
-      if (this._trailCounter <= 1) {
-        if (this.world?.particles != null && this.trail) {
-          if (this.trailEffect === "default") {
+    if (this.world?.particles != null && this.trail) {
+      if (this.trailEffect === "old") {
+        for (let e = 0; e <= s; e++) {
+          this._trailCounter--;
+          if (this._trailCounter <= 1) {
             let trailparticle = new ShapeParticle(
               this.x - e * p5.Vector.fromAngle(this.directionRad).x,
               this.y - e * p5.Vector.fromAngle(this.directionRad).y,
@@ -192,10 +201,63 @@ class Bullet extends PhysicalObject {
             );
             trailparticle.light = this.trailLight;
             this.world.particles.push(trailparticle);
-          } else this.emit(this.trailEffect);
+            this._trailCounter = this.trailInterval;
+          }
         }
-        this._trailCounter = this.trailInterval;
-      }
+      } else if (this.trailEffect === "default") {
+        const poses = from.multiLerp(to, Math.ceil(s / this.trailInterval));
+        poses.forEach((p) => {
+          const trailparticle = new ShapeParticle(
+            p.x,
+            p.y,
+            this.directionRad,
+            this.trailLife || (this.maxLife * 1.2) ** 0.6,
+            0,
+            0,
+            this.trailShape, //flames
+            this.trailColours,
+            this.trailWidth || this.hitSize * 1.25,
+            0,
+            this.trailWidth || this.hitSize * 1.25,
+            0,
+            0,
+          );
+          trailparticle.light = this.trailLight;
+          this.world.particles.push(trailparticle);
+        });
+      } else if (this.trailEffect === "moab-adventure") {
+        for (let e = 0; e < this.speed * dt; e++) {
+          if (reduced && !tru(game.effects)) continue;
+          if (this._trailCounter <= 0) {
+            if (this.world?.particles != null && this.trail) {
+              let v = Vector.fromAngle(this.direction).scale(e);
+              this.world.particles.push(
+                new ShapeParticle(
+                  this.x - v.x,
+                  this.y - v.y,
+                  this.directionRad,
+                  this.maxLife * 0.75,
+                  0,
+                  0,
+                  this.trailShape,
+                  this.trailColour,
+                  this.trailColourTo,
+                  this.trailWidth * 1.9,
+                  0,
+                  this.hitSize * this.trailInterval * 0.25,
+                  this.hitSize * this.trailInterval * 0.25,
+                  0,
+                ),
+              );
+            }
+            this._trailCounter = this.trailInterval;
+          } else {
+            this._trailCounter--;
+          }
+        }
+      } else if (Registries.vfx.get(this.trailEffect).type === "line-emission")
+        createLinearEffect(this.trailEffect, this.world, [from, to]);
+      else this.emit(this.trailEffect);
     }
   }
   draw() {
@@ -308,7 +370,7 @@ class Bullet extends PhysicalObject {
         .blocksInSquare(
           Math.floor(this.x / blockSize),
           Math.floor(this.y / blockSize),
-          Math.ceil(this.hitSize / blockSize)
+          Math.ceil(this.hitSize / blockSize),
         )
         .forEach((block) => {
           if (
@@ -348,7 +410,8 @@ class Bullet extends PhysicalObject {
       for (let instance of this.damage) {
         if (!instance.spread) instance.spread = 0;
         let todeal =
-          instance.amount + (this.conditionalPierce ? 0 : rnd.float(instance.spread, -instance.spread));
+          instance.amount +
+          (this.conditionalPierce ? 0 : rnd.float(instance.spread, -instance.spread));
         let taken = Math.min(todeal, physobj.health);
         if (!instance.radius) {
           physobj.damage(instance.type, todeal, this.entity);
@@ -372,6 +435,74 @@ class Bullet extends PhysicalObject {
       }
     }
     physobj.hitByBullet(this);
+  }
+  turnSpeed = 1;
+  /** @type {"nearest" | "mouse" | "hovered" | "none"} */
+  targetType = "none"; //"nearest", "mouse", "hovered"
+  trackingRange = 0;
+  target = null;
+  track() {
+    if (
+      this.target &&
+      !this.target.dead &&
+      !this.target.remove &&
+      this.distanceTo(this.target) < this.trackingRange
+    ) {
+      //If target still there
+      this.rotateTowards(this.target.x, this.target.y, this.turnSpeed);
+    }
+    let selected = null;
+    if (this.targetType === "nearest") {
+      //Closest to bullet
+      if (this.world) {
+        //If the bullet exists
+        let minDist = Infinity;
+        for (let entity of this.world.entities) {
+          if (
+            !(entity instanceof DroppedItemStack) &&
+            entity.team !== this.entity.team &&
+            !entity.dead &&
+            entity.visible &&
+            !this.damaged.includes(entity)
+          ) {
+            let dist = this.distanceTo(entity);
+            if (dist < this.trackingRange && dist < minDist) {
+              //If closer
+              selected = entity;
+              minDist = dist;
+            }
+          }
+        }
+      }
+    } else if (this.targetType === "hovered") {
+      //Closest to mouse pointer
+      if (this.world) {
+        //If the bullet exists
+        let minDist = Infinity;
+        selected =
+          this.distanceToPoint(game.mouse.x, game.mouse.y) < this.trackingRange ? game.mouse : null;
+        for (let entity of this.world.entities) {
+          if (
+            !(entity instanceof DroppedItemStack) &&
+            entity.team !== this.entity.team &&
+            !entity.dead
+          ) {
+            //Only select living entities
+            let dist = entity.distanceToPoint(game.mouse.x, game.mouse.y);
+            if (dist < this.trackingRange && dist < minDist) {
+              //If closer
+              selected = entity;
+              minDist = dist;
+            }
+          }
+        }
+      }
+    } else if (this.targetType === "mouse") {
+      //Closest to mouse pointer
+      if (this.distanceToPoint(game.mouse.x, game.mouse.y) < this.trackingRange)
+        selected = game.mouse;
+    }
+    this.target = selected;
   }
 }
 export { Bullet };

@@ -212,7 +212,7 @@ createLinkedBlockAndItem(
     health: 50,
     explosion: {
       radius: 180,
-      amount: 1500,
+      amount: 15000,
     },
     fuseEffect: {
       type: "particle-emission",
@@ -271,7 +271,7 @@ createLinkedBlockAndItem(
     health: 50,
     explosion: {
       radius: 400,
-      amount: 20000,
+      amount: 100000,
     },
     fuseEffect: "plasma-burn",
     detonationDelay: 180,

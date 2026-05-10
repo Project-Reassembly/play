@@ -271,7 +271,19 @@ class Vector {
   toString() {
     return `[${this.x},${this.y}]`;
   }
+  /**@param {Vector} other */
+  lerp(other, factor) {
+    return new Vector(
+      other.x * factor + this.x * (1 - factor),
+      other.y * factor + this.y * (1 - factor),
+    );
+  }
+  multiLerp(other, divisions) {
+    let d = 1 / (divisions - 1);
+    return new Array(divisions).fill(0).map((v, i) => this.lerp(other, i * d));
+  }
 }
+globalThis.v = Vector;
 
 function turn(direction, x, y, toX, toY, amount) {
   let delta = new Vector(toX - x, toY - y);

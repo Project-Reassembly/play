@@ -580,7 +580,7 @@ class Inventory {
       ui.mouse.x + 10,
       ui.mouse.y + 10,
       undefined,
-      Corporation.color(this.tooltip.item.corp) ||
+      Corporation.colorof(this.tooltip.item.corp) ||
       Item.getColourFromRarity(this.tooltip.item.rarity, "light"),
     );
 

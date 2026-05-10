@@ -82,10 +82,7 @@ import {
 import { Throwable } from "../classes/item/throwable.js";
 import { Weapon } from "../classes/item/weapon.js";
 import { Bullet } from "../classes/projectile/bullet.js";
-import { ContinuousLaserBullet } from "../classes/projectile/continuous-laser-bullet.js";
 import { CriticalBullet } from "../classes/projectile/critical.js";
-import { LaserBullet } from "../classes/projectile/laser-bullet.js";
-import { Missile } from "../classes/projectile/missile.js";
 import { PointBullet } from "../classes/projectile/point-bullet.js";
 import { VirtualBullet } from "../classes/projectile/virtual-bullet.js";
 import { Chunk } from "../classes/world/chunk.js";
@@ -124,9 +121,7 @@ Registries.type.add("player", Player);
 Registries.type.add("modular-tank", ModularTankEntity);
 //Projectiles
 Registries.type.add("bullet", Bullet);
-Registries.type.add("laser", LaserBullet);
-Registries.type.add("continuous-laser", ContinuousLaserBullet);
-Registries.type.add("missile", Missile);
+// Registries.type.add("missile", Missile);
 Registries.type.add("critical", CriticalBullet);
 Registries.type.add("point-bullet", PointBullet);
 Registries.type.add("block-bullet", BlockLaunchedBullet);

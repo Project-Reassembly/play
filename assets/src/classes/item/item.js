@@ -19,7 +19,7 @@ class Item extends Integrate.RegisteredItem {
   tooltip = null;
   init() {
     // this.description = wrapWords(this.description, 40);
-    this.tooltip = CMFT.drawer(`${this.corp ? `#>>${Corporation.icon(this.corp)}#@b` : "#@b"}${this.name}#--`, 25, 40).conjoin(
+    this.tooltip = CMFT.drawer(`${this.corp ? `#>>${Corporation.iconof(this.corp)}#@b` : "#@b"}${this.name}#--`, 25, 40).conjoin(
       CMFT.drawer(
         this.description +
           (this.marketValue > 0 ?
