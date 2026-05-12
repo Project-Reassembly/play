@@ -21,18 +21,20 @@ async function checkUpdate() {
   let gv = processVersion(gameVersion);
   let ov = processVersion(oldver);
   if (gv !== ov || preNumber > oldpre) {
-    console.log(`  Update available (${gv}/${ov})`);
+    console.log(
+      `  Update available (ver ${gv}/${ov}${preNumber ? ` pre ${preNumber}/${oldpre})` : ""}`,
+    );
     notify();
     versiongetter = true;
   } else {
-    console.log(`  No update available (${gv}).`);
+    console.log(`  No update available (ver ${gv}${preNumber ? ` pre ${preNumber}` : ""}).`);
     versiongetter = false;
   }
   gameVersion = oldver;
   preNumber = oldpre;
 }
 async function getVer() {
-  await fetch(`${versionGetURL}?t=${Date.now()}`, { with: { type: "json" } }).then(
+  await fetch(`${versionGetURL}`).then(
     async (val) => {
       let def = await val.json();
       console.log("[v] Got version data", def);
@@ -42,7 +44,7 @@ async function getVer() {
     },
     async () => {
       console.warn("[v] Failed to get version data, retrying from local data...");
-      await fetch(`../../version.json?t=${Date.now()}`, { with: { type: "json" } }).then(
+      await fetch(`../../version.json`).then(
         async (val) => {
           let def = await val.json();
           console.log("[v] Got backup version data", def);
@@ -56,7 +58,7 @@ async function getVer() {
 }
 
 console.log("[v] Getting initial version data...");
-fetch(`../../version.json?t=${Date.now()}`, { with: { type: "json" } }).then(async (val) => {
+fetch(`../../version.json`).then(async (val) => {
   let def = await val.json();
   console.log("[v] Got initial version data", def);
   gameVersion = def?.version ?? "0.0.0(error)";
