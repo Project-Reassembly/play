@@ -10,14 +10,13 @@ import { DroppedItemStack } from "../classes/item/dropped-itemstack.js";
 import { Equippable } from "../classes/item/equippable.js";
 import { ItemStack } from "../classes/item/item-stack.js";
 import { PlaceableItem } from "../classes/item/placeable.js";
-import { patternedBulletExpulsion } from "../classes/projectile/yeeter.js";
 import { Chunk } from "../classes/world/chunk.js";
 import { World } from "../classes/world/world.js";
 import { iterate2DArray } from "../core/2D-array.js";
 import { Decoration } from "../core/cmft.js";
 import { assign, construct, constructFromType } from "../core/constructor.js";
 import { Cutscene } from "../core/cutscene.js";
-import { clamp, rnd, roundNum, tru } from "../core/number.js";
+import { clamp, rnd, roundNum } from "../core/number.js";
 import { PreloadRegistries, Registries } from "../core/registry.js";
 import { Serialiser } from "../core/serialiser.js";
 import { ImageContainer, rotatedShape, ui, UIComponent } from "../core/ui.js";
@@ -28,14 +27,18 @@ import { loadStats, setupTips } from "../definitions/screens/title.js";
 import { cmdHistory } from "../definitions/text-edit.js";
 
 import { StatusEffect } from "../classes/effect/status-effect.js";
-import { Corporation } from "../classes/item/corporation.js";
 import "../lib/isl.js";
 import { exec, ExecutionContext } from "../lib/isl.js";
 import { blockSize, totalSize } from "../scaling.js";
 import { debug } from "./debug.js";
-import { createEffect, effectTimer, emitEffect, Explosion } from "./effects.js";
+import { effectTimer } from "./effects.js";
 import { fonts } from "./font.js";
 import { Log } from "./messaging.js";
+
+import { deliverPlayer } from "../classes/world/events/event-action.js";
+import { FactoryEvaluator } from "../classes/world/factory-valuations.js";
+import "../definitions/screens/ide.js";
+import { capturedInput, tcursor } from "../definitions/screens/ide.js";
 let histIndex = 0;
 const game = {
   saveslot: 1,
@@ -179,6 +182,7 @@ let stats = {
 };
 //Create or load world
 const world = new World();
+const factory = new FactoryEvaluator(world);
 function sortByE1(a, b) {
   const a0 = a[0],
     b0 = b[0];
@@ -204,8 +208,7 @@ try {
         //make player
         deliverPlayer(null, totalSize / 2, totalSize / 2, true, creation.corporation, world);
 
-        //make events
-        eventify(world);
+        world.evaluator.updateWorldForAllTeams();
 
         gen.inprogress = false;
         //Worldgen stats
@@ -637,7 +640,6 @@ function loadGame(name) {
   file = JSON.parse(file);
   game.money = file.money ?? 10000;
   world.become(World.deserialise(file.world));
-  eventify(world);
   console.log("Game loaded.");
   Log.send(`#a-You are now playing on '${world.name}'.`);
   return true;
@@ -902,7 +904,12 @@ function uiFrame() {
   //Reset mouse held status
   if (ui.waitingForMouseUp && !mouseIsPressed) ui.waitingForMouseUp = false;
   //Draw UI and mouse pos
-  if (gen.started && !gen.inprogress && ui.menuState === "in-game" && UIComponent.evaluateCondition("mode:build")) {
+  if (
+    gen.started &&
+    !gen.inprogress &&
+    ui.menuState === "in-game" &&
+    UIComponent.evaluateCondition("mode:build")
+  ) {
     ui.hoveredBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
     if (ui.hoveredBlock) ui.hoveredBlock.highlight();
     let conblock = Container.selectedBlock;
@@ -967,9 +974,10 @@ function gameFrame() {
 }
 
 function movePlayer() {
-  if (ui.texteditor.active) return game.player.controllable = false;
+  if (ui.texteditor.active) return (game.player.controllable = false);
   if (keyIsDown(SHIFT) || game.player.dead) {
     freecam = true;
+    UIComponent.setCondition("fc:true");
     if (keyIsDown(87)) {
       ui.camera.y -= 5;
     }
@@ -985,6 +993,7 @@ function movePlayer() {
     game.player.controllable = false;
   } else {
     freecam = false;
+    UIComponent.setCondition("fc:false");
     game.player.controllable = true;
   }
   _playerx.value = game.player.x;
@@ -1092,6 +1101,7 @@ function createPlayer(player = null, x, y, playerType = "iti-player") {
     player.addToWorld(world, x ?? totalSize / 2, y ?? totalSize / 2);
   }
   game.player = player;
+  factory.team = player.team;
   if (x !== undefined) game.player.x = x;
   if (y !== undefined) game.player.y = y;
   //For ISL
@@ -1103,113 +1113,6 @@ function createPlayer(player = null, x, y, playerType = "iti-player") {
   });
 }
 
-// Makes a player with a bang
-function deliverPlayer(player = null, x, y, moveCamera = false, corp = "iti", iworld = world) {
-  const crp = constructFromType(Registries.corps.get(corp), Corporation);
-  createPlayer(player, x, y, crp.player);
-  game.player.health = game.player.maxHealth;
-  game.player.statuses = {};
-  game.player.team = corp;
-  if (game.player.dead) {
-    game.player.dead = false;
-    game.player.addToWorld(iworld);
-  }
-  if (moveCamera) {
-    ui.camera.x = game.player.x;
-    ui.camera.y = game.player.y;
-  }
-  deliverEntity(game.player, false, iworld, true);
-}
-
-function deliverEntity(ent, add = false, world, clearArea = false) {
-  if (add) ent.addToWorld(world);
-  ent.visible = false;
-  ent.controllable = false;
-  ent.tangible = false;
-  emitEffect("land-target", ent);
-  effectTimer.do(() => {
-    let y = ui.camera.y - height / ui.camera.zoom;
-    let life = (ent.y - y) / 20;
-    patternedBulletExpulsion(
-      ent.x,
-      y,
-      {
-        lifetime: life - 1,
-        speed: 20,
-        trail: true,
-        trailEffect: "land-trail",
-        drawer: { hidden: true },
-        collides: false,
-        fires: 9,
-        fire: { damage: 6, lifetime: 2880, interval: 20, status: "burning", statusDuration: 120 },
-        fireSpread: 50,
-        fragNumber: 9,
-        fragSpacing: 40,
-        fragSpread: 40,
-        fragBullet: {
-          lifetime: 20,
-          speed: 30,
-          decel: 1.5,
-          pierce: 2,
-          trail: true,
-          trailEffect: "fire",
-          status: "burning",
-          statusDuration: 360,
-          drawer: { shape: "rhombus", fill: "gray", width: 30, height: 8 },
-          damage: [
-            { amount: 20, type: "ballistic" },
-            { amount: 40, type: "explosion", radius: 30 },
-          ],
-          despawnEffect: "explosion~30",
-          fires: 2,
-          fire: { damage: 6, lifetime: 1440, interval: 20, status: "burning", statusDuration: 120 },
-          fireSpread: 10,
-        },
-      },
-      1,
-      90,
-      0,
-      0,
-      world,
-      ent,
-    );
-    effectTimer.do(() => {
-      new Explosion({
-        x: ent.x,
-        y: ent.y,
-        world: world,
-        team: ent.team,
-        radius: 150,
-        amount: 5000,
-        knockback: 0,
-      }).create();
-      if (clearArea)
-        new Explosion({
-          x: ent.x,
-          y: ent.y,
-          world: world,
-          team: ent.team,
-          radius: 800,
-          amount: 500,
-          knockback: 0,
-        }).dealDamage();
-      createEffect("land-wave", world, ent.x, ent.y, -Math.PI / 2, 1);
-      createEffect("land-scorch", world, ent.x, ent.y, -Math.PI / 2, 1);
-      for (let tick = 0; tick < 10; tick++)
-        DroppedItemStack.create(
-          new ItemStack("scrap", roundNum(rnd.float(2, 20))),
-          world,
-          ent.x,
-          ent.y,
-          rnd.float(4, 10),
-          rnd.float(0, 360),
-        );
-      ent.visible = true;
-      ent.controllable = true;
-      ent.tangible = true;
-    }, life);
-  }, 180);
-}
 
 function mouseInteraction() {
   if (
@@ -1383,23 +1286,30 @@ window.keyPressed = function (ev) {
   // debug
   if (key === "f3") {
     UIComponent.setCondition("debugging:true");
-  } else if (UIComponent.evaluateCondition("debugging:true") && ui.menuState === "in-game") {
+  } else if (UIComponent.evaluateCondition("debugging:true")) {
     console.log("debug: " + ev.key);
     UIComponent.setCondition("debugging:false");
 
-    if (ev.key === "b") {
+    if (key === "b") {
       debug.hitboxes = !debug.hitboxes;
       Log.send(`#7-[#@-Debug#7-] Hitboxes ${debug.hitboxes ? "shown" : "hidden"}`);
-    }
-    else if (ev.key === "a") {
+    } else if (key === "a") {
       debug.ai = !debug.ai;
       Log.send(`#7-[#@-Debug#7-] AI targets and areas ${debug.ai ? "shown" : "hidden"}`);
-    }
-    else if (ev.key === "c") {
+    } else if (key === "c") {
       debug.chunkBorders = !debug.chunkBorders;
       Log.send(`#7-[#@-Debug#7-] Chunk borders ${debug.chunkBorders ? "shown" : "hidden"}`);
-    }
-    else if (ev.key === "Escape"){
+    } else if (key === "t") {
+      UIComponent.setCondition(
+        "debug-tools:" + (UIComponent.evaluateCondition("debug-tools:true") ? "false" : "true"),
+      );
+      Log.send(
+        `#7-[#@-Debug#7-] Debug tools ${UIComponent.evaluateCondition("debug-tools:true") ? "shown" : "hidden"}`,
+      );
+    } else if (key === "r") {
+      debug.regionBorders = !debug.regionBorders;
+      Log.send(`#7-[#@-Debug#7-] Region borders ${debug.regionBorders ? "shown" : "hidden"}`);
+    } else if (key === "escape") {
       debug.ai = false;
       debug.chunkBorders = false;
       debug.hitboxes = false;
@@ -1465,6 +1375,10 @@ function openCommandLine() {
 }
 /**@param {KeyboardEvent} ev  */
 window.keyTyped = function (ev) {
+  if (tcursor.active)
+    capturedInput(
+      ev.shiftKey || ev.getModifierState("CapsLock") ? key.toUpperCase() : key.toLowerCase(),
+    );
   if (!ui.texteditor.active) return false;
   if (key !== "/") {
     ui.texteditor.text +=
@@ -1500,28 +1414,28 @@ window.mouseWheel = function (ev) {
 /**
  * @param {World} world
  */
-function eventify(world) {
-  //spawn an iti merchant in 5 mins
-  world.addEvent("iticorpspawn", 18000, (world) => {
-    Log.send("#i-ITI have sent a merchant to trade");
-    let entiti = construct(Registries.entities.get("iti-corporate-merchant"), "entity");
-    entiti.x = game.player.x + rnd.float(300, 800) * (tru(0.5) ? -1 : 1);
-    entiti.y = game.player.y + rnd.float(300, 800) * (tru(0.5) ? -1 : 1);
-    deliverEntity(entiti, true, world);
-  });
-  //bossfight in 3-ish mins
-  world.addEvent("scrapboss-warning", 36000, (world) => {
-    Log.send("#d-The Scrapper is descending...");
-  });
-  //bossfight
-  world.addEvent("scrapboss", 46800, (world) => {
-    Log.send("#4-The Scrapper has descended!");
-    let entiti = construct(Registries.entities.get("scrapper"), "entity");
-    entiti.x = game.player.x + rnd.float(300, 800) * (tru(0.5) ? -1 : 1);
-    entiti.y = game.player.y + rnd.float(300, 800) * (tru(0.5) ? -1 : 1);
-    deliverEntity(entiti, true, world);
-  });
-}
+// function eventify(world) {
+//   // spawn an iti merchant in 5 mins
+//   world.addEvent("iticorpspawn", 18000, (world) => {
+//     Log.send("#i-ITI have sent a merchant to trade");
+//     let entiti = construct(Registries.entities.get("iti-corporate-merchant"), "entity");
+//     entiti.x = game.player.x + rnd.float(300, 800) * (tru(0.5) ? -1 : 1);
+//     entiti.y = game.player.y + rnd.float(300, 800) * (tru(0.5) ? -1 : 1);
+//     deliverEntity(entiti, true, world);
+//   });
+//   //bossfight in 3-ish mins
+//   world.addEvent("scrapboss-warning", 36000, (world) => {
+//     Log.send("#d-The Scrapper is descending...");
+//   });
+//   //bossfight
+//   world.addEvent("scrapboss", 46800, (world) => {
+//     Log.send("#4-The Scrapper has descended!");
+//     let entiti = construct(Registries.entities.get("scrapper"), "entity");
+//     entiti.x = game.player.x + rnd.float(300, 800) * (tru(0.5) ? -1 : 1);
+//     entiti.y = game.player.y + rnd.float(300, 800) * (tru(0.5) ? -1 : 1);
+//     deliverEntity(entiti, true, world);
+//   });
+// }
 
 function nextRecipe() {
   let block = ui.hoveredBlock ?? Container.selectedBlock;
@@ -1555,11 +1469,11 @@ window.mousePressed = function () {
 };
 
 window.world = world;
+window.factory = factory;
 
 export {
   clearData,
   createPlayer,
-  deliverPlayer,
   effects,
   fonts,
   game,

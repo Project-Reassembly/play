@@ -1,6 +1,7 @@
 import { Block } from "../../classes/block/block.js";
 import { Container } from "../../classes/block/container.js";
 import { DroppedItemStack } from "../../classes/item/dropped-itemstack.js";
+import { deliverPlayer } from "../../classes/world/events/event-action.js";
 import { col } from "../../core/color.js";
 import { roundNum, shortenedNumber } from "../../core/number.js";
 import {
@@ -13,7 +14,7 @@ import {
   ui,
   UIComponent,
 } from "../../core/ui.js";
-import { deliverPlayer, game, gen, world } from "../../play/game.js";
+import { game, gen, world } from "../../play/game.js";
 import { Log } from "../../play/messaging.js";
 import { totalSize } from "../../scaling.js";
 
@@ -22,12 +23,11 @@ import { totalSize } from "../../scaling.js";
 //                        INDICATORS
 
 //##############################################################
-// damage overlay
+// damage / low health overlay
 createCustomComponent(["in-game"], [], 0, 0, 1920, 1080, null, () => {
-  let intensity =
-    (1 - game.player.health / game.player.maxHealth) *
-    (UIComponent.evaluateCondition("mode:build") ? 0.5 : 1);
-  if (intensity > 0.5) {
+  let b = UIComponent.evaluateCondition("mode:build");
+  let intensity = (1 - game.player.health / game.player.maxHealth) * (b ? 0.5 : 1);
+  if (intensity > (b ? 0.25 : 0.5)) {
     intensity = (intensity - 0.35) * 2;
     for (let i = 0; i < 5; i++) {
       let f = (frameCount * 0.1 + i) % 5;
@@ -39,6 +39,19 @@ createCustomComponent(["in-game"], [], 0, 0, 1920, 1080, null, () => {
     strokeWeight(10 * intensity);
     rect(0, 0, 1920, 1080);
   }
+});
+// freecam
+createCustomComponent(["in-game"], ["fc:true"], 0, 0, 1920, 1080, null, () => {
+  let intensity = 0.3;
+  for (let i = 0; i < 5; i++) {
+    let f = (frameCount * 0.1 + i) % 5;
+    stroke(0, 0, 0, (255 - f * 51) * intensity);
+    strokeWeight((5 - f) * 2);
+    rect(0, 0, 1930 - f * 45 * intensity, 1090 - f * 45 * intensity);
+  }
+  stroke(255, 0, 0, 255 * intensity);
+  strokeWeight(10 * intensity);
+  rect(0, 0, 1920, 1080);
 });
 // pause
 createUIComponent(

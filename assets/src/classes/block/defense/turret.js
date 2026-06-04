@@ -284,6 +284,9 @@ class Turret extends Container {
     circle(this.x, this.y, this.attackRange * 2);
     pop();
   }
+  value() {
+    return super.value() + 2;
+  }
 }
 
 export { Turret };

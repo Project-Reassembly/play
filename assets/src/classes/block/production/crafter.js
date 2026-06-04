@@ -9,7 +9,7 @@ import { Inventory } from "../../inventory.js";
 import { DroppedItemStack } from "../../item/dropped-itemstack.js";
 import { ItemStack } from "../../item/item-stack.js";
 import { Item } from "../../item/item.js";
-import { Container } from "../container.js";
+import { Factory } from "./factory.js";
 /**
  * @typedef {Object} Recipe A definition for a crafting recipe.
  * @property {ItemStack[]} inputs Array of input itemstacks
@@ -17,7 +17,7 @@ import { Container } from "../container.js";
  * @prop {int} time Number of frames to complete this recipe.
  */
 /** */
-class Crafter extends Container {
+class Crafter extends Factory {
   /** @type {Recipe[]} */
   recipes = [];
   craftEffect = "crafter-craft";

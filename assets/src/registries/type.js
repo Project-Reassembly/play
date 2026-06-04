@@ -1,8 +1,5 @@
 import { Block } from "../classes/block/block.js";
-import {
-  LandingPad,
-  LaunchPad,
-} from "../classes/block/capitalism/launch-pad.js";
+import { LandingPad, LaunchPad } from "../classes/block/capitalism/launch-pad.js";
 import { Container } from "../classes/block/container.js";
 import { Conveyor, Unloader } from "../classes/block/conveyor.js";
 import { SignBlock } from "../classes/block/decoration.js";
@@ -24,11 +21,7 @@ import {
   PlasmaDecompressor,
   PlasmaGenerator,
 } from "../classes/block/plasma-gen-and-compressor.js";
-import {
-  PlasmaBlock,
-  PlasmaPipe,
-  PlasmaTank,
-} from "../classes/block/plasma-pipe.js";
+import { PlasmaBlock, PlasmaPipe, PlasmaTank } from "../classes/block/plasma-pipe.js";
 import { Crafter, Uncrafter } from "../classes/block/production/crafter.js";
 import { Drill } from "../classes/block/production/drill.js";
 import { Smelter } from "../classes/block/production/smelter.js";
@@ -64,10 +57,7 @@ import {
   WeaponisedComponent,
 } from "../classes/entity/component.js";
 import { Entity } from "../classes/entity/entity.js";
-import {
-  EquippedEntity,
-  InventoryEntity,
-} from "../classes/entity/inventory-entity.js";
+import { EquippedEntity, InventoryEntity } from "../classes/entity/inventory-entity.js";
 import { ModularTankEntity } from "../classes/entity/modular-tank.js";
 import { NPC } from "../classes/entity/npc.js";
 import { Player } from "../classes/entity/player.js";
@@ -86,9 +76,19 @@ import { CriticalBullet } from "../classes/projectile/critical.js";
 import { PointBullet } from "../classes/projectile/point-bullet.js";
 import { VirtualBullet } from "../classes/projectile/virtual-bullet.js";
 import { Chunk } from "../classes/world/chunk.js";
+import {
+  DeliverEntityAction,
+  MessageAction as SendMessageAction,
+  WorldEventAction,
+} from "../classes/world/events/event-action.js";
+import {
+  OtherEventHappenedCondition,
+  TimedCondition,
+  WorldEventCondition,
+} from "../classes/world/events/event-condition.js";
 import { World } from "../classes/world/world.js";
 import { RegisteredItem } from "../core/registered-item.js";
-import { Registries } from "../core/registry.js";
+import { TypeRegistries } from "../core/registry.js";
 import {
   ExplosionEffect,
   ImageParticleEmissionEffect,
@@ -106,106 +106,113 @@ import {
   LineEmissionEffect,
 } from "../play/line-effects.js";
 //Basic
-Registries.type.add("generic", RegisteredItem);
+TypeRegistries.default.add("generic", RegisteredItem);
 //Entities and parts
-Registries.type.add("component", Component);
-Registries.type.add("leg-component", LegComponent);
-Registries.type.add("weapon-component", WeaponComponent);
-Registries.type.add("weaponised-component", WeaponisedComponent);
-Registries.type.add("destructible-component", DestructibleComponent);
-Registries.type.add("entity", Entity);
-Registries.type.add("inventory-entity", InventoryEntity);
-Registries.type.add("equipped-entity", EquippedEntity);
-Registries.type.add("npc", NPC);
-Registries.type.add("player", Player);
-Registries.type.add("modular-tank", ModularTankEntity);
+TypeRegistries.default.add("component", Component);
+TypeRegistries.default.add("leg-component", LegComponent);
+TypeRegistries.default.add("weapon-component", WeaponComponent);
+TypeRegistries.default.add("weaponised-component", WeaponisedComponent);
+TypeRegistries.default.add("destructible-component", DestructibleComponent);
+TypeRegistries.default.add("entity", Entity);
+TypeRegistries.default.add("inventory-entity", InventoryEntity);
+TypeRegistries.default.add("equipped-entity", EquippedEntity);
+TypeRegistries.default.add("npc", NPC);
+TypeRegistries.default.add("player", Player);
+TypeRegistries.default.add("modular-tank", ModularTankEntity);
 //Projectiles
-Registries.type.add("bullet", Bullet);
-// Registries.type.add("missile", Missile);
-Registries.type.add("critical", CriticalBullet);
-Registries.type.add("point-bullet", PointBullet);
-Registries.type.add("block-bullet", BlockLaunchedBullet);
-Registries.type.add("virtual", VirtualBullet);
+TypeRegistries.default.add("bullet", Bullet);
+// TypeRegistries.default.add("missile", Missile);
+TypeRegistries.default.add("critical", CriticalBullet);
+TypeRegistries.default.add("point-bullet", PointBullet);
+TypeRegistries.default.add("block-bullet", BlockLaunchedBullet);
+TypeRegistries.default.add("virtual", VirtualBullet);
 //Items
-Registries.type.add("item", Item);
-Registries.type.add("placeable", PlaceableItem);
-Registries.type.add("itemstack", ItemStack);
-Registries.type.add("equippable", Equippable);
+TypeRegistries.default.add("item", Item);
+TypeRegistries.default.add("placeable", PlaceableItem);
+TypeRegistries.default.add("itemstack", ItemStack);
+TypeRegistries.default.add("equippable", Equippable);
 //Weapons
-Registries.type.add("weapon", Weapon);
-Registries.type.add("throwable", Throwable);
-Registries.type.add("block-launcher", BlockLauncher);
+TypeRegistries.default.add("weapon", Weapon);
+TypeRegistries.default.add("throwable", Throwable);
+TypeRegistries.default.add("block-launcher", BlockLauncher);
 //World
-Registries.type.add("world", World);
-Registries.type.add("chunk", Chunk);
+TypeRegistries.default.add("world", World);
+TypeRegistries.default.add("chunk", Chunk);
 //Block
-Registries.type.add("block", Block);
-Registries.type.add("wall", Wall);
-Registries.type.add("tile", Tile);
-Registries.type.add("container", Container);
-Registries.type.add("crafter", Crafter);
-Registries.type.add("smelter", Smelter);
-Registries.type.add("uncrafter", Uncrafter);
-Registries.type.add("tile-producer", TileProducer);
-Registries.type.add("drill", Drill);
-Registries.type.add("conveyor", Conveyor);
-Registries.type.add("unloader", Unloader);
-Registries.type.add("sign", SignBlock);
-Registries.type.add("plasma-block", PlasmaBlock);
-Registries.type.add("plasma-pipe", PlasmaPipe);
-Registries.type.add("plasma-generator", PlasmaGenerator);
-Registries.type.add("plasma-tank", PlasmaTank);
-Registries.type.add("plasma-compressor", PlasmaCompressor);
-Registries.type.add("plasma-decompressor", PlasmaDecompressor);
-Registries.type.add("bomb", Bomb);
-Registries.type.add("nuclear-bomb", NuclearBomb);
-Registries.type.add("tank-assembler", TankAssemblyBay);
+TypeRegistries.default.add("block", Block);
+TypeRegistries.default.add("wall", Wall);
+TypeRegistries.default.add("tile", Tile);
+TypeRegistries.default.add("container", Container);
+TypeRegistries.default.add("crafter", Crafter);
+TypeRegistries.default.add("smelter", Smelter);
+TypeRegistries.default.add("uncrafter", Uncrafter);
+TypeRegistries.default.add("tile-producer", TileProducer);
+TypeRegistries.default.add("drill", Drill);
+TypeRegistries.default.add("conveyor", Conveyor);
+TypeRegistries.default.add("unloader", Unloader);
+TypeRegistries.default.add("sign", SignBlock);
+TypeRegistries.default.add("plasma-block", PlasmaBlock);
+TypeRegistries.default.add("plasma-pipe", PlasmaPipe);
+TypeRegistries.default.add("plasma-generator", PlasmaGenerator);
+TypeRegistries.default.add("plasma-tank", PlasmaTank);
+TypeRegistries.default.add("plasma-compressor", PlasmaCompressor);
+TypeRegistries.default.add("plasma-decompressor", PlasmaDecompressor);
+TypeRegistries.default.add("bomb", Bomb);
+TypeRegistries.default.add("nuclear-bomb", NuclearBomb);
+TypeRegistries.default.add("tank-assembler", TankAssemblyBay);
 //capitalism
-Registries.type.add("launch-pad", LaunchPad);
-Registries.type.add("landing-pad", LandingPad);
+TypeRegistries.default.add("launch-pad", LaunchPad);
+TypeRegistries.default.add("landing-pad", LandingPad);
 //Turret
-Registries.type.add("turret", Turret);
-Registries.type.add("turret-base", TurretBase);
-Registries.type.add("turret-controller", TurretController);
-Registries.type.add("turret-item", TurretItem);
+TypeRegistries.default.add("turret", Turret);
+TypeRegistries.default.add("turret-base", TurretBase);
+TypeRegistries.default.add("turret-controller", TurretController);
+TypeRegistries.default.add("turret-item", TurretItem);
 //Dev blocks
-Registries.type.add("dev::structurereader", StructureReaderBlock);
-Registries.type.add("dev::itemcatalog", ItemCatalogBlock);
-Registries.type.add("dev::commandblock", CommandExecutorBlock);
+TypeRegistries.default.add("dev::structurereader", StructureReaderBlock);
+TypeRegistries.default.add("dev::itemcatalog", ItemCatalogBlock);
+TypeRegistries.default.add("dev::commandblock", CommandExecutorBlock);
 //Effects
-Registries.type.add("status-effect", StatusEffect);
-Registries.type.add("visual-effect", VisualEffect);
+TypeRegistries.default.add("status-effect", StatusEffect);
+TypeRegistries.default.add("visual-effect", VisualEffect);
 
-Registries.type.add("particle-emission", ParticleEmissionEffect);
-Registries.type.add("image-particle-emission", ImageParticleEmissionEffect);
-Registries.type.add("text-particle-emission", TextParticleEmissionEffect);
-Registries.type.add("wave-emission", WaveEmissionEffect);
-Registries.type.add("multi-effect", MultiEffect);
-Registries.type.add("explosion", ExplosionEffect);
-Registries.type.add("nuclear-explosion", NuclearExplosionEffect);
+TypeRegistries.default.add("particle-emission", ParticleEmissionEffect);
+TypeRegistries.default.add("image-particle-emission", ImageParticleEmissionEffect);
+TypeRegistries.default.add("text-particle-emission", TextParticleEmissionEffect);
+TypeRegistries.default.add("wave-emission", WaveEmissionEffect);
+TypeRegistries.default.add("multi-effect", MultiEffect);
+TypeRegistries.default.add("explosion", ExplosionEffect);
+TypeRegistries.default.add("nuclear-explosion", NuclearExplosionEffect);
 
-Registries.type.add("linear-effect", LinearEffect);
-Registries.type.add("linear-multi", LinearMultiEffect);
-Registries.type.add("line-emission", LineEmissionEffect);
-Registries.type.add("lightning-emission", LightningEmissionEffect);
+TypeRegistries.default.add("linear-effect", LinearEffect);
+TypeRegistries.default.add("linear-multi", LinearMultiEffect);
+TypeRegistries.default.add("line-emission", LineEmissionEffect);
+TypeRegistries.default.add("lightning-emission", LightningEmissionEffect);
 //AI
-Registries.type.add("ai.nothing", AITask);
-Registries.type.add("ai.attack", AIAttackTask);
-Registries.type.add("ai.shoot-bullet", ShootBulletsTask);
-Registries.type.add("ai.create-bullet", CreateBulletsTask);
-Registries.type.add("ai.retarget", RetargetTask);
-Registries.type.add("ai.follow", TrackTargetTask);
+TypeRegistries.default.add("ai.nothing", AITask);
+TypeRegistries.default.add("ai.attack", AIAttackTask);
+TypeRegistries.default.add("ai.shoot-bullet", ShootBulletsTask);
+TypeRegistries.default.add("ai.create-bullet", CreateBulletsTask);
+TypeRegistries.default.add("ai.retarget", RetargetTask);
+TypeRegistries.default.add("ai.follow", TrackTargetTask);
 
-Registries.type.add("ai.set-data", SetDataTask);
+TypeRegistries.default.add("ai.set-data", SetDataTask);
 
-Registries.type.add("aicon.constant", AICondition);
-Registries.type.add("aicon.has-target", HasTargetCondition);
-Registries.type.add("aicon.stored-target", StoredTargetCondition);
-Registries.type.add("aicon.near-target", NearTargetCondition);
-Registries.type.add("aicon.mouse", MouseDownCondition);
-Registries.type.add("aicon.keydown", KeyDownCondition);
+TypeRegistries.default.add("aicon.constant", AICondition);
+TypeRegistries.default.add("aicon.has-target", HasTargetCondition);
+TypeRegistries.default.add("aicon.stored-target", StoredTargetCondition);
+TypeRegistries.default.add("aicon.near-target", NearTargetCondition);
+TypeRegistries.default.add("aicon.mouse", MouseDownCondition);
+TypeRegistries.default.add("aicon.keydown", KeyDownCondition);
 
-Registries.type.add("aicon.data", DataComparisonCondition);
+TypeRegistries.default.add("aicon.data", DataComparisonCondition);
 
-Registries.type.add("aicon.all", CombinedCondition);
-Registries.type.add("aicon.any", AlternativeCondition);
+TypeRegistries.default.add("aicon.all", CombinedCondition);
+TypeRegistries.default.add("aicon.any", AlternativeCondition);
+
+TypeRegistries.worldevent.add("action.none", WorldEventAction);
+TypeRegistries.worldevent.add("action.deliver", DeliverEntityAction);
+TypeRegistries.worldevent.add("action.message", SendMessageAction);
+TypeRegistries.worldevent.add("condition.never", WorldEventCondition);
+TypeRegistries.worldevent.add("condition.time-passed", TimedCondition);
+TypeRegistries.worldevent.add("condition.event", OtherEventHappenedCondition);

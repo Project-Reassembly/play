@@ -1,4 +1,4 @@
-import { create2DArray, iterate2DArray } from "../../core/2D-array.js";
+import { create2DArray, index, iterate2DArray } from "../../core/2D-array.js";
 import { col } from "../../core/color.js";
 import { assign, constructFromType } from "../../core/constructor.js";
 import { tru } from "../../core/number.js";
@@ -8,7 +8,6 @@ import { debug } from "../../play/debug.js";
 import { Explosion, NuclearExplosion } from "../../play/effects.js";
 import { contentScale, createPlayer } from "../../play/game.js";
 import { blockSize, chunkSize, worldSize } from "../../scaling.js";
-import { Block } from "../block/block.js";
 import { GroundTile } from "../block/ground-tile.js";
 import { Particle } from "../effect/particle.js";
 import { Space } from "../effect/space-renderer.js";
@@ -16,6 +15,8 @@ import { Entity } from "../entity/entity.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { ItemStack } from "../item/item-stack.js";
 import { Chunk } from "./chunk.js";
+import { WorldEvent } from "./events/world-event.js";
+import { FactoryEvaluator, REGION_SIZE } from "./factory-valuations.js";
 import { PowerNetwork } from "./power-network.js";
 
 /**
@@ -48,7 +49,7 @@ class World {
   spaceParticles = [];
   /** @type {Particle[]} */
   particles = [];
-  /** @type {Particle[]} */
+  /** @type {Particle[]} Particles that will pause everything while they tick. */
   impactParticles = [];
   /** @type {Entity[]} */
   entities = [];
@@ -74,7 +75,10 @@ class World {
    * @type {Chunk[]} */
   toTick = [];
   //saved events
-  events = [];
+  /** @type {({[name:string]:WorldEvent})} */
+  events = {};
+
+  age = 0;
   get boss() {
     if (!this.#bossCache || this.#bossCache.dead) this.#bossCache = this.firstBoss();
     return this.#bossCache;
@@ -83,6 +87,10 @@ class World {
   #bossCache = null;
   constructor(name = "World") {
     this.name = name;
+    this.evaluator = new FactoryEvaluator(this);
+
+    this.addEvents();
+    console.log(`Added ${Object.keys(this.events).length} events to world '${name}'.`);
   }
   reset() {
     this.physobjs = [];
@@ -95,11 +103,24 @@ class World {
     this.networks = [];
     this.toRender = [];
     this.toTick = [];
+    this.evaluator.reset();
+    for (const e in this.events) {
+      this.events[e].reset();
+    }
+    this.age = 0;
+  }
+  addEvents() {
+    this.events = {};
+    Registries.events.forEach(
+      (i, n) => (this.events[n] = assign(constructFromType(i, WorldEvent), { name: n })),
+    );
   }
   tickAll() {
-    this.tickEvents();
     this.#actualTick();
     this.#removeDead();
+    this.evaluator.tick();
+    this.tickEvents();
+    this.age++;
   }
   resetRenderer() {
     this.toRender = this.getRenderedChunks(undefined, ui.camera.zoom);
@@ -218,7 +239,7 @@ class World {
       this.chunks,
       (chunk) =>
         chunk &&
-        World.isInRenderDistance(chunk, chunkSize * Block.size, 0.5 + padding, 0.5, 0.5, zoom) &&
+        World.isInRenderDistance(chunk, chunkSize * blockSize, 0.5 + padding, 0.5, 0.5, zoom) &&
         chunks.push(chunk),
     );
     return chunks;
@@ -257,6 +278,45 @@ class World {
       if (!World.isInRenderDistance(particle, 1, 0, 0, 0, ui.camera.zoom)) continue;
       particle.draw();
     }
+    if (debug.regionBorders) {
+      push();
+      rectMode(CORNER);
+      noFill();
+      col.stroke(col.yellow);
+      this.toRender.forEach((chunk) => {
+        for (let i = 0; i < chunkSize / REGION_SIZE; i++)
+          for (let j = 0; j < chunkSize / REGION_SIZE; j++) {
+            rect(
+              (chunk.i * chunkSize + i * REGION_SIZE - 0.5) * blockSize,
+              (chunk.y * chunkSize + j * REGION_SIZE - 0.5) * blockSize,
+              REGION_SIZE * blockSize,
+              REGION_SIZE * blockSize,
+            );
+            if (this.evaluator.chunkWantsUpdate(chunk.i, chunk.j)) {
+              rect(
+                (chunk.i * chunkSize + i * REGION_SIZE - 0.25) * blockSize,
+                (chunk.y * chunkSize + j * REGION_SIZE - 0.25) * blockSize,
+                (REGION_SIZE - 0.5) * blockSize,
+                (REGION_SIZE - 0.5) * blockSize,
+              );
+            }
+          }
+      });
+      textAlign(LEFT, TOP);
+      textSize(10);
+      fill(255, 255, 0);
+      noStroke();
+      let y = this.evaluator.values.size / 2 - 1;
+      for (const [team, regions] of this.evaluator.values) {
+        iterate2DArray(regions, (re, ry, rx) => {
+          const tx = (rx * REGION_SIZE - 0.4) * blockSize,
+            ty = (ry * REGION_SIZE - y / 2 + 0.1) * blockSize;
+          text(`${team} : ${re}`, tx, ty);
+        });
+        y--;
+      }
+      pop();
+    }
     if (debug.chunkBorders) {
       push();
       rectMode(CORNER);
@@ -287,20 +347,20 @@ class World {
     if (thing.hitSize) padding += thing.hitSize;
     else if (thing.width && thing.height) padding += Math.max(thing.width, thing.height);
 
-    if ((thing.x + xoffset) * posScale < ui.camera.x - width / zoom / 2 - padding * posScale)
+    if ((thing.x + xoffset) * posScale < ui.camera.x - (width / zoom) * 0.5 - padding * posScale)
       return false;
-    if ((thing.x + xoffset) * posScale > ui.camera.x + width / zoom / 2 + padding * posScale)
+    if ((thing.x + xoffset) * posScale > ui.camera.x + (width / zoom) * 0.5 + padding * posScale)
       return false;
-    if ((thing.y + yoffset) * posScale < ui.camera.y - height / zoom / 2 - padding * posScale)
+    if ((thing.y + yoffset) * posScale < ui.camera.y - (height / zoom) * 0.5 - padding * posScale)
       return false;
-    if ((thing.y + yoffset) * posScale > ui.camera.y + height / zoom / 2 + padding * posScale)
+    if ((thing.y + yoffset) * posScale > ui.camera.y + (height / zoom) * 0.5 + padding * posScale)
       return false;
     return true;
   }
   prepareForGeneration() {
-    this.chunks = create2DArray(World.size);
+    this.chunks = create2DArray(worldSize);
   }
-  isPositionFree(x, y, layer = "blocks") {
+  isPositionFree(x, y) {
     if (!this.chunks) throw new Error("The world has not been generated!");
     let cx = Math.floor(x / chunkSize),
       bx = x % chunkSize;
@@ -310,7 +370,27 @@ class World {
     if (!cr) return false;
     let chunk = cr[cx];
     if (!chunk) return false;
-    return chunk.getBlock(bx, by, layer) === null;
+    return chunk.getBlock(bx, by) === null;
+  }
+  chunk(x, y) {
+    if (!this.chunks) throw new Error("The world has not been generated!");
+    let cr = this.chunks[y];
+    let chunk = cr ? cr[x] : null;
+    if (!chunk) throw new Error(`There is no chunk at (chunk) x:${x}, y:${y}`);
+    return chunk;
+  }
+  chunkI(idx) {
+    if (!this.chunks) throw new Error("The world has not been generated!");
+    return index.at(this.chunks, idx);
+  }
+  chunkAt(x, y) {
+    if (!this.chunks) throw new Error("The world has not been generated!");
+    let cx = Math.floor(x / chunkSize);
+    let cy = Math.floor(y / chunkSize);
+    let cr = this.chunks[cy];
+    let chunk = cr ? cr[cx] : null;
+    if (!chunk) throw new Error(`There is no chunk at (chunk) x:${cx}, y:${cy}`);
+    return chunk;
   }
   placeAt(block, x, y) {
     if (!this.chunks) throw new Error("The world has not been generated!");
@@ -321,7 +401,9 @@ class World {
     let cr = this.chunks[cy];
     let chunk = cr ? cr[cx] : null;
     if (!chunk) throw new Error(`There is no chunk at (chunk) x:${cx}, y:${cy}`);
-    return chunk.addBlock(block, bx, by);
+    const bl = chunk.addBlock(block, bx, by);
+    if (bl && bl.value()) this.evaluator.requestChunkUpdate(cx, cy);
+    return bl;
   }
   setOre(block, x, y) {
     if (!this.chunks) throw new Error("The world has not been generated!");
@@ -344,25 +426,22 @@ class World {
     if (!chunk) throw new Error(`There is no chunk at (chunk) x:${cx}, y:${cy}`);
     let broken = chunk.getBlock(bx, by);
     chunk.removeBlock(bx, by);
+    if (broken && broken.value()) this.evaluator.requestChunkUpdate(cx, cy);
     return broken;
   }
   /**@returns `undefined` if no chunk, `null` if no block, or a `Block` otherwise. */
-  getBlock(x, y, layer = "blocks") {
+  getBlock(x, y) {
     if (!this.chunks) throw new Error("The world has not been generated!");
-    try {
-      let cx = Math.floor(x / chunkSize),
-        bx = x % chunkSize;
-      let cy = Math.floor(y / chunkSize),
-        by = y % chunkSize;
-      let cr = this.chunks[cy];
-      if (!cr) return;
-      let chunk = cr[cx];
-      if (!chunk) return;
-      let block = chunk.getBlock(bx, by, layer);
-      return block;
-    } catch (error) {
-      return null;
-    }
+    let cx = Math.floor(x / chunkSize),
+      bx = x % chunkSize;
+    let cy = Math.floor(y / chunkSize),
+      by = y % chunkSize;
+    let cr = this.chunks[cy];
+    if (!cr) return;
+    let chunk = cr[cx];
+    if (!chunk) return;
+    let block = chunk.getBlock(bx, by);
+    return block;
   }
   /**@returns `undefined` if no chunk, `null` if no tile, or a `string` otherwise. */
   getTile(x, y) {
@@ -398,24 +477,24 @@ class World {
     return arr;
   }
   /** Similar to `getBlock`, but will always return a block, or throw an error otherwise. */
-  getBlockErroring(x, y, layer = "blocks") {
-    let block = this.getBlock(x, y, layer);
+  getBlockErroring(x, y) {
+    let block = this.getBlock(x, y);
     if (block === undefined) throw new Error(`There is no chunk at (block) x:${x}, y:${y}`);
     if (block === null) throw new Error(`There is no block at x:${x}, y:${y}`);
     return block;
   }
   /**Gets all blocks neighbouring a position. Includes that position.*/
-  getAdjacent(x, y, layer = "blocks") {
+  getAdjacent(x, y) {
     return [
-      this.getBlock(x - 1, y - 1, layer),
-      this.getBlock(x, y - 1, layer),
-      this.getBlock(x + 1, y - 1, layer),
-      this.getBlock(x - 1, y, layer),
-      this.getBlock(x, y, layer),
-      this.getBlock(x + 1, y, layer),
-      this.getBlock(x - 1, y + 1, layer),
-      this.getBlock(x, y + 1, layer),
-      this.getBlock(x + 1, y + 1, layer),
+      this.getBlock(x - 1, y - 1),
+      this.getBlock(x, y - 1),
+      this.getBlock(x + 1, y - 1),
+      this.getBlock(x - 1, y),
+      this.getBlock(x, y),
+      this.getBlock(x + 1, y),
+      this.getBlock(x - 1, y + 1),
+      this.getBlock(x, y + 1),
+      this.getBlock(x + 1, y + 1),
     ];
   }
   /**@returns {SerialisedWorld} */
@@ -426,13 +505,22 @@ class World {
       entities: this.entities.map((x) => x.serialise()),
       seed: this.seed,
       networks: this.networks.map((x) => x.serialise()),
-      events: this.events.map((x) => ({ duration: x.time, name: x.name, full: x.full })),
+      events: Object.entries(this.events)
+        .filter((x) => x[1].disabled)
+        .map((x) => x[0]), //this.events.map((x) => ({ duration: x.time, name: x.name, full: x.full })),
     };
   }
   /**@param {SerialisedWorld} created  */
   static deserialise(created) {
     let wrold = new this();
-    wrold.events = created.events?.map((x) => ({ name: x.name, time: x.duration, full: x.full }));
+    // wrold.events = created.events?.map((x) => ({ name: x.name, time: x.duration, full: x.full }));
+    // disable already happened events.
+    if (created.events)
+      for (const key in wrold.events) {
+        const v = wrold.events[key];
+        if (created.events.includes(key)) v.disable();
+      }
+    Object.values(wrold.events).forEach((v, i, a) => {});
     wrold.chunks = created.chunks?.map((x) => x.map((y) => Chunk.deserialise(y))) ?? [[]];
     created.entities?.forEach((entity) => {
       if (entity["-"]) {
@@ -474,28 +562,32 @@ class World {
     assign(this, world);
   }
   tickEvents() {
-    this.events.forEach((x) => {
-      if (x.time === 0) if (this.evlisten[x.name]) this.evlisten[x.name](this);
-      if (x.time >= 0) x.time--;
-    });
-  }
-  addEvent(name, time, listener) {
-    if (!this.events.some((x) => x.name === name)) {
-      this.events.push({ name: name, time: time, full: time });
+    for (const key in this.events) {
+      const v = this.events[key];
+      v.tick(this);
     }
-    this.evlisten[name] = listener;
+    // this.events.forEach((x) => {
+    //   if (x.time === 0) if (this.evlisten[x.name]) this.evlisten[x.name](this);
+    //   if (x.time >= 0) x.time--;
+    // });
   }
-  triggerEvent(name) {
-    this.events.forEach((x) => {
-      if (x.name === name) x.time = 0;
-    });
-  }
-  resetEvent(name) {
-    this.events.forEach((x) => {
-      if (x.name === name) x.time = x.full ?? 0;
-    });
-  }
-  evlisten = {};
+  // addEvent(name, time, listener) {
+  //   if (!this.events.some((x) => x.name === name)) {
+  //     this.events.push({ name: name, time: time, full: time });
+  //   }
+  //   this.evlisten[name] = listener;
+  // }
+  // triggerEvent(name) {
+  //   this.events.forEach((x) => {
+  //     if (x.name === name) x.time = 0;
+  //   });
+  // }
+  // resetEvent(name) {
+  //   this.events.forEach((x) => {
+  //     if (x.name === name) x.time = x.full ?? 0;
+  //   });
+  // }
+  // evlisten = {};
 
   hasBoss() {
     return this.entities.some((x) => x.isBoss);

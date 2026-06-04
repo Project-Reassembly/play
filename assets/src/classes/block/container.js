@@ -62,6 +62,9 @@ class Container extends Block {
       "🟨 -------------------- ⬜",
     ];
   }
+  value() {
+    return (this.inventory.value() / 100) || 0;
+  }
 }
 export { Container };
 

@@ -13,6 +13,7 @@ import "../registries/corps.js";
 import "../registries/entity.js";
 import "../registries/item.js";
 
+import "../registries/events.js";
 import "../registries/status.js";
 import "../registries/vfx.js";
 import "../registries/worldgen.js";

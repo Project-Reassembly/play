@@ -3,7 +3,7 @@ import { createUIComponent, ui } from "../core/ui.js";
 
 //##############################################################
 
-//                        TEXT EDITOR
+//                   (BASIC) TEXT EDITOR
 
 //##############################################################
 export let cmdHistory = [];

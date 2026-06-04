@@ -5,8 +5,8 @@ import { Registries } from "../../../core/registry.js";
 import { autoScaledEffect } from "../../../play/effects.js";
 import { Log } from "../../../play/messaging.js";
 import { Item } from "../../item/item.js";
-import { Container } from "../container.js";
-class TileProducer extends Container {
+import { Factory } from "./factory.js";
+class TileProducer extends Factory {
   results = {};
   amount = 0;
   duration = 0;

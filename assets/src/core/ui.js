@@ -3,6 +3,7 @@ import { Inventory } from "../classes/inventory.js";
 import { ShootableObject } from "../classes/physical.js";
 import { Timer } from "../classes/timer.js";
 import { contentScale, fonts } from "../play/game.js";
+import * as CMFT from "./cmft.js";
 import { col } from "./color.js";
 import { CutsceneHandler } from "./cutscene.js";
 import * as MLF1 from "./mlf1.js";
@@ -210,6 +211,7 @@ class UIComponent {
   rotation = Block.direction.RIGHT;
   font = "darktech";
   defaultOutlCol = col.mono(60);
+  hastext = true;
 
   updateActivity() {
     //It's active if it should show *and* all the conditions are met
@@ -312,16 +314,18 @@ class UIComponent {
       endShape(CLOSE);
     }
     //Draw optional text
-    noStroke();
-    textFont(this.ocr ? fonts.ocr : fonts[this.font]);
-    if (this.ocr) {
-      col.stroke(this.textColour);
-      strokeWeight(this.textSize / 15);
+    if (this.hastext) {
+      noStroke();
+      textFont(this.ocr ? fonts.ocr : fonts[this.font]);
+      if (this.ocr) {
+        col.stroke(this.textColour);
+        strokeWeight(this.textSize / 15);
+      }
+      col.fill(this.textColour);
+      textAlign(CENTER, CENTER);
+      textSize(this.textSize);
+      text(this.text, this.x, this.y);
     }
-    col.fill(this.textColour);
-    textAlign(CENTER, CENTER);
-    textSize(this.textSize);
-    text(this.text, this.x, this.y);
     pop();
   }
   checkMouse() {
@@ -624,35 +628,46 @@ class InventoryUIComponent extends UIComponent {
   }
 }
 
-class BlockInventoryUIComponent extends UIComponent {
-  /**@type {Container} */
-  block = null;
-  rows = null;
-  cols = null;
-  itemSize = 40;
-  invName = false;
-  constructor(x, y, block, rows, cols, itemSize, invName = "inventory") {
-    super(x, y, 0, 0, "none", null, "", false, 0);
-    this.x = x;
-    this.y = y;
-    this.block = block;
-    this.rows = rows;
-    this.cols = cols;
-    this.itemSize = itemSize;
-    this.invName = invName;
+class SyntaxHighlightedUIComponent extends UIComponent {
+  /**@type {() => string} */
+  text = () => "";
+  /**@param {(text:string) => string} fn*/
+  formatter = t => t;
+  lasttxt = this.text();
+  textdrawer = new CMFT.Drawer().noBG();
+  hastext = false;
+  /**@param {() => string} fn*/
+  setText(fn) {
+    this.text = fn;
+    return this;
+  }
+  /**@param {(text:string) => string} fn*/
+  setFormatter(fn) {
+    this.formatter = fn;
+    return this;
+  }
+  refresh() {
+    this.#settxt(this.text());
+    return this;
+  }
+  #settxt(t) {
+    this.textdrawer = CMFT.drawer(
+      this.formatter(t ?? "null"),
+      this.textSize,
+      Math.floor(this.width / (this.textSize*0.6)),
+    ).noBG();
+    this.lasttxt = t;
   }
   draw() {
-    if (!this.block) return;
-    if (!(this.block instanceof Container)) return;
-    this.block.inventory.draw(
-      this.x,
-      this.y,
-      this.rows,
-      this.cols,
-      this.itemSize,
-      this.outlineColour ?? col.mono(50),
-      this.backgroundColour ?? col.from(95, 100, 100, 160),
-      this.inverted,
+    super.draw();
+    const t = this.text();
+    if (t !== this.lasttxt) this.#settxt(t);
+
+    this.textdrawer.draw(
+      this.x - (this.width - 20) * 0.5,
+      this.y - (this.height - 20) * 0.5,
+      col.white,
+      col.accent,
     );
   }
 }
@@ -696,8 +711,8 @@ function drawImg(
       image(img, x, y, width, height, ...otherParameters);
     } catch (error) {
       //Replace with a working image
-      if(Registries.images.has("error"))
-      image(Registries.images.get("error").image, x, y, width, height, ...otherParameters);
+      if (Registries.images.has("error"))
+        image(Registries.images.get("error").image, x, y, width, height, ...otherParameters);
     }
   }
 }
@@ -1180,11 +1195,46 @@ function createHealthbarComponent(
   return component;
 }
 
+function createSyntaxHighlightedComponent(
+  screens = [],
+  conditions = [],
+  x = 0,
+  y = 0,
+  width = 1,
+  height = 1,
+  bevel = "none",
+  onpress = null,
+  shownText = "",
+  useOCR = false,
+  shownTextSize = 20,
+) {
+  //Make component
+  const component = new SyntaxHighlightedUIComponent(
+    x,
+    y,
+    width,
+    height,
+    bevel,
+    onpress ?? (() => {}),
+    shownText,
+    useOCR,
+    shownTextSize,
+  );
+  component.conditions = conditions;
+  //Set conditional things
+  component.acceptedScreens = screens;
+  component.isInteractive = !!onpress;
+  //Add to game
+  ui.components.push(component);
+  return component;
+}
+
 export {
   createGamePropertySelector,
   createHealthbarComponent,
   createMultilineUIComponent,
   createSliderComponent,
+  createSyntaxHighlightedComponent,
   createUIComponent,
   createUIImageComponent,
   createUIInventoryComponent,

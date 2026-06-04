@@ -88,7 +88,7 @@ class Block extends ShootableObject {
    * @returns {Boolean} True if this block broke, false if not.
    */
   break(type = BreakType.delete) {
-    this.world.break(this.gridX, this.gridY, "blocks");
+    this.world.break(this.gridX, this.gridY);
     if (type !== BreakType.deconstruct && type !== BreakType.replace) return true;
     if (!this.dropItem) return true;
     DroppedItemStack.create(
@@ -176,6 +176,9 @@ class Block extends ShootableObject {
   leftArrow() {}
   read() {
     return this.registryName;
+  }
+  value(){
+    return 0;
   }
 }
 /** Stores values to describe how blocks are broken.

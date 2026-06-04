@@ -119,6 +119,9 @@ class Conveyor extends Block {
     super.applyExtraProps(deserialised, creator);
     deserialised.istack = ItemStack.deserialise(creator.item);
   }
+  value() {
+    return this.istack.getItem()?.marketValue / 100 || 0;
+  }
 }
 
 class Unloader extends Conveyor {

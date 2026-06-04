@@ -105,7 +105,7 @@ export class TurretController extends TurretBase {
   //defaults
   turnSpeed = 5;
   shootCone = -1;
-/**@type {PhysicalObject} */
+  /**@type {PhysicalObject} */
   target = null;
 
   inventorySize = 1;
@@ -371,6 +371,9 @@ export class TurretController extends TurretBase {
         DroppedItemStack.create(stack, this.world, this.x, this.y);
       }, true);
     return true;
+  }
+  value() {
+    return super.value() + (this.turretinv.get(0).getItem()?.baseSize || 0) + 2;
   }
 }
 

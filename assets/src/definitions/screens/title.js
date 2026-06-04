@@ -36,7 +36,6 @@ createUIComponent(["title"], [], 0, -250, 0, 0, "none", null, ">> REASSEMBLY", t
   .alignLeft()
   .setTextColour(col.mono(140)).font = "something";
 
-
 // art bit
 createUIImageComponent(["title"], [], 450, -35, 700, 700, null, "icon.dev", true);
 createUIComponent(
@@ -52,8 +51,6 @@ createUIComponent(
   true,
   30,
 ).setTextColour(col.accent);
-
-
 
 // buttons
 
@@ -116,6 +113,48 @@ createUIComponent(
   .setBackgroundColour(col.from(0, 0, 0))
   .setOutlineColour(col.from(60, 60, 60))
   .setTextColour(col.accent);
+
+// tools
+
+createUIComponent(
+  ["title"],
+  ["debug-tools:true"],
+  -800,
+  240,
+  0,
+  0,
+  "none",
+  null,
+  ">>>>>>>>>",
+  false,
+  75,
+)
+  .setTextColour(col.accent)
+  .anchorLeft()
+  .alignLeft();
+
+ui.addReset("debug-tools:false");
+
+createUIComponent(
+  ["title"],
+  ["debug-tools:true"],
+  -860,
+  250,
+  125,
+  75,
+  "none",
+  () => {
+    ui.menuState = "ide";
+  },
+  "Entity\nScripter",
+  true,
+  20,
+)
+  .setBackgroundColour(col.from(0, 0, 0))
+  .setOutlineColour(col.from(60, 60, 60))
+  .setTextColour(col.accent);
+
+// helpline
 
 createUIComponent(["title"], [], 0, 0, 0, 0, "none", null, "Project Helpline", true, 20)
   .setTextColour(col.accent)

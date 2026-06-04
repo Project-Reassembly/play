@@ -1,6 +1,5 @@
-
 import Integrate from "../lib/integrate.js";
-/** 
+/**
  * @import { Block } from "../classes/block/block.js"
  * @import { StatusEffect } from "../classes/effect/status-effect.js"
  * @import { Entity } from "../classes/entity/entity.js"
@@ -10,9 +9,9 @@ import Integrate from "../lib/integrate.js";
  * @import { Generator } from "../classes/world/generator.js"
  * @import { Cutscene } from "./cutscene.js"
  * @import { Corporation } from "../classes/item/corporation.js";
+ * @import { WorldEvent } from "../classes/world/events/world-event.js";
  */
 /// <reference path="../lib/integrate"/>
-
 
 const Registries = Object.freeze({
   /**@readonly @type {Integrate.Registry<ImageContainer>} */
@@ -31,13 +30,20 @@ const Registries = Object.freeze({
   worldgen: new Integrate.Registry(),
   /**@readonly @type {Integrate.Registry<Corporation>} */
   corps: new Integrate.Registry(),
+  /**@readonly @type {Integrate.Registry<WorldEvent>} */
+  events: new Integrate.Registry(),
   //Slightly odd registries
   /**@readonly @type {Integrate.Registry<[string[], string[]]>} */
   deathmsg: new Integrate.Registry(),
   /**@readonly @type {Integrate.Registry<Cutscene>} */
   cutscenes: new Integrate.Registry(),
+});
+
+const TypeRegistries = Object.freeze({
   /**@readonly */
-  type: Integrate.types
+  default: Integrate.types,
+  /**@readonly */
+  worldevent: new Integrate.TypeRegistry(),
 });
 
 /**
@@ -54,15 +60,18 @@ const PreloadRegistries = Object.freeze({
   stati: new Integrate.Registry(),
 });
 
+/** @template T @typedef {T extends Integrate.Registry<infer X> ? Integrate.Unconstructed<X> : never} TypeOfRegistry */
+
 /**
  * Finds a property on a registry entry.
- * @param {keyof Registries} reg The registry to search.
+ * @template {keyof Registries} T
+ * @param {T} reg The registry to search.
  * @param {string} name Registry name to find.
- * @param {string} prop Property to find on the value.
+ * @param {keyof TypeOfRegistry<Registries[T]>} prop Property to find on the value.
  */
-function lookup(reg, name, prop){
-  return (Registries[reg].get(name))[prop];
+function lookup(reg, name, prop) {
+  return Registries[reg].get(name)[prop];
 }
 
-export { lookup, PreloadRegistries, Registries };
+export { lookup, PreloadRegistries, Registries, TypeRegistries };
 

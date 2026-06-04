@@ -10,6 +10,7 @@ import { GroundTile } from "../block/ground-tile.js";
 import { PhysicalObject, ShootableObject } from "../physical.js";
 import { World } from "../world/world.js";
 import { AI } from "./ai/ai.js";
+import "./ai/scripter.js";
 import { AttributeMap } from "./attribute.js";
 /**
  * @typedef SerialisedEntity

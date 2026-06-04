@@ -23,7 +23,7 @@ class Item extends Integrate.RegisteredItem {
       CMFT.drawer(
         this.description +
           (this.marketValue > 0 ?
-            `\n#a-Sell value: \$${shortenedNumber(this.marketValue, 2, 4)}`
+            `\n#a-Sell value: \$${shortenedNumber(this.marketValue, 2, 4, false)}`
           : "\n#4iNo sell value"),
         20,
         40,

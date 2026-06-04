@@ -12,7 +12,7 @@ export const Decoration = new (class DecorationConsts {
     "2": col.from(0, 200, 0), // green
     "3": col.from(0, 150, 150), // cyan
     "4": col.from(230, 0, 0), // red
-    "5": col.from(220, 0, 220), // purple
+    "5": col.from(170, 60, 220), // purple
     "6": col.from(250, 140, 0), // orange
     "7": col.from(170, 170, 170), // light grey
     "8": col.from(70, 70, 70), // dark grey
@@ -24,6 +24,9 @@ export const Decoration = new (class DecorationConsts {
     "d": col.from(220, 120, 255), // light purple
     "e": col.from(255, 255, 100), // yellow
     "f": col.from(255, 255, 255), // white
+
+    // These kind of are
+    "g": col.from(250, 200, 150), // light orange
 
     // These aren't.
     "i": col.from(0, 190, 230), //ITI blue
@@ -391,6 +394,7 @@ class Drawer {
       noStroke();
     }
     textAlign(LEFT, TOP);
+    textFont(fonts.ocr);
     this.#texts.forEach((x) => x.draw(baseX, baseY, basecol, rarityColour));
     pop();
   }

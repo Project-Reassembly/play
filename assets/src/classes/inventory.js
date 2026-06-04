@@ -219,6 +219,18 @@ class Inventory {
     return this.count(item, excludedSlots) >= count;
   }
   /**
+   * Counts the total monetary value of this inventory.
+   * @param {int[]} [excludedSlots=[]] The slots to ignore while searching.
+   */
+  value(excludedSlots = null) {
+    let found = 0;
+    this.iterate((slotContent, slot) => {
+      if (excludedSlots && excludedSlots.includes(slot)) return;
+      found += ((slotContent.getItem()?.marketValue || 0) * slotContent.count) || 0;
+    }, true);
+    return found || 0;
+  }
+  /**
    * Counts the number of a type of item in this inventory.
    * @param {string} item The item to look for. Leave empty (or use `*`) to count all items.
    * @param {int[]} [excludedSlots=[]] The slots to ignore while searching.
@@ -632,6 +644,8 @@ class Inventory {
     // pop();
   }
 }
+
+globalThis.inv = i => Inventory.deserialise({ storage: i, size: i.length });
 
 export { Inventory };
 

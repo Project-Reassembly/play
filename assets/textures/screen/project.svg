@@ -24,13 +24,13 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
-     inkscape:zoom="1"
-     inkscape:cx="437"
-     inkscape:cy="209.5"
-     inkscape:window-width="2560"
-     inkscape:window-height="1346"
-     inkscape:window-x="2869"
-     inkscape:window-y="273"
+     inkscape:zoom="2"
+     inkscape:cx="320.75"
+     inkscape:cy="87.5"
+     inkscape:window-width="1838"
+     inkscape:window-height="1057"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1" />
   <defs
@@ -77,18 +77,6 @@
        preserveAspectRatio="xMidYMid"
        id="pattern183"
        patternTransform="matrix(0.2819078,0.10260605,-0.10260605,0.2819078,7.87556,51.004257)" />
-    <pattern
-       inkscape:collect="always"
-       xlink:href="#pattern111"
-       preserveAspectRatio="xMidYMid"
-       id="pattern182"
-       patternTransform="matrix(0.26905742,0.09792889,-0.05871871,0.16132832,23.479335,80.565467)" />
-    <pattern
-       inkscape:collect="always"
-       xlink:href="#pattern110"
-       preserveAspectRatio="xMidYMid"
-       id="pattern181"
-       patternTransform="matrix(0.2819078,0.10260605,-0.10260605,0.2819078,7.875555,51.004257)" />
     <pattern
        inkscape:collect="always"
        xlink:href="#pattern95"
@@ -232,13 +220,12 @@
        inkscape:isstock="true"
        inkscape:label="Stripes 01 (1:1)">
       <rect
-   style="stroke:none"
-   x="0"
-   y="-0.5"
-   width="1"
-   height="11"
-   id="rect134" />
-
+         style="stroke:none"
+         x="0"
+         y="-0.5"
+         width="1"
+         height="11"
+         id="rect134" />
     </pattern>
     <clipPath
        clipPathUnits="userSpaceOnUse"
@@ -439,88 +426,6 @@
        id="circle98"
        cx="57.309502"
        cy="88.557854"
-       r="0.48154369" />
-    <path
-       id="rect98"
-       style="fill:url(#pattern181);stroke:#989898;stroke-width:1.32292;stroke-linecap:square;stroke-linejoin:bevel;stroke-opacity:1"
-       d="M 71.415356,90.207851 H 65.818865 V 57.86203 h 5.596491 v 27.318468 l 8.26231,-0.01998 v 5.027353 z"
-       sodipodi:nodetypes="cccccccc" />
-    <circle
-       style="fill:#989898;fill-opacity:1;stroke:none;stroke-width:1.72686;stroke-linecap:square;stroke-linejoin:bevel;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="circle99"
-       cx="67.248489"
-       cy="59.284718"
-       r="0.48154369" />
-    <circle
-       style="fill:#989898;fill-opacity:1;stroke:none;stroke-width:1.72686;stroke-linecap:square;stroke-linejoin:bevel;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="circle100"
-       cx="69.999306"
-       cy="59.30843"
-       r="0.48154369" />
-    <circle
-       style="fill:#989898;fill-opacity:1;stroke:none;stroke-width:1.72686;stroke-linecap:square;stroke-linejoin:bevel;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="circle101"
-       cx="67.248489"
-       cy="88.737442"
-       r="0.48154369" />
-    <circle
-       style="fill:#989898;fill-opacity:1;stroke:none;stroke-width:1.72686;stroke-linecap:square;stroke-linejoin:bevel;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="circle102"
-       cx="70.21273"
-       cy="86.366043"
-       r="0.48154369" />
-    <path
-       id="path102"
-       style="fill:url(#pattern182);stroke:#989898;stroke-width:1.32292;stroke-linecap:square;stroke-linejoin:bevel;stroke-opacity:1"
-       d="M 81.422642,85.115855 V 62.984244 l -8.394737,-0.0051 v -5.122178 l 8.394737,0.0051 h 5.596491 v 32.326986 h -5.596491 z"
-       sodipodi:nodetypes="ccccccccc" />
-    <circle
-       style="fill:#989898;fill-opacity:1;stroke:none;stroke-width:1.72686;stroke-linecap:square;stroke-linejoin:bevel;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="circle103"
-       cx="74.433807"
-       cy="59.284718"
-       r="0.48154369" />
-    <circle
-       style="fill:#989898;fill-opacity:1;stroke:none;stroke-width:1.72686;stroke-linecap:square;stroke-linejoin:bevel;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="circle104"
-       cx="85.603081"
-       cy="59.30843"
-       r="0.48154369" />
-    <circle
-       style="fill:#989898;fill-opacity:1;stroke:none;stroke-width:1.72686;stroke-linecap:square;stroke-linejoin:bevel;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="circle105"
-       cx="82.828545"
-       cy="88.801643"
-       r="0.48154369" />
-    <circle
-       style="fill:#989898;fill-opacity:1;stroke:none;stroke-width:1.72686;stroke-linecap:square;stroke-linejoin:bevel;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="circle106"
-       cx="85.603081"
-       cy="88.789787"
-       r="0.48154369" />
-    <circle
-       style="fill:#989898;fill-opacity:1;stroke:none;stroke-width:1.72686;stroke-linecap:square;stroke-linejoin:bevel;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="circle107"
-       cx="74.433807"
-       cy="61.584969"
-       r="0.48154369" />
-    <circle
-       style="fill:#989898;fill-opacity:1;stroke:none;stroke-width:1.72686;stroke-linecap:square;stroke-linejoin:bevel;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="circle108"
-       cx="82.496552"
-       cy="62.011818"
-       r="0.48154369" />
-    <circle
-       style="fill:#989898;fill-opacity:1;stroke:none;stroke-width:1.72686;stroke-linecap:square;stroke-linejoin:bevel;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="circle109"
-       cx="78.228043"
-       cy="86.499657"
-       r="0.48154369" />
-    <circle
-       style="fill:#989898;fill-opacity:1;stroke:none;stroke-width:1.72686;stroke-linecap:square;stroke-linejoin:bevel;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="circle110"
-       cx="78.228043"
-       cy="88.799911"
        r="0.48154369" />
     <g
        id="g41"

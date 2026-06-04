@@ -13,19 +13,20 @@ import Integrate from "../lib/integrate.js";
  */
 function construct(object, defaultType = "generic") {
   if (!object) return; //Catch accidental calls using null, undefined or similar
-  object.type ??= defaultType;
-  return constructFromRegistry(object, Integrate.types);
+  return constructFromRegistry(object, Integrate.types, defaultType);
 }
 /** Generic type constructor. Uses the specified registry as the source for any template.
  * @template T
  * @param {Unconstructed<T>} object Source to construct from. This object is left unchanged. Type must be present in the given registry, or else `Object` is used instead.
  * @param {Integrate.TypeRegistry} registry Registry to get types from.
+ * @param {string} defaultType Default fallback type name for when the source has no `type` property.
  * @returns {T}
  */
-function constructFromRegistry(object, registry) {
+function constructFromRegistry(object, registry, defaultType) {
   if (!(registry instanceof Integrate.TypeRegistry))
     throw new TypeError("Invalid type registry!"); //Catch bad (nonexistent or non-registry) registry
   if (!object) return; //Catch accidental calls using null, undefined or similar
+  object.type ??= defaultType;
   return constructFromType(object, registry.get(object.type));
 }
 /** Specific type constructor. Uses a given type directly, and ignores the `type` property.

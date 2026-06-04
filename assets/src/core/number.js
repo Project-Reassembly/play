@@ -1,3 +1,4 @@
+import { index } from "./2D-array.js";
 import { Randomiser } from "./randomiser.js";
 
 //Goes up to a decillion (1 000 000 000 000 000 000 000 000 000 000). No-one will ever need that much stuff, so it should be enough.
@@ -8,11 +9,11 @@ const sizes = ["", "k", "m", "b", "t", "q", "Q", "s", "S", "o", "n", "d"];
  * @param {number} [digits=3] Number of digits to round to. Only has an effect if <= 10.
  * @param {number} [threshold=3] Number of digits before compression happens
  */
-function shortenedNumber(num = 0, digits = 2, threshold = 3) {
+function shortenedNumber(num = 0, digits = 2, threshold = 3, integral = true) {
   if (num < 0) return "-" + shortenedNumber(-num, digits);
   if (num === 0) return "0";
   let l10 = Math.log10(num);
-  if (l10 < threshold) return `${truncNum(num)}`;
+  if (l10 < threshold) return `${integral ? truncNum(num) : truncNum(num, digits)}`;
 
   let poT = Math.floor(l10);
   let shownNum = 10 ** (l10 - poT);
@@ -319,5 +320,5 @@ function tru(chance) {
 }
 
 export const rnd = new Randomiser();
-export { clamp, colinterp, dynamicSort, roundNum, shortenedNumber, tru, turn, Vector };
+export { clamp, colinterp, dynamicSort, index, roundNum, shortenedNumber, tru, turn, Vector };
 

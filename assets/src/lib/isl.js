@@ -8,15 +8,18 @@ import {
 import { Block } from "../classes/block/block.js";
 import { Entity } from "../classes/entity/entity.js";
 import { EquippedEntity } from "../classes/entity/inventory-entity.js";
+import { REGION_SIZE } from "../classes/world/factory-valuations.js";
 import { construct } from "../core/constructor.js";
+import { Vector } from "../core/number.js";
 import { Registries } from "../core/registry.js";
 import { Explosion, NuclearExplosion } from "../play/effects.js";
 import { clearData, loadGame, saveGame, world } from "../play/game.js";
 import { Log } from "../play/messaging.js";
+import { blockSize, chunkSize } from "../scaling.js";
 //Util
 let quietMode = false;
 function feedback(msg) {
-  if (!quietMode) Log.send("#7iISL> " + msg);
+  if (!quietMode) Log.send("#niISL#7i> " + msg);
 }
 function give(entity, item, amount = 1) {
   let leftover =
@@ -28,22 +31,27 @@ function give(entity, item, amount = 1) {
   return notgiven;
 }
 function getPos(x, y) {
-  let obj = {
-    x:
-      x ?
-        x.type === "relpos" ? ctx.x + parseFloat(x.value.substring(1))
-        : x.type === "identifier" && x.value === "~" ? ctx.x
-        : x.value
-      : ctx.x,
-    y:
-      y ?
-        y.type === "relpos" ? ctx.y + parseFloat(y.value.substring(1))
-        : y.type === "identifier" && y.value === "~" ? ctx.y
-        : y.value
-      : ctx.y,
-  };
+  let obj = new Vector(
+    x ?
+      x.type === "relpos" ? ctx.x + parseFloat(x.value.substring(1))
+      : x.type === "blockpos" ? parseFloat(x.value.slice(0, -1)) * blockSize
+      : x.type === "chunkpos" ? parseFloat(x.value.slice(0, -1)) * blockSize * chunkSize
+      : x.type === "regionpos" ? parseFloat(x.value.slice(0, -1)) * blockSize * REGION_SIZE
+      : x.type === "here" ? ctx.x
+      : x.value
+    : ctx.x,
+
+    y ?
+      y.type === "relpos" ? ctx.y + parseFloat(y.value.substring(1))
+      : y.type === "blockpos" ? parseFloat(y.value.slice(0, -1)) * blockSize
+      : y.type === "chunkpos" ? parseFloat(y.value.slice(0, -1)) * blockSize * chunkSize
+      : y.type === "regionpos" ? parseFloat(y.value.slice(0, -1)) * blockSize * REGION_SIZE
+      : y.type === "here" ? ctx.y
+      : y.value
+    : ctx.y,
+  );
   if (typeof obj.x !== "number" || typeof obj.y !== "number")
-    throw new TypeError("Positions must be numbers!");
+    throw new ISLError("Positions must be numbers!", TypeError);
   return obj;
 }
 class ExecutionContext {
@@ -57,17 +65,24 @@ class ExecutionContext {
   }
 }
 //Extension
-const positionType = "number|relpos|identifier";
+const positionType = "number|relpos|here|blockpos";
 const cle = new ISLExtension("pr-cmd");
-cle.addType("rloc-item", (val) => Registries.items.has(val) && !Registries.blocks.has(val));
-cle.addType("rloc-block", (val) => Registries.blocks.has(val) && !Registries.items.has(val));
-cle.addType("rloc-placeable", (val) => Registries.blocks.has(val) && Registries.items.has(val));
-cle.addType("rloc-status", (val) => Registries.statuses.has(val));
-cle.addType("rloc-entity", (val) => Registries.entities.has(val));
+cle.addType("rloc<item>", (val) => Registries.items.has(val) && !Registries.blocks.has(val));
+cle.addType("rloc<block>", (val) => Registries.blocks.has(val) && !Registries.items.has(val));
+cle.addType("rloc<placeable>", (val) => Registries.blocks.has(val) && Registries.items.has(val));
+cle.addType("rloc<status>", (val) => Registries.statuses.has(val));
+cle.addType("rloc<entity>", (val) => Registries.entities.has(val));
+cle.addType("rloc<corporation>", (val) => Registries.corps.has(val));
+cle.addType("rloc<cutscene>", (val) => Registries.cutscenes.has(val));
+cle.addType("rloc<vfx>", (val) => Registries.vfx.has(val));
 cle.addType("entity", () => false);
-cle.addType("nonentity-ctx", () => false);
+cle.addType("block", () => false);
+cle.addType("here", (v) => v == "~");
+cle.addType("blockpos", (v) => `${v}`.endsWith("b") && !isNaN(parseFloat(`${v}`.slice(0, -1))));
+cle.addType("regionpos", (v) => `${v}`.endsWith("r") && !isNaN(parseFloat(`${v}`.slice(0, -1))));
+cle.addType("chunkpos", (v) => `${v}`.endsWith("c") && !isNaN(parseFloat(`${v}`.slice(0, -1))));
 window["_self"] = cle.addVariable("self", new Entity(), "entity");
-const _ctx = (window["_ctx"] = cle.addVariable("ctx", new Block(), "nonentity-ctx"));
+const _ctx = (window["_ctx"] = cle.addVariable("ctx", new Block(), "block"));
 let _ce = (window["_created"] = cle.addVariable("created", "null", "null"));
 window["_playerx"] = cle.addVariable("playerx", 0, "number");
 window["_playery"] = cle.addVariable("playery", 0, "number");
@@ -82,7 +97,7 @@ cle.addKeyword(
   },
   [
     { name: "target", type: "entity" },
-    { name: "item", type: "rloc-item|rloc-placeable" },
+    { name: "item", type: "rloc<item>|rloc<placeable>" },
     { name: "amount", type: "number", optional: true },
   ],
 );
@@ -98,7 +113,7 @@ cle.addKeyword(
   },
   [
     { name: "target", type: "entity" },
-    { name: "status", type: "rloc-status" },
+    { name: "status", type: "rloc<status>" },
     { name: "duration", type: "number", optional: true },
   ],
 );
@@ -132,9 +147,7 @@ cle.addKeyword(
     })
       .create()
       .dealDamage();
-    feedback(
-      `Created explosion at ${pos.x}, ${pos.y}, dealing ${amt} damage in a ${rad}px radius`,
-    );
+    feedback(`Created explosion at ${pos.x}, ${pos.y}, dealing ${amt} damage in a ${rad}px radius`);
   },
   [
     { name: "x", type: positionType, optional: true },
@@ -155,7 +168,7 @@ cle.addKeyword(
     feedback(`Spawned new ${ent.name}#7i at ${pos.x}, ${pos.y}`);
   },
   [
-    { name: "entity", type: "rloc-entity" },
+    { name: "entity", type: "rloc<entity>" },
     { name: "x", type: positionType, optional: true },
     { name: "y", type: positionType, optional: true },
   ],
@@ -228,7 +241,10 @@ cle.addKeyword(
     let pos = getPos(x, y);
     let toActivate;
     try {
-      toActivate = world.getBlockErroring(Math.floor(pos.x / 30), Math.floor(pos.y / 30));
+      toActivate = world.getBlockErroring(
+        Math.floor(pos.x / blockSize),
+        Math.floor(pos.y / blockSize),
+      );
     } catch (err) {
       throw new ISLError(err.message, err.constructor);
     }
@@ -254,7 +270,7 @@ cle.addKeyword(
     feedback(`Placed ${placed.name}#7i at ${pos.x}, ${pos.y}`);
   },
   [
-    { name: "block", type: "rloc-block|rloc-placeable" },
+    { name: "block", type: "rloc<block>|rloc<placeable>" },
     { name: "x", type: positionType, optional: true },
     { name: "y", type: positionType, optional: true },
     { name: "team", type: "string", optional: true },
@@ -309,7 +325,7 @@ cle.addKeyword(
       interp.setVar(variable.value, val);
     } else {
       Log.send(
-        "#niISL> #yiActually, extensions can't create variables (yet). This is here as a placeholder.",
+        "#niISL#yi> Actually, extensions can't create variables (yet). This is here as a placeholder.",
       );
     }
   },
@@ -331,11 +347,10 @@ cle.addKeyword(
     } catch (err) {
       throw new ISLError(err.message, err.constructor);
     }
-    if (toWriteTo instanceof CommandExecutorBlock || toWriteTo instanceof SignBlock){
-      feedback(`Wrote text to ${toWriteTo.name} at ${toWriteTo.x}, ${toWriteTo.y}.`)
+    if (toWriteTo instanceof CommandExecutorBlock || toWriteTo instanceof SignBlock) {
+      feedback(`Wrote text to ${toWriteTo.name} at ${toWriteTo.x}, ${toWriteTo.y}.`);
       toWriteTo.write(text.value);
-    }
-    else throw new ISLError("Selected block cannot be written to.", TypeError);
+    } else throw new ISLError("Selected block cannot be written to.", TypeError);
   },
   [
     { name: "text", type: "string" },
@@ -483,7 +498,7 @@ cle.addKeyword(
       } else if (command === "quietmode") {
         s("#eiisl #-->#3- quietmode");
         s(" Enables or disables quiet mode.");
-        s(" When in quiet mode, ordinary feedback (prefixed with ISL>)");
+        s(" When in quiet mode, ordinary feedback (prefixed with #niISL#-->)");
         s(" will not be shown.");
         s("#@-Parameters:");
         s("  #6-[enabled]#--: State to set quiet mode to. If blank, will turn it on.");
@@ -521,12 +536,12 @@ const commandLine = new ISLInterpreter({
   },
   onwarn: (msg) => {
     console.log("[ISL Warning] " + msg);
-    (msg + "").split("\n").forEach((val) => Log.send("#e-"+val));
+    (msg + "").split("\n").forEach((val) => Log.send("#e-" + val));
   },
   onerror: (msg) => {
     if (msg.includes("Error detected")) {
       if (!quietMode) {
-        Log.send("#4iISL> Could not complete operation: ");
+        Log.send("#niISL#4i> Could not complete operation: ");
         `${msg}`
           .split("\n")[1]
           .split(",")
@@ -551,7 +566,7 @@ function exec(isl, context) {
 function runCommand(cmd, context) {
   if (!context) throw new SyntaxError("Execution context is not defined!");
   _ctx.value = context.self;
-  _ctx.type = context.isEntity ? "entity" : "nonentity-ctx";
+  _ctx.type = context.isEntity ? "entity" : "block";
   ctx = context;
   cmd = cmd.replaceAll("#", "\\_created\\");
   cmd = cmd.replaceAll("@s", "\\_ctx\\");
