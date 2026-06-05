@@ -1,7 +1,6 @@
 import { create2DArray, index, iterate2DArray } from "../../core/2D-array.js";
 import { col } from "../../core/color.js";
 import { assign, constructFromType } from "../../core/constructor.js";
-import { tru } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { ui } from "../../core/ui.js";
 import { debug } from "../../play/debug.js";
@@ -142,7 +141,7 @@ class World {
     //Only tick simulated chunks
     this.toTick.forEach((chunk) => {
       chunk.tick();
-      if (tru(World.randomTick)) chunk.randomTick();
+      //if (tru(World.randomTick)) chunk.randomTick();
     });
   }
   #removeDead() {

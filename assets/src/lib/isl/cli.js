@@ -1,14 +1,19 @@
 //Yes, this stuff.
 //Why make a command line language when there's a perfectly good one right here?
 
+import { BreakType } from "../../classes/block/block.js";
+import { GroundTile } from "../../classes/block/ground-tile.js";
 import { EquippedEntity, InventoryEntity } from "../../classes/entity/inventory-entity.js";
 import { deliverEntity } from "../../classes/world/events/event-action.js";
 import { construct } from "../../core/constructor.js";
+import { roundNum } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { Explosion, NuclearExplosion } from "../../play/effects.js";
 import { clearData, loadGame, saveGame, world } from "../../play/game.js";
 import { Log } from "../../play/messaging.js";
 import { blockSize } from "../../scaling.js";
+import Integrate from "../integrate.js";
+import { mods } from "../mod-list.js";
 import {
   addCreatedEntity,
   core,
@@ -25,6 +30,7 @@ import {
   quietMode,
   runCommand,
 } from "./core.js";
+const s = (str) => Log.send(str);
 function give(entity, item, amount = 1) {
   let leftover =
     entity instanceof EquippedEntity && entity.ammo.hasItem(item) ?
@@ -253,8 +259,8 @@ cle.addKeyword(
     let toActivate;
     try {
       toActivate = world.getBlockErroring(
-        Math.floor(pos.x / blockSize),
-        Math.floor(pos.y / blockSize),
+        Math.round(pos.x / blockSize),
+        Math.round(pos.y / blockSize),
       );
     } catch (err) {
       feedback(`#ci${err.message}.`);
@@ -278,7 +284,7 @@ cle.addKeyword(
     let pos = getPos(x, y);
     let placed;
     try {
-      placed = world.placeAt(block.value, Math.floor(pos.x / 30), Math.floor(pos.y / 30));
+      placed = world.placeAt(block.value, Math.round(pos.x / 30), Math.round(pos.y / 30));
     } catch (err) {
       feedback(`#ci${err.message}.`);
       return;
@@ -300,9 +306,9 @@ cle.addKeyword(
     type ??= { type: "string", value: "ignore" };
     type.value ??= "ignore";
     try {
-      let toBreak = world.getBlockErroring(Math.floor(pos.x / 30), Math.floor(pos.y / 30));
+      let toBreak = world.getBlockErroring(Math.round(pos.x / 30), Math.round(pos.y / 30));
       if (type.value === "ignore" || toBreak.break(BreakType[type.value] ?? "delete"))
-        world.break(Math.floor(pos.x / 30), Math.floor(pos.y / 30));
+        world.break(Math.round(pos.x / 30), Math.round(pos.y / 30));
     } catch (err) {
       throw new ISLError(err.message, err.constructor);
     }
@@ -394,13 +400,67 @@ cle.addKeyword(
   ],
 );
 
+cle.addKeyword(
+  "mod",
+  async (interp, labels, url) => {
+    try {
+      /**@type {Integrate.Mod} */
+      const m = await Integrate.add(`${url?.value}`);
+      GroundTile.reloadIDs();
+      preload();
+      console.log(m);
+      feedback(`Successfully loaded '${m.displayName}: ${m.tagline}' (${m.name}) by ${m.author}!`);
+      mods.set(m.name, m);
+    } catch (e) {
+      feedback(`#ciMod loading from '${url?.value}' failed: ${e.message}`);
+    }
+  },
+  [{ type: "string", name: "url" }],
+);
+cle.addKeyword(
+  "mod-info",
+  async (interp, labels, mod) => {
+    const lmod = mods.get(`${mod?.value}`);
+    if (!lmod) {
+      feedback(`#ciThere is no loaded mod with ID '${mod?.value}'.`);
+      return;
+    }
+    const affectedReg = [...new Set(lmod.content.map((c) => c.registry))];
+    feedback(`Listing info for mod '${lmod.displayName}':`);
+    s(`#@b${lmod.displayName}#@- by ${lmod.author}#--`);
+    s(`#@i${lmod.tagline.replaceAll("#", "\#")}#--`);
+    s(`#7-${lmod.description.replaceAll("#", "\#")}#--`);
+    s(
+      `#h-${lmod.content.length}#-- content item${lmod.content.length === 1 ? "" : "s"} ${affectedReg.length === 1 ? `in #n-Registries#--.#i-${affectedReg[0]}#--` : `across #h-${affectedReg.length}#-- registries`}:`,
+    );
+    if (affectedReg.length === 1) {
+      lmod.content
+        .filter((c) => c.registry === affectedReg[0])
+        .forEach((c) => {
+          s(
+            ` - #e-${c.name}#--: ${c.constructible.type ?? "unknown type"}, #6-${roundNum((c.JSON.length * 2) / 1024, 3)}kb#--`,
+          );
+        });
+    } else
+      affectedReg.forEach((v, i) => {
+        const incl = lmod.content.filter((c) => c.registry === v);
+        s(` #h-${incl.length}#-- in #n-Registries#--.#i-${v}#--: `);
+        incl.forEach((c) => {
+          s(
+            `  - #e-${c.name}#--: ${c.constructible.type ?? "unknown type"}, #6-${roundNum((c.JSON.length * 2) / 1024, 3)}kb#--`,
+          );
+        });
+      });
+  },
+  [{ type: "string|identifier", name: "mod" }],
+);
+
 cle.addLabel("general", ["help"]);
 cle.addLabel("selector", ["help"]);
 cle.addKeyword(
   "help",
   (interp, labels, cmd) => {
     let command = cmd?.value;
-    const s = (str) => Log.send(str);
     //Header
     s("#@->>> ISL Command Line Help <<<");
     //Body
@@ -427,6 +487,7 @@ cle.addKeyword(
       s(" #6-@s#--/#6-@self#--: The executor of the command. May be a block.");
       s(" #6-@r#--/#6-@random#--: A random entity.");
       s(" #6-@c#--/#6-@closest#--: The closest entity (likely yourself if used alone).");
+      s(" #6-@#--/#6-@w#--/#6-@newest#--: The most recently spawned entity.");
       s(" #6-@e#--/#6-@everything#--: All entities, including items.");
       s(" #6-@l#--/#6-@living#--: All entities, excluding items.");
       s(" #6-@i#--/#6-@item#--: All items.");
@@ -468,33 +529,32 @@ cle.addKeyword(
         ` These can be chained infinitely (e.g. #6-@n>r|e!p>c|iti#--: all #6-iti#-- entities, a random enemy #-iand#-- the closest entity other than the player).`,
       );
       s(` Evaluation is left-to-right.`);
+      s("#@-Created Entity Selectors");
+      s(` Replacing the #6-@#-- with a #6-\\##-- selects from only ISL-created entities, instead of all entities in the whole world.`);
     } else {
       if (!command) {
         s("Run [#3-help #7i<command>#--] to get help for a command");
         s("Run [#3-general help#--] to get help for the command line");
         s("ISL basics function, but are not covered here");
-        s("#@->>> ---------P:R--------- <<<");
-        s("#eiutility");
+        s("#ei- utility ---------------------------------------------------------------------- ");
         s(" #3-give #7i<entity> <item> [amount]");
-        s(" #3-spawn #7i<entity> [x] [y]");
-        s(" #3-deliver #7i<entity> [x] [y]");
-        s(" #3-tp #7i<entity> <x> <y>");
-        s(" #3-team #7i<entity> <team>");
+        s(" #3-spawn #7i<entity> [x] [y]     #3-deliver #7i<entity> [x] [y]");
+        s(" #3-tp #7i<entity> <x> <y>        #3-team #7i<entity> <team>");
         s(" #3-explode #7i<x> <y> [damage] [radius] [team]");
         s(" #3-at #7i<entity> <...command>");
         s(" #3-devset");
-        s("#eimanipulation");
+        s("#ei- manipulation ----------------------------------------------------------------- ");
         s(" #3-activate #7i<x> <y>");
-        s(" #3-place #7i<block> <x> <y>");
-        s(" #3-break #7i<x> <y> [type]");
-        s("#eistorage");
-        s(" #3-save #7i[name]");
-        s(" #3-load #7i[name]");
-        s("#eiui");
+        s(" #3-place #7i<block> <x> <y>      #3-break #7i<x> <y> [type]");
+        s("#ei- storage ---------------------------------------------------------------------- ");
+        s(" #3-save #7i[name]                #3-load #7i[name]");
+        s("#ei- ui --------------------------------------------------------------------------- ");
         s(" #3-quietmode #7i[enabled]");
-        s("#eiinformation");
-        s(" #3-read #7i<x> <y> as <variable>");
-        s(" #3-write #7i<text> <x> <y>");
+        s("#ei- information ------------------------------------------------------------------ ");
+        s(" #3-read #7i<x> <y> as <variable> #3-write #7i<text> <x> <y>");
+        s("#ei- modifications ---------------------------------------------------------------- ");
+        s(" #3-mod #7i<url>                  #3-mod-info #7i<mod>             #3-mod-list");
+        s("#ei-------------------------------------------------------------------------------- ");
       } else if (command === "give") {
         s("#eiutility #-->#3- give");
         s(" Adds an item to an entity's inventory.");
@@ -611,21 +671,36 @@ cle.addKeyword(
         s("  #6-[name]#--: Name of the save file. Needed for custom files.");
         s("         Leave blank to use the default save file.");
       } else if (command === "quietmode") {
-        s("#eiisl #-->#3- quietmode");
+        s("#eiui #-->#3- quietmode");
         s(" Enables or disables quiet mode.");
         s(" When in quiet mode, ordinary feedback (prefixed with #niISL#-->)");
         s(" will not be shown.");
         s("#@-Parameters:");
         s("  #6-[enabled]#--: State to set quiet mode to. If blank, will turn it on.");
+      } else if (command === "mod") {
+        s("#eimodifications #-->#3- mod");
+        s(" Loads and implements an Integrate mod from the Internet, then reloads");
+        s(" game resources.")
+        s(" May cause lag if a large mod is loaded, so runs #-iasynchronously#--.");
+        s("#@-Parameters:");
+        s("  #6-<url>#--: The URL to fetch the mod from.");
+      } else if (command === "mod-info") {
+        s("#eimodifications #-->#3- mod-info");
+        s(" Gets extended information for an installed mod.");
+        s("#@-Parameters:");
+        s("  #6-<mod>#--: The identifier of the mod.");
+      } else if (command === "mod-list") {
+        s("#eimodifications #-->#3- mod-list");
+        s(" Gets the titles and identifiers of all installed mods.");
+        s("#@-Parameters:");
+        s(" (none)");
       } else {
         s("#4bInvalid Command: " + command);
-        s(" The chosen keyword is not a command line");
-        s(" exclusive keyword. If unsure, run [help] with");
-        s(" no #@-Parameters for a list of available commands.");
+        s(" The chosen keyword is not a command line-exclusive keyword.");
+        s(" If unsure, run [help] with no #@-Parameters#-- ");
+        s(" for a list of available commands.");
       }
     }
-    //Footer
-    s("#@->>> ---------CLI--------- <<<");
   },
   [{ name: "command", type: "keyword", optional: true }],
 );

@@ -120,13 +120,7 @@ class BlockGenerator extends Generator {
         x: x,
         y: y,
       });
-      if (selected.ores.length > 0)
-        postMessage({
-          type: "ores",
-          ores: selected.ores,
-          x: x,
-          y: y,
-        });
+      if (selected.ores.length > 0) postMessage({ type: "ores", ores: selected.ores, x: x, y: y });
       this._positions.push({ x: x, y: y });
       this._generated++;
     }

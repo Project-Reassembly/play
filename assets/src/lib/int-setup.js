@@ -12,6 +12,7 @@ import "../registries/block.js";
 import "../registries/corps.js";
 import "../registries/entity.js";
 import "../registries/item.js";
+import "../registries/tile.js";
 
 import "../registries/events.js";
 import "../registries/status.js";
@@ -22,12 +23,16 @@ import "../registries/deathmsg.js";
 console.log("[Setup] Imported hardcoded content");
 //Set up mods
 Integrate.addModdableRegistry(Registries.blocks, "blocks");
+Integrate.addModdableRegistry(Registries.tiles, "tiles");
 Integrate.addModdableRegistry(Registries.items, "items");
 Integrate.addModdableRegistry(Registries.entities, "entities");
 Integrate.addModdableRegistry(PreloadRegistries.images, "images");
+Integrate.addModdableRegistry(Registries.events, "events");
 Integrate.addModdableRegistry(PreloadRegistries.cutscenes, "cutscenes");
 Integrate.addModdableRegistry(Registries.corps, "corporations");
 Integrate.addModdableRegistry(PreloadRegistries.stati, "statuses");
 Integrate.addModdableRegistry(Registries.vfx, "vfx");
 Integrate.addModdableRegistry(Registries.worldgen, "world-generators");
+
+Integrate.setPrefix(true);
 console.log("[Setup] Added moddable registries");

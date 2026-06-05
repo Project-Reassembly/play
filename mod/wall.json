@@ -1,0 +1,7 @@
+{
+  "type": "wall",
+  "health": 150000,
+  "armour": 250,
+  "name": "Supreme Tungsten Wall",
+  "image": "base.supreme-tungsten"
+}

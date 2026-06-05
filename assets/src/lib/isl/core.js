@@ -148,6 +148,7 @@ function oneselect(ctx, selector, source) {
     case "random":
       return source.length === 0 ? [] : [rnd.in(source)];
 
+    case "":
     case "w":
     case "newest":
       return source.length === 0 ? [] : [newestIn(source)];
@@ -247,6 +248,15 @@ let ctx = null;
 
 export function addCreatedEntity(newent) {
   created.push(newent);
+}
+export function checkCreatedEntities() {
+  for (let i = 0; i < created.length; i++) {
+    const ent = created[i];
+    if (ent.dead) {
+      created.splice(i, 1);
+      i--;
+    }
+  }
 }
 /**@type {Entity[]} */
 let created = [];

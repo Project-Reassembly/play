@@ -10,6 +10,7 @@ import Integrate from "../lib/integrate.js";
  * @import { Cutscene } from "./cutscene.js"
  * @import { Corporation } from "../classes/item/corporation.js";
  * @import { WorldEvent } from "../classes/world/events/world-event.js";
+ * @import { GroundTile } from "../classes/block/ground-tile.js";
  */
 /// <reference path="../lib/integrate"/>
 
@@ -20,6 +21,8 @@ const Registries = Object.freeze({
   items: new Integrate.Registry(),
   /**@readonly @type {Integrate.Registry<Block>} */
   blocks: new Integrate.Registry(),
+  /**@readonly @type {Integrate.Registry<GroundTile>} */
+  tiles: new Integrate.Registry(),
   /**@readonly @type {Integrate.Registry<Entity>} */
   entities: new Integrate.Registry(),
   /**@readonly @type {Integrate.Registry<StatusEffect>} */
@@ -48,7 +51,8 @@ const TypeRegistries = Object.freeze({
 
 /**
  * @typedef PreloadResource
- * @property {string} path
+ * @property {string} path Target item, default stored thing.
+ * @prop {[string, string][]} [items] Repository items, only used when `type === "repo"`. Each entry is of the form `[name, path]`.
  */
 
 const PreloadRegistries = Object.freeze({
@@ -74,4 +78,3 @@ function lookup(reg, name, prop) {
 }
 
 export { lookup, PreloadRegistries, Registries, TypeRegistries };
-

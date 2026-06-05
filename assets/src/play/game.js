@@ -22,19 +22,23 @@ import { Serialiser } from "../core/serialiser.js";
 import { ImageContainer, rotatedShape, ui, UIComponent } from "../core/ui.js";
 import "../definitions/screens/any.js";
 import "../definitions/screens/in-game.js";
-import { creation, selectors } from "../definitions/screens/new-game.js";
+import {
+  selectors as createCorporationSelectors,
+  creation,
+} from "../definitions/screens/new-game.js";
 import { loadStats, setupTips } from "../definitions/screens/title.js";
 import { cmdHistory } from "../definitions/text-edit.js";
 
 import { StatusEffect } from "../classes/effect/status-effect.js";
 import { exec } from "../lib/isl/cli.js";
-import { ExecutionContext } from "../lib/isl/core.js";
+import { checkCreatedEntities, ExecutionContext } from "../lib/isl/core.js";
 import { blockSize, totalSize } from "../scaling.js";
 import { debug } from "./debug.js";
 import { effectTimer } from "./effects.js";
 import { fonts } from "./font.js";
 import { Log } from "./messaging.js";
 
+import { GroundTile } from "../classes/block/ground-tile.js";
 import { deliverPlayer } from "../classes/world/events/event-action.js";
 import "../definitions/screens/ide.js";
 import { capturedInput, tcursor } from "../definitions/screens/ide.js";
@@ -257,8 +261,8 @@ try {
             iterate2DArray(def.entries, (e, y, x) => {
               if (e) {
                 if (chunk.tiles[y][x] === target) {
-                  if (Registries.blocks.has(e)) {
-                    chunk[layer][y][x] = e;
+                  if (Registries.tiles.has(e)) {
+                    chunk[layer][y][x] = GroundTile.getNumericalID(e);
                     stats.placed[e] ??= 0;
                     stats.placed[e]++;
                   } else {
@@ -273,8 +277,8 @@ try {
           } else
             iterate2DArray(def.entries, (e, y, x) => {
               if (e)
-                if (Registries.blocks.has(e)) {
-                  chunk[layer][y][x] = e;
+                if (Registries.tiles.has(e)) {
+                  chunk[layer][y][x] = GroundTile.getNumericalID(e);
                   stats.placed[e] ??= 0;
                   stats.placed[e]++;
                 } else {
@@ -535,6 +539,12 @@ function saveGame(name) {
   //Dictionary replacement:
   let dict = [];
   let num = 0;
+  Registries.tiles.forEach((item, name) => {
+    if (file.includes(name)) {
+      dict.push([num, name]);
+      num++;
+    }
+  });
   Registries.blocks.forEach((item, name) => {
     if (file.includes(name)) {
       dict.push([num, name]);
@@ -639,7 +649,7 @@ function loadGame(name) {
   game.money = file.money ?? 10000;
   world.become(World.deserialise(file.world));
   console.log("Game loaded.");
-  Log.send(`#a-You are now playing on '${world.name}'.`);
+  Log.send(`#a-Game loaded.`);
   return true;
 }
 
@@ -656,27 +666,41 @@ function sizeKB(string) {
   return string ? string.length / 512 : 0;
 }
 globalThis.preload = async function () {
+  loadStats.images = 0;
+  loadStats.cutscenes = 0;
+  loadStats.totalImages = PreloadRegistries.images.size;
+  loadStats.totalCutscenes = PreloadRegistries.cutscenes.size;
   await fonts.load();
   console.log("Loaded fonts.");
-  PreloadRegistries.images.forEach((el, name) =>
-    Registries.images.add(name, new ImageContainer(el.path)),
-  );
+  PreloadRegistries.images.forEach((el, name) => {
+    if (el.type === "repo") {
+      console.log("repository - ",el.items);
+      [...el.items].forEach((x) => {
+        if (!Registries.images.has(x[0])) Registries.images.add(x[0], new ImageContainer(x[1] ?? x[0]));
+      });
+    } else if (!Registries.images.has(name))
+      Registries.images.add(name, new ImageContainer(el.path));
+  });
   await Registries.images.forEachAsync(async (el, name) => {
     await el.load();
     loadStats.images++;
   });
   console.log(`Loaded ${loadStats.images}/${loadStats.totalImages} images.`);
   await PreloadRegistries.cutscenes.forEachAsync(async (el, name) => {
-    Registries.cutscenes.add(name, await Cutscene.from(el.path));
+    if (!Registries.cutscenes.has(name))
+      Registries.cutscenes.add(name, await Cutscene.from(el.path));
     loadStats.cutscenes++;
   });
   console.log(`Loaded ${loadStats.cutscenes}/${loadStats.totalCutscenes} cutscenes.`);
 
   PreloadRegistries.stati.forEach((el, name) => {
-    Registries.statuses.add(name, constructFromType(el, StatusEffect));
+    if (!Registries.statuses.has(name))
+      Registries.statuses.add(name, constructFromType(el, StatusEffect));
   });
 
-  selectors();
+  createCorporationSelectors();
+
+  GroundTile.reloadIDs();
 
   loadStats.hide();
   console.log("All assets loaded.");
@@ -874,7 +898,7 @@ export function drawNeutralBackground(yo = 0) {
 
 function fpsUpdate() {
   //calculate FPS
-  if (frameRate() && ui?.previousFPS) {
+  if (frameRate && ui?.previousFPS) {
     ui.previousFPS.push(frameRate());
     if (ui.previousFPS.length > 5) {
       ui.previousFPS.splice(0, 1);
@@ -952,6 +976,7 @@ function gameFrame() {
       } else UIComponent.setCondition("dead:yes");
       effects.applyShake();
       world.tickAll();
+      checkCreatedEntities()
     }
   });
   UIComponent.setCondition("boss:" + (world.hasBoss() ? "yes" : "no"));
@@ -1171,7 +1196,7 @@ function interact() {
       //If space is free, and buildable
       if (
         world.getBlock(game.mouse.blockX, game.mouse.blockY, "floor")?.buildable ||
-        (Registries.blocks.get(world.getTile(game.mouse.blockX, game.mouse.blockY)).buildable ??
+        (Registries.tiles.get(world.getTile(game.mouse.blockX, game.mouse.blockY)).buildable ??
           true)
       ) {
         if (
@@ -1360,6 +1385,7 @@ function openCommandLine() {
   ui.texteditor.title = "Command Line";
   ui.texteditor.isCommandLine = true;
   ui.texteditor.save = (command) => {
+    if (command.startsWith("/")) command = command.substring(1);
     exec(command, new ExecutionContext(game.player.x, game.player.y, game.player));
     cmdHistory.unshift(command);
     histIndex = -1;
@@ -1372,8 +1398,8 @@ window.keyTyped = function (ev) {
       ev.shiftKey || ev.getModifierState("CapsLock") ? key.toUpperCase() : key.toLowerCase(),
     );
   if (!ui.texteditor.active) return false;
-  if (key === "/") return false;
-  else if (key === "c" && ev.ctrlKey) navigator.clipboard.writeText(ui.texteditor.text);
+  // if (key === "/") return false;
+  if (key === "c" && ev.ctrlKey) navigator.clipboard.writeText(ui.texteditor.text);
   else if (key === "x" && ev.ctrlKey)
     navigator.clipboard.writeText(ui.texteditor.text).then((x) => (ui.texteditor.text = ""));
   else if (key === "v" && ev.ctrlKey)

@@ -1,0 +1,8 @@
+{
+  "name": "test",
+  "displayName": "Test Mod",
+  "tagline": "Example mod for Integrate",
+  "description": "Example mod for Integrate & Project: Reassembly.",
+  "author": "Deez nuts",
+  "definitions": "./defs.json"
+}

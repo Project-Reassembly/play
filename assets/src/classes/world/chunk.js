@@ -29,9 +29,9 @@ class Chunk {
     return chunkSize;
   }
   /** @import {Block} from "../block/block.js" */
-  /** @type {(string|null)[][]} */
+  /** @type {(number)[][]} */
   tiles = create2DArray(chunkSize);
-  /** @type {(string|null)[][]} */
+  /** @type {(number)[][]} */
   ores = create2DArray(chunkSize);
   /** @type {(Block|null)[][]} */
   blocks = create2DArray(chunkSize);
@@ -79,7 +79,7 @@ class Chunk {
     if (this[layer][y] === undefined || this[layer][y][x] === undefined)
       throw new Error(`Can't place tile outside of chunk (at ${x}, ${y} (not) in chunk)`);
 
-    this[layer][y][x] = block;
+    this[layer][y][x] = GroundTile.getNumericalID(block);
   }
   /**
    * Removes a block from the chunk.
@@ -109,7 +109,7 @@ class Chunk {
     if (this[layer][y] === undefined || this[layer][y][x] === undefined)
       throw new Error(`Can't remove time outside of chunk (at ${x}, ${y} in chunk)`);
     if (this[layer][y][x]) {
-      this[layer][y][x] = null;
+      this[layer][y][x] = 0;
       return true;
     }
     return false;
@@ -137,7 +137,7 @@ class Chunk {
   getTile(x, y, layer = Chunk.Layer.tiles) {
     if (this[layer][y] === undefined || this[layer][y][x] === undefined)
       throw new Error(`Can't get tile outside of chunk (at ${x}, ${y} in chunk)`);
-    return this[layer][y][x];
+    return GroundTile.getNameFromID(this[layer][y][x]);
   }/**
    * Gets the tile from the highest occupied layer at a position in the chunk.\
    * For example, if both an ore and a tile are present, then the ore is chosen.
@@ -148,7 +148,7 @@ class Chunk {
   getHighestTile(x, y) {
     if (this.tiles[y] === undefined || this.tiles[y][x] === undefined)
       throw new Error(`Can't get tile outside of chunk (at ${x}, ${y} in chunk)`);
-    return this.ores[y][x] ?? this.tiles[y][x];
+    return GroundTile.getNameFromID(this.ores[y][x] ?? this.tiles[y][x]);
   }
   randomTick() {
     iterate2DArray(
@@ -206,8 +206,8 @@ class Chunk {
   serialise() {
     return {
       blocks: mapJagged2DArray(this.blocks, (y) => (y ? y.serialise() : null)),
-      tiles: structuredClone(this.tiles),
-      ores: structuredClone(this.ores),
+      tiles: mapJagged2DArray(this.tiles, t => GroundTile.getNameFromID(t)),
+      ores: mapJagged2DArray(this.ores, t => GroundTile.getNameFromID(t)),
       i: this.i,
       j: this.j,
     };
@@ -223,7 +223,7 @@ class Chunk {
         let sfloor = (created.ores ?? mapJagged2DArray(created.floors, (s,r,c) => s?.block ))[y][x];
         let stile = created.tiles[y][x];
         //Floor, Tile
-        if (stile) chunk.addTile(stile ?? "stone", x, y);
+        if (stile) chunk.addTile(stile, x, y);
         if (sfloor) chunk.addTile(sfloor, x, y, "ores");
         if (sblock) {
           //Block

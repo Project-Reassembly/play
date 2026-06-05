@@ -632,7 +632,7 @@ class SyntaxHighlightedUIComponent extends UIComponent {
   /**@type {() => string} */
   text = () => "";
   /**@param {(text:string) => string} fn*/
-  formatter = t => t;
+  formatter = (t) => t;
   lasttxt = this.text();
   textdrawer = new CMFT.Drawer().noBG();
   hastext = false;
@@ -654,7 +654,7 @@ class SyntaxHighlightedUIComponent extends UIComponent {
     this.textdrawer = CMFT.drawer(
       this.formatter(t ?? "null"),
       this.textSize,
-      Math.floor(this.width / (this.textSize*0.6)),
+      Math.floor(this.width / (this.textSize * 0.6)),
     ).noBG();
     this.lasttxt = t;
   }
@@ -674,6 +674,7 @@ class SyntaxHighlightedUIComponent extends UIComponent {
 
 class ImageContainer {
   #image;
+  #color;
   #path;
   constructor(path) {
     this.#path = path;
@@ -686,8 +687,65 @@ class ImageContainer {
     this.#image = await loadImage(this.#path);
     return true;
   }
+  getColor(){
+    const i = this.#image;
+    i.loadPixels();
+    const pixelElementCount = i.pixels.length,
+      pixels = pixelElementCount / 4;
+    let reds = 0,
+      greens = 0,
+      blues = 0;
+    for (let pixi = 0; pixi < pixelElementCount; pixi += 4) {
+      reds += i.pixels[pixi];
+      greens += i.pixels[pixi + 1];
+      blues += i.pixels[pixi + 2];
+    }
+    i.pixels = null;
+    return this.#color = col.from(reds / pixels, greens / pixels, blues / pixels);
+  }
   get image() {
     return this.#image;
+  }
+  draw(x, y, width, height, angle = 0, flipV = false) {
+    if (!this.#image) return; //Cancel if no image loaded yet
+    if (angle === 0 && !flipV) image(this.#image, x, y, width, height);
+    else {
+      push(); //Save current position, rotation, etc
+      translate(x, y); //Move middle to 0,0
+      rotate(angle);
+      if (flipV) scale(1, -1);
+      image(this.#image, 0, 0, width, height);
+      pop(); //Return to old state
+    }
+  }
+  drawCol(x, y, width, height, angle = 0) {
+    if (!this.#color) return; //Cancel if no color loaded yet
+    push(); //Save current position, rotation, color, etc
+    noStroke();
+    col.fill(this.#color);
+    if (angle !== 0) rect(x, y, width, height);
+    else {
+      translate(x, y); //Move middle to 0,0
+      rotate(angle);
+      rect(0, 0, width, height);
+    }
+    pop(); //Return to old state
+  }
+  static draw(img, x, y, width, height, angle = 0, flipV = false) {
+    const loaded = Registries.images.tryGet(img) ?? "error";
+    noSmooth();
+    if (loaded instanceof this) {
+      loaded.draw(x, y, width, height, angle, flipV);
+    } else {
+      //Try to draw it directly if not
+      try {
+        image(loaded, x, y, width, height);
+      } catch (error) {
+        //Replace with a working image, if possible
+        const i = Registries.images.tryGet("error")?.image;
+        if (i) image(i, x, y, width, height);
+      }
+    }
   }
 }
 
@@ -699,31 +757,33 @@ function drawImg(
   height,
   ...otherParameters //IDK what else p5 image takes
 ) {
-  //Get from registry if it exists
-  img = Registries.images.has(img) ? Registries.images.get(img) : "error";
-  noSmooth();
-  if (img instanceof ImageContainer) {
-    if (!img.image) return; //Cancel if no image loaded yet
-    image(img.image, x, y, width, height, ...otherParameters);
-  } else {
-    //Try to draw it directly if not
-    try {
-      image(img, x, y, width, height, ...otherParameters);
-    } catch (error) {
-      //Replace with a working image
-      if (Registries.images.has("error"))
-        image(Registries.images.get("error").image, x, y, width, height, ...otherParameters);
-    }
-  }
+  ImageContainer.draw(img, x, y, width, height);
+  // //Get from registry if it exists
+  // img = Registries.images.has(img) ? Registries.images.get(img) : "error";
+  // noSmooth();
+  // if (img instanceof ImageContainer) {
+  //   if (!img.image) return; //Cancel if no image loaded yet
+  //   image(img.image, x, y, width, height, ...otherParameters);
+  // } else {
+  //   //Try to draw it directly if not
+  //   try {
+  //     image(img, x, y, width, height, ...otherParameters);
+  //   } catch (error) {
+  //     //Replace with a working image
+  //     if (Registries.images.has("error"))
+  //       image(Registries.images.get("error").image, x, y, width, height, ...otherParameters);
+  //   }
+  // }
 }
 
 function rotatedImg(img = "error", x, y, width, height, angle, flipV = false) {
-  push(); //Save current position, rotation, etc
-  translate(x, y); //Move middle to 0,0
-  rotate(angle);
-  if (flipV) scale(1, -1);
-  drawImg(img, 0, 0, width, height);
-  pop(); //Return to old state
+  ImageContainer.draw(img, x, y, width, height, angle, flipV);
+  // push(); //Save current position, rotation, etc
+  // translate(x, y); //Move middle to 0,0
+  // rotate(angle);
+  // if (flipV) scale(1, -1);
+  // drawImg(img, 0, 0, width, height);
+  // pop(); //Return to old state
 }
 
 function rotatedShape(shape = "circle", x, y, width, height, angle, flipV = false) {

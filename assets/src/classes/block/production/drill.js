@@ -1,8 +1,8 @@
-import { ShootableObject } from "../../physical.js";
-import { TileProducer } from "./tile-producer.js";
 import { Registries } from "../../../core/registry.js";
 import { drawImg, rotatedImg } from "../../../core/ui.js";
 import { blockSize } from "../../../scaling.js";
+import { ShootableObject } from "../../physical.js";
+import { TileProducer } from "./tile-producer.js";
 class Drill extends TileProducer {
   topImg = "error";
   baseImg = "error";
@@ -10,7 +10,7 @@ class Drill extends TileProducer {
   spinSpeed = 2;
   tick() {
     if (this._blockOn !== "null")
-      this._speed = Registries.blocks.get(this._blockOn).drillSpeed ?? 1;
+      this._speed = Registries.tiles.get(this._blockOn).drillSpeed ?? 1;
     else this._speed = 1;
     super.tick();
   }
@@ -41,3 +41,4 @@ class Drill extends TileProducer {
   }
 }
 export { Drill };
+
