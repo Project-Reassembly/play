@@ -27,8 +27,8 @@ import { loadStats, setupTips } from "../definitions/screens/title.js";
 import { cmdHistory } from "../definitions/text-edit.js";
 
 import { StatusEffect } from "../classes/effect/status-effect.js";
-import "../lib/isl.js";
-import { exec, ExecutionContext } from "../lib/isl.js";
+import { exec } from "../lib/isl/cli.js";
+import { ExecutionContext } from "../lib/isl/core.js";
 import { blockSize, totalSize } from "../scaling.js";
 import { debug } from "./debug.js";
 import { effectTimer } from "./effects.js";
@@ -36,7 +36,6 @@ import { fonts } from "./font.js";
 import { Log } from "./messaging.js";
 
 import { deliverPlayer } from "../classes/world/events/event-action.js";
-import { FactoryEvaluator } from "../classes/world/factory-valuations.js";
 import "../definitions/screens/ide.js";
 import { capturedInput, tcursor } from "../definitions/screens/ide.js";
 let histIndex = 0;
@@ -182,7 +181,6 @@ let stats = {
 };
 //Create or load world
 const world = new World();
-const factory = new FactoryEvaluator(world);
 function sortByE1(a, b) {
   const a0 = a[0],
     b0 = b[0];
@@ -996,8 +994,6 @@ function movePlayer() {
     UIComponent.setCondition("fc:false");
     game.player.controllable = true;
   }
-  _playerx.value = game.player.x;
-  _playery.value = game.player.y;
 }
 
 function updateUIActivity() {
@@ -1101,18 +1097,14 @@ function createPlayer(player = null, x, y, playerType = "iti-player") {
     player.addToWorld(world, x ?? totalSize / 2, y ?? totalSize / 2);
   }
   game.player = player;
-  factory.team = player.team;
   if (x !== undefined) game.player.x = x;
   if (y !== undefined) game.player.y = y;
-  //For ISL
-  _self.value = player;
 
   //Change to an accessor property
   Object.defineProperty(game.player, "target", {
     get: () => game.mouse, //This way, I only have to set it once.
   });
 }
-
 
 function mouseInteraction() {
   if (
@@ -1380,7 +1372,13 @@ window.keyTyped = function (ev) {
       ev.shiftKey || ev.getModifierState("CapsLock") ? key.toUpperCase() : key.toLowerCase(),
     );
   if (!ui.texteditor.active) return false;
-  if (key !== "/") {
+  if (key === "/") return false;
+  else if (key === "c" && ev.ctrlKey) navigator.clipboard.writeText(ui.texteditor.text);
+  else if (key === "x" && ev.ctrlKey)
+    navigator.clipboard.writeText(ui.texteditor.text).then((x) => (ui.texteditor.text = ""));
+  else if (key === "v" && ev.ctrlKey)
+    navigator.clipboard.readText(ui.texteditor.text).then((v) => (ui.texteditor.text = v));
+  else {
     ui.texteditor.text +=
       ev.shiftKey || ev.getModifierState("CapsLock") ? key.toUpperCase() : key.toLowerCase();
   }
@@ -1469,17 +1467,6 @@ window.mousePressed = function () {
 };
 
 window.world = world;
-window.factory = factory;
 
-export {
-  clearData,
-  createPlayer,
-  effects,
-  fonts,
-  game,
-  gen,
-  loadGame,
-  saveGame,
-  world
-};
+export { clearData, createPlayer, effects, fonts, game, gen, loadGame, saveGame, world };
 

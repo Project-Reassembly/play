@@ -72,6 +72,7 @@ createUIComponent(
     UIComponent.setCondition("startable:false");
     ui.timer.repeat((i) => (fade = i * 4), 64);
     ui.timer.do(() => {
+      fade = 0;
       ui.menuState = "new-game";
       newgame_handler.show("start");
     }, 64);
@@ -102,6 +103,7 @@ createUIComponent(
     UIComponent.setCondition("startable:false");
     ui.timer.repeat((i) => (fade = i * 4), 64);
     ui.timer.do(() => {
+      fade = 0;
       gen.mode = "load";
       ui.menuState = "in-game";
     }, 64);
@@ -212,7 +214,7 @@ Object.defineProperty(globalThis, "f", { get: () => fade });
 //update info every day
 setInterval(checkUpdate, 86_400_000);
 
-ui.addReset("show-load:true");
+UIComponent.setCondition("show-load:true");
 export const loadStats = {
   totalImages: PreloadRegistries.images.size,
   totalCutscenes: PreloadRegistries.cutscenes.size,

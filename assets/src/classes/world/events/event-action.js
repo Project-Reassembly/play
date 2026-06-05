@@ -83,6 +83,7 @@ export function deliverPlayer(
   moveCamera = false,
   corp = "iti",
   iworld = world,
+  nuke = true,
 ) {
   const crp = constructFromType(Registries.corps.get(corp), Corporation);
   createPlayer(player, x, y, crp.player);
@@ -97,7 +98,7 @@ export function deliverPlayer(
     ui.camera.x = game.player.x;
     ui.camera.y = game.player.y;
   }
-  deliverEntity(game.player, false, iworld, true);
+  deliverEntity(game.player, false, iworld, nuke);
 }
 
 export function deliverEntity(ent, add = false, world, clearArea = false) {

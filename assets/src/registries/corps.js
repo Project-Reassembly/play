@@ -18,7 +18,7 @@ Registries.corps.add("iti", {
   icon: "icon.iti",
   description:
     "Large tech company, based on Earth.\n\nDelivers quality products at a fairly affordable price, although some consider them a luxury company.\n\nRun by humans, staffed by constructs.",
-  player: "iti-player",
+  player: "integrity",
 });
 
 Registries.corps.add("ccc", {
@@ -27,7 +27,9 @@ Registries.corps.add("ccc", {
   icon: "icon.ccc",
   description:
     "A now-independent branch of InfiniTech Industries, focused on space-time manipulation.\nThe self-employed time police.",
+  player: "endeavour",
   preview: true,
+  playable: false,
 });
 
 Registries.corps.add("peti", {
@@ -37,6 +39,7 @@ Registries.corps.add("peti", {
   description:
     "Small yet growing organisation manufacturing new types of technology.\nThey don't bother testing properly, so their tech may be unstable.\n\nThey have mostly military contracts, although criminal organisations have taken an interest in their tech too.",
   namescale: 0.75,
-  player: "peti-player",
+  player: "proton",
   preview: true,
+  playable: false,
 });

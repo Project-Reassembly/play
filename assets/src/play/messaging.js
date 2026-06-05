@@ -1,6 +1,7 @@
 import * as CMFT from "../core/cmft.js";
 import { col } from "../core/color.js";
 import { fonts } from "./font.js";
+import { game } from "./game.js";
 class InGameMessage {
   msg = "";
   timer = 0;
@@ -37,7 +38,7 @@ class InGameMessageBox {
     textSize(this.charSize);
     rectMode(CORNER);
     noStroke();
-    fill(0, 100);
+    fill(0, 150);
     let len = Math.min(this._messages.length, this.maxLines);
     for (const msg of this._messages) {
       const measured = msg.cmft.width;
@@ -62,7 +63,7 @@ class InGameMessageBox {
     let len = this._messages.length;
     for (let index = 0; index < len; index++) {
       let message = this._messages[index];
-      if (!message) continue;
+      if (!message || (game.paused && message.timer >= 100)) continue;
       message.timer--;
       if (!(message.timer > 0)) {
         this._messages.splice(index, 1);

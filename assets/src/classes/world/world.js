@@ -138,7 +138,7 @@ class World {
     this.floorParticles.forEach((p) => p.step(1));
     this.bullets.forEach((b) => b.tick());
     this.particles.forEach((p) => p.step(1));
-    this.entities.forEach((entity) => entity.tick());
+    this.entities.forEach((entity) => World.isInRenderDistance(entity, 1,World.simulationDistance * chunkSize * blockSize, 0, 0, 1) && entity.tick());
     //Only tick simulated chunks
     this.toTick.forEach((chunk) => {
       chunk.tick();

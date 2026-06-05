@@ -129,7 +129,7 @@ function corpsel(
     null,
     // fuck it we ball
     CMFT.Collection.createWrapped(descr, 35).text() +
-      (disabled ? "\n\n🟪Preview, not selectable."
+      (disabled ? "\n\n🟪WIP, not yet playable."
       : pdef ?
         `\n\n🟨Player Stats:⬜\n🟦 ${pdef.name}⬜\n  ${
           pdef.health ?? 100

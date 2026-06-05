@@ -912,7 +912,7 @@ createUIComponent(
     game.money -= 1200;
     Log.send("#a-Spent $1200 on [#@-Basic Respawn#a-]");
     UIComponent.setCondition("dead:no");
-    deliverPlayer(null, totalSize / 2, totalSize / 2, false, game.player.team);
+    deliverPlayer(null, totalSize / 2, totalSize / 2, false, game.player.team, undefined, true);
   },
   ">> New Player <<\nSend a new robot\nwith the basic\ncorp equipment\nto the drop\npoint.\n\n$1200",
   true,
@@ -928,7 +928,7 @@ createUIComponent(
   "none",
   () => {
     UIComponent.setCondition("dead:no");
-    deliverPlayer(null, totalSize / 2, totalSize / 2, false, "scrap");
+    deliverPlayer(null, totalSize / 2, totalSize / 2, false, "scrap", undefined, true);
   },
   ">> Scrap Player <<\nSend a robot\nmade of scrap\nto the drop\npoint.\n\nFree",
   true,
@@ -947,7 +947,7 @@ createUIComponent(
     game.money -= 2000;
     Log.send("#a-Spent $2000 on [#@-Convenience Respawn#a-]");
     UIComponent.setCondition("dead:no");
-    deliverPlayer(null, game.player?.x, game.player?.y, false, game.player.team);
+    deliverPlayer(null, game.player?.x, game.player?.y, false, game.player.team, undefined, true);
   },
   "> Convenience <\n>>> Respawn <<<\nSend a new robot\nwith the basic\ncorp equipment\nto the point\nwhere you died.\n\n$2000",
   true,
@@ -966,6 +966,7 @@ createUIComponent(
     game.reset();
     gen.reset();
     ui.reset();
+    ui.menuState = "title"
   },
   "End Game",
   true,

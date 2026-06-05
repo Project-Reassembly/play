@@ -65,13 +65,15 @@ class Entity extends ShootableObject {
   spawnX = 0;
   spawnY = 0;
   controllable = true;
-  _aidelay = 6;
+  _lastAICheck = 6;
   /** Multiplier for both range and movement speed while passive. */
   passiveIncentiveModifier = 0.75;
 
   //custom ai, only available for entities and not turrets
   /**@type {AI?} */
   ai = null;
+
+  age = 0;
 
   isBoss = false;
 
@@ -219,16 +221,15 @@ class Entity extends ShootableObject {
     this.calculateAttributeModifiers();
     this.computedVelocity = this.pos.sub(this._lastPos);
     this.computedSpeed = this.computedVelocity.magnitude;
+    this.age++;
   }
 
   doAI() {
     if (this.ai) this.ai.tick(this);
     else {
       if (this.#firing) this.attack();
-      if (this._aidelay > 0) {
-        this._aidelay--;
-      } else {
-        this._aidelay = 6;
+      if (this.age >= this._lastAICheck + 6) {
+        this._lastAICheck = this.age;
         if (this.aiType === "passive") {
           this._passiveAI();
         } else if (this.aiType === "hostile") {

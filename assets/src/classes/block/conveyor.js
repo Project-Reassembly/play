@@ -13,9 +13,8 @@ class Conveyor extends Block {
   moveTime = 10;
   _progress = 0;
   rotatable = true;
-  inventorySize = 1;
   selectable = false;
-  shape = "straight";
+  // shape = "straight";
   baseImg = "error";
   beltImg = "error";
   walkable = true;
@@ -25,8 +24,8 @@ class Conveyor extends Block {
     if (!this.istack || this.istack.isEmpty()) return;
     let vct = Direction.vectorOf(this.direction);
     let target =
-      this.world.getBlock(this.gridX + vct.x, this.gridY + vct.y) ??
-      this.world.getBlock(this.gridX + vct.x * 2 ** 0.5, this.gridY + vct.y * 2 ** 0.5);
+      this.world.getBlock(this.gridX + vct.x, this.gridY + vct.y);// ??
+      // this.world.getBlock(this.gridX + vct.x * 2 ** 0.5, this.gridY + vct.y * 2 ** 0.5);
     this.convey(target, this.gridX + vct.x, this.gridY + vct.y);
   }
   convey(target, posX, posY) {
@@ -73,7 +72,7 @@ class Conveyor extends Block {
     let vct = Direction.vectorOf(this.direction);
     let amt = this._progress / this.moveTime;
     if (this.istack && !this.istack.isEmpty()) {
-      if (this.shape === "straight")
+      // if (this.shape === "straight")
         drawImg(
           this.istack.getItem().image,
           this.x + vct.x * (amt - 0.5) * blockSize,

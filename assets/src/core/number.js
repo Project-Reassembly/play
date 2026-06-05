@@ -319,6 +319,44 @@ function tru(chance) {
   return rnd.bool(chance);
 }
 
+/** Returns the index of the minimum value in the array. */
+export function minI(array) {
+  let mindex = -1;
+  let min = array[0];
+  const l = array.length;
+  for (let i = 0; i < l; i++)
+    if (!(array[i] > min)) {
+      min = array[i];
+      mindex = i;
+    }
+  return mindex;
+}
+/** Returns the index of the minimum value in the array which is above or equal to `floor`. */
+export function minIF(array, floor) {
+  let mindex = -1;
+  let min = Infinity;
+  const l = array.length;
+  for (let i = 0; i < l; i++)
+    if (!(array[i] > min) && array[i] >= floor) {
+      min = array[i];
+      mindex = i;
+    }
+  return mindex;
+}
+/** Returns the index of the maximum value in the array. */
+export function maxI(array) {
+  let maxdex = -1;
+  let max = array[0];
+  const l = array.length;
+  for (let i = 0; i < l; i++)
+    if (!(array[i] < max)) {
+      max = array[i];
+      maxdex = i;
+    }
+  return maxdex;
+}
+globalThis.mi = minIF
+
 export const rnd = new Randomiser();
 export { clamp, colinterp, dynamicSort, index, roundNum, shortenedNumber, tru, turn, Vector };
 

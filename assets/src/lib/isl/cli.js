@@ -1,26 +1,30 @@
 //Yes, this stuff.
 //Why make a command line language when there's a perfectly good one right here?
-import { ISLExtension } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@main/core/extensions.js";
+
+import { EquippedEntity, InventoryEntity } from "../../classes/entity/inventory-entity.js";
+import { deliverEntity } from "../../classes/world/events/event-action.js";
+import { construct } from "../../core/constructor.js";
+import { Registries } from "../../core/registry.js";
+import { Explosion, NuclearExplosion } from "../../play/effects.js";
+import { clearData, loadGame, saveGame, world } from "../../play/game.js";
+import { Log } from "../../play/messaging.js";
+import { blockSize } from "../../scaling.js";
 import {
+  addCreatedEntity,
+  core,
+  doTo,
+  ExecutionContext,
+  feedback,
+  getCTX,
+  getPos,
   ISLError,
+  ISLExtension,
   ISLInterpreter,
-} from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@main/core/interpreter.js";
-import { Block } from "../classes/block/block.js";
-import { Entity } from "../classes/entity/entity.js";
-import { EquippedEntity } from "../classes/entity/inventory-entity.js";
-import { REGION_SIZE } from "../classes/world/factory-valuations.js";
-import { construct } from "../core/constructor.js";
-import { Vector } from "../core/number.js";
-import { Registries } from "../core/registry.js";
-import { Explosion, NuclearExplosion } from "../play/effects.js";
-import { clearData, loadGame, saveGame, world } from "../play/game.js";
-import { Log } from "../play/messaging.js";
-import { blockSize, chunkSize } from "../scaling.js";
-//Util
-let quietMode = false;
-function feedback(msg) {
-  if (!quietMode) Log.send("#niISL#7i> " + msg);
-}
+  makeInterpreter,
+  positionType,
+  quietMode,
+  runCommand,
+} from "./core.js";
 function give(entity, item, amount = 1) {
   let leftover =
     entity instanceof EquippedEntity && entity.ammo.hasItem(item) ?
@@ -30,100 +34,72 @@ function give(entity, item, amount = 1) {
   if (leftover) notgiven = entity.inventory.addItem(item, leftover);
   return notgiven;
 }
-function getPos(x, y) {
-  let obj = new Vector(
-    x ?
-      x.type === "relpos" ? ctx.x + parseFloat(x.value.substring(1))
-      : x.type === "blockpos" ? parseFloat(x.value.slice(0, -1)) * blockSize
-      : x.type === "chunkpos" ? parseFloat(x.value.slice(0, -1)) * blockSize * chunkSize
-      : x.type === "regionpos" ? parseFloat(x.value.slice(0, -1)) * blockSize * REGION_SIZE
-      : x.type === "here" ? ctx.x
-      : x.value
-    : ctx.x,
-
-    y ?
-      y.type === "relpos" ? ctx.y + parseFloat(y.value.substring(1))
-      : y.type === "blockpos" ? parseFloat(y.value.slice(0, -1)) * blockSize
-      : y.type === "chunkpos" ? parseFloat(y.value.slice(0, -1)) * blockSize * chunkSize
-      : y.type === "regionpos" ? parseFloat(y.value.slice(0, -1)) * blockSize * REGION_SIZE
-      : y.type === "here" ? ctx.y
-      : y.value
-    : ctx.y,
-  );
-  if (typeof obj.x !== "number" || typeof obj.y !== "number")
-    throw new ISLError("Positions must be numbers!", TypeError);
-  return obj;
-}
-class ExecutionContext {
-  get isEntity() {
-    return this.self instanceof Entity;
-  }
-  constructor(x, y, self) {
-    this.x = x;
-    this.y = y;
-    this.self = self;
-  }
-}
 //Extension
-const positionType = "number|relpos|here|blockpos";
 const cle = new ISLExtension("pr-cmd");
-cle.addType("rloc<item>", (val) => Registries.items.has(val) && !Registries.blocks.has(val));
-cle.addType("rloc<block>", (val) => Registries.blocks.has(val) && !Registries.items.has(val));
-cle.addType("rloc<placeable>", (val) => Registries.blocks.has(val) && Registries.items.has(val));
-cle.addType("rloc<status>", (val) => Registries.statuses.has(val));
-cle.addType("rloc<entity>", (val) => Registries.entities.has(val));
-cle.addType("rloc<corporation>", (val) => Registries.corps.has(val));
-cle.addType("rloc<cutscene>", (val) => Registries.cutscenes.has(val));
-cle.addType("rloc<vfx>", (val) => Registries.vfx.has(val));
-cle.addType("entity", () => false);
-cle.addType("block", () => false);
-cle.addType("here", (v) => v == "~");
-cle.addType("blockpos", (v) => `${v}`.endsWith("b") && !isNaN(parseFloat(`${v}`.slice(0, -1))));
-cle.addType("regionpos", (v) => `${v}`.endsWith("r") && !isNaN(parseFloat(`${v}`.slice(0, -1))));
-cle.addType("chunkpos", (v) => `${v}`.endsWith("c") && !isNaN(parseFloat(`${v}`.slice(0, -1))));
-window["_self"] = cle.addVariable("self", new Entity(), "entity");
-const _ctx = (window["_ctx"] = cle.addVariable("ctx", new Block(), "block"));
-let _ce = (window["_created"] = cle.addVariable("created", "null", "null"));
-window["_playerx"] = cle.addVariable("playerx", 0, "number");
-window["_playery"] = cle.addVariable("playery", 0, "number");
 cle.addKeyword(
   "give",
   (interp, labels, entity, item, amount) => {
     let target = entity?.value;
-    let notgiven = give(target, item?.value, amount?.value);
+    let given = new Set();
+    if (!Registries.items.has(item?.value)) {
+      feedback(`#ciItem ${item?.value} does not exist!`);
+      return;
+    }
+    const d = doTo(target, (ent) => {
+      if (!(ent instanceof InventoryEntity)) {
+        feedback(`#ci${ent.name}#ci has no inventory to give items to.`);
+        return false;
+      }
+      let notgiven = give(ent, item?.value, amount?.value);
+      given.add((amount?.value ?? 1) - notgiven);
+      return true;
+    });
     feedback(
-      `Given ${(amount?.value ?? 1) - notgiven} ${Registries.items.get(item?.value).name}#7i to ${target.name}`,
+      `Given ${given.size === 0 ? "no" : `${[...given]}x`} ${Registries.items.get(item?.value).name}#7i to ${d}`,
     );
   },
   [
     { name: "target", type: "entity" },
-    { name: "item", type: "rloc<item>|rloc<placeable>" },
+    { name: "item", type: "identifier" },
     { name: "amount", type: "number", optional: true },
   ],
 );
 cle.addKeyword(
   "effect",
   (interp, labels, entity, status, duration) => {
-    /**@type {Entity} */
     let target = entity?.value;
-    target.applyStatus(status?.value, (duration?.value ?? 10) * 60);
+
+    if (!Registries.statuses.has(status?.value)) {
+      feedback(`#ciEffect ${status?.value} does not exist!`);
+      return;
+    }
+
+    const d = doTo(target, (ent) => {
+      ent.applyStatus(status?.value, (duration?.value ?? 10) * 60);
+      return true;
+    });
+
     feedback(
-      `Given effect ${Registries.statuses.get(status?.value).name}#7i to ${target.name}#7i for ${duration?.value ?? 1}s`,
+      `Given effect ${Registries.statuses.get(status?.value).name}#7i to ${d} for ${duration?.value ?? 1}s`,
     );
   },
   [
     { name: "target", type: "entity" },
-    { name: "status", type: "rloc<status>" },
+    { name: "status", type: "identifier" },
     { name: "duration", type: "number", optional: true },
   ],
 );
 cle.addKeyword(
   "shield",
   (interp, labels, entity, amount) => {
-    /**@type {Entity} */
     let target = entity?.value;
-    target.addShield(amount?.value ?? 0);
-    feedback(`Added ${amount?.value ?? 0} shield HP to ${target.name}`);
+
+    const d = doTo(target, (ent) => {
+      ent.addShield(amount?.value ?? 0);
+      return true;
+    });
+
+    feedback(`Added ${amount?.value ?? 0} shield HP to ${d}`);
   },
   [
     { name: "target", type: "entity" },
@@ -160,26 +136,52 @@ cle.addKeyword(
 cle.addKeyword(
   "spawn",
   (interp, labels, entity, x, y) => {
+    if (!Registries.entities.has(entity?.value)) {
+      feedback(`#ciEntity ${entity?.value} does not exist.`);
+      return;
+    }
     let ent = construct(Registries.entities.get(entity?.value), "entity");
     let pos = getPos(x, y);
     ent.addToWorld(world, pos.x, pos.y);
-    _ce.value = ent;
-    _ce.type = "entity";
+    addCreatedEntity(ent);
     feedback(`Spawned new ${ent.name}#7i at ${pos.x}, ${pos.y}`);
   },
   [
-    { name: "entity", type: "rloc<entity>" },
+    { name: "entity", type: "identifier" },
     { name: "x", type: positionType, optional: true },
     { name: "y", type: positionType, optional: true },
   ],
 );
 cle.addKeyword(
-  "teleport",
-  (interp, labels, target, x, y) => {
+  "deliver",
+  (interp, labels, entity, x, y) => {
+    if (!Registries.entities.has(entity?.value)) {
+      feedback(`#ciEntity ${entity?.value} does not exist.`);
+      return;
+    }
+    let ent = construct(Registries.entities.get(entity?.value), "entity");
     let pos = getPos(x, y);
-    target.value.x = pos.x;
-    target.value.y = pos.y;
-    feedback(`Teleported ${target.value.name}#7i to ${pos.x}, ${pos.y}`);
+    ent.addToWorld(world, pos.x, pos.y);
+    deliverEntity(ent, false, world, false);
+    addCreatedEntity(ent);
+    feedback(`Delivering new ${ent.name}#7i at ${pos.x}, ${pos.y}`);
+  },
+  [
+    { name: "entity", type: "identifier" },
+    { name: "x", type: positionType, optional: true },
+    { name: "y", type: positionType, optional: true },
+  ],
+);
+cle.addKeyword(
+  "tp",
+  (interp, labels, target, x, y) => {
+    const pos = getPos(x, y);
+    const d = doTo(target.value, (ent) => {
+      ent.x = pos.x;
+      ent.y = pos.y;
+      return true;
+    });
+    feedback(`Teleported ${d}#7i to ${pos.x}, ${pos.y}`);
   },
   [
     { name: "target", type: "entity" },
@@ -190,25 +192,34 @@ cle.addKeyword(
 cle.addKeyword(
   "team",
   (interp, labels, target, team) => {
-    target.value.team = team.value;
-    feedback(`Set the team of ${target.value.name}#7i to ${team.value}`);
+    if (!Registries.corps.has(team?.value)) {
+      feedback(`#ciTeam ${team?.value} does not exist!`);
+      return;
+    }
+    const d = doTo(target.value, (ent) => {
+      ent.team = `${team.value}`;
+      return true;
+    });
+    feedback(`Set the team of ${d}#7i to ${team.value}`);
   },
   [
     { name: "target", type: "entity" },
-    { name: "team", type: "string" },
+    { name: "team", type: "identifier" },
   ],
 );
 cle.addKeyword(
   "devset",
   (interp, labels) => {
-    if (!ctx.isEntity && !(ctx.self instanceof EquippedEntity))
-      throw new ISLError("Cannot give items to non-entity executor!", TypeError);
-    else {
-      give(ctx.self, "dev::itemcatalog", 1);
-      give(ctx.self, "dev::commandblock", 100);
-      give(ctx.self, "dev::commandblock.chain", 100);
-      give(ctx.self, "dev::commandblock.loop", 100);
-      give(ctx.self, "dev::structurereader", 100);
+    const cli_ctx = getCTX();
+    if (!cli_ctx.isEntity && !(cli_ctx.self instanceof EquippedEntity)) {
+      feedback(`#ciCannot give items to non-entity executor!.`);
+      return;
+    } else {
+      give(cli_ctx.self, "dev::itemcatalog", 1);
+      give(cli_ctx.self, "dev::commandblock", 100);
+      give(cli_ctx.self, "dev::commandblock.chain", 100);
+      give(cli_ctx.self, "dev::commandblock.loop", 100);
+      give(cli_ctx.self, "dev::structurereader", 100);
     }
   },
   [],
@@ -246,7 +257,8 @@ cle.addKeyword(
         Math.floor(pos.y / blockSize),
       );
     } catch (err) {
-      throw new ISLError(err.message, err.constructor);
+      feedback(`#ci${err.message}.`);
+      return;
     }
     toActivate.activated();
     feedback(`Activated block at ${pos.x}, ${pos.y}`);
@@ -259,18 +271,23 @@ cle.addKeyword(
 cle.addKeyword(
   "place",
   (interp, labels, block, x, y, team) => {
+    if (!Registries.blocks.has(block?.value)) {
+      feedback(`#ciBlock ${block?.value} doesn't exist.`);
+      return;
+    }
     let pos = getPos(x, y);
     let placed;
     try {
       placed = world.placeAt(block.value, Math.floor(pos.x / 30), Math.floor(pos.y / 30));
     } catch (err) {
-      throw new ISLError(err.message, err.constructor);
+      feedback(`#ci${err.message}.`);
+      return;
     }
     if (team?.value) placed.team = team.value;
     feedback(`Placed ${placed.name}#7i at ${pos.x}, ${pos.y}`);
   },
   [
-    { name: "block", type: "rloc<block>|rloc<placeable>" },
+    { name: "block", type: "identifier" },
     { name: "x", type: positionType, optional: true },
     { name: "y", type: positionType, optional: true },
     { name: "team", type: "string", optional: true },
@@ -347,9 +364,9 @@ cle.addKeyword(
     } catch (err) {
       throw new ISLError(err.message, err.constructor);
     }
-    if (toWriteTo instanceof CommandExecutorBlock || toWriteTo instanceof SignBlock) {
-      feedback(`Wrote text to ${toWriteTo.name} at ${toWriteTo.x}, ${toWriteTo.y}.`);
+    if (typeof toWriteTo.write === "function") {
       toWriteTo.write(text.value);
+      feedback(`Wrote text to ${toWriteTo.name} at ${toWriteTo.x}, ${toWriteTo.y}.`);
     } else throw new ISLError("Selected block cannot be written to.", TypeError);
   },
   [
@@ -359,16 +376,99 @@ cle.addKeyword(
   ],
 );
 
+cle.addKeyword(
+  "at",
+  (interp, labels, target, ...code) => {
+    const cmd = code
+      .map((x) => x.value)
+      .join(" ")
+      .replaceAll("&", ";");
+    feedback(`Doing ${cmd} at ${target.value}`);
+    const d = doTo(target.value, (ent) => {
+      exec(cmd, new ExecutionContext(ent.x, ent.y, ent));
+    });
+  },
+  [
+    { type: "entity", name: "target" },
+    { type: "any", name: "code", recurring: true },
+  ],
+);
+
 cle.addLabel("general", ["help"]);
+cle.addLabel("selector", ["help"]);
 cle.addKeyword(
   "help",
   (interp, labels, cmd) => {
     let command = cmd?.value;
-    const s = (str) => Log.send(str, 1080);
+    const s = (str) => Log.send(str);
     //Header
     s("#@->>> ISL Command Line Help <<<");
     //Body
-    if (!labels.includes("general")) {
+    if (labels.includes("general")) {
+      s("General command line syntax help.");
+      s("#ciThis is incompatible with normal ISL,");
+      s("#ci so not expect this to work in mod scripts.");
+      s("#@-Selectors");
+      s(" For help with selectors (#6-@...#--), run [#b-selector help#--]");
+      s("#@-Positioning");
+      s(" Positions may be given as a number, or as an ISL");
+      s(" relative position (#h-relpos#--). This is relative to");
+      s(" the executor, #-bwhether it is a block or an entity#--.");
+      s(" #b-~#-- may be used as the current relevant coordinate.");
+      s(" The suffix #b-b#-- may be used to indicate block coordinates");
+      s(" so 1 block right would be either #b-~30 ~#-- or #b-~1b ~#--.");
+      s(" The suffix #b-c#-- indicates chunks, and #b-r#-- indicates");
+      s(" evaluation regions.");
+    } else if (labels.includes("selector")) {
+      s("Selectors are used to provide entities to commands which require an");
+      s("#7i<entity>#-- input. They can be very simple, or very complex:");
+      s("#@-Simple Selectors");
+      s(" #6-@p#--/#6-@player#--: The current player.");
+      s(" #6-@s#--/#6-@self#--: The executor of the command. May be a block.");
+      s(" #6-@r#--/#6-@random#--: A random entity.");
+      s(" #6-@c#--/#6-@closest#--: The closest entity (likely yourself if used alone).");
+      s(" #6-@e#--/#6-@everything#--: All entities, including items.");
+      s(" #6-@l#--/#6-@living#--: All entities, excluding items.");
+      s(" #6-@i#--/#6-@item#--: All items.");
+      s(" #6-@t#--/#6-@team#--: All entities on the team of the executor.");
+      s(" #6-@a#--/#6-@ally#--: All entities allied to the team of the executor.");
+      s(" #6-@n#--/#6-@enemy#--: All entities not on or allied to the team of the executor.");
+      s("#@-Generated/Programmatic Selectors");
+      s(
+        ` #6-@${[...Registries.corps]
+          .map((x) => x.key)
+          .join("#--/#6-@")}#--: All entities on the specified team.`,
+      );
+      s(
+        ` #6-@=<type>#--: All entities of the specified #6-<type>#--, e.g. #6-@=scavenger#-- matches all scavengers.`,
+      );
+      s(
+        ` #6-@{<property>}#--: All entities with the specified #6-<property>#--, such as #6-@{relation}#--.`,
+      );
+      s(
+        ` #6-@{<property>:<value>}#--: All entities with the specified #6-<value>#-- of #6-<property>#--, such as #6-@{health:100}#--`,
+      );
+      s("#@-Compound Selectors");
+      s(
+        ` Here, #6-x#-- and #6-y#-- are generic selectors, i.e. anything from the lists above, or '#6-x#-- can be another compound selector.`,
+      );
+      s(
+        ` #6-@x>y#--: All entities that matched #6-x#-- which also match #6-y#--, such as #6-@n>c#-- for closest enemy.`,
+      );
+      s(
+        ` #6-@x+y#--: All entities that matched #6-x#-- or match #6-y#--, such as #6-@iti+ccc#-- for entities in either #6-iti#-- or #6-ccc#--.`,
+      );
+      s(
+        ` #6-@x!y#--: All entities that matched #6-x#-- which don't match #6-y#--, such as #6-@n!peti#-- for enemies which aren't #6-peti#--`,
+      );
+      s(
+        ` #6-@x|y#--: The same as #6-@x+y#--, except further combinations only affect #6-y#--, not #6-x#--.`,
+      );
+      s(
+        ` These can be chained infinitely (e.g. #6-@n>r|e!p>c|iti#--: all #6-iti#-- entities, a random enemy #-iand#-- the closest entity other than the player).`,
+      );
+      s(` Evaluation is left-to-right.`);
+    } else {
       if (!command) {
         s("Run [#3-help #7i<command>#--] to get help for a command");
         s("Run [#3-general help#--] to get help for the command line");
@@ -377,9 +477,11 @@ cle.addKeyword(
         s("#eiutility");
         s(" #3-give #7i<entity> <item> [amount]");
         s(" #3-spawn #7i<entity> [x] [y]");
-        s(" #3-teleport #7i<entity> <x> <y>");
+        s(" #3-deliver #7i<entity> [x] [y]");
+        s(" #3-tp #7i<entity> <x> <y>");
         s(" #3-team #7i<entity> <team>");
         s(" #3-explode #7i<x> <y> [damage] [radius] [team]");
+        s(" #3-at #7i<entity> <...command>");
         s(" #3-devset");
         s("#eimanipulation");
         s(" #3-activate #7i<x> <y>");
@@ -403,8 +505,13 @@ cle.addKeyword(
       } else if (command === "spawn") {
         s("#eiutility #-->#3- spawn");
         s(" Creates an entity at a location.");
-        s(" This entity can be accessed through [#].");
-        s(' Entity will always start on team "enemy".');
+        s("#@-Parameters:");
+        s("  #6-<entity>#--: Registry name of entity to spawn.");
+        s("  #6-[x], [y]#--: Position from top-left corner. 1 block = 30px.");
+      } else if (command === "deliver") {
+        s("#eiutility #-->#3- deliver");
+        s(" Drops an entity at a location, as if it were spawned by an event.");
+        s(" WIll not create the secondary shockwave that player spawns create.");
         s("#@-Parameters:");
         s("  #6-<entity>#--: Registry name of entity to spawn.");
         s("  #6-[x], [y]#--: Position from top-left corner. 1 block = 30px.");
@@ -414,9 +521,9 @@ cle.addKeyword(
         s("#@-Parameters:");
         s("  #6-<entity>#--: Registry name of entity to spawn.");
         s("  #6-<team>#--: String name of the target team.");
-      } else if (command === "teleport") {
-        s("#eiutility #-->#3- teleport");
-        s(" Moves an entity to a location.");
+      } else if (command === "tp") {
+        s("#eiutility #-->#3- tp");
+        s(" Teleports an entity to a location.");
         s("#@-Parameters:");
         s("  #6-<entity>#--: The entity to move.");
         s("  #6-<x>, <y>#--: Position from top-left corner. 1 block = 30px.");
@@ -439,6 +546,14 @@ cle.addKeyword(
         s(" Useful for testing.");
         s("#@-Parameters:");
         s(" (none)");
+      } else if (command === "at") {
+        s("#eiutility #-->#3- at");
+        s(" Performs a command at and as one or more entities.");
+        s(" #@-&#-- can be used in #7i<...command>#-- to perform multiple commands at once.");
+        s("#@-Parameters:");
+        s("  #6-<entity>#--: Selector for entities to perform this at.");
+        s("  #6-<...command>#--: Any valid command for this command line,");
+        s("    or sequence separated with #@-&#--.");
       } else if (command === "activate") {
         s("#eimanipulation #-->#3- activate");
         s(" Activates a block. Different blocks do different things.");
@@ -508,72 +623,23 @@ cle.addKeyword(
         s(" exclusive keyword. If unsure, run [help] with");
         s(" no #@-Parameters for a list of available commands.");
       }
-    } else {
-      s("General command line syntax help.");
-      s("#ciThis is incompatible with normal ISL. Do not expect this to work in scripts.");
-      s("#@-Shorthand");
-      s(" #6-@p#--: The current player.");
-      s(' #6-@s#--: The executor ("self"). May be a block.');
-      s(" #6-\\##--: Most recently created entity. May be null.");
-      s("#@-Positioning");
-      s(" Positions may be given as a number, or as an ISL");
-      s(" relative position (#h-relpos#--). This is relative to");
-      s(" the executor, #-bwhether it is a block or an entity#--.");
-      s(" #3-~#-- may be used as the current relevant coordinate.");
-      s(" 1 block is 30px wide, so 1 block right would be #3-~30 ~#--.");
     }
     //Footer
-    s("#@->>> ---------P:R--------- <<<");
+    s("#@->>> ---------CLI--------- <<<");
   },
   [{ name: "command", type: "keyword", optional: true }],
 );
+
 //Interpreter
-const commandLine = new ISLInterpreter({
-  environment: "P:R",
-  onlog: (msg) => {
-    console.log("[ISL Log] " + msg);
-    (msg + "").split("\n").forEach((val) => Log.send(val));
-  },
-  onwarn: (msg) => {
-    console.log("[ISL Warning] " + msg);
-    (msg + "").split("\n").forEach((val) => Log.send("#e-" + val));
-  },
-  onerror: (msg) => {
-    if (msg.includes("Error detected")) {
-      if (!quietMode) {
-        Log.send("#niISL#4i> Could not complete operation: ");
-        `${msg}`
-          .split("\n")[1]
-          .split(",")
-          .forEach((x) => Log.send("#4i    " + x));
-      }
-    } else `${msg}`.split("\n").forEach((val) => Log.send("#4i" + val));
-    console.log(`[ISL Error] ${msg}`);
-  },
-});
+/** @type {ISLInterpreter} */
+const commandLine = makeInterpreter("P:R.CLI");
+commandLine.extend(core);
 commandLine.extend(cle);
-let ctx = new ExecutionContext(0, 0, null);
 
 function exec(isl, context) {
-  isl.split(/[\n\;]/g).forEach((line) => runCommand(line, context));
-}
-
-/**
- *
- * @param {string} cmd Command to execute.
- * @param {ExecutionContext} context Options for executing this command.
- */
-function runCommand(cmd, context) {
-  if (!context) throw new SyntaxError("Execution context is not defined!");
-  _ctx.value = context.self;
-  _ctx.type = context.isEntity ? "entity" : "block";
-  ctx = context;
-  cmd = cmd.replaceAll("#", "\\_created\\");
-  cmd = cmd.replaceAll("@s", "\\_ctx\\");
-  cmd = cmd.replaceAll("@p", "\\_self\\");
-  commandLine.executeLine(cmd);
+  isl.split(/[\n\;]/g).forEach((line) => runCommand(line, context, commandLine));
 }
 
 console.log("ISL ready.");
-export { commandLine, exec, ExecutionContext, runCommand };
+export { commandLine, exec };
 

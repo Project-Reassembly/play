@@ -2,9 +2,9 @@ import { Registries } from "../core/registry.js";
 Registries.entities.add("tonk", {
   type: "modular-tank",
 });
-Registries.entities.add("scrap-player", {
+Registries.entities.add("recycled", {
   type: "player",
-  name: "",
+  name: "The Recycled",
   health: 150,
   light: 100,
   components: [
@@ -126,7 +126,8 @@ Registries.entities.add("scrap-player", {
     },
   ],
 });
-Registries.entities.add("iti-player", {
+Registries.entities.alias("recycled", "scrap-player")
+Registries.entities.add("integrity", {
   type: "player",
   name: "Integrity",
   health: 350,
@@ -245,7 +246,8 @@ Registries.entities.add("iti-player", {
     },
   ],
 });
-Registries.entities.add("ccc-player", {
+Registries.entities.alias("integrity", "iti-player")
+Registries.entities.add("endeavour", {
   type: "player",
   name: "Endeavour",
   health: 200,
@@ -358,7 +360,8 @@ Registries.entities.add("ccc-player", {
     },
   ],
 });
-Registries.entities.add("peti-player", {
+Registries.entities.alias("endeavour", "ccc-player")
+Registries.entities.add("proton", {
   type: "player",
   name: "Proton",
   health: 100,
@@ -476,6 +479,7 @@ Registries.entities.add("peti-player", {
     },
   ],
 });
+Registries.entities.alias("proton", "peti-player")
 
 Registries.entities.add("scavenger", {
   name: "Scavenger",

@@ -5,18 +5,33 @@ import { Log } from "../../play/messaging.js";
 import { Block } from "../block/block.js";
 import { Entity } from "../entity/entity.js";
 import { EquippedEntity, InventoryEntity } from "../entity/inventory-entity.js";
+import { World } from "../world/world.js";
 import { ItemStack } from "./item-stack.js";
 class DroppedItemStack extends Entity {
+  constructor() {
+    super();
+    delete this.team;
+  }
   item = ItemStack.EMPTY;
   delay = 30;
   #delayLeft = 30;
+  /**
+   * 
+   * @param {ItemStack} stack Item to drop.
+   * @param {World} world world to drop it in.
+   * @param {number} x 
+   * @param {number} y 
+   * @param {number} speed Initial speed of the item
+   * @param {number} direction Direction to send the item in. Is random if not defined.
+   */
   static create(stack, world, x = 0, y = 0, speed = 3, direction = NaN) {
     let item = new this();
     item.item = stack.copy();
+    item.name = `Dropped ${stack.getItem()?.name}`
     item.init();
     item.addToWorld(world, x, y);
     item.speed = speed;
-    if (!isNaN(direction)) item.direction = direction;
+    if (!isNaN(+direction)) item.direction = +direction;
     else item.direction = rnd.float(0, 360);
   }
   init() {
@@ -25,7 +40,6 @@ class DroppedItemStack extends Entity {
     this.components = [];
     this.width = 10;
     this.height = 10;
-    this.team = "items";
   }
   damage() {
     return 0;
@@ -44,9 +58,8 @@ class DroppedItemStack extends Entity {
         if (ent instanceof InventoryEntity && ent.collidesWith(this)) {
           let it = this.item.item;
           if (ent instanceof EquippedEntity) {
-            let leftOver = ent.ammo.hasItem(it)
-              ? ent.ammo.addItem(it, this.item.count)
-              : this.item.count;
+            let leftOver =
+              ent.ammo.hasItem(it) ? ent.ammo.addItem(it, this.item.count) : this.item.count;
             if (!leftOver) {
               if (ent === game.player) {
                 Log.send("Picked up " + this.item.toString(true));
@@ -63,9 +76,7 @@ class DroppedItemStack extends Entity {
                 if (ent === game.player) {
                   let newcount = this.item.count - leftOver2;
                   if (newcount > 0)
-                    Log.send(
-                      "Picked up " + this.item.getItem().name + "#-- x" + newcount
-                    );
+                    Log.send("Picked up " + this.item.getItem().name + "#-- x" + newcount);
                 }
                 this.item.count = leftOver2;
               }
@@ -81,10 +92,7 @@ class DroppedItemStack extends Entity {
       }
     else {
       this.attributes.multiply("speed", 0.86);
-      this.move(
-        Math.cos(this.directionRad) * this.speed,
-        Math.sin(this.directionRad) * this.speed
-      );
+      this.move(Math.cos(this.directionRad) * this.speed, Math.sin(this.directionRad) * this.speed);
     }
     this.tickGroundEffects();
   }
@@ -92,7 +100,7 @@ class DroppedItemStack extends Entity {
     let blockIn = this.world.getBlock(
       Math.floor(this.x / Block.size),
       Math.floor(this.y / Block.size),
-      "blocks"
+      "blocks",
     );
     if (blockIn && blockIn.walkable) blockIn.steppedOnBy(this);
   }
@@ -100,12 +108,7 @@ class DroppedItemStack extends Entity {
     drawImg(this.item?.getItem()?.image ?? "error", this.x, this.y, 15, 15);
   }
   serialise() {
-    return {
-      "-": true,
-      stack: this.item.serialise(),
-      x: this.x,
-      y: this.y,
-    };
+    return { "-": true, "stack": this.item.serialise(), "x": this.x, "y": this.y };
   }
 }
 export { DroppedItemStack };
