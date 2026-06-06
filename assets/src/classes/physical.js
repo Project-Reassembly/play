@@ -400,7 +400,7 @@ export class ShootableObject extends PhysicalObject {
     return this.takeDamage(type, Math.max(this.calcArmour(amount), 0), source);
   }
   /**@readonly Natural logarithm of 1.4 */
-  static LN1p4 = Math.log(1.4);
+  static LN1p4 = Math.log1p(0.4);
   /** Calculate the damage to deal to this entity after applying armour. */
   calcArmour(amount) {
     let at = Math.log1p(this.armourToughness) / ShootableObject.LN1p4;

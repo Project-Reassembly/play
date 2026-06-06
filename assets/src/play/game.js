@@ -674,9 +674,10 @@ globalThis.preload = async function () {
   console.log("Loaded fonts.");
   PreloadRegistries.images.forEach((el, name) => {
     if (el.type === "repo") {
-      console.log("repository - ",el.items);
+      console.log("repository - ", el.items);
       [...el.items].forEach((x) => {
-        if (!Registries.images.has(x[0])) Registries.images.add(x[0], new ImageContainer(x[1] ?? x[0]));
+        if (!Registries.images.has(x[0]))
+          Registries.images.add(x[0], new ImageContainer(x[1] ?? x[0]));
       });
     } else if (!Registries.images.has(name))
       Registries.images.add(name, new ImageContainer(el.path));
@@ -865,6 +866,7 @@ function frame() {
     fpsUpdate();
     uiFrame();
     if (!ui.waitingForMouseUp) mouseInteraction();
+    if (!game.paused && !ui.mouse.down && game.player?.punchCharge > 0) game.player.releasePunch()
   }
 }
 
@@ -976,7 +978,7 @@ function gameFrame() {
       } else UIComponent.setCondition("dead:yes");
       effects.applyShake();
       world.tickAll();
-      checkCreatedEntities()
+      checkCreatedEntities();
     }
   });
   UIComponent.setCondition("boss:" + (world.hasBoss() ? "yes" : "no"));
@@ -998,7 +1000,7 @@ function gameFrame() {
 
 function movePlayer() {
   if (ui.texteditor.active) return (game.player.controllable = false);
-  if (keyIsDown(SHIFT) || game.player.dead) {
+  if (keyIsDown(ALT) || game.player.dead) {
     freecam = true;
     UIComponent.setCondition("fc:true");
     if (keyIsDown(87)) {
@@ -1060,7 +1062,7 @@ function tickUI() {
 
 function showMousePos() {
   push();
-  if (keyIsDown(ALT)) {
+  if (debug.position) {
     textAlign(CENTER, CENTER);
     textFont(fonts.ocr);
     stroke(0);
@@ -1130,44 +1132,41 @@ function createPlayer(player = null, x, y, playerType = "iti-player") {
     get: () => game.mouse, //This way, I only have to set it once.
   });
 }
-
 function mouseInteraction() {
   if (
     ui.menuState === "in-game" &&
-    mouseIsPressed &&
+    ui.mouse.down &&
     !ui.waitingForMouseUp &&
     game.player?.controllable &&
-    UIComponent.evaluateCondition("menu:none")
+    ui.conditions.menu === "none"
   ) {
-    if (ui.mouse.button === "right") secondaryInteract();
-    else interact();
+    if (ui.conditions.mode === "build") {
+      if (ui.mouse.button === "right") tryBreak();
+      else tryPlace();
+    } else if (ui.conditions.mode === "fight") {
+      if (!Inventory.mouseItemStack.isEmpty()) {
+        Inventory.mouseItemStack.getItem().useInAir(game.player, Inventory.mouseItemStack);
+        return;
+      }
+      if (ui.waitingForMouseUp) return;
+
+      if (ui.mouse.button === "right") {
+        const rhi = game.player.rightHand.get(0);
+        if (rhi instanceof ItemStack && rhi.getItem() instanceof Equippable)
+          rhi.getItem().use(game.player, keyIsDown(SHIFT));
+        else game.player.chargePunchRight();
+      } else {
+        const lhi = game.player.leftHand.get(0);
+        if (lhi instanceof ItemStack && lhi.getItem() instanceof Equippable)
+          lhi.getItem().use(game.player, keyIsDown(SHIFT));
+        else game.player.chargePunchLeft();
+      }
+    }
   }
 }
 
-function secondaryInteract() {
-  if (Inventory.mouseItemStack.item === "nothing") {
-    let block = world.getBlock(game.mouse.blockX, game.mouse.blockY);
-    if (block && block.team === game.player.team && UIComponent.evaluateCondition("mode:build"))
-      if (block.dropItem) {
-        //Break breakables
-
-        if (block.break(BreakType.deconstruct))
-          if (block === Container.selectedBlock) Container.selectedBlock = null;
-        return;
-      }
-    if (UIComponent.evaluateCondition("mode:fight")) {
-      if (
-        game.player.rightHand.get(0) instanceof ItemStack &&
-        game.player.rightHand.get(0).getItem() instanceof Equippable
-      )
-        game.player.rightHand.get(0).getItem().use(game.player, true);
-      if (
-        game.player.leftHand.get(0) instanceof ItemStack &&
-        game.player.leftHand.get(0).getItem() instanceof Equippable
-      )
-        game.player.leftHand.get(0).getItem().use(game.player, true);
-    }
-  } else {
+function tryBreak() {
+  if (!Inventory.mouseItemStack.isEmpty()) {
     DroppedItemStack.create(
       Inventory.mouseItemStack,
       world,
@@ -1178,76 +1177,74 @@ function secondaryInteract() {
     );
     Inventory.mouseItemStack.clear();
     ui.waitingForMouseUp = true;
+    return;
   }
-}
+  let block = world.getBlock(game.mouse.blockX, game.mouse.blockY);
+  if (block && block.team === game.player.team && ui.conditions.mode === "build")
+    if (block.dropItem) {
+      //Break breakables
 
-function interact() {
-  if (UIComponent.evaluateCondition("mode:build")) {
-    let heldItem = Inventory.mouseItemStack.getItem();
-    let clickedBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
-    if (
-      clickedBlock &&
-      clickedBlock.team === game.player.team &&
-      clickedBlock.interaction(game.player, Inventory.mouseItemStack)
-    )
-      return;
-    //Place items on free space
-    if (heldItem instanceof PlaceableItem) {
-      //If space is free, and buildable
-      if (
-        world.getBlock(game.mouse.blockX, game.mouse.blockY, "floor")?.buildable ||
-        (Registries.tiles.get(world.getTile(game.mouse.blockX, game.mouse.blockY)).buildable ??
-          true)
-      ) {
-        if (
-          heldItem.place(
-            Inventory.mouseItemStack,
-            game.mouse.blockX,
-            game.mouse.blockY,
-            selectedDirection,
-          )
-        )
-          return;
-      }
-    }
-    //If clicked again
-    if (clickedBlock && clickedBlock === Container.selectedBlock) {
-      Container.selectedBlock = null;
-      ui.waitingForMouseUp = true;
+      if (block.break(BreakType.deconstruct))
+        if (block === Container.selectedBlock) Container.selectedBlock = null;
       return;
     }
-    //If block is (not) interacted with
-    if (clickedBlock && clickedBlock.selectable && clickedBlock.team === game.player.team) {
-      Container.selectedBlock = clickedBlock;
-      ui.waitingForMouseUp = true;
-      return;
-    } else {
-      if (Container.selectedBlock) {
-        Container.selectedBlock = null;
-        ui.waitingForMouseUp = true;
-        return;
-      }
-    }
-    if (heldItem !== null)
-      Inventory.mouseItemStack.getItem().useInAir(game.player, Inventory.mouseItemStack);
-    if (Inventory.mouseItemStack?.isEmpty()) Inventory.mouseItemStack = ItemStack.EMPTY;
-  } else {
-    if (Inventory.mouseItemStack.getItem() !== null) {
-      Inventory.mouseItemStack.getItem().useInAir(game.player, Inventory.mouseItemStack);
-      return;
-    }
-    if (ui.waitingForMouseUp) return;
-    if (
-      game.player.rightHand.get(0) instanceof ItemStack &&
-      game.player.rightHand.get(0).getItem() instanceof Equippable
-    )
-      game.player.rightHand.get(0).getItem().use(game.player);
+  if (ui.conditions.mode === "fight") {
     if (
       game.player.leftHand.get(0) instanceof ItemStack &&
       game.player.leftHand.get(0).getItem() instanceof Equippable
     )
-      game.player.leftHand.get(0).getItem().use(game.player);
+      game.player.leftHand.get(0).getItem().use(game.player, true);
   }
+}
+
+function tryPlace() {
+  let heldItem = Inventory.mouseItemStack.getItem();
+  let clickedBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
+  if (
+    clickedBlock &&
+    clickedBlock.team === game.player.team &&
+    clickedBlock.interaction(game.player, Inventory.mouseItemStack)
+  )
+    return;
+  //Place items on free space
+  if (heldItem instanceof PlaceableItem) {
+    //If space is free, and buildable
+    if (
+      world.getBlock(game.mouse.blockX, game.mouse.blockY, "floor")?.buildable ||
+      (Registries.tiles.get(world.getTile(game.mouse.blockX, game.mouse.blockY)).buildable ?? true)
+    ) {
+      if (
+        heldItem.place(
+          Inventory.mouseItemStack,
+          game.mouse.blockX,
+          game.mouse.blockY,
+          selectedDirection,
+        )
+      )
+        return;
+    }
+  }
+  //If clicked again
+  if (clickedBlock && clickedBlock === Container.selectedBlock) {
+    Container.selectedBlock = null;
+    ui.waitingForMouseUp = true;
+    return;
+  }
+  //If block is (not) interacted with
+  if (clickedBlock && clickedBlock.selectable && clickedBlock.team === game.player.team) {
+    Container.selectedBlock = clickedBlock;
+    ui.waitingForMouseUp = true;
+    return;
+  } else {
+    if (Container.selectedBlock) {
+      Container.selectedBlock = null;
+      ui.waitingForMouseUp = true;
+      return;
+    }
+  }
+  if (heldItem !== null)
+    Inventory.mouseItemStack.getItem().useInAir(game.player, Inventory.mouseItemStack);
+  if (Inventory.mouseItemStack?.isEmpty()) Inventory.mouseItemStack = ItemStack.EMPTY;
 }
 
 function reset() {
@@ -1304,7 +1301,7 @@ window.keyPressed = function (ev) {
   if (key === "f3") {
     UIComponent.setCondition("debugging:true");
   } else if (UIComponent.evaluateCondition("debugging:true")) {
-    console.log("debug: " + ev.key);
+    console.log("debug: " + key);
     UIComponent.setCondition("debugging:false");
 
     if (key === "b") {
@@ -1326,10 +1323,16 @@ window.keyPressed = function (ev) {
     } else if (key === "r") {
       debug.regionBorders = !debug.regionBorders;
       Log.send(`#7-[#@-Debug#7-] Region borders ${debug.regionBorders ? "shown" : "hidden"}`);
+    } else if (key === "p") {
+      debug.position = !debug.position;
+      Log.send(`#7-[#@-Debug#7-] Cursor position ${debug.position ? "shown" : "hidden"}`);
+    } else if (key === "x") {
+      debug.text = !debug.text;
+      Log.send(`#7-[#@-Debug#7-] Text blocks ${debug.text ? "shown" : "hidden"}`);
     } else if (key === "escape") {
-      debug.ai = false;
-      debug.chunkBorders = false;
-      debug.hitboxes = false;
+      for (const key in debug) {
+        debug[key] = false;
+      }
       Log.send(`#7-[#@-Debug#7-] Disabled everything.`);
     }
   }

@@ -1,17 +1,22 @@
-import { constructFromType } from "../../core/constructor.js";
+import { construct, constructFromType } from "../../core/constructor.js";
 import { rnd, tru } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { ui, UIComponent } from "../../core/ui.js";
+import Integrate from "../../lib/integrate.js";
 import { autoScaledEffect } from "../../play/effects.js";
 import { Log } from "../../play/messaging.js";
 import { blockSize, Direction, totalSize } from "../../scaling.js";
 import { Inventory } from "../inventory.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { ItemStack } from "../item/item-stack.js";
+import { Bullet } from "../projectile/bullet.js";
+import { patternedBulletExpulsion } from "../projectile/yeeter.js";
 import { Timer } from "../timer.js";
+import { WeaponComponent } from "./component.js";
 import { EquippedEntity } from "./inventory-entity.js";
 export const respawnTimer = new Timer();
 
+/** Equipped entity with an assembler, and f i s t s. */
 class Player extends EquippedEntity {
   respawnTime = 180;
   //internal assembler
@@ -26,6 +31,11 @@ class Player extends EquippedEntity {
   _recipe = 0;
   _progress = 0;
   _maxprog = 0;
+
+  /** @type {WeaponComponent} */
+  leftArmComponent;
+  /** @type {WeaponComponent} */
+  rightArmComponent;
   /*
   Recipes are like
   {
@@ -56,6 +66,198 @@ class Player extends EquippedEntity {
       });
       this._maxprog = this.assemblyRecipes[this._recipe]?.time ?? 0;
     }
+    this.leftArmComponent = construct(
+      Object.assign(this.armType, {
+        type: "weapon-component",
+        recoil: 0.2,
+        rotationalRecoil: -60,
+        recoilSpeed: 4,
+      }),
+      "weapon-component",
+    );
+    this.rightArmComponent = construct(
+      Object.assign(this.armType, {
+        type: "weapon-component",
+        recoil: 0.2,
+        rotationalRecoil: -60,
+        recoilSpeed: 4,
+      }),
+      "weapon-component",
+    );
+  }
+  punchHand = "left";
+  punchCharge = 0;
+  punchCharging = false;
+  chargePunchRight() {
+    if (this.rightArmComponent._rotRecoiled === 0) {
+      if (this.punchHand !== "right") this.punchCharge = 0;
+      this.punchHand = "right";
+      this.punchCharge++;
+      this.punchCharging = true;
+    }
+  }
+  chargePunchLeft() {
+    if (this.leftArmComponent._rotRecoiled === 0) {
+      if (this.punchHand !== "left") this.punchCharge = 0;
+      this.punchHand = "left";
+      this.punchCharge++;
+      this.punchCharging = true;
+    }
+  }
+  releasePunch() {
+    this._punchWith(this.punchHand === "left" ? this.leftArmComponent : this.rightArmComponent);
+    this.punchCharging = false;
+  }
+  _posOf(component) {
+    let pos = component.getPosOn(this);
+    pos.x += Math.cos(pos.direction) * -5;
+    pos.x -= Math.cos(this.directionRad) * 10;
+    pos.y += Math.sin(pos.direction) * -5;
+    pos.y -= Math.sin(this.directionRad) * 10;
+    return pos;
+  }
+  _chargePosOf(component) {
+    let pos = component.getPosOn(this);
+    const m = component === this.leftArmComponent;
+    // pos.x += Math.cos(pos.direction) * -5;
+    // pos.x += Math.sin(pos.direction) * (m ? 10 : -10);
+    pos.x -= Math.cos(this.directionRad) * 10;
+    // pos.y += Math.sin(pos.direction) * -5;
+    // pos.y += Math.cos(pos.direction) * (m ? 10 : -10);
+    pos.y -= Math.sin(this.directionRad) * 10;
+    return pos;
+  }
+  _punchWith(component) {
+    component.trigger();
+    component.tick(this);
+    const { x, y, direction } = this._posOf(component);
+    this.punch(x, y, direction, this.punchCharge);
+    this.punchCharge = 0;
+  }
+  _chargeEffectAt(component) {
+    const { x, y, direction } = this._chargePosOf(component);
+    autoScaledEffect(
+      this.punchCharge > 90 ? "punch-charged"
+      : this.punchCharge === 90 ? "punch-charge-complete"
+      : "punch-charge",
+      this.world,
+      x,
+      y,
+      direction,
+    );
+  }
+  punch(x, y, direction, charge) {
+    if (charge > 90) {
+      autoScaledEffect("charged-swing", this.world, x, y, direction);
+      /** @type {Integrate.Unconstructed<Bullet>} */
+      const bul = {
+        hitEffect: "big-punch",
+        speed: 5,
+        lifetime: 2,
+        hitSize: 10,
+        knockback: 50,
+        damage: [{ amount: 5, type: "impact" }],
+        despawnEffect: "none",
+        drawer: { hidden: true },
+        hitNumber: 1,
+        hitBullet: {
+          spawnNumber: 1,
+          spawnBullet: {
+            speed: 0,
+            lifetime: 0,
+            drawer: { hidden: true },
+            damage: [{ amount: 2, type: "impact", radius: 25, knockback: 1500 }],
+          },
+          turnSpeed: 360,
+          targetType: "hovered",
+          trackingRange: 60,
+          hitEffect: "punch",
+          speed: 5,
+          lifetime: 9,
+          extraUpdates: 1,
+          hitSize: 10,
+          knockback: 30,
+          damage: [{ amount: 2, type: "impact" }],
+          despawnEffect: "none",
+          drawer: { hidden: true },
+          hitNumber: 1,
+          trail: true,
+          trailEffect: "charged-punch-trail",
+          hitBullet: {
+            turnSpeed: 360,
+            targetType: "hovered",
+            trackingRange: 30,
+            hitEffect: "punch",
+            speed: 5,
+            lifetime: 7,
+            extraUpdates: 1,
+            hitSize: 10,
+            knockback: 20,
+            damage: [{ amount: 2, type: "impact" }],
+            despawnEffect: "none",
+            drawer: { hidden: true },
+            hitNumber: 1,
+            trail: true,
+            trailEffect: "charged-punch-trail",
+            hitBullet: {
+              turnSpeed: 360,
+              targetType: "hovered",
+              trackingRange: 30,
+              hitEffect: "punch",
+              speed: 5,
+              lifetime: 5,
+              hitSize: 10,
+              knockback: 10,
+              damage: [{ amount: 1, type: "impact" }],
+              despawnEffect: "none",
+              trail: true,
+              trailEffect: "charged-punch-trail",
+              drawer: { hidden: true },
+            },
+          },
+        },
+      };
+      patternedBulletExpulsion(x, y, bul, 1, degrees(direction), 0, 0, this.world, this);
+    } else {
+      autoScaledEffect("swing", this.world, x, y, direction);
+      /** @type {Integrate.Unconstructed<Bullet>} */
+      const bul = {
+        hitEffect: "punch",
+        speed: 1,
+        lifetime: 5,
+        hitSize: 10,
+        knockback: 20,
+        damage: [{ amount: 1, type: "impact" }],
+        despawnEffect: "none",
+        drawer: { hidden: true },
+      };
+      patternedBulletExpulsion(x, y, bul, 1, degrees(direction), 0, 0, this.world, this);
+    }
+  }
+  drawArms() {
+    let left = this.leftHand.get(0)?.getItem();
+    if (!left || left?.showArm) this.leftArmComponent.draw(this.x, this.y, this.direction, true);
+    if (left?.component)
+      left.component.draw(
+        this.x,
+        this.y,
+        this.direction,
+        true,
+        this.armType.xOffset,
+        this.armType.yOffset,
+      );
+
+    let right = this.rightHand.get(0)?.getItem();
+    if (!right || right?.showArm) this.rightArmComponent.draw(this.x, this.y, this.direction);
+    if (right?.component)
+      right.component.draw(
+        this.x,
+        this.y,
+        this.direction,
+        false,
+        this.armType.xOffset,
+        this.armType.yOffset,
+      );
   }
 
   nextRecipe() {
@@ -102,9 +304,7 @@ class Player extends EquippedEntity {
       autoScaledEffect(this.tickEffect, this.world, this.x, this.y, Direction.UP);
   }
   stringifyRecipe(recipe) {
-    return (
-      `${recipe.inputs.map((x) => x.toString(true)).join("\n")}\n -  - -- \\⬇/ -- -  - \n${recipe.outputs.map((x) => x.toString(true)).join("\n")}\n`
-    );
+    return `${recipe.inputs.map((x) => x.toString(true)).join("\n")}\n -  - -- \\⬇/ -- -  - \n${recipe.outputs.map((x) => x.toString(true)).join("\n")}\n`;
   }
   getRecipeInfo() {
     return this.assemblyRecipes.length > 0 ?
@@ -115,6 +315,12 @@ class Player extends EquippedEntity {
 
   tick() {
     super.tick();
+    this.leftArmComponent.tick(this);
+    this.rightArmComponent.tick(this);
+    if (this.punchCharging && this.punchCharge > 20)
+      this._chargeEffectAt(
+        this.punchHand === "left" ? this.leftArmComponent : this.rightArmComponent,
+      );
     if (this.assemblyRecipes.length > 0) {
       let recipe = this.assemblyRecipes[this._recipe];
       if (!recipe) {

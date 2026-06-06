@@ -1472,8 +1472,8 @@ Registries.vfx.add("iti-pad-trail", {
         heightTo: 12,
         colours: [
           [255, 255, 255],
-          [0, 255, 255,192],
-          [0, 0, 255, 50,128],
+          [0, 255, 255, 192],
+          [0, 0, 255, 50, 128],
           [50, 50, 50, 0],
         ],
         rotateSpeed: 2,
@@ -1510,7 +1510,7 @@ Registries.vfx.add("iti-pad-trail", {
         decel: 0,
         shape: "rhombus",
         colours: [
-          [255,255, 255, 200],
+          [255, 255, 255, 200],
           [150, 255, 255, 0],
         ],
         widthFrom: 20,
@@ -1531,13 +1531,13 @@ Registries.vfx.add("iti-pad-trail", {
         decel: 0,
         image: "capitalism.iti.pod",
         colours: [
-          [255,255, 255, 200],
+          [255, 255, 255, 200],
           [150, 255, 255, 0],
         ],
-        widthFrom: 30 ,
-        widthTo: 30 ,
+        widthFrom: 30,
+        widthTo: 30,
         heightFrom: 30,
-        heightTo: 30 ,
+        heightTo: 30,
         rotateSpeed: 0,
         light: 100,
       },
@@ -2024,6 +2024,294 @@ Registries.vfx.add("shield-break-yellow", {
       },
     },
   ],
+});
+
+Registries.vfx.add("punch-charge", {
+  type: "particle-emission",
+  amount: 1,
+  cone: 360,
+  particle: {
+    lifetime: 30,
+    speed: 1,
+    decel: 0.05,
+    colours: [
+      [255, 255, 255, 200],
+      [200, 100, 100, 0],
+    ],
+    widthFrom: 0,
+    widthTo: 2,
+    heightFrom: 8,
+    heightTo: 8,
+    shape: "rect",
+    light: 20,
+  },
+});
+Registries.vfx.add("punch-charged", {
+  type: "particle-emission",
+  amount: 1,
+  cone: 360,
+  particle: {
+    lifetime: 20,
+    speed: .5,
+    decel: 0,
+    colours: [
+      [255, 255, 255, 200],
+      [200, 100, 100, 0],
+    ],
+    widthFrom: 0,
+    widthTo: 2,
+    heightFrom: 4,
+    heightTo: 4,
+    shape: "rect",
+    light: 20,
+  },
+});
+Registries.vfx.add("punch-charge-complete", {
+  type: "wave-emission",
+  particle: {
+    lifetime: 30,
+    radiusFrom: 0,
+    radiusTo: 30,
+    strokeFrom: 1,
+    strokeTo: 5,
+    colours: [
+      [255, 255, 255, 200],
+      [200, 100, 100, 0],
+    ],
+    light: 30,
+  },
+});
+Registries.vfx.add("punch", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      amount: 4,
+      cone: 45,
+      particle: {
+        lifetime: 10,
+        speed: 4,
+        decel: 0.11,
+        colours: [
+          [255, 255, 255, 200],
+          [200, 100, 100, 0],
+        ],
+        widthFrom: 2,
+        widthTo: 0,
+        heightFrom: 8,
+        heightTo: 8,
+        shape: "rect",
+        light: 20,
+      },
+    },
+    {
+      type: "particle-emission",
+      amount: 4,
+      cone: 360,
+      particle: {
+        lifetime: 10,
+        speed: 4,
+        decel: 0.1,
+        colours: [
+          [255, 255, 255, 200],
+          [200, 100, 100, 0],
+        ],
+        widthFrom: 2,
+        widthTo: 0,
+        heightFrom: 8,
+        heightTo: 8,
+        shape: "rect",
+        light: 20,
+      },
+    },
+    {
+      type: "particle-emission",
+      amount: 4,
+      cone: 30,
+      particle: {
+        lifetime: 10,
+        speed: 5,
+        decel: 0.2,
+        direction: 180,
+        colours: [
+          [255, 255, 255, 200],
+          [200, 100, 100, 0],
+        ],
+        widthFrom: 2,
+        widthTo: 0,
+        heightFrom: 8,
+        heightTo: 8,
+        shape: "rect",
+        light: 20,
+      },
+    },
+    {
+      type: "wave-emission",
+      particle: {
+        lifetime: 20,
+        radiusFrom: 0,
+        radiusTo: 20,
+        strokeFrom: 1,
+        strokeTo: 5,
+        colours: [
+          [255, 255, 255, 200],
+          [200, 100, 100, 0],
+        ],
+        light: 30,
+      },
+    },
+  ],
+});
+Registries.vfx.add("big-punch", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      amount: 4,
+      cone: 45,
+      particle: {
+        lifetime: 20,
+        speed: 4,
+        decel: 0.11,
+        colours: [
+          [255, 255, 255, 200],
+          [200, 100, 100, 0],
+        ],
+        widthFrom: 2,
+        widthTo: 0,
+        heightFrom: 8,
+        heightTo: 8,
+        shape: "rect",
+        light: 20,
+      },
+    },
+    {
+      type: "particle-emission",
+      amount: 4,
+      cone: 360,
+      particle: {
+        lifetime: 20,
+        speed: 4,
+        decel: 0.1,
+        colours: [
+          [255, 255, 255, 200],
+          [200, 100, 100, 0],
+        ],
+        widthFrom: 2,
+        widthTo: 0,
+        heightFrom: 8,
+        heightTo: 8,
+        shape: "rect",
+        light: 20,
+      },
+    },
+    {
+      type: "particle-emission",
+      amount: 4,
+      cone: 30,
+      particle: {
+        lifetime: 20,
+        speed: 5,
+        decel: 0.2,
+        direction: 180,
+        colours: [
+          [255, 255, 255, 200],
+          [200, 100, 100, 0],
+        ],
+        widthFrom: 2,
+        widthTo: 0,
+        heightFrom: 8,
+        heightTo: 8,
+        shape: "rect",
+        light: 20,
+      },
+    },
+    {
+      type: "wave-emission",
+      emissions: 2,
+      interval: 5,
+      particle: {
+        lifetime: 30,
+        radiusFrom: 0,
+        radiusTo: 45,
+        strokeFrom: 2,
+        strokeTo: 10,
+        colours: [
+          [255, 255, 255, 200],
+          [200, 100, 100, 0],
+        ],
+        light: 30,
+      },
+    },
+  ],
+});
+Registries.vfx.add("charged-swing", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      cone: 20,
+      amount: 2,
+      particle: {
+        lifetime: 10,
+        speed: 0,
+        shape: "inverted-triangle",
+        direction: 90,
+        colours: [
+          [255, 255, 255, 100],
+          [255, 240, 210],
+          [255, 230, 175, 0],
+        ],
+        widthFrom: 50,
+        widthTo: 20,
+        heightFrom: 4,
+        heightTo: 0,
+        rotateSpeed: 0,
+        light: 30,
+      },
+    },
+  ],
+});
+Registries.vfx.add("swing", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      cone: 0,
+      amount: 1,
+      particle: {
+        lifetime: 10,
+        speed: 0,
+        shape: "inverted-triangle",
+        direction: 90,
+        colours: [
+          [255, 255, 255, 100],
+          [255, 240, 210],
+          [255, 230, 175, 0],
+        ],
+        widthFrom: 25,
+        widthTo: 20,
+        heightFrom: 8,
+        heightTo: 0,
+        rotateSpeed: 0,
+        light: 30,
+      },
+    },
+  ],
+});
+Registries.vfx.add("charged-punch-trail", {
+  type: "line-emission",
+  amount: 1,
+  line: {
+    lifetime: 20,
+    light: 20,
+    colours: [
+      [255, 255, 255, 200],
+      [200, 100, 100, 0],
+    ],
+    strokeFrom: 2,
+    strokeTo: 0,
+  },
 });
 
 // lines

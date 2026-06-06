@@ -1,5 +1,5 @@
 import { construct } from "../../core/constructor.js";
-import { turn, Vector } from "../../core/number.js";
+import { turn } from "../../core/number.js";
 import { RegisteredItem } from "../../core/registered-item.js";
 import { Registries } from "../../core/registry.js";
 import { rotatedImg } from "../../core/ui.js";
@@ -27,19 +27,12 @@ class Component extends RegisteredItem {
     let xoff = 0,
       yoff = 0;
     if (entity instanceof EquippedEntity) {
-      if (entity.leftHand.get(0)?.getItem()?.component === this)
-        mirrored = true;
+      if (entity.leftHand.get(0)?.getItem()?.component === this) mirrored = true;
+      if (entity.leftArmComponent === this) mirrored = true;
       xoff = entity.armType.xOffset;
       yoff = entity.armType.yOffset;
     }
-    return this.getPosFrom(
-      entity.x,
-      entity.y,
-      entity.direction,
-      mirrored,
-      xoff,
-      yoff
-    );
+    return this.getPosFrom(entity.x, entity.y, entity.direction, mirrored, xoff, yoff);
   }
   getPosFrom(x, y, direction, mirrored = false, xoff = 0, yoff = 0) {
     let facing = radians(direction + this.rotation * (mirrored ? -1 : 1));
@@ -58,26 +51,10 @@ class Component extends RegisteredItem {
   draw(x, y, direction, mirrored = false, xoff = 0, yoff = 0) {
     let pos = this.getPosFrom(x, y, direction, mirrored, xoff, yoff);
     if (this.image) {
-      rotatedImg(
-        this.image,
-        pos.x,
-        pos.y,
-        this.width,
-        this.height,
-        pos.direction,
-        mirrored
-      );
+      rotatedImg(this.image, pos.x, pos.y, this.width, this.height, pos.direction, mirrored);
     } else {
       //If no image, draw shape instead
-      rotatedShape(
-        this.shape,
-        pos.x,
-        pos.y,
-        this.width,
-        this.height,
-        pos.direction,
-        mirrored
-      );
+      rotatedShape(this.shape, pos.x, pos.y, this.width, this.height, pos.direction, mirrored);
     }
   }
   tick(entity) {}
@@ -113,9 +90,7 @@ class LegComponent extends Component {
   _cycleAmount = 0;
   getPosFrom(x, y, direction, mirrored = false, xoff = 0, yoff = 0) {
     let facing = radians(direction + this.rotation * (mirrored ? -1 : 1));
-    let offset =
-      Math.sin(this._cycleAmount / (this.cycleLength * PI)) *
-      (mirrored ? -1 : 1);
+    let offset = Math.sin(this._cycleAmount / (this.cycleLength * PI)) * (mirrored ? -1 : 1);
     return {
       x:
         x +
@@ -145,9 +120,7 @@ class WeaponComponent extends Component {
   postRecoil = false;
   getPosFrom(x, y, direction, mirrored = false, xoff = 0, yoff = 0) {
     let facing = radians(
-      direction +
-        (this.rotation + (this.postRecoil ? 0 : this._rotRecoiled)) *
-          (mirrored ? -1 : 1)
+      direction + (this.rotation + (this.postRecoil ? 0 : this._rotRecoiled)) * (mirrored ? -1 : 1),
     );
     return {
       x:
@@ -159,16 +132,14 @@ class WeaponComponent extends Component {
         (this.xOffset - this._recoiled + xoff) * Math.sin(facing) +
         (this.yOffset + yoff) * Math.cos(facing) * (mirrored ? -1 : 1),
       direction:
-        facing + radians(this.postRot + (this.postRecoil ? this._rotRecoiled : 0)) *
-          (mirrored ? -1 : 1),
+        facing +
+        radians(this.postRot + (this.postRecoil ? this._rotRecoiled : 0)) * (mirrored ? -1 : 1),
     };
   }
   trigger(recoilFactor = 1, rotationalRecoilFactor = 1) {
-    this._recoiled =
-      (this.cumulative ? this._recoiled : 0) + this.recoil * recoilFactor;
+    this._recoiled = (this.cumulative ? this._recoiled : 0) + this.recoil * recoilFactor;
     this._rotRecoiled =
-      (this.cumulative ? this._rotRecoiled : 0) +
-      this.rotationalRecoil * rotationalRecoilFactor;
+      (this.cumulative ? this._rotRecoiled : 0) + this.rotationalRecoil * rotationalRecoilFactor;
   }
   tick(entity) {
     super.tick(entity);
@@ -222,8 +193,7 @@ class DestructibleComponent extends ShootableObject {
   getPosOn(entity) {
     let mirrored = false;
     if (entity instanceof EquippedEntity) {
-      if (entity.leftHand.get(0)?.getItem()?.component === this)
-        mirrored = true;
+      if (entity.leftHand.get(0)?.getItem()?.component === this) mirrored = true;
     }
     return this.getPosFrom(entity.x, entity.y, entity.direction, mirrored);
   }
@@ -231,39 +201,19 @@ class DestructibleComponent extends ShootableObject {
     let facing = radians(direction + this.rotation * (mirrored ? -1 : 1));
     return {
       x:
-        x +
-        this.xOffset * Math.cos(facing) -
-        this.yOffset * Math.sin(facing) * (mirrored ? -1 : 1),
+        x + this.xOffset * Math.cos(facing) - this.yOffset * Math.sin(facing) * (mirrored ? -1 : 1),
       y:
-        y +
-        this.xOffset * Math.sin(facing) +
-        this.yOffset * Math.cos(facing) * (mirrored ? -1 : 1),
+        y + this.xOffset * Math.sin(facing) + this.yOffset * Math.cos(facing) * (mirrored ? -1 : 1),
       direction: facing,
     };
   }
   draw(x, y, direction, mirrored = false) {
     let pos = this.getPosFrom(x, y, direction, mirrored);
     if (this.image) {
-      rotatedImg(
-        this.image,
-        pos.x,
-        pos.y,
-        this.width,
-        this.height,
-        pos.direction,
-        mirrored
-      );
+      rotatedImg(this.image, pos.x, pos.y, this.width, this.height, pos.direction, mirrored);
     } else {
       //If no image, draw shape instead
-      rotatedShape(
-        this.shape,
-        pos.x,
-        pos.y,
-        this.width,
-        this.height,
-        pos.direction,
-        mirrored
-      );
+      rotatedShape(this.shape, pos.x, pos.y, this.width, this.height, pos.direction, mirrored);
     }
   }
 }
@@ -274,9 +224,9 @@ class WeaponisedComponent extends Component {
   _ticked = false;
   init() {
     this.weapon =
-      typeof this.weapon === "string"
-        ? construct(Registries.items.get(this.weapon), "weapon")
-        : construct(this.weapon, "weapon");
+      typeof this.weapon === "string" ?
+        construct(Registries.items.get(this.weapon), "weapon")
+      : construct(this.weapon, "weapon");
     this.weapon.component = this;
   }
   tick(entity) {
@@ -292,8 +242,8 @@ class WeaponisedComponent extends Component {
             pos.y,
             entity.target.x,
             entity.target.y,
-            entity.turnSpeed * 2
-          ).direction
+            entity.turnSpeed * 2,
+          ).direction,
         ) - entity.directionRad;
 
       // new Vector(entity.target.x, entity.target.y).sub(this.getPosOn(entity))
@@ -331,10 +281,5 @@ class WeaponisedComponent extends Component {
   }
 }
 
-export {
-  Component,
-  LegComponent,
-  WeaponComponent,
-  WeaponisedComponent,
-  DestructibleComponent,
-};
+export { Component, DestructibleComponent, LegComponent, WeaponComponent, WeaponisedComponent };
+

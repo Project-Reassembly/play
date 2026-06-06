@@ -2,6 +2,7 @@ import { col } from "../../core/color.js";
 import { clamp, rnd, tru, Vector } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { rotatedImg, rotatedShape } from "../../core/ui.js";
+import Integrate from "../../lib/integrate.js";
 import { createLinearEffect, repeat } from "../../play/effects.js";
 import { game } from "../../play/game.js";
 import { blockSize } from "../../scaling.js";
@@ -58,6 +59,7 @@ class Bullet extends PhysicalObject {
   status = "none";
   statusDuration = 0;
   //spawn bullet
+  /**@type {Integrate.Unconstructed<Bullet>} */
   spawnBullet = {};
   spawnNumber = 0;
   spawnDirection = 0;
@@ -67,6 +69,7 @@ class Bullet extends PhysicalObject {
   spawnSpeedMin = 0.8;
   spawnSpeedMax = 1.2;
   //Frags
+  /**@type {Integrate.Unconstructed<Bullet>} */
   fragBullet = {};
   fragNumber = 0;
   fragDirection = 0;
@@ -75,7 +78,18 @@ class Bullet extends PhysicalObject {
 
   fragSpeedMin = 0.8;
   fragSpeedMax = 1.2;
+  //Hit-only Frags
+  /**@type {Integrate.Unconstructed<Bullet>} */
+  hitBullet = {};
+  hitNumber = 0;
+  hitDirection = 0;
+  hitSpread = 0;
+  hitSpacing = 0;
+
+  hitSpeedMin = 0.8;
+  hitSpeedMax = 1.2;
   //Intervals
+  /**@type {Integrate.Unconstructed<Bullet>} */
   intervalBullet = {};
   intervalNumber = 0;
   intervalDirection = 0;
@@ -311,6 +325,21 @@ class Bullet extends PhysicalObject {
         ),
       );
   }
+  hitb() {
+    patternedBulletExpulsion(
+      this.x,
+      this.y,
+      this.hitBullet,
+      this.hitNumber,
+      this.direction + this.hitDirection,
+      this.hitSpread,
+      this.hitSpacing,
+      this.world,
+      this.entity,
+      this.hitSpeedMin,
+      this.hitSpeedMax,
+    );
+  }
   frag() {
     patternedBulletExpulsion(
       this.x,
@@ -426,6 +455,7 @@ class Bullet extends PhysicalObject {
       }
       this.emit(this.impactFrame, 0, 0, true);
       this.emit(this.hitEffect);
+      this.hitb();
       //Make the bullet know
       this.damaged.push(physobj);
       //If exhausted

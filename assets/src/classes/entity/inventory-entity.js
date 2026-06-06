@@ -4,7 +4,7 @@ import { Inventory } from "../inventory.js";
 import { Equippable } from "../item/equippable.js";
 import { ItemStack } from "../item/item-stack.js";
 import { PhysicalObject } from "../physical.js";
-import { Component } from "./component.js";
+import { Component, WeaponComponent } from "./component.js";
 import { Entity } from "./entity.js";
 class InventoryEntity extends Entity {
   /**@type {Inventory} */
@@ -51,7 +51,7 @@ class EquippedEntity extends InventoryEntity {
   /**@type {Inventory} */
   ammo = null;
 
-  armType = new Component();
+  armType = new WeaponComponent();
 
   //Commonly used indices
   /**@type {Component} */
@@ -108,13 +108,7 @@ class EquippedEntity extends InventoryEntity {
     super.onHealthZeroed(type, source);
   }
 
-  draw() {
-    if (this.dead) return;
-    if (this.legsPart) {
-      this.legsPart.draw(this.x, this.y, this.direction);
-      this.legsPart.draw(this.x, this.y, this.direction, true);
-    }
-    //Arms
+  drawArms() {
     let left = this.leftHand.get(0)?.getItem();
     if (!left || left?.showArm) this.armType.draw(this.x, this.y, this.direction, true);
     if (left?.component)
@@ -138,6 +132,15 @@ class EquippedEntity extends InventoryEntity {
         this.armType.xOffset,
         this.armType.yOffset,
       );
+  }
+  draw() {
+    if (this.dead) return;
+    if (this.legsPart) {
+      this.legsPart.draw(this.x, this.y, this.direction);
+      this.legsPart.draw(this.x, this.y, this.direction, true);
+    }
+    //Arms
+    this.drawArms();
 
     let d = (item) => {
       if (item instanceof Equippable) {

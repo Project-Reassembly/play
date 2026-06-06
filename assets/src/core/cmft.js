@@ -1,5 +1,6 @@
 import { Timer } from "../classes/timer.js";
 import { Shr3 } from "../lib/q5-noise-function.js";
+import { debug } from "../play/debug.js";
 import { effectTimer } from "../play/effects.js";
 import { fonts } from "../play/font.js";
 import { col } from "./color.js";
@@ -450,7 +451,7 @@ class Element {
     }
     col.fill(c);
     this.component.draw(baseX + this.#xOffset, baseY + this.#yOffset, this.charSize);
-    if (keyIsDown(ALT)) {
+    if (debug.text) {
       col.stroke(c);
       this.debugOutl(baseX, baseY);
     }
