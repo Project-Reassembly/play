@@ -7,8 +7,19 @@ import { blockSize } from "../scaling.js";
 import { TextParticle } from "./effect/text-particle.js";
 export class PhysicalObject extends Integrate.RegisteredItem {
   static debug = false;
-  x = 0;
-  y = 0;
+  pos = Vector.ZERO;
+  get x() {
+    return this.pos.x;
+  }
+  get y() {
+    return this.pos.y;
+  }
+  set x(_) {
+    this.pos.x = _;
+  }
+  set y(_) {
+    this.pos.y = _;
+  }
   /**@type {number} */
   width = null;
   /**@type {number} */
@@ -17,14 +28,11 @@ export class PhysicalObject extends Integrate.RegisteredItem {
   direction = 0;
   _previousRot = 0;
   hitSize = 30;
-  /** @type {World} */
+  /** @type {import("./world/world.js").World} */
   world = null;
 
   visible = true;
   tangible = true;
-  get pos() {
-    return new Vector(this.x, this.y);
-  }
   get directionRad() {
     return (this.direction / 180) * Math.PI;
   }
@@ -43,7 +51,8 @@ export class PhysicalObject extends Integrate.RegisteredItem {
   }
 
   moveVct(vct, ignoresBlocks = false) {
-    this.move(vct.x, vct.y, ignoresBlocks);
+    if (ignoresBlocks) this.pos.add(vct, true);
+    else this.move(vct.x, vct.y);
   }
 
   move(dx, dy, ignoresBlocks = false) {
@@ -110,10 +119,14 @@ export class PhysicalObject extends Integrate.RegisteredItem {
       hitsupright;
     //Final judgement
     if (noright) {
-      this.x = (right ?? upright ?? downright).x - this.width * 0.5 - blockSize * 0.5;
+      const wall = (right ?? upright ?? downright).x - blockSize * 0.5;
+      this.x = wall - this.width * 0.5;
+      this.hitHorizontalWall(wall, this.y);
     }
     if (noleft) {
-      this.x = (left ?? upleft ?? downleft).x + this.width * 0.5 + blockSize * 0.5;
+      const wall = (left ?? upleft ?? downleft).x + blockSize * 0.5;
+      this.x = wall + this.width * 0.5;
+      this.hitHorizontalWall(wall, this.y);
     }
   }
 
@@ -165,12 +178,18 @@ export class PhysicalObject extends Integrate.RegisteredItem {
       hitsdownleft;
     //Final judgement
     if (noup) {
-      this.y = (up ?? upleft ?? upright).y + this.height * 0.5 + blockSize * 0.5;
+      const wall = (up ?? upleft ?? upright).y + blockSize * 0.5;
+      this.y = wall + this.height * 0.5;
+      this.hitVerticalWall(this.x, wall);
     }
     if (nodown) {
-      this.y = (down ?? downleft ?? downright).y - this.height * 0.5 - blockSize * 0.5;
+      const wall = (down ?? downleft ?? downright).y - blockSize * 0.5;
+      this.y = wall - this.height * 0.5;
+      this.hitVerticalWall(this.x, wall);
     }
   }
+  hitVerticalWall(x, y) {}
+  hitHorizontalWall(x, y) {}
 
   rotateTowards(x, y, amount) {
     let res = turn(this.direction, this.x, this.y, x, y, amount);
@@ -208,15 +227,20 @@ export class PhysicalObject extends Integrate.RegisteredItem {
       let oldRot = this.direction;
       this.direction = this._previousRot;
       this.rotateTowards(x, y, turnSpeed);
-      this.moveVct(Vector.fromAngle(this.direction).scale(speed), ignoreBlocks);
+      this.moveInDirection(Vector.fromAngle(this.direction).scale(speed), ignoreBlocks);
       this._previousRot = this.direction;
       this.direction = oldRot;
       return true;
     } else {
       let done = this.rotateTowards(x, y, turnSpeed);
-      this.moveVct(Vector.fromAngle(this.direction).scale(speed), ignoreBlocks);
+      this.moveInDirection(Vector.fromAngle(this.direction).scale(speed), ignoreBlocks);
       return done;
     }
+  }
+
+  /** Intent to move in a direction. */
+  moveInDirection(vct, ignoreBlocks) {
+    this.moveVct(vct, ignoreBlocks);
   }
 
   draw() {
@@ -390,7 +414,7 @@ export class ShootableObject extends PhysicalObject {
     if (this.shield > 0) {
       const oldshield = this.shield;
       const sdam = Math.max(this.calcShield(amount), 0);
-      this.createShieldDamageNumber(sdam);
+      this.createShieldDamageNumber(Math.min(sdam, this.shield));
       this.shield -= sdam;
       if (this.shield <= 0) {
         this.breakShield();

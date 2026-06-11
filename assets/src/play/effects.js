@@ -16,6 +16,7 @@ const effectTimer = new Timer();
 class Explosion {
   x = 0;
   y = 0;
+  /** @type {import("../classes/world/world.js").World} */
   world = null;
   knockback = NaN;
   radius = 0;
@@ -62,16 +63,15 @@ class Explosion {
     for (let e of this.world.entities) {
       //If hit
       if (!e.dead) {
-        let dist = ((this.x - e.x) ** 2 + (this.y - e.y) ** 2) ** 0.5 || 1;
-        let scalar = knockmul * 75;
-        e.knock(
+        let dist = Math.sqrt((this.x - e.x) ** 2 + (this.y - e.y) ** 2) || 1;
+        let scalar = knockmul * 25;
+        e.knockback(
           clamp(
-            ((!isNaN(this.knockback) ? this.knockback : this.amount) * scalar) / dist ** 3,
+            ((!isNaN(this.knockback) ? this.knockback : this.amount) * scalar) / dist ** 2,
             0,
-            200,
+            128,
           ),
           new Vector(e.x - this.x, e.y - this.y).angle,
-          true,
         );
       }
     }
@@ -197,7 +197,10 @@ function liquidDestructionBlast(
                 rnd.float(0.5, 1),
                 0.1,
                 "circle",
-                [col.mult(colour, rnd.float(0.8, 1.2)), col.hide(col.mult(colourTo, rnd.float(0.8, 1.2)))],
+                [
+                  col.mult(colour, rnd.float(0.8, 1.2)),
+                  col.hide(col.mult(colourTo, rnd.float(0.8, 1.2))),
+                ],
                 componentSize / 2,
                 componentSize / 4,
                 componentSize / 2,
@@ -420,7 +423,8 @@ class ParticleEmissionEffect extends EmissionEffect {
           y + this.y,
           direction +
             radians(
-              (this.particle.direction ?? 0) + rnd.float(-(this.cone ?? 360) / 2, (this.cone ?? 360) / 2),
+              (this.particle.direction ?? 0) +
+                rnd.float(-(this.cone ?? 360) / 2, (this.cone ?? 360) / 2),
             ),
           this.particle.lifetime ?? 60,
           this.particle.speed ?? 1,
@@ -449,7 +453,8 @@ class ImageParticleEmissionEffect extends ParticleEmissionEffect {
           y + this.y,
           direction +
             radians(
-              (this.particle.direction ?? 0) + rnd.float(-(this.cone ?? 360) / 2, (this.cone ?? 360) / 2),
+              (this.particle.direction ?? 0) +
+                rnd.float(-(this.cone ?? 360) / 2, (this.cone ?? 360) / 2),
             ),
           this.particle.lifetime ?? 60,
           this.particle.speed ?? 1,

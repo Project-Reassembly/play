@@ -5,7 +5,10 @@ import "../registries/cutscene.js";
 import "../registries/images.js";
 console.log("[Setup] Imported preload content");
 
-import "../registries/type.js";
+import "../registries/types/type.js";
+
+import "../registries/types/accessory.js";
+import "../registries/types/worldevent.js";
 console.log("[Setup] Imported types");
 
 import "../registries/block.js";
@@ -20,6 +23,7 @@ import "../registries/vfx.js";
 import "../registries/worldgen.js";
 
 import "../registries/deathmsg.js";
+import "../registries/various-small-registries.js";
 console.log("[Setup] Imported hardcoded content");
 //Set up mods
 Integrate.addModdableRegistry(Registries.blocks, "blocks");

@@ -138,6 +138,17 @@ class Chunk {
     if (this[layer][y] === undefined || this[layer][y][x] === undefined)
       throw new Error(`Can't get tile outside of chunk (at ${x}, ${y} in chunk)`);
     return GroundTile.getNameFromID(this[layer][y][x]);
+  } /**
+   * Gets a tile ID from the chunk.
+   * @param {number} x X position offset from the chunk
+   * @param {number} y Y position offset from the chunk
+   * @param {keyof Chunk.Layer} layer Layer that tiles should be looked for in.
+   * @returns {number} The tile's numerical ID, or 0 if no block is present.
+   */
+  getTileID(x, y, layer = Chunk.Layer.tiles) {
+    if (this[layer][y] === undefined || this[layer][y][x] === undefined)
+      throw new Error(`Can't get tile outside of chunk (at ${x}, ${y} in chunk)`);
+    return this[layer][y][x];
   }/**
    * Gets the tile from the highest occupied layer at a position in the chunk.\
    * For example, if both an ore and a tile are present, then the ore is chosen.
@@ -149,6 +160,17 @@ class Chunk {
     if (this.tiles[y] === undefined || this.tiles[y][x] === undefined)
       throw new Error(`Can't get tile outside of chunk (at ${x}, ${y} in chunk)`);
     return GroundTile.getNameFromID(this.ores[y][x] ?? this.tiles[y][x]);
+  }/**
+   * Gets the tile from the highest occupied layer at a position in the chunk.\
+   * For example, if both an ore and a tile are present, then the ore is chosen.
+   * @param {number} x X position offset from the chunk
+   * @param {number} y Y position offset from the chunk
+   * @returns {number} The tile's numerical ID, or null if no block is present.
+   */
+  getHighestTileID(x, y) {
+    if (this.tiles[y] === undefined || this.tiles[y][x] === undefined)
+      throw new Error(`Can't get tile outside of chunk (at ${x}, ${y} in chunk)`);
+    return (this.ores[y][x] ?? this.tiles[y][x]);
   }
   randomTick() {
     iterate2DArray(

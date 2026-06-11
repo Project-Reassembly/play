@@ -25,9 +25,17 @@ Registries.deathmsg.add("laser", [
     "(1) tried to dodge (2)'s laser",
   ],
 ]);
-Registries.deathmsg.add("impact", [
+Registries.deathmsg.add("crush", [
   ["(1) was crushed to death", "(1) couldn't handle the pressure"],
   ["(1) was crushed by (2)", "(1) was squashed by (2)"],
+]);
+Registries.deathmsg.add("impact", [
+  ["(1) was bashed to death", "(1) was smacked to death", "(1) discovered the laws of motion"],
+  ["(1) was bashed by (2)", "(1) was smacked by (2)", "(1) was introduced to physics by (2)"],
+]);
+Registries.deathmsg.add("wall", [
+  ["(1) ran into a wall", "(1) discovered kinetic energy", "(1) didn't stop in time"],
+  ["(1) was slammed into a wall by (2)", "(1) ran away from (2) directly into a wall", "(1) was introduced to a wall by (2)"],
 ]);
 Registries.deathmsg.add("explosion", [
   ["(1) blew up", "(1) became geography", "(1) tried to rocket jump"],

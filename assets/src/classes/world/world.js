@@ -1,14 +1,16 @@
 import { create2DArray, index, iterate2DArray } from "../../core/2D-array.js";
 import { col } from "../../core/color.js";
 import { assign, constructFromType } from "../../core/constructor.js";
+import { clamp, rnd } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { ui } from "../../core/ui.js";
 import { debug } from "../../play/debug.js";
-import { Explosion, NuclearExplosion } from "../../play/effects.js";
+import { Explosion, NuclearExplosion, repeat } from "../../play/effects.js";
 import { contentScale, createPlayer } from "../../play/game.js";
 import { blockSize, chunkSize, worldSize } from "../../scaling.js";
 import { GroundTile } from "../block/ground-tile.js";
 import { Particle } from "../effect/particle.js";
+import { ShapeParticle } from "../effect/shape-particle.js";
 import { Space } from "../effect/space-renderer.js";
 import { Entity } from "../entity/entity.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
@@ -137,7 +139,17 @@ class World {
     this.floorParticles.forEach((p) => p.step(1));
     this.bullets.forEach((b) => b.tick());
     this.particles.forEach((p) => p.step(1));
-    this.entities.forEach((entity) => World.isInRenderDistance(entity, 1,World.simulationDistance * chunkSize * blockSize, 0, 0, 1) && entity.tick());
+    this.entities.forEach(
+      (entity) =>
+        World.isInRenderDistance(
+          entity,
+          1,
+          World.simulationDistance * chunkSize * blockSize,
+          0,
+          0,
+          1,
+        ) && entity.tick(),
+    );
     //Only tick simulated chunks
     this.toTick.forEach((chunk) => {
       chunk.tick();
@@ -442,8 +454,25 @@ class World {
     let block = chunk.getBlock(bx, by);
     return block;
   }
+  getHighestTileID(x, y) {
+    if (!this.chunks) throw new Error("The world has not been generated!");
+    try {
+      let cx = Math.floor(x / chunkSize),
+        bx = x % chunkSize;
+      let cy = Math.floor(y / chunkSize),
+        by = y % chunkSize;
+      let cr = this.chunks[cy];
+      if (!cr) return 0;
+      let chunk = cr[cx];
+      if (!chunk) return 0;
+      let block = chunk.getHighestTileID(bx, by);
+      return block;
+    } catch (error) {
+      return 0;
+    }
+  }
   /**@returns `undefined` if no chunk, `null` if no tile, or a `string` otherwise. */
-  getTile(x, y) {
+  getHighestTile(x, y) {
     if (!this.chunks) throw new Error("The world has not been generated!");
     try {
       let cx = Math.floor(x / chunkSize),
@@ -454,8 +483,41 @@ class World {
       if (!cr) return;
       let chunk = cr[cx];
       if (!chunk) return;
-      let block = chunk.getTile(bx, by);
+      let block = chunk.getHighestTile(bx, by);
       return block;
+    } catch (error) {
+      return null;
+    }
+  }
+  getTileID(x, y, layer) {
+    if (!this.chunks) throw new Error("The world has not been generated!");
+    try {
+      let cx = Math.floor(x / chunkSize),
+        bx = x % chunkSize;
+      let cy = Math.floor(y / chunkSize),
+        by = y % chunkSize;
+      let cr = this.chunks[cy];
+      if (!cr) return 0;
+      let chunk = cr[cx];
+      if (!chunk) return 0;
+      return chunk.getTileID(bx, by, layer);
+    } catch (error) {
+      return 0;
+    }
+  }
+  /**@returns `undefined` if no chunk, `null` if no tile, or a `string` otherwise. */
+  getTile(x, y, layer) {
+    if (!this.chunks) throw new Error("The world has not been generated!");
+    try {
+      let cx = Math.floor(x / chunkSize),
+        bx = x % chunkSize;
+      let cy = Math.floor(y / chunkSize),
+        by = y % chunkSize;
+      let cr = this.chunks[cy];
+      if (!cr) return;
+      let chunk = cr[cx];
+      if (!chunk) return;
+      return chunk.getTile(bx, by, layer);
     } catch (error) {
       return null;
     }
@@ -597,6 +659,33 @@ class World {
 
   print() {
     iterate2DArray(this.chunks, (c) => iterate2DArray(c.tiles, (t) => console.log(t)));
+  }
+
+  floorFlightCircle(x, y, color, speed) {
+    const sp = clamp(speed, 1, 5);
+    const us = speed / sp;
+    const s = Math.sqrt(speed)/25
+    repeat(Math.ceil(us), () => {
+    this.floorParticles.push(
+      new ShapeParticle(
+        x,
+        y,
+        rnd.float(0, 360),
+        speed/s,
+        sp,
+        s,
+        "circle",
+        [col.mult(color, .9), col.mult(col.hide(color), .9)],
+        sp * 6,
+        sp * 2,
+        sp * 6,
+        sp * 2,
+        0,
+        0,
+        false,
+      ),
+    );
+    })
   }
 }
 export { World };

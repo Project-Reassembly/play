@@ -106,7 +106,8 @@ class LegComponent extends Component {
   /**@param {Entity} entity*/
   tick(entity) {
     super.tick(entity);
-    this._cycleAmount += entity.computedSpeed;
+    if (entity.flying) this._cycleAmount = entity.velocity.magnitude * 3;
+    else this._cycleAmount += entity.velocity.magnitude;
   }
 }
 class WeaponComponent extends Component {

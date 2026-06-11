@@ -1,34 +1,34 @@
-import { Block } from "../classes/block/block.js";
-import { LandingPad, LaunchPad } from "../classes/block/capitalism/launch-pad.js";
-import { Container } from "../classes/block/container.js";
-import { Conveyor, Unloader } from "../classes/block/conveyor.js";
-import { SignBlock } from "../classes/block/decoration.js";
-import { Bomb, NuclearBomb } from "../classes/block/defense/bomb.js";
+import { Block } from "../../classes/block/block.js";
+import { LandingPad, LaunchPad } from "../../classes/block/capitalism/launch-pad.js";
+import { Container } from "../../classes/block/container.js";
+import { Conveyor, Unloader } from "../../classes/block/conveyor.js";
+import { SignBlock } from "../../classes/block/decoration.js";
+import { Bomb, NuclearBomb } from "../../classes/block/defense/bomb.js";
 import {
   TurretBase,
   TurretController,
   TurretItem,
-} from "../classes/block/defense/turret-components.js";
-import { Turret } from "../classes/block/defense/turret.js";
-import { Wall } from "../classes/block/defense/wall.js";
+} from "../../classes/block/defense/turret-components.js";
+import { Turret } from "../../classes/block/defense/turret.js";
+import { Wall } from "../../classes/block/defense/wall.js";
 import {
   CommandExecutorBlock,
   ItemCatalogBlock,
   StructureReaderBlock,
-} from "../classes/block/devblocks.js";
+} from "../../classes/block/devblocks.js";
 import {
   PlasmaCompressor,
   PlasmaDecompressor,
   PlasmaGenerator,
-} from "../classes/block/plasma-gen-and-compressor.js";
-import { PlasmaBlock, PlasmaPipe, PlasmaTank } from "../classes/block/plasma-pipe.js";
-import { Crafter, Uncrafter } from "../classes/block/production/crafter.js";
-import { Drill } from "../classes/block/production/drill.js";
-import { Smelter } from "../classes/block/production/smelter.js";
-import { TileProducer } from "../classes/block/production/tile-producer.js";
-import { Tile } from "../classes/block/tile.js";
-import { TankAssemblyBay } from "../classes/block/tonq/tank-assembly-bay.js";
-import { StatusEffect } from "../classes/effect/status-effect.js";
+} from "../../classes/block/plasma-gen-and-compressor.js";
+import { PlasmaBlock, PlasmaPipe, PlasmaTank } from "../../classes/block/plasma-pipe.js";
+import { Crafter, Uncrafter } from "../../classes/block/production/crafter.js";
+import { Drill } from "../../classes/block/production/drill.js";
+import { Smelter } from "../../classes/block/production/smelter.js";
+import { TileProducer } from "../../classes/block/production/tile-producer.js";
+import { Tile } from "../../classes/block/tile.js";
+import { TankAssemblyBay } from "../../classes/block/tonq/tank-assembly-bay.js";
+import { StatusEffect } from "../../classes/effect/status-effect.js";
 import {
   AICondition,
   AlternativeCondition,
@@ -39,7 +39,7 @@ import {
   MouseDownCondition,
   NearTargetCondition,
   StoredTargetCondition,
-} from "../classes/entity/ai/ai-conditions.js";
+} from "../../classes/entity/ai/ai-conditions.js";
 import {
   AIAttackTask,
   AITask,
@@ -48,47 +48,38 @@ import {
   SetDataTask,
   ShootBulletsTask,
   TrackTargetTask,
-} from "../classes/entity/ai/ai-tasks.js";
+} from "../../classes/entity/ai/ai-tasks.js";
 import {
   Component,
   DestructibleComponent,
   LegComponent,
   WeaponComponent,
   WeaponisedComponent,
-} from "../classes/entity/component.js";
-import { Entity } from "../classes/entity/entity.js";
-import { EquippedEntity, InventoryEntity } from "../classes/entity/inventory-entity.js";
-import { ModularTankEntity } from "../classes/entity/modular-tank.js";
-import { NPC } from "../classes/entity/npc.js";
-import { Player } from "../classes/entity/player.js";
-import { Equippable } from "../classes/item/equippable.js";
-import { ItemStack } from "../classes/item/item-stack.js";
-import { Item } from "../classes/item/item.js";
-import { PlaceableItem } from "../classes/item/placeable.js";
+} from "../../classes/entity/component.js";
+import { Entity } from "../../classes/entity/entity.js";
+import { EquippedEntity, InventoryEntity } from "../../classes/entity/inventory-entity.js";
+import { ModularTankEntity } from "../../classes/entity/modular-tank.js";
+import { NPC } from "../../classes/entity/npc.js";
+import { Player } from "../../classes/entity/player.js";
+import { Accessory } from "../../classes/item/accessory.js";
+import { Equippable } from "../../classes/item/equippable.js";
+import { ItemStack } from "../../classes/item/item-stack.js";
+import { Item } from "../../classes/item/item.js";
+import { PlaceableItem } from "../../classes/item/placeable.js";
 import {
   BlockLaunchedBullet,
   BlockLauncher,
-} from "../classes/item/special-weapons/block-launcher.js";
-import { Throwable } from "../classes/item/throwable.js";
-import { Weapon } from "../classes/item/weapon.js";
-import { Bullet } from "../classes/projectile/bullet.js";
-import { CriticalBullet } from "../classes/projectile/critical.js";
-import { PointBullet } from "../classes/projectile/point-bullet.js";
-import { VirtualBullet } from "../classes/projectile/virtual-bullet.js";
-import { Chunk } from "../classes/world/chunk.js";
-import {
-  DeliverEntityAction,
-  MessageAction as SendMessageAction,
-  WorldEventAction,
-} from "../classes/world/events/event-action.js";
-import {
-  OtherEventHappenedCondition,
-  TimedCondition,
-  WorldEventCondition,
-} from "../classes/world/events/event-condition.js";
-import { World } from "../classes/world/world.js";
-import { RegisteredItem } from "../core/registered-item.js";
-import { TypeRegistries } from "../core/registry.js";
+} from "../../classes/item/special-weapons/block-launcher.js";
+import { Throwable } from "../../classes/item/throwable.js";
+import { Weapon } from "../../classes/item/weapon.js";
+import { Bullet } from "../../classes/projectile/bullet.js";
+import { CriticalBullet } from "../../classes/projectile/critical.js";
+import { PointBullet } from "../../classes/projectile/point-bullet.js";
+import { VirtualBullet } from "../../classes/projectile/virtual-bullet.js";
+import { Chunk } from "../../classes/world/chunk.js";
+import { World } from "../../classes/world/world.js";
+import { RegisteredItem } from "../../core/registered-item.js";
+import { TypeRegistries } from "../../core/registry.js";
 import {
   ExplosionEffect,
   ImageParticleEmissionEffect,
@@ -98,13 +89,13 @@ import {
   TextParticleEmissionEffect,
   VisualEffect,
   WaveEmissionEffect,
-} from "../play/effects.js";
+} from "../../play/effects.js";
 import {
   LightningEmissionEffect,
   LinearEffect,
   LinearMultiEffect,
   LineEmissionEffect,
-} from "../play/line-effects.js";
+} from "../../play/line-effects.js";
 //Basic
 TypeRegistries.default.add("generic", RegisteredItem);
 //Entities and parts
@@ -131,6 +122,7 @@ TypeRegistries.default.add("item", Item);
 TypeRegistries.default.add("placeable", PlaceableItem);
 TypeRegistries.default.add("itemstack", ItemStack);
 TypeRegistries.default.add("equippable", Equippable);
+TypeRegistries.default.add("accessory", Accessory);
 //Weapons
 TypeRegistries.default.add("weapon", Weapon);
 TypeRegistries.default.add("throwable", Throwable);
@@ -210,9 +202,3 @@ TypeRegistries.default.add("aicon.data", DataComparisonCondition);
 TypeRegistries.default.add("aicon.all", CombinedCondition);
 TypeRegistries.default.add("aicon.any", AlternativeCondition);
 
-TypeRegistries.worldevent.add("action.none", WorldEventAction);
-TypeRegistries.worldevent.add("action.deliver", DeliverEntityAction);
-TypeRegistries.worldevent.add("action.message", SendMessageAction);
-TypeRegistries.worldevent.add("condition.never", WorldEventCondition);
-TypeRegistries.worldevent.add("condition.time-passed", TimedCondition);
-TypeRegistries.worldevent.add("condition.event", OtherEventHappenedCondition);

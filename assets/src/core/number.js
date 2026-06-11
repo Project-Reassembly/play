@@ -104,16 +104,22 @@ function colinterp(cols, factor, forceint = false) {
  */
 class Vector {
   /**@readonly */
-  static ZERO = new this(0, 0);
+  static get ZERO() {
+    return new this(0, 0);
+  }
   x = 0;
   y = 0;
   constructor(x = 0, y = 0) {
     this.x = x;
     this.y = y;
   }
+  /** True if this vector is not the zero vector. */
+  get nonzero() {
+    return this.x !== 0 || this.y !== 0;
+  }
   /** The length of the hypotenuse of the triangle formed by this vector's X- and Y-values as lengths. */
   get magnitude() {
-    return (this.x ** 2 + this.y ** 2) ** 0.5;
+    return Math.sqrt(this.x * this.x + this.y * this.y);
   }
   /**
    * Adds 2 vectors.
@@ -189,12 +195,13 @@ class Vector {
     return Math.atan2(this.y, this.x);
   }
   /**
-   * Returns the unit vector of this vector, i.e. this vector scaled by 1/magnitude.
+   * Returns the unit vector of this vector, i.e. this vector scaled by 1/magnitude. \
+   * For the zero vector, returns the _direction vector_ with angle 0 and magnitude 1, i.e. positional (1,0).
    * @param {boolean} [mutate=false]  Whether or not to change this vector's values.
    * @returns The result of the scaling. Either this vector, or the new one.
    */
   normalise(mutate = false) {
-    return this.scale(1 / this.magnitude, mutate);
+    return this.nonzero ? this.scale(1 / this.magnitude, mutate) : this.addXY(1, 0, mutate);
   }
   /**
    * Rotates a vector around an angle, anticlockwise.
@@ -227,6 +234,15 @@ class Vector {
    */
   distanceTo(vct) {
     return this.sub(vct).magnitude;
+  }
+  /**
+   * Finds the distance between this vector and a point.
+   * @param {number} x The X position fo the point to get the distance to.
+   * @param {number} y The Y position fo the point to get the distance to.
+   * @returns The Euclidean distance from this vector to the other one.
+   */
+  distanceToXY(x, y) {
+    return this.subXY(x, y).magnitude;
   }
   /**Creates a vector from an angle *in degrees* */
   static fromAngle(angle) {
@@ -355,7 +371,7 @@ export function maxI(array) {
     }
   return maxdex;
 }
-globalThis.mi = minIF
+globalThis.mi = minIF;
 
 export const rnd = new Randomiser();
 export { clamp, colinterp, dynamicSort, index, roundNum, shortenedNumber, tru, turn, Vector };

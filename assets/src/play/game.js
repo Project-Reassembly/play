@@ -866,7 +866,10 @@ function frame() {
     fpsUpdate();
     uiFrame();
     if (!ui.waitingForMouseUp) mouseInteraction();
-    if (!game.paused && !ui.mouse.down && game.player?.punchCharge > 0) game.player.releasePunch()
+    if (!game.paused && game.player) {
+      if (!ui.mouse.left && game.player.punchChargeR > 0) game.player.releasePunchRight();
+      if (!ui.mouse.right && game.player.punchChargeL > 0) game.player.releasePunchLeft();
+    }
   }
 }
 
@@ -1141,8 +1144,9 @@ function mouseInteraction() {
     ui.conditions.menu === "none"
   ) {
     if (ui.conditions.mode === "build") {
-      if (ui.mouse.button === "right") tryBreak();
-      else tryPlace();
+      // press both buttons to replace blocks
+      if (ui.mouse.right) tryBreak();
+      if (ui.mouse.left) tryPlace();
     } else if (ui.conditions.mode === "fight") {
       if (!Inventory.mouseItemStack.isEmpty()) {
         Inventory.mouseItemStack.getItem().useInAir(game.player, Inventory.mouseItemStack);
@@ -1150,12 +1154,14 @@ function mouseInteraction() {
       }
       if (ui.waitingForMouseUp) return;
 
-      if (ui.mouse.button === "right") {
+      // LMB = right hand // primary mouse button -> dominant hand
+      if (ui.mouse.left) {
         const rhi = game.player.rightHand.get(0);
         if (rhi instanceof ItemStack && rhi.getItem() instanceof Equippable)
           rhi.getItem().use(game.player, keyIsDown(SHIFT));
         else game.player.chargePunchRight();
-      } else {
+      }
+      if (ui.mouse.right) {
         const lhi = game.player.leftHand.get(0);
         if (lhi instanceof ItemStack && lhi.getItem() instanceof Equippable)
           lhi.getItem().use(game.player, keyIsDown(SHIFT));

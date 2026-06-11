@@ -1,6 +1,7 @@
 import { construct } from "../../core/constructor.js";
 import { debug } from "../../play/debug.js";
 import { Inventory } from "../inventory.js";
+import { Accessory } from "../item/accessory.js";
 import { Equippable } from "../item/equippable.js";
 import { ItemStack } from "../item/item-stack.js";
 import { PhysicalObject } from "../physical.js";
@@ -174,26 +175,23 @@ class EquippedEntity extends InventoryEntity {
     entity.ammo = Inventory.deserialise(created.ammo);
   }
   attack() {
-    if (
-      this.rightHand.get(0) instanceof ItemStack &&
-      this.rightHand.get(0).getItem() instanceof Equippable
-    )
-      this.rightHand.get(0).getItem().use(this);
-    if (
-      this.leftHand.get(0) instanceof ItemStack &&
-      this.leftHand.get(0).getItem() instanceof Equippable
-    )
-      this.leftHand.get(0).getItem().use(this);
+    const r = this.rightHand.get(0),
+      l = this.leftHand.get(0);
+    if (r instanceof ItemStack && r.getItem() instanceof Equippable) r.getItem().use(this);
+    if (l instanceof ItemStack && l.getItem() instanceof Equippable) l.getItem().use(this);
   }
   calculateAttributeModifiers() {
     super.calculateAttributeModifiers();
 
     this.equipment.iterate((stack) => {
       let i = stack.getItem();
-      if (i instanceof Equippable) {
-        for (let key in i.attributeModifiers) {
-          this.attributes.multiply(key, i.attributeModifiers[key]);
-        }
+      // if (i instanceof Equippable) {
+      //   for (let key in i.attributeModifiers) {
+      //     this.attributes.multiply(key, i.attributeModifiers[key]);
+      //   }
+      // }
+      if (i instanceof Accessory) {
+        i.calcAttrMods(this);
       }
     });
   }

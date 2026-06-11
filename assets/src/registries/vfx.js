@@ -2484,3 +2484,90 @@ Registries.vfx.add("peti-laser-mini", {
 //     },
 //   ],
 // });
+
+
+Registries.vfx.add("hit-wall", {
+  type: "multi-effect",
+  effects: [
+    {
+      type: "particle-emission",
+      amount: 4,
+      cone: 45,
+      particle: {
+        lifetime: 20,
+        speed: 4,
+        decel: 0.11,
+        colours: [
+          [255, 255, 255, 200],
+          [200, 100, 100, 0],
+        ],
+        widthFrom: 2,
+        widthTo: 0,
+        heightFrom: 8,
+        heightTo: 8,
+        shape: "rect",
+        light: 20,
+      },
+    },
+    {
+      type: "particle-emission",
+      amount: 4,
+      cone: 360,
+      particle: {
+        lifetime: 20,
+        speed: 4,
+        decel: 0.1,
+        colours: [
+          [255, 255, 255, 200],
+          [200, 100, 100, 0],
+        ],
+        widthFrom: 2,
+        widthTo: 0,
+        heightFrom: 8,
+        heightTo: 8,
+        shape: "rect",
+        light: 20,
+      },
+    },
+    {
+      type: "particle-emission",
+      amount: 4,
+      cone: 30,
+      particle: {
+        lifetime: 20,
+        speed: 5,
+        decel: 0.2,
+        direction: 180,
+        colours: [
+          [255, 255, 255, 200],
+          [200, 100, 100, 0],
+        ],
+        widthFrom: 2,
+        widthTo: 0,
+        heightFrom: 8,
+        heightTo: 8,
+        shape: "rect",
+        light: 20,
+      },
+    },
+    {
+      type: "particle-emission",
+      cone:0,
+      particle: {
+        lifetime: 30,
+        speed: 0,
+        decel: 0,
+        colours: [
+          [255, 255, 255, 200],
+          [200, 100, 100, 0],
+        ],
+        widthFrom: 15,
+        widthTo: 90,
+        heightFrom: 15,
+        heightTo: 30,
+        shape: "ellipse",
+        light: 20,
+      },
+    },
+  ],
+});

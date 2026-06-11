@@ -510,6 +510,7 @@ Registries.entities.add("scavenger", {
   aiType: "scavenger",
   attackRange: 250,
   targetRange: 500,
+  approachDist: 30,
   rightHand: [
     {
       item: "scrap-shooter",

@@ -77,8 +77,8 @@ export const col = new (class Int32Colours {
     return 255 | 0;
   }
   /**@readonly @type {color}*/
-  get accent(){
-    return -425066241 | 0
+  get accent() {
+    return -425066241 | 0;
   }
   /**@param {byte} r @param {byte} g @param {byte} b @param {byte} a @returns {color} */
   from(r = 0, g = 0, b = 0, a = 255) {
@@ -142,6 +142,25 @@ export const col = new (class Int32Colours {
       b = clamp(((col >> 8) & 0xff) * f, 0, 255) | 0;
     return (r << 24) | (g << 16) | (b << 8) | (col & 0xff);
   }
+  /**Mixes two colors together. @param {color} col1 @param {color} col2  @returns {color} */
+  blend(col1, col2) {
+    col1 = col1 | 0;
+    col2 = col2 | 0;
+    const r1 = (col1 >> 24) & 0xff,
+      g1 = (col1 >> 16) & 0xff,
+      b1 = (col1 >> 8) & 0xff,
+      a1 = col1 & 0xff;
+    const r2 = (col2 >> 24) & 0xff,
+      g2 = (col2 >> 16) & 0xff,
+      b2 = (col2 >> 8) & 0xff,
+      a2 = col2 & 0xff;
+    const ar = clamp(a1 + a2, 0, 255) & 0xff;
+    const mf = a1 / ar;
+    const rr = r1 * mf + r2 * (1 - mf),
+      gr = g1 * mf + g2 * (1 - mf),
+      br = b1 * mf + b2 * (1 - mf);
+    return (rr << 24) | (gr << 16) | (br << 8) | (ar & 0xff);
+  }
   /** @param {byte} level  @returns {color} */
   mono(level) {
     level = level & 0xff;
@@ -204,7 +223,7 @@ export const col = new (class Int32Colours {
   }
   /**@param {color} col */
   hex(col) {
-    return (col >>> 0).toString(16).padEnd(8,"f");
+    return (col >>> 0).toString(16).padEnd(8, "f");
   }
   /**@param {string} col */
   fromHex(col) {
@@ -215,29 +234,29 @@ export const col = new (class Int32Colours {
     // if(typeof col !== "number") throw new TypeError(`${col} is not a color!`)
     // ctx.fillStyle = `#${(col >>> 0).toString(16).padEnd(8,"0")}`;
     col = col | 0;
-    fill((col >> 24) & 0xff, (col >> 16) & 0xff, (col >> 8) & 0xff, (col & 0xff)|1);
+    fill((col >> 24) & 0xff, (col >> 16) & 0xff, (col >> 8) & 0xff, (col & 0xff) | 1);
   }
   /**@param {color} col */
   tint(col) {
     // ctx.fillStyle = `#${(col >>> 0).toString(16).padEnd(8,"0")}`;
     col = col | 0;
-    tint((col >> 24) & 0xff, (col >> 16) & 0xff, (col >> 8) & 0xff, (col & 0xff)|1);
+    tint((col >> 24) & 0xff, (col >> 16) & 0xff, (col >> 8) & 0xff, (col & 0xff) | 1);
   }
   /**@param {color} col */
   fillOn(g, col) {
     col = col | 0;
-    g.fill((col >> 24) & 0xff, (col >> 16) & 0xff, (col >> 8) & 0xff, (col & 0xff)|1);
+    g.fill((col >> 24) & 0xff, (col >> 16) & 0xff, (col >> 8) & 0xff, (col & 0xff) | 1);
   }
   /**@param {color} col */
   stroke(col) {
     // if(typeof col !== "number") throw new TypeError(`${col} is not a color!`)
     col = col | 0;
-    stroke((col >> 24) & 0xff, (col >> 16) & 0xff, (col >> 8) & 0xff, (col & 0xff)|1);
+    stroke((col >> 24) & 0xff, (col >> 16) & 0xff, (col >> 8) & 0xff, (col & 0xff) | 1);
   }
   /**@param {color} col */
   strokeOn(g, col) {
     col = col | 0;
-    g.stroke((col >> 24) & 0xff, (col >> 16) & 0xff, (col >> 8) & 0xff, (col & 0xff)|1);
+    g.stroke((col >> 24) & 0xff, (col >> 16) & 0xff, (col >> 8) & 0xff, (col & 0xff) | 1);
   }
   /** Recursively converts every colour-looking property of an object to an actual colour. */
   autonorm = function (obj) {

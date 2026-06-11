@@ -63,6 +63,8 @@ export const Decoration = new (class DecorationConsts {
         (Decoration.timer.ticks % 240) / 240,
       );
     },
+    //Reassembly accent color
+    "=": col.accent
   });
   timer = new Timer();
   styles = Object.freeze({

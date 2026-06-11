@@ -42,7 +42,7 @@ export class CutsceneHandler {
   fade = true;
   index = 0;
   active = false;
-  /** @type {CMFTTextDrawer} */
+  /** @type {CMFT.Drawer} */
   drawer = null;
   empty = new CMFT.Drawer().noBG();
   /**@param {string} csn Registry name of the cutscene to show.*/

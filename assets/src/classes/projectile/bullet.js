@@ -45,8 +45,9 @@ class Bullet extends PhysicalObject {
   entity = null;
   //bonc
   knockback = 0;
-  kineticKnockback = false;
-  controlledKnockback = false;
+  iknockback = 0; // immediate knockback
+  // kineticKnockback = false;
+  // controlledKnockback = false;
   //pierce
   damaged = [];
   pierce = 0;
@@ -135,6 +136,7 @@ class Bullet extends PhysicalObject {
     this.trailInterval ??= this.speed / this.hitSize;
     this.world ??= this.entity?.world;
     if (this.targetType !== "none" && this.targetType !== "nearest") this.controlled = true;
+    if(!this.damage instanceof Array) this.damage = [this.damage];
   }
   oncreated() {
     this.emit(this.spawnFrame, 0, 0, true);
@@ -158,9 +160,9 @@ class Bullet extends PhysicalObject {
     if (!this.remove) {
       this.intervalTick();
       //Which way to move
-      let moveVector = p5.Vector.fromAngle(this.directionRad);
+      let moveVector = Vector.fromAngle(this.direction);
       //Scale to speed
-      moveVector.mult(this.speed * dt);
+      moveVector.scale(this.speed * dt, true);
       //Move
       this.move(moveVector.x, moveVector.y);
       if (this.trackingRange > 0 && this.targetType !== "none") this.track();
@@ -175,10 +177,11 @@ class Bullet extends PhysicalObject {
         this.lifetime -= dt;
       }
       this.spawnTrail(dt);
+      const p = this.pos.clone();
       if (this.endLine !== "none") {
-        this.positions.push(this.pos);
+        this.positions.push(p);
       }
-      this.lastpos = this.pos;
+      this.lastpos = p;
     }
   }
   move(x, y) {
@@ -480,6 +483,7 @@ class Bullet extends PhysicalObject {
     ) {
       //If target still there
       this.rotateTowards(this.target.x, this.target.y, this.turnSpeed);
+      return;
     }
     let selected = null;
     if (this.targetType === "nearest") {

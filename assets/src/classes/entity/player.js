@@ -1,5 +1,5 @@
 import { construct, constructFromType } from "../../core/constructor.js";
-import { rnd, tru } from "../../core/number.js";
+import { rnd, tru, Vector } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { ui, UIComponent } from "../../core/ui.js";
 import Integrate from "../../lib/integrate.js";
@@ -7,10 +7,11 @@ import { autoScaledEffect } from "../../play/effects.js";
 import { Log } from "../../play/messaging.js";
 import { blockSize, Direction, totalSize } from "../../scaling.js";
 import { Inventory } from "../inventory.js";
+import { Accessory } from "../item/accessory.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { ItemStack } from "../item/item-stack.js";
 import { Bullet } from "../projectile/bullet.js";
-import { patternedBulletExpulsion } from "../projectile/yeeter.js";
+import { getPatternedBulletExpulsion } from "../projectile/yeeter.js";
 import { Timer } from "../timer.js";
 import { WeaponComponent } from "./component.js";
 import { EquippedEntity } from "./inventory-entity.js";
@@ -85,28 +86,31 @@ class Player extends EquippedEntity {
       "weapon-component",
     );
   }
-  punchHand = "left";
-  punchCharge = 0;
-  punchCharging = false;
+  punchChargeL = 0;
+  punchChargingL = false;
+  punchChargeR = 0;
+  punchChargingR = false;
   chargePunchRight() {
     if (this.rightArmComponent._rotRecoiled === 0) {
-      if (this.punchHand !== "right") this.punchCharge = 0;
-      this.punchHand = "right";
-      this.punchCharge++;
-      this.punchCharging = true;
+      this.punchChargeR++;
+      this.punchChargingR = true;
     }
   }
   chargePunchLeft() {
     if (this.leftArmComponent._rotRecoiled === 0) {
-      if (this.punchHand !== "left") this.punchCharge = 0;
-      this.punchHand = "left";
-      this.punchCharge++;
-      this.punchCharging = true;
+      this.punchChargeL++;
+      this.punchChargingL = true;
     }
   }
-  releasePunch() {
-    this._punchWith(this.punchHand === "left" ? this.leftArmComponent : this.rightArmComponent);
-    this.punchCharging = false;
+  releasePunchLeft() {
+    this._punchWith(this.leftArmComponent, this.punchChargeL);
+    this.punchChargeL = 0;
+    this.punchChargingL = false;
+  }
+  releasePunchRight() {
+    this._punchWith(this.rightArmComponent, this.punchChargeR);
+    this.punchChargeR = 0;
+    this.punchChargingR = false;
   }
   _posOf(component) {
     let pos = component.getPosOn(this);
@@ -127,18 +131,17 @@ class Player extends EquippedEntity {
     pos.y -= Math.sin(this.directionRad) * 10;
     return pos;
   }
-  _punchWith(component) {
+  _punchWith(component, charge) {
     component.trigger();
     component.tick(this);
     const { x, y, direction } = this._posOf(component);
-    this.punch(x, y, direction, this.punchCharge);
-    this.punchCharge = 0;
+    this.punch(x, y, direction, charge);
   }
-  _chargeEffectAt(component) {
+  _chargeEffectAt(component, charge) {
     const { x, y, direction } = this._chargePosOf(component);
     autoScaledEffect(
-      this.punchCharge > 90 ? "punch-charged"
-      : this.punchCharge === 90 ? "punch-charge-complete"
+      charge > 90 ? "punch-charged"
+      : charge === 90 ? "punch-charge-complete"
       : "punch-charge",
       this.world,
       x,
@@ -147,92 +150,40 @@ class Player extends EquippedEntity {
     );
   }
   punch(x, y, direction, charge) {
-    if (charge > 90) {
+    const charged = charge > 90;
+    if (charged) {
       autoScaledEffect("charged-swing", this.world, x, y, direction);
-      /** @type {Integrate.Unconstructed<Bullet>} */
-      const bul = {
-        hitEffect: "big-punch",
-        speed: 5,
-        lifetime: 2,
-        hitSize: 10,
-        knockback: 50,
-        damage: [{ amount: 5, type: "impact" }],
-        despawnEffect: "none",
-        drawer: { hidden: true },
-        hitNumber: 1,
-        hitBullet: {
-          spawnNumber: 1,
-          spawnBullet: {
-            speed: 0,
-            lifetime: 0,
-            drawer: { hidden: true },
-            damage: [{ amount: 2, type: "impact", radius: 25, knockback: 1500 }],
-          },
-          turnSpeed: 360,
-          targetType: "hovered",
-          trackingRange: 60,
-          hitEffect: "punch",
-          speed: 5,
-          lifetime: 9,
-          extraUpdates: 1,
-          hitSize: 10,
-          knockback: 30,
-          damage: [{ amount: 2, type: "impact" }],
-          despawnEffect: "none",
-          drawer: { hidden: true },
-          hitNumber: 1,
-          trail: true,
-          trailEffect: "charged-punch-trail",
-          hitBullet: {
-            turnSpeed: 360,
-            targetType: "hovered",
-            trackingRange: 30,
-            hitEffect: "punch",
-            speed: 5,
-            lifetime: 7,
-            extraUpdates: 1,
-            hitSize: 10,
-            knockback: 20,
-            damage: [{ amount: 2, type: "impact" }],
-            despawnEffect: "none",
-            drawer: { hidden: true },
-            hitNumber: 1,
-            trail: true,
-            trailEffect: "charged-punch-trail",
-            hitBullet: {
-              turnSpeed: 360,
-              targetType: "hovered",
-              trackingRange: 30,
-              hitEffect: "punch",
-              speed: 5,
-              lifetime: 5,
-              hitSize: 10,
-              knockback: 10,
-              damage: [{ amount: 1, type: "impact" }],
-              despawnEffect: "none",
-              trail: true,
-              trailEffect: "charged-punch-trail",
-              drawer: { hidden: true },
-            },
-          },
-        },
-      };
-      patternedBulletExpulsion(x, y, bul, 1, degrees(direction), 0, 0, this.world, this);
     } else {
       autoScaledEffect("swing", this.world, x, y, direction);
-      /** @type {Integrate.Unconstructed<Bullet>} */
-      const bul = {
-        hitEffect: "punch",
-        speed: 1,
-        lifetime: 5,
-        hitSize: 10,
-        knockback: 20,
-        damage: [{ amount: 1, type: "impact" }],
-        despawnEffect: "none",
-        drawer: { hidden: true },
-      };
-      patternedBulletExpulsion(x, y, bul, 1, degrees(direction), 0, 0, this.world, this);
     }
+
+    /** @type {string?} */
+    let type = charged ? "big-punch" : "punch";
+    this.doToAccessories((i) => {
+      const t = i.selectAtkType(this, charged);
+      if (t) type = t;
+    });
+
+    /** @type {Integrate.Unconstructed<Bullet>} */
+    const bul = typeof type === "object" ? type : Registries.small.punch_types.get(type).bullet;
+    if (bul) {
+      getPatternedBulletExpulsion(x, y, bul, 1, degrees(direction), 0, 0, this.world, this).forEach(
+        (b) => {
+          const oh = b.hitb;
+          b.hitb = () => {
+            this.doToAccessories((i) => i.atkPerformed(this, charged));
+            oh.call(b);
+          };
+        },
+      );
+    }
+  }
+  /** @param {(v:Accessory, i:number, stop: () => void) => void} fn  */
+  doToAccessories(fn) {
+    this.equipment.iterate((stack, _, stop) => {
+      const i = stack.getItem();
+      if (i instanceof Accessory) fn(i, _, stop);
+    });
   }
   drawArms() {
     let left = this.leftHand.get(0)?.getItem();
@@ -317,10 +268,10 @@ class Player extends EquippedEntity {
     super.tick();
     this.leftArmComponent.tick(this);
     this.rightArmComponent.tick(this);
-    if (this.punchCharging && this.punchCharge > 20)
-      this._chargeEffectAt(
-        this.punchHand === "left" ? this.leftArmComponent : this.rightArmComponent,
-      );
+    if (this.punchChargingR && this.punchChargeR > 20)
+      this._chargeEffectAt(this.rightArmComponent, this.punchChargeR);
+    if (this.punchChargingL && this.punchChargeL > 20)
+      this._chargeEffectAt(this.leftArmComponent, this.punchChargeL);
     if (this.assemblyRecipes.length > 0) {
       let recipe = this.assemblyRecipes[this._recipe];
       if (!recipe) {
@@ -368,24 +319,27 @@ class Player extends EquippedEntity {
       totalSize - blockSize * 0.5,
       totalSize - blockSize * 0.5,
     ];
-
     if (this.controllable) {
+      const v = Vector.ZERO;
+      const accel = this.flying ? Math.cbrt(this.speed) / 5 : this.speed / 10;
       if (keyIsDown(87) && this.y > borders[1] /* Top */ + this.hitSize) {
         //If 'W' pressed
-        this.move(0, -this.speed);
+        v.addXY(0, -1, true);
+        //this.move(0, -this.speed);
       }
       if (keyIsDown(83) && this.y < borders[3] /* Bottom */ - this.hitSize) {
         //If 'S' pressed
-        this.move(0, this.speed);
+        v.addXY(0, 1, true);
       }
       if (keyIsDown(65) && this.x > borders[0] /* Left */ + this.hitSize) {
         //If 'A' pressed
-        this.move(-this.speed, 0);
+        v.addXY(-1, 0, true);
       }
       if (keyIsDown(68) && this.x < borders[2] /* Right */ - this.hitSize) {
         //If 'D' pressed
-        this.move(this.speed, 0);
+        v.addXY(1, 0, true);
       }
+      if (v.nonzero) this.velocity.add(v.normalise().scale(accel), true);
     }
   }
   serialise() {

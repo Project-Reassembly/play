@@ -373,7 +373,7 @@ export class TurretController extends TurretBase {
     return true;
   }
   value() {
-    return super.value() + (this.turretinv.get(0).getItem()?.baseSize || 0) + 2;
+    return super.value() + (this.turretinv.get(0) ? this.turretinv.get(0).getItem()?.baseSize || 0 : 0) + 2;
   }
 }
 

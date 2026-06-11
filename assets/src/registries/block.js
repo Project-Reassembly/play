@@ -873,6 +873,33 @@ createLinkedBlockAndItem(
         ],
         time: 360,
       },
+      {
+        inputs: [
+          {
+            item: "makeshift-explosive",
+            count: 1,
+          },
+          {
+            item: "plate",
+            count: 4,
+          },
+          {
+            item: "copper-ingot",
+            count: 2,
+          },
+          {
+            item: "copper-wire",
+            count: 12,
+          },
+        ],
+        outputs: [
+          {
+            item: "blast-knuckles",
+            count: 1,
+          },
+        ],
+        time: 600,
+      },
     ],
   },
   {

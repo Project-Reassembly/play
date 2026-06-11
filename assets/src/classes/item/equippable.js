@@ -1,6 +1,7 @@
 import { construct } from "../../core/constructor.js";
 import { roundNum } from "../../core/number.js";
 import { Item } from "./item.js";
+/** Item which can be used in weapon or body slots. */
 class Equippable extends Item {
   //Shown offsets
   posX = 0;

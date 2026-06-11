@@ -3,11 +3,11 @@
 console.log("[World Gen] [Setup] Worker created");
 const { BlockGenerator, Generator, OreGenerator, TileGenerator } =
   await import("../classes/world/generator.js");
+const { GroundTile } = await import("../classes/block/ground-tile.js");
 const { constructFromRegistry } = await import("../core/constructor.js");
 const { Registries } = await import("../core/registry.js");
 const Integrate = (await import("../lib/integrate.js")).default;
 await import("../registries/worldgen.js");
-const { GroundTile } = await import("../classes/block/ground-tile.js");
 console.log("[World Gen] [Setup] Imported constructor");
 
 onmessage = (ev) => {

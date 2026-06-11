@@ -15,7 +15,7 @@ export class GroundTile extends RegisteredItem {
     const i = this.#tiles[type]?.image ?? "error";
     const img = Registries.images.get(i);
     // if (ui.camera.zoom < 0.2) img.drawCol(x, y, blockSize, blockSize);
-    /*else*/img.draw(x, y, blockSize, blockSize);
+    /*else*/ img.draw(x, y, blockSize, blockSize);
     // console.log("drawing " + i + " at " + x * blockSize + ", " + y * blockSize);
     //drawImg(i, x, y, blockSize, blockSize);
   }
@@ -26,6 +26,12 @@ export class GroundTile extends RegisteredItem {
         Registries.statuses.get(tile.appliedStatus ?? "none"),
         tile.appliedStatusDuration ?? 240,
       );
+    if (tile?.speedMultiplier) entity.attributes.multiply("speed", +tile.speedMultiplier || 1);
+  }
+
+  static colorOf(type) {
+    let img = this.#tiles[type]?.image ?? "error";
+    return Registries.images.get(img).color;
   }
   static randomTick(tile, x, y) {}
   /** @type {Integrate.Unconstructed<GroundTile>[]} */

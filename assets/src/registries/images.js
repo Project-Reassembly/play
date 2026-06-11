@@ -70,6 +70,8 @@ add("item.sandstone", "assets/textures/item/sandstone.png")
 
 add("item.coal", "assets/textures/item/coal.png")
 add("item.makeshift-explosive", "assets/textures/item/makeshift-explosive.png")
+//Items > Accessories
+add("accessory.blast-knuckles", "assets/textures/item/blast-knuckles.png")
 //Items > Ammo
 add("item.scrap-bullet", "assets/textures/item/scrap-bullet.png")
 add("item.scrap-rocket", "assets/textures/item/scrap-rocket.png")

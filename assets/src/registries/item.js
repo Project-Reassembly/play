@@ -5,8 +5,7 @@ Registries.items.add("nothing", {});
 Registries.items.add("scrap", {
   name: "Scrap Metal",
   marketValue: 1,
-  description:
-    "A small piece of scrap, recovered from remains of destroyed machines.",
+  description: "A small piece of scrap, recovered from remains of destroyed machines.",
   image: "item.scrap",
 });
 Registries.items.add("plate", {
@@ -19,8 +18,7 @@ Registries.items.add("plate", {
 Registries.items.add("raw-copper", {
   name: "Raw Copper (Malachite)",
   marketValue: 1,
-  description:
-    "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
+  description: "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-copper",
 });
 Registries.items.add("copper-ingot", {
@@ -32,16 +30,14 @@ Registries.items.add("copper-ingot", {
 Registries.items.add("copper-wire", {
   name: "Copper Wire",
   marketValue: 0.5,
-  description:
-    "Basic wire, used for circuitry\n and low-power energy transmission.",
+  description: "Basic wire, used for circuitry\n and low-power energy transmission.",
   image: "item.copper-wire",
 });
 
 Registries.items.add("raw-iron", {
   name: "Raw Iron (Hematite)",
   marketValue: 5,
-  description:
-    "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
+  description: "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-iron",
 });
 Registries.items.add("iron-ingot", {
@@ -54,8 +50,7 @@ Registries.items.add("iron-ingot", {
 Registries.items.add("raw-electrum", {
   name: "Natural Electrum",
   marketValue: 25,
-  description:
-    "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
+  description: "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-electrum",
 });
 Registries.items.add("electrum-ingot", {
@@ -80,8 +75,7 @@ Registries.items.add("gold-ingot", {
 Registries.items.add("raw-titanium", {
   name: "Raw Titanium (Ilmenite)",
   marketValue: 85,
-  description:
-    "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
+  description: "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-titanium",
 });
 Registries.items.add("titanium-ingot", {
@@ -94,8 +88,7 @@ Registries.items.add("titanium-ingot", {
 Registries.items.add("raw-aluminium", {
   name: "Raw Aluminium (Bauxite)",
   marketValue: 60,
-  description:
-    "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
+  description: "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-aluminium",
 });
 Registries.items.add("aluminium-ingot", {
@@ -108,8 +101,7 @@ Registries.items.add("aluminium-ingot", {
 Registries.items.add("raw-tungsten", {
   name: "Raw Tungsten (Wolframite)",
   marketValue: 50,
-  description:
-    "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
+  description: "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-tungsten",
 });
 Registries.items.add("tungsten-ingot", {
@@ -141,8 +133,7 @@ Registries.items.add("sandstone", {
 Registries.items.add("coal", {
   name: "Coal",
   marketValue: 0.75,
-  description:
-    "A small chunk of coal.\nUsed as fuel in smelters.\nYay, pollution!",
+  description: "A small chunk of coal.\nUsed as fuel in smelters.\nYay, pollution!",
   image: "item.coal",
 });
 //Throwables
@@ -158,22 +149,11 @@ Registries.items.add("makeshift-explosive", {
     speed: 8,
     decel: 0.2,
     collides: false,
-    drawer: {
-      image: "item.makeshift-explosive",
-      width: 10,
-      height: 10,
-    },
+    drawer: { image: "item.makeshift-explosive", width: 10, height: 10 },
     status: "burning",
     statusDuration: 360,
     trailEffect: "burning",
-    damage: [
-      {
-        type: "explosion",
-        amount: 30,
-        spread: 10,
-        radius: 30,
-      },
-    ],
+    damage: [{ type: "explosion", amount: 30, spread: 10, radius: 30 }],
     fragBullet: {
       lifetime: 10,
       speed: 15,
@@ -181,42 +161,33 @@ Registries.items.add("makeshift-explosive", {
       trail: true,
       hitSize: 2.5,
       trailShape: "rhombus",
-      drawer: {
-        shape: "rhombus",
-        fill: "#cd9f8b",
-        width: 8,
-        height: 3,
-        image: false,
-      },
+      drawer: { shape: "rhombus", fill: "#cd9f8b", width: 8, height: 3, image: false },
       trailColours: [
         [255, 255, 100, 200],
         [255, 0, 0, 100],
         [75, 75, 75, 20],
       ],
       trailLife: 30,
-      damage: [
-        {
-          type: "ballistic",
-          amount: 5,
-          spread: 3,
-        },
-      ],
+      damage: [{ type: "ballistic", amount: 5, spread: 3 }],
     },
     fragNumber: 9,
     fragSpread: 360,
     despawnEffect: "explosion~50",
     fires: 3,
     isFireBinomial: true,
-    fire: {
-      damage: 3,
-      lifetime: 720,
-      interval: 20,
-      status: "burning",
-      statusDuration: 120,
-    },
+    fire: { damage: 3, lifetime: 720, interval: 20, status: "burning", statusDuration: 120 },
     fireChance: 0.5,
     fireSpread: 20,
   },
+});
+//Accessories
+Registries.items.add("blast-knuckles", {
+  type: "accessory",
+  name: "Blast Knuckles",
+  image: "accessory.blast-knuckles",
+  description:
+    "#7iGet it? Like brass knuckles? But boom?#--\nUses #-bMakeshift Explosive#--s to make #=-charged punches#-- explode violently.",
+  modifiers: [{ type: "punch", charged: "blast-punch", ammoUsed: "makeshift-explosive" }],
 });
 //Weapons
 Registries.items.add("scrap-shooter", {
@@ -235,33 +206,14 @@ Registries.items.add("scrap-shooter", {
         trail: true,
         hitSize: 2.5,
         trailShape: "rhombus",
-        drawer: {
-          shape: "rhombus",
-          fill: "#cd9f8b",
-          width: 8,
-          height: 3,
-          image: false,
-        },
+        drawer: { shape: "rhombus", fill: "#cd9f8b", width: 8, height: 3, image: false },
         trailColours: [[80, 62, 55, 100]],
-        damage: [
-          {
-            type: "ballistic",
-            amount: 7,
-            spread: 2,
-          },
-        ],
+        damage: [{ type: "ballistic", amount: 7, spread: 2 }],
       },
     ],
-    ammos: {
-      "scrap-bullet": 0,
-    },
+    ammos: { "scrap-bullet": 0 },
   },
-  shoot: {
-    reload: 10,
-    pattern: {
-      spread: 3.5,
-    },
-  },
+  shoot: { reload: 10, pattern: { spread: 3.5 } },
   component: {
     type: "weapon-component",
     width: 32,
@@ -281,7 +233,7 @@ Registries.items.add("scrap-repeater", {
     "Shoots bullets far more quickly.\nMore inaccurate.\n\nIf you shoot enough bullets, you can't miss!",
   image: "weapon.scrap-repeater.item",
   range: 250,
-  recoil: 0.6,
+  recoil: 0.15,
   bullets: {
     types: [
       {
@@ -291,35 +243,16 @@ Registries.items.add("scrap-repeater", {
         light: 30,
         trail: true,
         hitSize: 2.5,
-        knockback: 2,
+        knockback: 0.5,
         trailShape: "rhombus",
-        drawer: {
-          shape: "rhombus",
-          fill: "#cd9f8b",
-          width: 10,
-          height: 2.5,
-          image: false,
-        },
+        drawer: { shape: "rhombus", fill: "#cd9f8b", width: 10, height: 2.5, image: false },
         trailColours: [[80, 62, 55, 100]],
-        damage: [
-          {
-            type: "ballistic",
-            amount: 5,
-            spread: 2,
-          },
-        ],
+        damage: [{ type: "ballistic", amount: 5, spread: 2 }],
       },
     ],
-    ammos: {
-      "scrap-bullet": 0,
-    },
+    ammos: { "scrap-bullet": 0 },
   },
-  shoot: {
-    reload: 3,
-    pattern: {
-      spread: 5,
-    },
-  },
+  shoot: { reload: 3, pattern: { spread: 5 } },
   component: {
     type: "weapon-component",
     width: 36,
@@ -336,8 +269,7 @@ Registries.items.add("scrap-cannon", {
   type: "weapon",
   name: "Scrap Cannon",
   marketValue: 150,
-  description:
-    "Hurls 3 large clumps of scrap, which break apart in the air and on impact.",
+  description: "Hurls 3 large clumps of scrap, which break apart in the air and on impact.",
   image: "weapon.scrap-shooter.item",
   range: 200,
   bullets: {
@@ -350,22 +282,9 @@ Registries.items.add("scrap-cannon", {
         trail: true,
         hitSize: 5,
         trailShape: "rhombus",
-        drawer: {
-          shape: "rhombus",
-          fill: "#cd9f8b",
-          width: 14,
-          height: 9,
-          image: false,
-        },
+        drawer: { shape: "rhombus", fill: "#cd9f8b", width: 14, height: 9, image: false },
         trailColours: [[80, 62, 55, 100]],
-        damage: [
-          {
-            type: "ballistic",
-            amount: 30,
-            spread: 7.5,
-            radius: 20,
-          },
-        ],
+        damage: [{ type: "ballistic", amount: 30, spread: 7.5, radius: 20 }],
         despawnEffect: "explosion~20",
         intervalNumber: 2,
         intervalTime: 7,
@@ -377,20 +296,8 @@ Registries.items.add("scrap-cannon", {
           lifetime: 12,
           hitSize: 2.5,
           trailColours: [[80, 62, 55, 100]],
-          damage: [
-            {
-              amount: 6,
-              type: "ballistic",
-              spread: 3,
-            },
-          ],
-          drawer: {
-            shape: "rhombus",
-            fill: "#cd9f8b",
-            width: 6,
-            height: 4,
-            image: false,
-          },
+          damage: [{ amount: 6, type: "ballistic", spread: 3 }],
+          drawer: { shape: "rhombus", fill: "#cd9f8b", width: 6, height: 4, image: false },
         },
         fragSpacing: 20,
         fragNumber: 2,
@@ -401,36 +308,14 @@ Registries.items.add("scrap-cannon", {
           lifetime: 12,
           hitSize: 2.5,
           trailColours: [[80, 62, 55, 100]],
-          damage: [
-            {
-              amount: 8,
-              type: "ballistic",
-              spread: 4,
-            },
-          ],
-          drawer: {
-            shape: "rhombus",
-            fill: "#cd9f8b",
-            width: 8,
-            height: 4,
-            image: false,
-          },
+          damage: [{ amount: 8, type: "ballistic", spread: 4 }],
+          drawer: { shape: "rhombus", fill: "#cd9f8b", width: 8, height: 4, image: false },
         },
       },
     ],
-    ammos: {
-      scrap: 0,
-    },
+    ammos: { scrap: 0 },
   },
-  shoot: {
-    effect: "explosion~10",
-    reload: 90,
-    pattern: {
-      spacing: 10,
-      spread: 5,
-      amount: 3,
-    },
-  },
+  shoot: { effect: "explosion~10", reload: 90, pattern: { spacing: 10, spread: 5, amount: 3 } },
   component: {
     type: "weapon-component",
     width: 32,
@@ -462,7 +347,7 @@ Registries.items.add("scrap-launcher", {
         trailEffect: "burning",
         trail: true,
         trailInterval: 10,
-        knockback: 20,
+        knockback: 5,
         // trailColours: [
         //   [255, 255, 255],
         //   [255, 255, 0],
@@ -472,23 +357,10 @@ Registries.items.add("scrap-launcher", {
         //   [100, 100, 100, 0],
         // ],
         damage: [
-          {
-            amount: 8,
-            type: "ballistic",
-            spread: 4,
-          },
-          {
-            amount: 45,
-            type: "explosion",
-            spread: 10,
-            radius: 60,
-          },
+          { amount: 8, type: "ballistic", spread: 4 },
+          { amount: 45, type: "explosion", spread: 10, radius: 60 },
         ],
-        drawer: {
-          image: "bullet.scrap-rocket",
-          width: 16,
-          height: 9,
-        },
+        drawer: { image: "bullet.scrap-rocket", width: 16, height: 9 },
         despawnEffect: "explosion~60",
         fragBullet: {
           lifetime: 10,
@@ -497,39 +369,22 @@ Registries.items.add("scrap-launcher", {
           trail: true,
           hitSize: 2.5,
           trailShape: "rhombus",
-          drawer: {
-            shape: "rhombus",
-            fill: "#cd9f8b",
-            width: 8,
-            height: 3,
-            image: false,
-          },
+          drawer: { shape: "rhombus", fill: "#cd9f8b", width: 8, height: 3, image: false },
           trailColours: [
             [255, 255, 100, 200],
             [255, 0, 0, 100],
             [75, 75, 75, 20],
           ],
           trailLife: 30,
-          damage: [
-            {
-              type: "ballistic",
-              amount: 10,
-              spread: 5,
-            },
-          ],
+          damage: [{ type: "ballistic", amount: 10, spread: 5 }],
         },
         fragNumber: 9,
         fragSpread: 360,
       },
     ],
-    ammos: {
-      "scrap-rocket": 0,
-    },
+    ammos: { "scrap-rocket": 0 },
   },
-  shoot: {
-    effect: "launcher-smoke",
-    reload: 45,
-  },
+  shoot: { effect: "launcher-smoke", reload: 45 },
   component: {
     type: "weapon-component",
     width: 36,
@@ -560,21 +415,10 @@ Registries.items.add("construction-gun", {
       [255, 250, 100],
       [255, 200, 50, 100],
     ],
-    damage: [
-      {
-        type: "impact",
-        amount: 0,
-        radius: 25,
-      },
-    ],
+    damage: [{ type: "impact", amount: 0, radius: 25 }],
     despawnEffect: "construction-hit~25",
   },
-  shoot: {
-    reload: 20,
-    pattern: {
-      spread: 0.5,
-    },
-  },
+  shoot: { reload: 20, pattern: { spread: 0.5 } },
   component: {
     type: "weapon-component",
     width: 32,
@@ -617,30 +461,15 @@ Registries.items.add("iti-laser-pistol", {
         status: "plasma-burn",
         statusDuration: 20,
         trailLife: 30,
-        knockback: 5,
-        drawer: {
-          hidden: true,
-        },
-        damage: [
-          {
-            type: "laser",
-            amount: 6,
-          },
-        ],
+        knockback: 1.5,
+        drawer: { hidden: true },
+        damage: [{ type: "laser", amount: 6 }],
         despawnEffect: "none",
       },
     ],
-    ammos: {
-      none: 0,
-    },
+    ammos: { none: 0 },
   },
-  shoot: {
-    reload: 13,
-    effect: "laser-caster-frag",
-    pattern: {
-      spread: 3,
-    },
-  },
+  shoot: { reload: 13, effect: "laser-caster-frag", pattern: { spread: 3 } },
   component: {
     type: "weapon-component",
     width: 32,
@@ -672,27 +501,13 @@ Registries.items.add("iti-laser-caster", {
         trailShape: "rhombus",
         trailColours: [[0, 200, 255, 200]],
         trailLight: 70,
-        knockback: 10,
+        knockback: 3,
         status: "plasma-burn",
         statusDuration: 360,
-        drawer: {
-          shape: "rhombus",
-          fill: [0, 255, 255],
-          width: 12,
-          height: 4,
-          image: false,
-        },
+        drawer: { shape: "rhombus", fill: [0, 255, 255], width: 12, height: 4, image: false },
         damage: [
-          {
-            type: "laser",
-            amount: 20,
-            spread: 5,
-          },
-          {
-            amount: 10,
-            spread: 3,
-            radius: 20,
-          },
+          { type: "laser", amount: 20, spread: 5 },
+          { amount: 10, spread: 3, radius: 20 },
         ],
         despawnEffect: "laser-caster-explosion~20",
         fire: {
@@ -710,7 +525,7 @@ Registries.items.add("iti-laser-caster", {
           trackingRange: 100,
           light: 50,
           trailLight: 50,
-          knockback: 2,
+          knockback: 0.5,
           turnSpeed: 20,
           lifetime: 10,
           speed: 10,
@@ -732,13 +547,7 @@ Registries.items.add("iti-laser-caster", {
             height: 2,
             image: false,
           },
-          damage: [
-            {
-              type: "laser",
-              amount: 8,
-              spread: 2,
-            },
-          ],
+          damage: [{ type: "laser", amount: 8, spread: 2 }],
           despawnEffect: "laser-caster-frag",
         },
       },
@@ -751,27 +560,13 @@ Registries.items.add("iti-laser-caster", {
         trailShape: "rhombus",
         trailColours: [[0, 200, 255, 200]],
         trailLight: 70,
-        knockback: 20,
+        knockback: 3,
         status: "plasma-burn",
         statusDuration: 420,
-        drawer: {
-          shape: "rhombus",
-          fill: [0, 255, 255],
-          width: 14,
-          height: 5,
-          image: false,
-        },
+        drawer: { shape: "rhombus", fill: [0, 255, 255], width: 14, height: 5, image: false },
         damage: [
-          {
-            type: "laser",
-            amount: 24,
-            spread: 5,
-          },
-          {
-            amount: 12.5,
-            spread: 4,
-            radius: 25,
-          },
+          { type: "laser", amount: 24, spread: 5 },
+          { amount: 12.5, spread: 4, radius: 25 },
         ],
         despawnEffect: "laser-caster-explosion~25",
         fire: {
@@ -789,7 +584,7 @@ Registries.items.add("iti-laser-caster", {
           trackingRange: 150,
           light: 50,
           trailLight: 50,
-          knockback: 2,
+          knockback: 0.5,
           turnSpeed: 25,
           lifetime: 15,
           speed: 15,
@@ -811,13 +606,7 @@ Registries.items.add("iti-laser-caster", {
             height: 3,
             image: false,
           },
-          damage: [
-            {
-              type: "laser",
-              amount: 10,
-              spread: 2,
-            },
-          ],
+          damage: [{ type: "laser", amount: 10, spread: 2 }],
           despawnEffect: "laser-caster-frag",
         },
       },
@@ -830,27 +619,13 @@ Registries.items.add("iti-laser-caster", {
         trailShape: "rhombus",
         trailColours: [[184, 0, 255, 200]],
         trailLight: 70,
-        knockback: 20,
+        knockback: 3,
         status: "plasma-burn-boosted",
         statusDuration: 480,
-        drawer: {
-          shape: "rhombus",
-          fill: [198, 51, 255],
-          width: 12,
-          height: 7,
-          image: false,
-        },
+        drawer: { shape: "rhombus", fill: [198, 51, 255], width: 12, height: 7, image: false },
         damage: [
-          {
-            type: "laser",
-            amount: 45,
-            spread: 6,
-          },
-          {
-            amount: 20,
-            spread: 5,
-            radius: 30,
-          },
+          { type: "laser", amount: 45, spread: 6 },
+          { amount: 20, spread: 5, radius: 30 },
         ],
         despawnEffect: "laser-caster-explosion-plasma~30",
         fire: {
@@ -868,7 +643,7 @@ Registries.items.add("iti-laser-caster", {
           trackingRange: 150,
           light: 50,
           trailLight: 50,
-          knockback: 2,
+          knockback: 0.5,
           turnSpeed: 25,
           lifetime: 12,
           speed: 12,
@@ -883,20 +658,8 @@ Registries.items.add("iti-laser-caster", {
             [198, 51, 255, 128],
             [184, 0, 255],
           ],
-          drawer: {
-            shape: "rhombus",
-            fill: "white",
-            width: 7,
-            height: 3,
-            image: false,
-          },
-          damage: [
-            {
-              type: "laser",
-              amount: 15,
-              spread: 3,
-            },
-          ],
+          drawer: { shape: "rhombus", fill: "white", width: 7, height: 3, image: false },
+          damage: [{ type: "laser", amount: 15, spread: 3 }],
           despawnEffect: "laser-caster-frag-plasma",
         },
       },
@@ -908,27 +671,13 @@ Registries.items.add("iti-laser-caster", {
         hitSize: 3,
         trailEffect: "laser-caster-fire-destabilised",
         trailLight: 70,
-        knockback: 20,
+        knockback: 3,
         status: "destabilised",
         statusDuration: 480,
-        drawer: {
-          shape: "rhombus",
-          fill: [255, 100, 100],
-          width: 12,
-          height: 7,
-          image: false,
-        },
+        drawer: { shape: "rhombus", fill: [255, 100, 100], width: 12, height: 7, image: false },
         damage: [
-          {
-            type: "laser",
-            amount: 75,
-            spread: 15,
-          },
-          {
-            amount: 30,
-            spread: 8,
-            radius: 60,
-          },
+          { type: "laser", amount: 75, spread: 15 },
+          { amount: 30, spread: 8, radius: 60 },
         ],
         despawnEffect: "laser-caster-explosion-destabilised~60",
         fire: {
@@ -948,7 +697,7 @@ Registries.items.add("iti-laser-caster", {
           trackingRange: 150,
           light: 50,
           trailLight: 50,
-          knockback: 2,
+          knockback: 0.5,
           turnSpeed: 25,
           lifetime: 12,
           speed: 12,
@@ -962,13 +711,7 @@ Registries.items.add("iti-laser-caster", {
             [255, 100, 100],
             [255, 0, 0, 0],
           ],
-          drawer: {
-            shape: "rhombus",
-            fill: "red",
-            width: 7,
-            height: 3,
-            image: false,
-          },
+          drawer: { shape: "rhombus", fill: "red", width: 7, height: 3, image: false },
           fire: {
             damage: 10,
             interval: 10,
@@ -982,9 +725,7 @@ Registries.items.add("iti-laser-caster", {
             speed: 0,
             hitSize: 0,
             collides: false,
-            drawer: {
-              hidden: true,
-            },
+            drawer: { hidden: true },
             fire: {
               damage: 10,
               interval: 10,
@@ -998,23 +739,12 @@ Registries.items.add("iti-laser-caster", {
           },
           intervalTime: 3,
           intervalNumber: 1,
-          damage: [
-            {
-              type: "laser",
-              amount: 35,
-              spread: 10,
-            },
-          ],
+          damage: [{ type: "laser", amount: 35, spread: 10 }],
           despawnEffect: "laser-caster-frag-destabilised",
         },
       },
     ],
-    ammos: {
-      "iti-destabilised-cell": 3,
-      "iti-plasma-cell": 2,
-      "iti-energy-cell": 1,
-      none: 0,
-    },
+    ammos: { "iti-destabilised-cell": 3, "iti-plasma-cell": 2, "iti-energy-cell": 1, "none": 0 },
     unbrowsable: [1, 2, 3],
   },
   shoot: {
@@ -1061,23 +791,11 @@ Registries.items.add("iti-energy-repeater", {
           [0, 0, 255, 100],
         ],
         trailLight: 50,
-        knockback: 10,
+        knockback: 1,
         status: "plasma-burn",
         statusDuration: 120,
-        drawer: {
-          shape: "rhombus",
-          fill: [0, 255, 255],
-          width: 12,
-          height: 2,
-          image: false,
-        },
-        damage: [
-          {
-            type: "laser",
-            amount: 10,
-            spread: 4,
-          },
-        ],
+        drawer: { shape: "rhombus", fill: [0, 255, 255], width: 12, height: 2, image: false },
+        damage: [{ type: "laser", amount: 10, spread: 4 }],
         despawnEffect: "laser-caster-frag",
       },
       {
@@ -1097,23 +815,11 @@ Registries.items.add("iti-energy-repeater", {
         ],
         trailLight: 50,
         trailWidth: 1,
-        knockback: 15,
+        knockback: 1.5,
         status: "plasma-burn",
         statusDuration: 150,
-        drawer: {
-          shape: "rhombus",
-          fill: [0, 255, 255],
-          width: 12,
-          height: 2,
-          image: false,
-        },
-        damage: [
-          {
-            type: "laser",
-            amount: 13,
-            spread: 4,
-          },
-        ],
+        drawer: { shape: "rhombus", fill: [0, 255, 255], width: 12, height: 2, image: false },
+        damage: [{ type: "laser", amount: 13, spread: 4 }],
         despawnEffect: "laser-caster-frag",
       },
       {
@@ -1133,23 +839,11 @@ Registries.items.add("iti-energy-repeater", {
         ],
         trailLight: 50,
         trailWidth: 1,
-        knockback: 10,
+        knockback: 1,
         status: "plasma-burn-boosted",
         statusDuration: 140,
-        drawer: {
-          shape: "rhombus",
-          fill: "white",
-          width: 12,
-          height: 4,
-          image: false,
-        },
-        damage: [
-          {
-            type: "laser",
-            amount: 25,
-            spread: 5,
-          },
-        ],
+        drawer: { shape: "rhombus", fill: "white", width: 12, height: 4, image: false },
+        damage: [{ type: "laser", amount: 25, spread: 5 }],
         despawnEffect: "laser-caster-frag-plasma",
       },
       {
@@ -1163,23 +857,11 @@ Registries.items.add("iti-energy-repeater", {
         hitSize: 3,
         trailEffect: "destabilised",
         trailLight: 50,
-        knockback: 10,
+        knockback: 1,
         status: "destabilised",
         statusDuration: 140,
-        drawer: {
-          shape: "rhombus",
-          fill: "red",
-          width: 12,
-          height: 4,
-          image: false,
-        },
-        damage: [
-          {
-            type: "laser",
-            amount: 20,
-            spread: 5,
-          },
-        ],
+        drawer: { shape: "rhombus", fill: "red", width: 12, height: 4, image: false },
+        damage: [{ type: "laser", amount: 20, spread: 5 }],
         despawnEffect: "laser-caster-frag-destabilised",
         fire: {
           damage: 10,
@@ -1193,12 +875,7 @@ Registries.items.add("iti-energy-repeater", {
         fireChance: 1,
       },
     ],
-    ammos: {
-      "iti-destabilised-cell": 3,
-      "iti-plasma-cell": 2,
-      "iti-energy-cell": 1,
-      none: 0,
-    },
+    ammos: { "iti-destabilised-cell": 3, "iti-plasma-cell": 2, "iti-energy-cell": 1, "none": 0 },
     unbrowsable: [1, 2, 3],
   },
   shoot: {
@@ -1206,11 +883,7 @@ Registries.items.add("iti-energy-repeater", {
     effect: "laser-caster-frag",
     reload: 30,
     charge: 20,
-    pattern: {
-      burst: 3,
-      interval: 5,
-      spread: 3,
-    },
+    pattern: { burst: 3, interval: 5, spread: 3 },
   },
   hasAltFire: true,
   altBullets: {
@@ -1231,23 +904,11 @@ Registries.items.add("iti-energy-repeater", {
           [0, 0, 255, 100],
         ],
         trailLight: 60,
-        knockback: 7,
+        knockback: 3,
         status: "plasma-burn",
         statusDuration: 180,
-        drawer: {
-          shape: "rhombus",
-          fill: [0, 255, 255],
-          width: 10,
-          height: 3,
-          image: false,
-        },
-        damage: [
-          {
-            amount: 20,
-            spread: 5,
-            radius: 30,
-          },
-        ],
+        drawer: { shape: "rhombus", fill: [0, 255, 255], width: 10, height: 3, image: false },
+        damage: [{ amount: 20, spread: 5, radius: 30 }],
         despawnEffect: "laser-caster-explosion~30",
       },
       {
@@ -1266,23 +927,11 @@ Registries.items.add("iti-energy-repeater", {
           [0, 0, 255, 100],
         ],
         trailLight: 60,
-        knockback: 10,
+        knockback: 3.5,
         status: "plasma-burn",
         statusDuration: 240,
-        drawer: {
-          shape: "rhombus",
-          fill: [0, 255, 255],
-          width: 10,
-          height: 3,
-          image: false,
-        },
-        damage: [
-          {
-            amount: 25,
-            spread: 7,
-            radius: 35,
-          },
-        ],
+        drawer: { shape: "rhombus", fill: [0, 255, 255], width: 10, height: 3, image: false },
+        damage: [{ amount: 25, spread: 7, radius: 35 }],
         despawnEffect: "laser-caster-explosion~35",
       },
       {
@@ -1301,23 +950,11 @@ Registries.items.add("iti-energy-repeater", {
           [184, 0, 255],
         ],
         trailLight: 60,
-        knockback: 12,
+        knockback: 2,
         status: "plasma-burn-boosted",
         statusDuration: 200,
-        drawer: {
-          shape: "rhombus",
-          fill: "white",
-          width: 10,
-          height: 5,
-          image: false,
-        },
-        damage: [
-          {
-            amount: 50,
-            spread: 10,
-            radius: 45,
-          },
-        ],
+        drawer: { shape: "rhombus", fill: "white", width: 10, height: 5, image: false },
+        damage: [{ amount: 50, spread: 10, radius: 45 }],
         despawnEffect: "laser-caster-explosion-plasma~45",
       },
       {
@@ -1331,23 +968,11 @@ Registries.items.add("iti-energy-repeater", {
         hitSize: 2.5,
         trailEffect: "destabilised",
         trailLight: 60,
-        knockback: 12,
+        knockback: 2,
         status: "destabilised",
         statusDuration: 200,
-        drawer: {
-          shape: "rhombus",
-          fill: "red",
-          width: 10,
-          height: 5,
-          image: false,
-        },
-        damage: [
-          {
-            amount: 40,
-            spread: 10,
-            radius: 60,
-          },
-        ],
+        drawer: { shape: "rhombus", fill: "red", width: 10, height: 5, image: false },
+        damage: [{ amount: 40, spread: 10, radius: 60 }],
         despawnEffect: "laser-caster-explosion-destabilised~60",
         fire: {
           damage: 10,
@@ -1361,12 +986,7 @@ Registries.items.add("iti-energy-repeater", {
         fireChance: 1,
       },
     ],
-    ammos: {
-      "iti-destabilised-cell": 3,
-      "iti-plasma-cell": 2,
-      "iti-energy-cell": 1,
-      none: 0,
-    },
+    ammos: { "iti-destabilised-cell": 3, "iti-plasma-cell": 2, "iti-energy-cell": 1, "none": 0 },
     unbrowsable: [1, 2, 3],
   },
   altShoot: {
@@ -1410,17 +1030,9 @@ Registries.items.add("peti-charged-laser-blaster", {
         trail: false,
         endLine: "peti-laser",
         hitEffect: "laser-caster-frag-destabilised",
-        knockback: 15,
-        drawer: {
-          hidden: true,
-        },
-        damage: [
-          {
-            type: "laser",
-            amount: 30,
-            spread: 6
-          },
-        ],
+        knockback: 3,
+        drawer: { hidden: true },
+        damage: [{ type: "laser", amount: 30, spread: 6 }],
         despawnEffect: "none",
         spawnNumber: 5,
         spawnSpread: 15,
@@ -1434,24 +1046,14 @@ Registries.items.add("peti-charged-laser-blaster", {
           hitSize: 3,
           endLine: "peti-laser-mini",
           hitEffect: "laser-caster-frag-destabilised",
-          knockback: 4,
-          drawer: {
-            hidden: true,
-          },
-          damage: [
-            {
-              type: "laser",
-              amount: 5,
-              spread: 2
-            },
-          ],
+          knockback: 2,
+          drawer: { hidden: true },
+          damage: [{ type: "laser", amount: 5, spread: 2 }],
           despawnEffect: "none",
         },
       },
     ],
-    ammos: {
-      none: 0,
-    },
+    ammos: { none: 0 },
   },
   shoot: {
     charge: 45,
@@ -1498,13 +1100,8 @@ Registries.items.add("peti-electrified-plasma-launcher", {
         ],
         hitEffect: "laser-caster-frag-destabilised",
         trailLife: 30,
-        knockback: 10,
-        drawer: {
-          shape: "circle",
-          fill: "red",
-          width: 6,
-          height: 6,
-        },
+        knockback: 1,
+        drawer: { shape: "circle", fill: "red", width: 6, height: 6 },
         damage: [],
         targetType: "nearest",
         trackingRange: 100,
@@ -1525,32 +1122,19 @@ Registries.items.add("peti-electrified-plasma-launcher", {
           hitSize: 3,
           pierce: 2,
           endLine: "peti-zap",
-          knockback: 5,
-          drawer: {
-            hidden: true,
-          },
-          damage: [
-            {
-              type: "electric",
-              amount: 6,
-            },
-          ],
+          knockback: 0.5,
+          drawer: { hidden: true },
+          damage: [{ type: "electric", amount: 6 }],
           despawnEffect: "none",
         },
       },
     ],
-    ammos: {
-      none: 0,
-    },
+    ammos: { none: 0 },
   },
   shoot: {
     reload: 60,
     effect: "laser-caster-explosion-destabilised~10",
-    pattern: {
-      spread: 10,
-      burst: 2,
-      interval: 5,
-    },
+    pattern: { spread: 10, burst: 2, interval: 5 },
   },
   component: {
     type: "weapon-component",
@@ -1571,7 +1155,7 @@ Registries.items.add("peti-plasma-railgun", {
   description: "Pierces targets with a massive bolt of red plasma.",
   image: "weapon.peti-plasma-railgun.item",
   range: 1000,
-  recoil: 10,
+  recoil: 2,
   shootX: 42,
   shootY: -1,
   bullets: {
@@ -1587,22 +1171,13 @@ Registries.items.add("peti-plasma-railgun", {
         trailShape: "rhombus",
         trailEffect: "plasma-railgun-trail",
         hitEffect: "plasma-railgun-hit~70",
-        knockback: 50,
-        drawer: {
-          hidden: true,
-        },
-        damage: [
-          {
-            type: "laser",
-            amount: 2400
-          },
-        ],
+        knockback: 17,
+        drawer: { hidden: true },
+        damage: [{ type: "laser", amount: 2400 }],
         despawnEffect: "plasma-railgun-impact~120",
       },
     ],
-    ammos: {
-      none: 0,
-    },
+    ammos: { none: 0 },
   },
   shoot: {
     charge: 100,
@@ -1619,85 +1194,6 @@ Registries.items.add("peti-plasma-railgun", {
     recoil: 14,
     rotationalRecoil: 25,
     recoilSpeed: 0.1,
-  },
-});
-
-//Weapons > Experimental
-Registries.items.add("astral-blaster", {
-  type: "weapon",
-  name: "Astral Blaster",
-  marketValue: 12500,
-  rarity: Item.rarity.SPECIAL,
-  description:
-    "Shoots some sort of, I don't know, space blob which explodes somehow.\n#5iPreview Content",
-  image: "weapon.iti-laser-caster.item",
-  range: 400,
-  bullets: {
-    types: [
-      {
-        lifetime: 120,
-        extraUpdates: 7,
-        light: 70,
-        speed: 5,
-        trail: true,
-        hitSize: 3,
-        trailEffect: {
-          type: "particle-emission",
-          amount: 1,
-          particle: {
-            shape: "circle",
-            widthFrom: 30,
-            widthTo: 10,
-            heightFrom: 30,
-            heightTo: 10,
-            speed: 1,
-            decel: 0.05,
-            colours: [[100, 0, 255]],
-            space: true,
-            lifetime: 30,
-          },
-        },
-        knockback: 10,
-        drawer: {
-          hidden: true,
-        },
-        damage: [
-          {
-            type: "space",
-            amount: 1000,
-            spread: 300,
-            radius: 100,
-          },
-        ],
-        despawnEffect: {
-          type: "explosion",
-          scale: 100,
-          isSpace: true,
-          sparkColours: [[100, 0, 255]],
-          smokeColours: [[100, 0, 255]],
-          waveColours: [[100, 0, 255]],
-        },
-      },
-    ],
-    ammos: {
-      none: 0,
-    },
-  },
-  shoot: {
-    charge: 60,
-    reload: 180,
-    chargeEffect: "laser-caster-charge",
-    effect: "laser-caster-frag",
-  },
-  component: {
-    type: "weapon-component",
-    width: 32,
-    height: 11,
-    yOffset: 0,
-    image: "weapon.iti-laser-caster.component",
-    recoil: 4,
-    rotationalRecoil: 8,
-    recoilSpeed: 0.15,
   },
 });
 
@@ -1721,33 +1217,14 @@ Registries.items.add("recycle-mounted", {
         trail: true,
         hitSize: 2.5,
         trailShape: "rhombus",
-        drawer: {
-          shape: "rhombus",
-          fill: "#cd9f8b",
-          width: 12,
-          height: 2,
-          image: false,
-        },
+        drawer: { shape: "rhombus", fill: "#cd9f8b", width: 12, height: 2, image: false },
         trailColours: [[80, 62, 55, 100]],
-        damage: [
-          {
-            type: "ballistic",
-            amount: 15,
-            spread: 4,
-          },
-        ],
+        damage: [{ type: "ballistic", amount: 15, spread: 4 }],
       },
     ],
-    ammos: {
-      "scrap-bullet": 0,
-    },
+    ammos: { "scrap-bullet": 0 },
   },
-  shoot: {
-    reload: 10,
-    pattern: {
-      spread: 3.5,
-    },
-  },
+  shoot: { reload: 10, pattern: { spread: 3.5 } },
   component: {
     type: "weapon-component",
     width: 32,
@@ -1764,7 +1241,7 @@ Registries.items.add("scrap-artillery", {
   type: "turret-item",
   name: "240mm Artillery Emplacement Gun",
   marketValue: 450,
-  description: "Large scrap gun, to be mounted on a Turret Controller.",
+  description: "Large scrap gun, to be mounted on a Turret Controller. Shoots large bullets made of 4 material ingots.",
   baseSize: 2,
   image: "weapon.tank-gun.item",
   ammoUse: 4,
@@ -1789,24 +1266,12 @@ Registries.items.add("scrap-artillery", {
           trailLife: 45,
           trailShape: "rhombus",
           trailWidth: 10,
-          drawer: {
-            shape: "rhombus",
-            fill: "#cd9f8b",
-            width: 28,
-            height: 12,
-            image: false,
-          },
+          drawer: { shape: "rhombus", fill: "#cd9f8b", width: 28, height: 12, image: false },
           trailColours: [
             [200, 200, 200, 50],
             [50, 50, 50, 0],
           ],
-          damage: [
-            {
-              type: "ballistic",
-              amount: 75,
-              radius: 20,
-            },
-          ],
+          damage: [{ type: "ballistic", amount: 75, radius: 20 }],
           despawnEffect: "explosion~20",
           fragSpacing: 4,
           fragNumber: 4,
@@ -1817,20 +1282,8 @@ Registries.items.add("scrap-artillery", {
             lifetime: 24,
             hitSize: 2.5,
             trailColours: [[70, 70, 70, 100]],
-            damage: [
-              {
-                amount: 10,
-                type: "ballistic",
-                spread: 3,
-              },
-            ],
-            drawer: {
-              shape: "rhombus",
-              fill: "#cd9f8b",
-              width: 8,
-              height: 4,
-              image: false,
-            },
+            damage: [{ amount: 10, type: "ballistic", spread: 3 }],
+            drawer: { shape: "rhombus", fill: "#cd9f8b", width: 8, height: 4, image: false },
           },
         },
       },
@@ -1845,25 +1298,13 @@ Registries.items.add("scrap-artillery", {
         trailLife: 45,
         trailShape: "rhombus",
         trailWidth: 10,
-        drawer: {
-          shape: "rhombus",
-          fill: "#cd9f8b",
-          width: 28,
-          height: 12,
-          image: false,
-        },
+        drawer: { shape: "rhombus", fill: "#cd9f8b", width: 28, height: 12, image: false },
         trailColours: [
           [255, 200, 75, 100],
           [200, 200, 200, 50],
           [80, 62, 55, 50],
         ],
-        damage: [
-          {
-            type: "ballistic",
-            amount: 200,
-            radius: 30,
-          },
-        ],
+        damage: [{ type: "ballistic", amount: 200, radius: 30 }],
         despawnEffect: "explosion~30",
         fragSpacing: 4,
         fragNumber: 9,
@@ -1875,20 +1316,8 @@ Registries.items.add("scrap-artillery", {
           hitSize: 2.5,
           pierce: 1,
           trailColours: [[80, 62, 55, 100]],
-          damage: [
-            {
-              amount: 16,
-              type: "ballistic",
-              spread: 5,
-            },
-          ],
-          drawer: {
-            shape: "rhombus",
-            fill: "#cd9f8b",
-            width: 8,
-            height: 4,
-            image: false,
-          },
+          damage: [{ amount: 16, type: "ballistic", spread: 5 }],
+          drawer: { shape: "rhombus", fill: "#cd9f8b", width: 8, height: 4, image: false },
         },
       },
       {
@@ -1903,24 +1332,13 @@ Registries.items.add("scrap-artillery", {
         trailShape: "rhombus",
         trailWidth: 10,
         conditionalPierce: true,
-        drawer: {
-          shape: "rhombus",
-          fill: [255, 188, 153],
-          width: 28,
-          height: 12,
-          image: false,
-        },
+        drawer: { shape: "rhombus", fill: [255, 188, 153], width: 28, height: 12, image: false },
         trailColours: [
           [255, 186, 144, 100],
           [255, 163, 125, 50],
           [214, 135, 99, 0],
         ],
-        damage: [
-          {
-            type: "ballistic",
-            amount: 320,
-          },
-        ],
+        damage: [{ type: "ballistic", amount: 320 }],
         despawnEffect: "explosion~60",
       },
       {
@@ -1935,41 +1353,19 @@ Registries.items.add("scrap-artillery", {
         trailShape: "rhombus",
         trailWidth: 10,
         conditionalPierce: true,
-        drawer: {
-          shape: "rhombus",
-          fill: [255, 188, 153],
-          width: 28,
-          height: 12,
-          image: false,
-        },
+        drawer: { shape: "rhombus", fill: [255, 188, 153], width: 28, height: 12, image: false },
         trailColours: [
           [255, 255, 255, 100],
           [200, 200, 200, 50],
           [150, 50, 50, 0],
         ],
-        damage: [
-          {
-            type: "ballistic",
-            amount: 350,
-          },
-        ],
+        damage: [{ type: "ballistic", amount: 350 }],
         despawnEffect: "explosion~60",
       },
     ],
-    ammos: {
-      "iron-ingot": 3,
-      "copper-ingot": 2,
-      scrap: 1,
-      stone: 0,
-    },
+    ammos: { "iron-ingot": 3, "copper-ingot": 2, "scrap": 1, "stone": 0 },
   },
-  shoot: {
-    effect: "tonk-shoot",
-    reload: 180,
-    pattern: {
-      spread: 2,
-    },
-  },
+  shoot: { effect: "tonk-shoot", reload: 180, pattern: { spread: 2 } },
   component: {
     type: "weapon-component",
     width: 102,
@@ -2001,42 +1397,19 @@ Registries.items.add("deathbringer-turret", {
         trail: true,
         hitSize: 10,
         trailEffect: "deathbringer-trail",
-        knockback: 300,
-        drawer: {
-          hidden: true,
-        },
+        knockback: 30,
+        drawer: { hidden: true },
         damage: [
-          {
-            type: "laser",
-            amount: 10000,
-            spread: 2000,
-          },
-          {
-            type: "laser",
-            amount: 2000,
-            spread: 300,
-            radius: 300,
-          },
-          {
-            type: "explosion",
-            amount: 24000,
-            spread: 3000,
-            radius: 300,
-            nuclear: true,
-          },
+          { type: "laser", amount: 10000, spread: 2000 },
+          { type: "laser", amount: 2000, spread: 300, radius: 300 },
+          { type: "explosion", amount: 24000, spread: 3000, radius: 300, nuclear: true },
         ],
         despawnEffect: "deathbringer-nuke~300",
       },
     ],
-    ammos: {
-      "iti-destabilised-cell": 0,
-    },
+    ammos: { "iti-destabilised-cell": 0 },
   },
-  shoot: {
-    reload: 480,
-    charge: 120,
-    chargeEffect: "deathbringer-charge",
-  },
+  shoot: { reload: 480, charge: 120, chargeEffect: "deathbringer-charge" },
   component: {
     type: "weapon-component",
     width: 270,
@@ -2057,7 +1430,7 @@ Registries.items.add("scrap-bullet", {
   stackSize: 10000,
 });
 Registries.items.add("scrap-rocket", {
-  name: "Scrap Bullet",
+  name: "Scrap Rocket",
   marketValue: 2,
   description: "A makeshift explosive rocket.",
   image: "item.scrap-rocket",
@@ -2072,11 +1445,7 @@ Registries.items.add("iti-energy-cell", {
   image: "item.iti-energy-cell",
   corp: "iti",
   stackSize: 200,
-  attributeModifiers: {
-    speed: 1.1,
-    "fire-rate": 1.2,
-    health: 0.7,
-  },
+  attributeModifiers: { "speed": 1.1, "fire-rate": 1.2, "health": 0.7 },
 });
 Registries.items.add("iti-plasma-cell", {
   name: "Plasma Cell",
@@ -2088,7 +1457,7 @@ Registries.items.add("iti-plasma-cell", {
   stackSize: 200,
 });
 Registries.items.add("iti-destabilised-cell", {
-  name: "#c*Destabilised#@n Energy Cell",
+  name: "#c*Destabilised#@b Energy Cell",
   marketValue: 7500,
   description: "Is this even ITI?",
   image: "item.iti-destabilised-cell",

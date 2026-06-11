@@ -3,15 +3,21 @@ import { construct, constructFromType } from "../../core/constructor.js";
 import { clamp, rnd, roundNum, tru, Vector } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { debug } from "../../play/debug.js";
-import { createDestructionExplosion, liquidDestructionBlast } from "../../play/effects.js";
+import {
+  autoScaledEffect,
+  createDestructionExplosion,
+  liquidDestructionBlast,
+} from "../../play/effects.js";
 import { game } from "../../play/game.js";
 import { blockSize, totalSize } from "../../scaling.js";
 import { GroundTile } from "../block/ground-tile.js";
 import { PhysicalObject, ShootableObject } from "../physical.js";
+import { Chunk } from "../world/chunk.js";
 import { World } from "../world/world.js";
 import { AI } from "./ai/ai.js";
 import "./ai/scripter.js";
 import { AttributeMap } from "./attribute.js";
+import { Model } from "./models/model.js";
 /**
  * @typedef SerialisedEntity
  * @prop {number} health
@@ -24,15 +30,14 @@ import { AttributeMap } from "./attribute.js";
  * @prop {number} spawnYs
  * @prop {boolean} isMainPlayer
  */
-/** */
+/** Shootable object which moves off the chunk grid, possibly with a complex model. */
 class Entity extends ShootableObject {
   name = "Entity";
   resistances = [];
-  //How the entity will be drawn
-  /**@type {Component[]} */
-  components = [];
+  age = 0;
 
-  moving = false;
+  isBoss = false;
+
   hitSize = 20;
   get speed() {
     return this.attributes.get("speed").get();
@@ -59,6 +64,7 @@ class Entity extends ShootableObject {
   aiType = "passive";
   attackRange = 100;
   targetRange = 1000;
+  approachDist = 0;
   waitTime = 90;
   waitVariance = 60;
   _waiting = 0;
@@ -66,16 +72,15 @@ class Entity extends ShootableObject {
   spawnY = 0;
   controllable = true;
   _lastAICheck = 6;
+  //because ai rate limit sucks and the scrapper is  s l o w
+  #firing = false;
   /** Multiplier for both range and movement speed while passive. */
   passiveIncentiveModifier = 0.75;
+  moving = false;
 
   //custom ai, only available for entities and not turrets
   /**@type {AI?} */
   ai = null;
-
-  age = 0;
-
-  isBoss = false;
 
   //Status effects
   /** @type {AttributeMap} */
@@ -93,15 +98,19 @@ class Entity extends ShootableObject {
   flying = false;
   explosiveness = 0.1;
   _lastPos = Vector.ZERO;
-
-  //because ai rate limit sucks and the scrapper is  s l o w
-  #firing = false;
-
   computedVelocity = Vector.ZERO;
   computedSpeed = 0;
 
+  velocity = Vector.ZERO;
+
+  // Visuals
+  /** Deprecated visuals, use `Entity.model` instead. @deprecated @type {Component[]} */
+  components = [];
+  /** @type {Model?} */
+  model = null;
+
   predictMotion(timeToImpact) {
-    return this.computedVelocity.scale(timeToImpact);
+    return this.velocity.scale(timeToImpact);
   }
   predictMotionDS(speedOfShot, distance) {
     return this.predictMotion(distance / speedOfShot);
@@ -110,7 +119,10 @@ class Entity extends ShootableObject {
   init() {
     super.init();
     this.maxEnergy = this.energy;
-    this.components = this.components.map((x) => construct(x, "component"));
+
+    if (this.model) {
+      this.model.draw(this.x, this.y, this.direction);
+    } else this.components = this.components.map((x) => construct(x, "component"));
 
     if (!(this.attributes instanceof AttributeMap)) {
       console.warn("Invalid attribute map!");
@@ -131,6 +143,32 @@ class Entity extends ShootableObject {
     );
   }
 
+  /** Intent to move in a direction. @param {Vector} vct */
+  moveInDirection(vct, ignoreBlocks) {
+    const accel = this.flying ? Math.cbrt(this.speed) / 5 : this.speed / 10;
+    this.velocity.add(vct.normalise().scale(accel), true);
+  }
+
+  hitHorizontalWall(x, y) {
+    const spd = Math.abs(this.velocity.x);
+    this.velocity.scaleAsymmetrical(0, 1, true);
+    if (spd > this.speed) {
+      autoScaledEffect("hit-wall", this.world, x, y, 0);
+      this.hitSomething(spd - this.speed);
+    }
+  }
+  hitVerticalWall(x, y) {
+    const spd = Math.abs(this.velocity.y);
+    this.velocity.scaleAsymmetrical(1, 0, true);
+    if (spd > this.speed) {
+      autoScaledEffect("hit-wall", this.world, x, y, Math.PI / 2);
+      this.hitSomething(spd - this.speed);
+    }
+  }
+  hitSomething(speed) {
+    this.damage("wall", speed ** 2);
+  }
+
   addToWorld(world, x, y) {
     if (!(world instanceof World))
       throw new TypeError(
@@ -144,6 +182,7 @@ class Entity extends ShootableObject {
     this.spawnY = this.y;
   }
 
+  /** @deprecated */
   knock(
     amount = 0,
     direction = -this.direction,
@@ -196,18 +235,24 @@ class Entity extends ShootableObject {
     }
   }
 
+  knockback(amount = 0, direction = this.direction + 180) {
+    this.velocity.add(Vector.fromAngle(direction).scale(amount, true), true);
+  }
+
   hitByBullet(bullet) {
     if (bullet.entity.team === this.team) return;
-    if (bullet.controlledKnockback) {
-      //Get direction to the target
-      let direction = new Vector(bullet.entity.target.x, bullet.entity.target.y).subXY(
-        bullet.x,
-        bullet.y,
-      ).angle;
-      this.knock(bullet.knockback, direction, bullet.kineticKnockback); //Knock with default resolution
-    } else {
-      this.knock(bullet.knockback, bullet.direction, bullet.kineticKnockback); //Knock with default resolution
-    }
+    // if (bullet.controlledKnockback) {
+    //   //Get direction to the target
+    //   let direction = new Vector(bullet.entity.target.x, bullet.entity.target.y).subXY(
+    //     bullet.x,
+    //     bullet.y,
+    //   ).angle;
+    //   this.knock(bullet.knockback, direction, bullet.kineticKnockback); //Knock with default resolution
+    // } else {
+    // this.knock(bullet.knockback, bullet.direction, bullet.kineticKnockback); //Knock with default resolution
+    // }
+    if (bullet.knockback !== 0) this.knockback(+bullet.knockback || 0, bullet.direction);
+    if (bullet.iknockback !== 0) this.knock(+bullet.iknockback*10 || 0, bullet.direction);
     if (bullet.status !== "none") {
       this.applyStatus(bullet.status, bullet.statusDuration);
     }
@@ -217,6 +262,9 @@ class Entity extends ShootableObject {
     this._lastPos = new Vector(this.x, this.y);
     this.components.forEach((c) => c.tick(this));
     if (this.controllable) this.doAI();
+    this.moveVct(this.velocity, this.flying);
+    if (this.flying) this.velocity.scale(0.975, true);
+    else this.velocity.scale(0.9, true);
     super.tick();
     this.calculateAttributeModifiers();
     this.computedVelocity = this.pos.sub(this._lastPos);
@@ -240,13 +288,25 @@ class Entity extends ShootableObject {
           this._scavengerAI();
         }
       }
-      //Base AI
-      if (this.target) {
-        this._waiting--;
-        if (this._waiting <= 0) {
-          if (this.distanceToPoint(this.target.x, this.target.y) > this.size / 2)
-            this.moveTowards(this.target.x, this.target.y, true);
-        }
+      this._approachTarget();
+    }
+  }
+
+  /**Target Approach AI
+   * - Moves towards a point, trying to stop at its approach distance away from the target.
+   * - May cause high velocities to confuse the AI for a short time.
+   * - Used by literally everything.
+   * - Slightly different to `ai.follow`, in that it directly takes current velocity into account, and will stop early to let friction slow it down.
+   */
+  _approachTarget() {
+    if (this.target) {
+      this._waiting--;
+      if (this._waiting <= 0) {
+        if (
+          this.distanceToPoint(this.target.x, this.target.y) >
+          (this.size * 0.5 + this.approachDist) * (0.6 + this.velocity.magnitude ** 1.11)
+        )
+          this.moveTowards(this.target.x, this.target.y, true);
       }
     }
   }
@@ -259,7 +319,7 @@ class Entity extends ShootableObject {
   _passiveAI() {
     if (!this.target || this.target instanceof PhysicalObject)
       this.target = { x: this.x, y: this.y };
-    if (this.distanceTo(this.target) < this.size) {
+    if (this.distanceTo(this.target) < this.size * 2) {
       let xOffset =
         rnd.float(this.targetRange, this.targetRange / 4) *
         (tru(0.5) ? -1 : 1) *
@@ -361,21 +421,37 @@ class Entity extends ShootableObject {
   tickGroundEffects() {
     const bx = Math.round(this.x / blockSize);
     const by = Math.round(this.y / blockSize);
-    let blockIn = this.world.getBlock(bx, by, "blocks");
-    let blockOn = this.world.getBlock(bx, by, "floor");
-    if (blockIn && blockIn.walkable) blockIn.steppedOnBy(this);
-    else if (blockOn?.speedMultiplier) this.attributes.multiply("speed", blockOn.speedMultiplier);
-    else if (!blockIn && !blockOn) {
-      let tile = this.world.getTile(bx, by);
-      if (tile) GroundTile.entityWalksOn(this, tile);
+    let blockIn = this.world.getBlock(bx, by);
+    if (!this.flying && blockIn && blockIn.walkable) blockIn.steppedOnBy(this);
+    // else if (blockOn?.speedMultiplier) this.attributes.multiply("speed", blockOn.speedMultiplier);
+    else if (!blockIn /* && !blockOn */) {
+      if (this.flying) {
+        let tile = this.world.getTileID(bx, by);
+        let ore = this.world.getTileID(bx, by, Chunk.Layer.ores);
+        this.world.floorFlightCircle(
+          this.x,
+          this.y,
+          ore ?
+            col.blend(GroundTile.colorOf(ore), GroundTile.colorOf(tile))
+          : GroundTile.colorOf(tile),
+          (this.velocity.magnitude + 1) * 0.25,
+        );
+      } else {
+        let tile = this.world.getHighestTileID(bx, by);
+        if (tile) GroundTile.entityWalksOn(this, tile);
+      }
     }
   }
   draw() {
-    for (let component of this.components) {
-      component.draw(this.x, this.y, this.direction);
+    if (this.model) {
+      this.model.draw(this.x, this.y, this.direction);
+    } else {
+      for (let component of this.components) {
+        component.draw(this.x, this.y, this.direction);
+      }
+      super.draw();
     }
     if (debug.ai) this._debugAI();
-    super.draw();
   }
   /**Draws extra lines and stuff for AI debugging. */
   _debugAI() {
@@ -384,19 +460,35 @@ class Entity extends ShootableObject {
     col.stroke(this.target instanceof ShootableObject ? col.red : col.green);
     strokeWeight(4);
     if (this.target) {
-      square(this.target.x, this.target.y, this.size);
+      square(
+        this.target.x,
+        this.target.y,
+        (this.size * 0.5 + this.approachDist) * (0.6 + this.velocity.magnitude ** 1.11),
+      );
       line(this.x, this.y, this.target.x, this.target.y);
     }
     if (this.aiType === "hostile" || this.aiType === "guard") {
-      col.stroke(this.target instanceof ShootableObject ? col.from(200,0,255,100) : col.from(255,255,0,100));
+      col.stroke(
+        this.target instanceof ShootableObject ?
+          col.from(200, 0, 255, 100)
+        : col.from(255, 255, 0, 100),
+      );
       circle(this.x, this.y, this.attackRange * 2);
     }
     if (this.aiType === "hostile" || this.aiType === "scavenger") {
-      col.stroke(this.target instanceof ShootableObject ? col.from(255,0,0,100) : col.from(0,255,0,100));
+      col.stroke(
+        this.target instanceof ShootableObject ?
+          col.from(255, 0, 0, 100)
+        : col.from(0, 255, 0, 100),
+      );
       circle(this.x, this.y, this.targetRange * 2);
     }
     if (this.aiType === "guard") {
-      col.stroke(this.target instanceof ShootableObject ? col.from(255,128,0,100) : col.from(0,255,255,100));
+      col.stroke(
+        this.target instanceof ShootableObject ?
+          col.from(255, 128, 0, 100)
+        : col.from(0, 255, 255, 100),
+      );
       circle(this.spawnX, this.spawnY, this.targetRange * 2);
     }
     pop();

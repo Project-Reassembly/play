@@ -1,8 +1,11 @@
-import { Block } from "../classes/block/block.js";
-import { Inventory } from "../classes/inventory.js";
-import { ShootableObject } from "../classes/physical.js";
+/**
+ * @import { Block } from "../classes/block/block.js"
+ * @import { Inventory } from "../classes/inventory.js";
+ * @import { ShootableObject } from "../classes/physical.js";
+ */
 import { Timer } from "../classes/timer.js";
 import { contentScale, fonts } from "../play/game.js";
+import { Direction } from "../scaling.js";
 import * as CMFT from "./cmft.js";
 import { col } from "./color.js";
 import { CutsceneHandler } from "./cutscene.js";
@@ -13,6 +16,76 @@ const ui = new (class UI {
   menuState = "title";
   waitingForMouseUp = false;
   mouse = new (class Mouse {
+    #lmb = false;
+    #rmb = false;
+    #mmb = false;
+    #fmb = false;
+    #bmb = false;
+
+    #lms = false;
+    #rms = false;
+    #mms = false;
+    #fms = false;
+    #bms = false;
+    constructor() {
+      addEventListener("mousedown", (e) => {
+        switch (e.button) {
+          case 0:
+            this.#lmb = true;
+            this.#lms = e.timeStamp;
+            this.onleft();
+            break;
+          case 1:
+            this.#mmb = true;
+            this.#mms = e.timeStamp;
+            this.onmiddle();
+            break;
+          case 2:
+            this.#rmb = true;
+            this.#rms = e.timeStamp;
+            this.onright();
+            break;
+          case 3:
+            this.#bmb = true;
+            this.#bms = e.timeStamp;
+            this.onback();
+            break;
+          case 4:
+            this.#fmb = true;
+            this.#fms = e.timeStamp;
+            this.onforward();
+            break;
+          default:
+            console.warn(`Unknown button code: ${e.button}`);
+        }
+      });
+      addEventListener("mouseup", (e) => {
+        switch (e.button) {
+          case 0:
+            this.#lmb = false;
+            this.onleftrel(e.timeStamp - this.#lms);
+            break;
+          case 1:
+            this.#mmb = false;
+            this.onmiddlerel(e.timeStamp - this.#mms);
+            break;
+          case 2:
+            this.#rmb = false;
+            this.onrightrel(e.timeStamp - this.#rms);
+            break;
+          case 3:
+            this.#bmb = false;
+            this.onbackrel(e.timeStamp - this.#bms);
+            break;
+          case 4:
+            this.#fmb = false;
+            this.onforwardrel(e.timeStamp - this.#fms);
+            break;
+          default:
+            console.warn(`Unknown button code: ${e.button}`);
+        }
+      });
+    }
     /**@readonly */
     get x() {
       return mouseX / contentScale - 960;
@@ -23,9 +96,9 @@ const ui = new (class UI {
     }
     /**@readonly */
     get down() {
-      return mouseIsPressed;
+      return this.#lmb || this.#rmb || this.#mmb || this.#fmb || this.#bmb;
     }
-    /**@readonly */
+    /**@readonly @deprecated */
     get button() {
       if (!mouseButton) return "awaiting click";
       return (
@@ -35,6 +108,37 @@ const ui = new (class UI {
         : "unknown"
       );
     }
+    /**@readonly */
+    get left() {
+      return this.#lmb;
+    }
+    /**@readonly */
+    get right() {
+      return this.#rmb;
+    }
+    /**@readonly */
+    get middle() {
+      return this.#mmb;
+    }
+    /**@readonly */
+    get forward() {
+      return this.#fmb;
+    }
+    /**@readonly */
+    get back() {
+      return this.#bmb;
+    }
+    onright() {}
+    onleft() {}
+    onmiddle() {}
+    onforward() {}
+    onback() {}
+
+    onrightrel(t) {}
+    onleftrel(t) {}
+    onmiddlerel(t) {}
+    onforwardrel(t) {}
+    onbackrel(t) {}
   })();
   lastMousePos = { x: 0, blockX: 0, y: 0, blockY: 0 };
   camera = {
@@ -208,7 +312,7 @@ class UIComponent {
   outline = true;
   background = true;
   backgroundColour = null;
-  rotation = Block.direction.RIGHT;
+  rotation = Direction.RIGHT;
   font = "darktech";
   defaultOutlCol = col.mono(60);
   hastext = true;
@@ -614,17 +718,15 @@ class InventoryUIComponent extends UIComponent {
   }
   draw() {
     if (!this.inventory) return;
-    if (this.inventory instanceof Inventory) {
-      this.inventory.draw(
-        this.x,
-        this.y,
-        this.rows,
-        this.cols,
-        this.itemSize,
-        this.outlineColour ?? col.mono(50),
-        this.backgroundColour ?? col.from(95, 100, 100, 160),
-      );
-    }
+    this.inventory.draw(
+      this.x,
+      this.y,
+      this.rows,
+      this.cols,
+      this.itemSize,
+      this.outlineColour ?? col.mono(50),
+      this.backgroundColour ?? col.from(95, 100, 100, 160),
+    );
   }
 }
 
@@ -685,26 +787,40 @@ class ImageContainer {
   }
   async load() {
     this.#image = await loadImage(this.#path);
+    this.#color = this.getColor();
     return true;
   }
-  getColor(){
+  getColor() {
     const i = this.#image;
     i.loadPixels();
-    const pixelElementCount = i.pixels.length,
-      pixels = pixelElementCount / 4;
+    const pixelElementCount = i.pixels.length;
     let reds = 0,
       greens = 0,
-      blues = 0;
+      blues = 0,
+      weight = 0;
     for (let pixi = 0; pixi < pixelElementCount; pixi += 4) {
-      reds += i.pixels[pixi];
-      greens += i.pixels[pixi + 1];
-      blues += i.pixels[pixi + 2];
+      const alpha = i.pixels[pixi + 3];
+      if (alpha > 0) {
+        reds += i.pixels[pixi] * alpha;
+        greens += i.pixels[pixi + 1] * alpha;
+        blues += i.pixels[pixi + 2] * alpha;
+        weight += alpha;
+      }
     }
     i.pixels = null;
-    return this.#color = col.from(reds / pixels, greens / pixels, blues / pixels);
+    return col.from(
+      reds / weight,
+      greens / weight,
+      blues / weight,
+      (weight / pixelElementCount) * 64,
+    );
   }
   get image() {
     return this.#image;
+  }
+  /**@type {import("./color.js").color} */
+  get color() {
+    return this.#color;
   }
   draw(x, y, width, height, angle = 0, flipV = false) {
     if (!this.#image) return; //Cancel if no image loaded yet
@@ -731,8 +847,18 @@ class ImageContainer {
     }
     pop(); //Return to old state
   }
+  /**
+   * Draws an image container or string.
+   * @param {ImageContainer|string} img Image to draw.
+   * @param {number} x
+   * @param {number} y
+   * @param {number} width
+   * @param {number} height
+   * @param {number} angle Angle to draw the image at, in radians.
+   * @param {boolean} flipV Whether or not to flip the image vertically.
+   */
   static draw(img, x, y, width, height, angle = 0, flipV = false) {
-    const loaded = Registries.images.tryGet(img) ?? "error";
+    const loaded = img instanceof this ? img : (Registries.images.tryGet(img) ?? "error");
     noSmooth();
     if (loaded instanceof this) {
       loaded.draw(x, y, width, height, angle, flipV);

@@ -10,10 +10,7 @@ import { PointBullet } from "../projectile/point-bullet.js";
 import { patternedBulletExpulsion } from "../projectile/yeeter.js";
 import { Timer } from "../timer.js";
 import { Equippable } from "./equippable.js";
-import {
-  WeaponBulletConfiguration,
-  WeaponShootConfiguration,
-} from "./weapon-exts.js";
+import { WeaponBulletConfiguration, WeaponShootConfiguration } from "./weapon-exts.js";
 class Weapon extends Equippable {
   timer = new Timer();
   ammoUse = 1;
@@ -47,16 +44,9 @@ class Weapon extends Equippable {
     super.init();
     this.shoot = constructFromType(this.shoot, WeaponShootConfiguration);
     this.bullets = constructFromType(this.bullets, WeaponBulletConfiguration);
-    if (this.altShoot)
-      this.altShoot = constructFromType(
-        this.altShoot,
-        WeaponShootConfiguration
-      );
+    if (this.altShoot) this.altShoot = constructFromType(this.altShoot, WeaponShootConfiguration);
     if (this.altBullets)
-      this.altBullets = constructFromType(
-        this.altBullets,
-        WeaponBulletConfiguration
-      );
+      this.altBullets = constructFromType(this.altBullets, WeaponBulletConfiguration);
   }
 
   /**@param {EquippedEntity} holder  */
@@ -68,19 +58,12 @@ class Weapon extends Equippable {
       this._cooldown -= holder.attributes.getValue("fire-rate");
       if (this._cooldown <= 0) {
         let pos = this._getShootPos(holder);
-        autoScaledEffect(
-          this.shoot.readyEffect,
-          holder.world,
-          pos.x,
-          pos.y,
-          pos.direction
-        );
+        autoScaledEffect(this.shoot.readyEffect, holder.world, pos.x, pos.y, pos.direction);
       }
     }
   }
   getAcceleratedReloadRate(shoot) {
-    if (this.#acceleration <= -1 || this.#acceleration > this.maxAccel)
-      return shoot.reload; //If bad acceleration then ignore it
+    if (this.#acceleration <= -1 || this.#acceleration > this.maxAccel) return shoot.reload; //If bad acceleration then ignore it
     return shoot.reload / (1 + this.#acceleration); //2 acceleration = 200% fire rate increase = 3x fire rate
   }
   accelerate(shoot) {
@@ -108,12 +91,8 @@ class Weapon extends Equippable {
   }
   _getShootPos(holder) {
     let pos = this.component.getPosOn(holder);
-    pos.x +=
-      Math.cos(pos.direction) * this.shootX +
-      Math.sin(pos.direction) * this.shootY;
-    pos.y +=
-      Math.sin(pos.direction) * this.shootX +
-      Math.cos(pos.direction) * this.shootY;
+    pos.x += Math.cos(pos.direction) * this.shootX + Math.sin(pos.direction) * this.shootY;
+    pos.y += Math.sin(pos.direction) * this.shootX + Math.cos(pos.direction) * this.shootY;
     return pos;
   }
   /**
@@ -124,10 +103,7 @@ class Weapon extends Equippable {
       //choose ammo
       let ammoType = "-";
       for (let ammo in bulletConfig.ammos) {
-        if (
-          bulletConfig.getAmmo(ammo) !== null &&
-          entityHasAmmo(holder, ammo, this.ammoUse)
-        ) {
+        if (bulletConfig.getAmmo(ammo) !== null && entityHasAmmo(holder, ammo, this.ammoUse)) {
           ammoType = ammo;
           break;
         }
@@ -139,13 +115,8 @@ class Weapon extends Equippable {
       this._lastCharge = shoot.charge;
       if (shoot.charge > 0) {
         let pos = this._getShootPos(holder);
-        autoScaledEffect(
-          shoot.chargeEffect,
-          holder.world,
-          pos.x,
-          pos.y,
-          pos.direction,
-          () => this._getShootPos(holder)
+        autoScaledEffect(shoot.chargeEffect, holder.world, pos.x, pos.y, pos.direction, () =>
+          this._getShootPos(holder),
         );
         this._cooldown = shoot.reload + shoot.charge;
         this.timer.do(() => {
@@ -161,12 +132,7 @@ class Weapon extends Equippable {
     else return false;
     return true;
   }
-  _internalFire(
-    holder,
-    shoot = this.shoot,
-    ammoType,
-    bulletConfig = this.bullets
-  ) {
+  _internalFire(holder, shoot = this.shoot, ammoType, bulletConfig = this.bullets) {
     if (!this._useAmmo(holder, ammoType)) return;
 
     this._cooldown = this.getAcceleratedReloadRate(shoot);
@@ -174,20 +140,9 @@ class Weapon extends Equippable {
 
     this.timer.repeat(
       () => {
-        holder.knock(
-          (this.recoil * 100) / holder.size,
-          holder.direction + 180,
-          false,
-          10
-        );
+        holder.knockback((this.recoil * 100) / holder.size);
         let pos = this._getShootPos(holder);
-        autoScaledEffect(
-          shoot.effect,
-          holder.world,
-          pos.x,
-          pos.y,
-          pos.direction
-        );
+        autoScaledEffect(shoot.effect, holder.world, pos.x, pos.y, pos.direction);
         patternedBulletExpulsion(
           pos.x,
           pos.y,
@@ -197,21 +152,20 @@ class Weapon extends Equippable {
           shoot.pattern.spread,
           shoot.pattern.spacing,
           holder.world,
-          holder
+          holder,
         );
         if (this.component instanceof WeaponComponent) {
           this.component.trigger(shoot.recoilScale, shoot.rotRecoilScale);
         }
       },
       shoot.pattern.burst,
-      shoot.pattern.interval
+      shoot.pattern.interval,
     );
   }
   /**@param {EquippedEntity} holder  */
   use(holder, isSecondary = false) {
     if (isSecondary) {
-      if (this.altShoot)
-        this.fire(holder, this.altShoot, this.altBullets ?? this.bullets);
+      if (this.altShoot) this.fire(holder, this.altShoot, this.altBullets ?? this.bullets);
     } else {
       this.fire(holder, this.shoot, this.bullets);
     }
@@ -221,25 +175,24 @@ class Weapon extends Equippable {
   getContextualisedInfo(holder) {
     let ammoType = "-";
     for (let ammo in this.bullets.ammos) {
-      if (
-        this.bullets.getAmmo(ammo) !== null &&
-        entityHasAmmo(holder, ammo, this.ammoUse)
-      ) {
+      if (this.bullets.getAmmo(ammo) !== null && entityHasAmmo(holder, ammo, this.ammoUse)) {
         ammoType = ammo;
         break;
       }
     }
-    return (
-      `${crop(this.name, 15)}\nAmmo: ${ammoType !== "none"
-        ? ammoType === "-"
-          ? ""
-          : entityAmmoCount(holder, ammoType)
-        : "∞"}\n${ammoType !== "none"
-          ? ammoType === "-"
-            ? "None Available"
-            : `${crop(Registries.items.get(ammoType).name, 12)} ×${this.ammoUse}`
-          : "Free"}\n${this.createProgressBar()} `
-    );
+    return `${crop(this.name, 15)}\nAmmo: ${
+      ammoType !== "none" ?
+        ammoType === "-" ?
+          ""
+        : entityAmmoCount(holder, ammoType)
+      : "∞"
+    }\n${
+      ammoType !== "none" ?
+        ammoType === "-" ?
+          "None Available"
+        : `${crop(Registries.items.get(ammoType).name, 12)} ×${this.ammoUse}`
+      : "Free"
+    }\n${this.createProgressBar()} `;
   }
   createProgressBar() {
     if (this._cooldown <= this._lastReload)
@@ -249,26 +202,18 @@ class Weapon extends Equippable {
         .substring(0, 15);
     else
       return ""
-        .padEnd(
-          15 - ((this._cooldown - this._lastReload) / this._lastCharge) * 15,
-          "■"
-        )
+        .padEnd(15 - ((this._cooldown - this._lastReload) / this._lastCharge) * 15, "■")
         .padEnd(15, "□")
         .substring(0, 15);
   }
   createExtendedTooltip() {
     return [
-      this.hasAltFire
-        ? "🟨 ------- Main ------- ⬜"
-        : "🟨 -------------------- ⬜",
+      this.hasAltFire ? "🟨 ------- Main ------- ⬜" : "🟨 -------------------- ⬜",
       ...Weapon.infoOfShootPattern(this.shoot, this.bullets),
       this.hasAltFire ? "🟨 ------- Alt -------- ⬜" : "",
-      ...(this.hasAltFire
-        ? Weapon.infoOfShootPattern(
-            this.altShoot,
-            this.altBullets ?? this.bullets
-          )
-        : []),
+      ...(this.hasAltFire ?
+        Weapon.infoOfShootPattern(this.altShoot, this.altBullets ?? this.bullets)
+      : []),
       "🟨 -------------------- ⬜",
     ];
   }
@@ -280,132 +225,118 @@ class Weapon extends Equippable {
    */
   static infoOfShootPattern(shoot, bulletConfig) {
     return [
-      `Fire Rate: ${shoot.pattern.amount * shoot.pattern.burst > 1
-        ? shoot.pattern.amount * shoot.pattern.burst + "× "
-        : ""}${roundNum(60 / (shoot.reload + shoot.charge), 2)}/s`,
+      `Fire Rate: ${
+        shoot.pattern.amount * shoot.pattern.burst > 1 ?
+          shoot.pattern.amount * shoot.pattern.burst + "× "
+        : ""
+      }${roundNum(60 / (shoot.reload + shoot.charge), 2)}/s`,
       shoot.pattern.spread ? `${shoot.pattern.spread}° inaccuracy` : "",
       shoot.pattern.spacing ? `${shoot.pattern.spacing}° shot spacing` : "",
       "🟨Shots:⬜",
       ...Object.keys(bulletConfig.ammos).flatMap((x) =>
-        bulletConfig.unbrowsable.includes(bulletConfig.ammos[x])
-          ? []
-          : [
-              x == "none"
-                ? " "
-                : `${ind(1)}🟨${Registries.items.get(x).name}:⬜`,
-              ...Weapon.getBulletInfo(
-                bulletConfig.getAmmo(x),
-                x == "none" ? 1 : 2
-              ),
-            ]
+        bulletConfig.unbrowsable.includes(bulletConfig.ammos[x]) ?
+          []
+        : [
+            x == "none" ? " " : `${ind(1)}🟨${Registries.items.get(x).name}:⬜`,
+            ...Weapon.getBulletInfo(bulletConfig.getAmmo(x), x == "none" ? 1 : 2),
+          ],
       ),
     ];
   }
   static getBulletInfo(bullet = {}, idl = 0) {
-    if (Array.isArray(bullet))
-      return bullet.flatMap((b) => Weapon.getBulletInfo(b, idl));
+    if (Array.isArray(bullet)) return bullet.flatMap((b) => Weapon.getBulletInfo(b, idl));
     /**@type {Bullet} */
     let blt = construct(bullet, "bullet");
     if (!blt) return [ind(idl) + "🟥invalid: " + bullet + "⬜"];
-    let time =
-      blt.decel > 0
-        ? Math.min(blt.lifetime, blt.speed / blt.decel)
-        : blt.lifetime;
+    let time = blt.decel > 0 ? Math.min(blt.lifetime, blt.speed / blt.decel) : blt.lifetime;
     return [
       ind(idl) +
-        (blt instanceof PointBullet
-          ? "🟪instant⬜"
-          : `${roundNum(
+        (blt instanceof PointBullet ? "🟪instant⬜" : (
+          `${roundNum(
             //s = ut + ½at²
             (blt.speed * time + 0.5 * (-blt.decel * time ** 2)) / 30,
-            1
-          )} blocks range`),
+            1,
+          )} blocks range`
+        )),
 
       ...blt.damage.map(
         (x) =>
-          `${`${ind(idl) +
-          (x.amount ?? 0)}${x.spread && x.spread > 0 ? ` (±${x.spread})` : ""}`} ${x.type ?? (x.radius > 0 ? "explosion" : "unknown")}${x.radius > 0 ? " area" : ""} damage${x.radius > 0 ? " ~ " + roundNum(x.radius / 30, 1) + " blocks" : ""}`
+          `${`${
+            ind(idl) + (x.amount ?? 0)
+          }${x.spread && x.spread > 0 ? ` (±${x.spread})` : ""}`} ${x.type ?? (x.radius > 0 ? "explosion" : "unknown")}${x.radius > 0 ? " area" : ""} damage${x.radius > 0 ? " ~ " + roundNum(x.radius / 30, 1) + " blocks" : ""}`,
       ),
 
       ind(idl) +
-        (blt.status !== "none"
-          ? `🟨${Registries.statuses.get(blt.status).name} for ${roundNum(blt.statusDuration / 60, 1)}s`
-          : ""),
+        (blt.status !== "none" ?
+          `🟨${Registries.statuses.get(blt.status).name} for ${roundNum(blt.statusDuration / 60, 1)}s`
+        : ""),
 
-      ind(idl) +
-        (blt.conditionalPierce ? "🟨continues if target destroyed⬜" : ""),
+      ind(idl) + (blt.conditionalPierce ? "🟨continues if target destroyed⬜" : ""),
 
       ind(idl) + (blt.pierce > 0 ? "🟨" + blt.pierce + "× pierce⬜" : ""),
 
       ind(idl) + (blt.fires > 0 ? "🟧incendiary: " : ""),
       ind(idl + 1) +
-        (blt.fires > 0
-          ? blt.isFireBinomial
-            ? `${blt.fireChance * 100}% chance for a fire ${blt.fires > 1 ? blt.fires + " times" : ""}`
-            : ((blt.fireChance ?? 1) !== 1
-                ? `${blt.fireChance * 100}% chance for `
-                : "") + (blt.fires > 1 ? blt.fires + " fires " : "1 fire ")
-          : ""),
+        (blt.fires > 0 ?
+          blt.isFireBinomial ?
+            `${blt.fireChance * 100}% chance for a fire ${blt.fires > 1 ? blt.fires + " times" : ""}`
+          : ((blt.fireChance ?? 1) !== 1 ? `${blt.fireChance * 100}% chance for ` : "") +
+            (blt.fires > 1 ? blt.fires + " fires " : "1 fire ")
+        : ""),
       ind(idl + 1) +
-        (blt.fires > 0
-          ? `${blt.fire.damage ?? 1} ${blt.fire.type ?? "fire"} damage every ${roundNum((blt.fire.interval ?? 10) / 60, 1)}s`
-          : ""),
+        (blt.fires > 0 ?
+          `${blt.fire.damage ?? 1} ${blt.fire.type ?? "fire"} damage every ${roundNum((blt.fire.interval ?? 10) / 60, 1)}s`
+        : ""),
       ind(idl + 1) +
-        (blt.fires > 0
-          ? `${roundNum((blt.fire.lifetime ?? 600) / 60, 1)}s lifetime⬜`
-          : ""),
+        (blt.fires > 0 ? `${roundNum((blt.fire.lifetime ?? 600) / 60, 1)}s lifetime⬜` : ""),
 
       ind(idl) + (blt instanceof Missile ? "🟦homing: " : ""),
       ind(idl + 1) +
-        (blt instanceof Missile
-          ? roundNum(blt.trackingRange / 30, 1) + " blocks range"
-          : ""),
-      ind(idl + 1) +
-        (blt instanceof Missile
-          ? roundNum(blt.turnSpeed, 1) + " strength⬜"
-          : ""),
+        (blt instanceof Missile ? roundNum(blt.trackingRange / 30, 1) + " blocks range" : ""),
+      ind(idl + 1) + (blt instanceof Missile ? roundNum(blt.turnSpeed, 1) + " strength⬜" : ""),
 
       ind(idl) + (blt.fragNumber > 0 ? blt.fragNumber + " frags:" : ""),
-      ...(blt.fragNumber > 0
-        ? Weapon.getBulletInfo(blt.fragBullet, idl + 1)
-        : []),
+      ...(blt.fragNumber > 0 ? Weapon.getBulletInfo(blt.fragBullet, idl + 1) : []),
 
       ind(idl) +
-        (blt.intervalNumber > 0
-          ? roundNum((blt.intervalNumber * 60) / blt.intervalTime, 1) +
-            "/s interval shots:"
-          : ""),
-      ...(blt.intervalNumber > 0
-        ? Weapon.getBulletInfo(blt.intervalBullet, idl + 1)
-        : []),
+        (blt.intervalNumber > 0 ?
+          roundNum((blt.intervalNumber * 60) / blt.intervalTime, 1) + "/s interval shots:"
+        : ""),
+      ...(blt.intervalNumber > 0 ? Weapon.getBulletInfo(blt.intervalBullet, idl + 1) : []),
     ];
   }
 }
 
 function entityHasAmmo(ent, ammoItem, ammoAmount) {
   if (ammoItem === "none") return true;
-  return ent instanceof InventoryEntity
-    ? ent instanceof EquippedEntity
-      ? ent.ammo.hasItem(ammoItem, ammoAmount)
+  return (
+    ent instanceof InventoryEntity ?
+      ent instanceof EquippedEntity ?
+        ent.ammo.hasItem(ammoItem, ammoAmount)
       : ent.inventory.hasItem(ammoItem, ammoAmount)
-    : false;
+    : false
+  );
 }
 
 function entityAmmoCount(ent, ammoItem, ammoAmount) {
   if (ammoItem === "none") return -1;
-  return ent instanceof InventoryEntity
-    ? ent instanceof EquippedEntity
-      ? ent.ammo.count(ammoItem)
+  return (
+    ent instanceof InventoryEntity ?
+      ent instanceof EquippedEntity ?
+        ent.ammo.count(ammoItem)
       : ent.inventory.count(ammoItem)
-    : 0;
+    : 0
+  );
 }
 
 function entityAmmoUse(ent, ammoItem, ammoAmount) {
-  return ent instanceof InventoryEntity
-    ? ent instanceof EquippedEntity
-      ? ent.ammo.removeItem(ammoItem, ammoAmount)
+  return (
+    ent instanceof InventoryEntity ?
+      ent instanceof EquippedEntity ?
+        ent.ammo.removeItem(ammoItem, ammoAmount)
       : ent.inventory.removeItem(ammoItem, ammoAmount)
-    : false;
+    : false
+  );
 }
 
 function ind(lvl = 0) {
