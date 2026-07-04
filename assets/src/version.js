@@ -58,7 +58,7 @@ async function getVer() {
 }
 
 console.log("[v] Getting initial version data...");
-fetch(`../../version.json`).then(async (val) => {
+fetch(`../version.json`).then(async (val) => {
   let def = await val.json();
   console.log("[v] Got initial version data", def);
   gameVersion = def?.version ?? "0.0.0(error)";
