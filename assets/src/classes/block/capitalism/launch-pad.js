@@ -1,3 +1,4 @@
+import { constructFromType } from "../../../core/constructor.js";
 import * as MLF1 from "../../../core/mlf1.js";
 import { roundNum } from "../../../core/number.js";
 import { Registries } from "../../../core/registry.js";
@@ -8,7 +9,7 @@ import { blockSize } from "../../../scaling.js";
 import { ImageParticle } from "../../effect/image-particle.js";
 import { ItemStack } from "../../item/item-stack.js";
 import { Item } from "../../item/item.js";
-import { patternedBulletExpulsion } from "../../projectile/yeeter.js";
+import { BulletModel } from "../../projectile/bullet-model.js";
 import { Timer } from "../../timer.js";
 import { Container } from "../container.js";
 
@@ -22,6 +23,23 @@ export class LaunchPad extends Container {
   #launchTime = 0;
   launchAmount = 10;
   inventorySize = 12;
+  /** @type {BulletModel} */
+  #bulletModel = new BulletModel();
+  init() {
+    super.init();
+
+    this.#bulletModel = constructFromType(
+      {
+        lifetime: 360,
+        collides: false,
+        components: [
+          { type: "vfx-trail", effect: this.trail, spacing: "timed" },
+          { type: "movement", speed: 0, decel: -0.05 },
+        ],
+      },
+      BulletModel,
+    );
+  }
   tick() {
     super.tick();
     this.tickLaunch();
@@ -57,34 +75,9 @@ export class LaunchPad extends Container {
       if (rem === 0) sotp();
     }, true);
     game.money += value;
-    Log.send(
-      `#a-Got \$${value} from selling ${sold.join("#a-, ")}`,
-      
-    );
+    Log.send(`#a-Got \$${value} from selling ${sold.join("#a-, ")}`);
     this.inventory.clean();
-    patternedBulletExpulsion(
-      this.x,
-      this.y,
-      {
-        trail: true,
-        trailInterval: 1,
-        trailSpacing: "timed",
-        trailEffect: this.trail,
-        lifetime: 360,
-        speed: 0,
-        decel: -0.05,
-        collides: false,
-        drawer: {
-          hidden: true
-        },
-      },
-      1,
-      -90,
-      0,
-      0,
-      this.world,
-      game.player
-    );
+    this.#bulletModel.emit(this.x, this.y, 1, -90, 0, 0, this.world, game.player);
   }
   drawTooltip(x, y, outlineColour, backgroundColour, forceVReverse) {
     super.drawTooltip(x, y, outlineColour, backgroundColour, true);
@@ -96,7 +89,7 @@ export class LaunchPad extends Container {
         .padEnd(20, "□")
         .substring(0, 20)}`,
       this.title,
-      Item.getColourFromRarity(0, "light")
+      Item.getColourFromRarity(0, "light"),
     );
   }
   createExtendedTooltip() {
@@ -120,6 +113,24 @@ export class LandingPad extends Container {
   #receiveTime = 0;
   inventorySize = 12;
   #currentFilter = "nothing";
+  /** @type {BulletModel} */
+  #bulletModel = new BulletModel();
+  init() {
+    super.init();
+
+    this.#bulletModel = constructFromType(
+      {
+        lifetime: 390,
+        collides: false,
+        components: [
+          { type: "vfx-trail", effect: this.trail, spacing: "timed" },
+          { type: "movement", speed: 18, decel: 0.05 },
+          { type: "expiry-vfx", effect: "land-effect" },
+        ],
+      },
+      BulletModel,
+    );
+  }
   tick() {
     super.tick();
     this.tickLaunch();
@@ -135,10 +146,7 @@ export class LandingPad extends Container {
   }
   validateBuy() {
     if (this.#currentFilter === "nothing") return false;
-    if (
-      game.money < (Registries.items.get(this.#currentFilter)?.marketValue ?? 1)
-    )
-      return false;
+    if (game.money < (Registries.items.get(this.#currentFilter)?.marketValue ?? 1)) return false;
     if (!this.inventory.canAddItem(this.#currentFilter)) return false;
     return true;
   }
@@ -150,8 +158,7 @@ export class LandingPad extends Container {
    */
   interaction(ent, stack = ItemStack.EMPTY) {
     if (stack.item !== "nothing") this.#currentFilter = stack.item;
-    if (stack.getItem())
-      Log.send("Set requested item to " + stack.getItem()?.name);
+    if (stack.getItem()) Log.send("Set requested item to " + stack.getItem()?.name);
     else return false;
     ui.waitingForMouseUp = true;
     return true;
@@ -165,7 +172,7 @@ export class LandingPad extends Container {
         this.uiX - 10 * ui.camera.zoom,
         this.uiY - 10 * ui.camera.zoom,
         10 * ui.camera.zoom,
-        10 * ui.camera.zoom
+        10 * ui.camera.zoom,
       );
     }
   }
@@ -173,9 +180,7 @@ export class LandingPad extends Container {
     let item = Registries.items.get(this.#currentFilter);
     let value = item?.marketValue ?? 1;
     game.money -= value;
-    Log.send(
-      `#a-Bought 1x ${item?.name ?? "nothing"}#a- for \$${value}`,
-    );
+    Log.send(`#a-Bought 1x ${item?.name ?? "nothing"}#a- for \$${value}`);
     this.timer.do(() => {
       this.world.particles.push(
         new ImageParticle(
@@ -192,35 +197,12 @@ export class LandingPad extends Container {
           blockSize / 2,
           blockSize,
           blockSize / 2,
-          0
-        )
+          0,
+        ),
       );
       this.inventory.addItem(this.#currentFilter);
     }, 395);
-    patternedBulletExpulsion(
-      this.x,
-      this.y - 3249,
-      {
-        trail: true,
-        trailInterval: 1,
-        trailSpacing: "timed",
-        trailEffect: this.trail,
-        lifetime: 390,
-        speed: 18,
-        decel: 0.05,
-        collides: false,
-        despawnEffect: "land-effect",
-        drawer: {
-          hidden: true
-        },
-      },
-      1,
-      90,
-      0,
-      0,
-      this.world,
-      game.player
-    );
+    this.#bulletModel.emit(this.x, this.y - 3249, 1, 90, 0, 0, this.world, game.player);
   }
   drawTooltip(x, y, outlineColour, backgroundColour, forceVReverse) {
     super.drawTooltip(x, y, outlineColour, backgroundColour, true);
@@ -228,14 +210,14 @@ export class LandingPad extends Container {
     MLF1.draw(
       x,
       y,
-      `Buying ${it.name ?? "nothing"}${it.name === undefined
-        ? ""
-        : ` (\$${it.marketValue ?? 1} each)`}\n${this.validateBuy() ? "Ready to Receive!" : "Not ready"}\n${""
-          .padEnd((this.#receiveTime / this.receiveCooldown) * 20, "■")
-          .padEnd(20, "□")
-          .substring(0, 20)}`,
+      `Buying ${it.name ?? "nothing"}${
+        it.name === undefined ? "" : ` (\$${it.marketValue ?? 1} each)`
+      }\n${this.validateBuy() ? "Ready to Receive!" : "Not ready"}\n${""
+        .padEnd((this.#receiveTime / this.receiveCooldown) * 20, "■")
+        .padEnd(20, "□")
+        .substring(0, 20)}`,
       this.title,
-      Item.getColourFromRarity(0, "light")
+      Item.getColourFromRarity(0, "light"),
     );
   }
   createExtendedTooltip() {

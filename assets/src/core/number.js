@@ -121,6 +121,10 @@ class Vector {
   get magnitude() {
     return Math.sqrt(this.x * this.x + this.y * this.y);
   }
+  /** The square of the length of the hypotenuse of the triangle formed by this vector's X- and Y-values as lengths. */
+  get magSqr() {
+    return this.x * this.x + this.y * this.y;
+  }
   /**
    * Adds 2 vectors.
    * @param {Vector} vct Vector to add.
@@ -252,6 +256,13 @@ class Vector {
   static fromAngleRad(angle) {
     return new Vector(Math.cos(angle), Math.sin(angle));
   }
+  /** Sets this vector's values from another.
+   * @param {{x:number, y:number}} thing
+   */
+  copyFrom(thing) {
+    this.x = thing.x;
+    this.y = thing.y;
+  }
 
   /** Returns a p5.Vector object equivalent to this vector.\
    * Use this class instead of p5.Vector whenever possible.
@@ -296,8 +307,13 @@ class Vector {
     );
   }
   multiLerp(other, divisions) {
+    divisions = Math.max(divisions, 1);
     let d = 1 / (divisions - 1);
     return new Array(divisions).fill(0).map((v, i) => this.lerp(other, i * d));
+  }
+  *[Symbol.iterator]() {
+    yield this.x;
+    yield this.y;
   }
 }
 globalThis.v = Vector;

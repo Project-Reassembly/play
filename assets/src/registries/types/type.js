@@ -55,7 +55,7 @@ import {
   LegComponent,
   WeaponComponent,
   WeaponisedComponent,
-} from "../../classes/entity/component.js";
+} from "../../classes/entity/entity-part.js";
 import { Entity } from "../../classes/entity/entity.js";
 import { EquippedEntity, InventoryEntity } from "../../classes/entity/inventory-entity.js";
 import { ModularTankEntity } from "../../classes/entity/modular-tank.js";
@@ -67,15 +67,10 @@ import { ItemStack } from "../../classes/item/item-stack.js";
 import { Item } from "../../classes/item/item.js";
 import { PlaceableItem } from "../../classes/item/placeable.js";
 import {
-  BlockLaunchedBullet,
-  BlockLauncher,
+  BlockLauncher
 } from "../../classes/item/special-weapons/block-launcher.js";
 import { Throwable } from "../../classes/item/throwable.js";
 import { Weapon } from "../../classes/item/weapon.js";
-import { Bullet } from "../../classes/projectile/bullet.js";
-import { CriticalBullet } from "../../classes/projectile/critical.js";
-import { PointBullet } from "../../classes/projectile/point-bullet.js";
-import { VirtualBullet } from "../../classes/projectile/virtual-bullet.js";
 import { Chunk } from "../../classes/world/chunk.js";
 import { World } from "../../classes/world/world.js";
 import { RegisteredItem } from "../../core/registered-item.js";
@@ -110,13 +105,12 @@ TypeRegistries.default.add("equipped-entity", EquippedEntity);
 TypeRegistries.default.add("npc", NPC);
 TypeRegistries.default.add("player", Player);
 TypeRegistries.default.add("modular-tank", ModularTankEntity);
-//Projectiles
-TypeRegistries.default.add("bullet", Bullet);
-// TypeRegistries.default.add("missile", Missile);
-TypeRegistries.default.add("critical", CriticalBullet);
-TypeRegistries.default.add("point-bullet", PointBullet);
-TypeRegistries.default.add("block-bullet", BlockLaunchedBullet);
-TypeRegistries.default.add("virtual", VirtualBullet);
+//Projectiles (replaced by BulletModel)
+// TypeRegistries.default.add("bullet", BulletInstance);
+// // TypeRegistries.default.add("missile", Missile);
+// TypeRegistries.default.add("critical", CriticalBullet);
+// TypeRegistries.default.add("point-bullet", PointBullet);
+// TypeRegistries.default.add("block-bullet", BlockLaunchedBullet);
 //Items
 TypeRegistries.default.add("item", Item);
 TypeRegistries.default.add("placeable", PlaceableItem);

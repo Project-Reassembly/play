@@ -35,7 +35,7 @@ class LightningParticle extends LinearParticle {
     //Generate points v2
     let prev = this.pos1;
     this.points = [this.pos1];
-    for(let p = 1; p < this.positions.length; p++){
+    for(let p = 1; p < this.positions.length-1; p++){
       if(p % lineLength !== 0 && p !== this.positions.length - 1) continue;
       let curr = this.positions[p];
       let direction = curr.sub(prev);
@@ -43,6 +43,7 @@ class LightningParticle extends LinearParticle {
       this.points.push(curr.add(pvec.scale(deviation * rnd.float(1, -1))))
       prev = curr;
     }
+    this.points.push(this.pos2)
 
     this.glowEffect = glowEffect;
   }

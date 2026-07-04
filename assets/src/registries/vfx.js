@@ -2343,6 +2343,20 @@ Registries.vfx.add("peti-zap", {
     strokeTo: 0,
   },
 });
+Registries.vfx.add("peti-zap-multi", {
+  type: "lightning-emission",
+  amount: 2,
+  line: {
+    lifetime: 10,
+    light: 20,
+    colours: [
+      [255, 30, 30],
+      [255, 0, 0, 50],
+    ],
+    strokeFrom: 2,
+    strokeTo: 0,
+  },
+});
 Registries.vfx.add("peti-laser", {
   type: "line-emission",
   amount: 1,

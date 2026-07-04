@@ -1,5 +1,5 @@
 import { col } from "../core/color.js";
-import { Vector, clamp, rnd, roundNum, turn } from "../core/number.js";
+import { Vector, clamp, rnd, turn } from "../core/number.js";
 import Integrate from "../lib/integrate.js";
 import { debug } from "../play/debug.js";
 import { emitEffect } from "../play/effects.js";
@@ -27,14 +27,19 @@ export class PhysicalObject extends Integrate.RegisteredItem {
   /**Direction in degrees */
   direction = 0;
   _previousRot = 0;
+  /** Setter for both width and height. */
   hitSize = 30;
   /** @type {import("./world/world.js").World} */
   world = null;
-
+  /** Should the entity render? Also affects targeting. */
   visible = true;
+  /** Should the object be included in collision detection? */
   tangible = true;
   get directionRad() {
     return (this.direction / 180) * Math.PI;
+  }
+  set directionRad(_) {
+    this.direction = (_ / Math.PI) * 180;
   }
   init() {
     this.width ??= this.hitSize;
@@ -47,7 +52,7 @@ export class PhysicalObject extends Integrate.RegisteredItem {
    * @param {PhysicalObject} other
    */
   collidesWith(other) {
-    return !other ? false : hitboxesIntersect(this, other);
+    return !other ? false : this.tangible && other.tangible && hitboxesIntersect(this, other);
   }
 
   moveVct(vct, ignoresBlocks = false) {
@@ -347,7 +352,8 @@ export class ShootableObject extends PhysicalObject {
     this._shieldDamageNumber(amount, this.x, this.y);
   }
   _baseDamageNumber(amount, x, y) {
-    const frac = amount / this.maxHealth;
+    const mag = Math.abs(amount);
+    const frac = mag / this.maxHealth;
     this.world.particles.push(
       new TextParticle(
         x,
@@ -356,23 +362,24 @@ export class ShootableObject extends PhysicalObject {
         60,
         this.size / 30 + Math.sqrt(frac),
         0.025,
-        roundNum(Math.abs(amount), 1),
+        Math.round(mag),
 
         createFlashingColourArray(
-          amount > 0 ?
+          amount >= 0 ?
             col.interp([col.yellow, col.red, col.black], clamp(frac, 0, 1))
-          : col.interp([col.from(200, 255, 0), col.green, col.white], clamp(-frac, 0, 1)),
+          : col.interp([col.from(200, 255, 0), col.green, col.white], clamp(frac, 0, 1)),
           65,
         ),
 
-        (1 + (amount / this.maxHealth) * 0.5) * 20,
-        (1 + amount / this.maxHealth / 6) * 10,
+        (1 + frac * 0.5) * 20,
+        (1 + frac / 6) * 10,
         0,
         true,
       ),
     );
   }
   _shieldDamageNumber(amount, x, y) {
+    const mag = Math.abs(amount);
     const frac = amount / this._lastMaxShield;
     this.world.particles.push(
       new TextParticle(
@@ -382,10 +389,10 @@ export class ShootableObject extends PhysicalObject {
         60,
         this.size / 30 + Math.sqrt(frac),
         0.025,
-        roundNum(Math.abs(amount), 1),
+        Math.round(mag),
 
         createFlashingColourArray(
-          amount > 0 ?
+          amount >= 0 ?
             col.interp(
               this.useYellowShield ? [col.yellow, col.white] : [col.blue, col.cyan, col.white],
               clamp(frac, 0, 1),

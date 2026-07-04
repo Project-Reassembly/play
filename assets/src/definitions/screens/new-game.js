@@ -256,7 +256,7 @@ export function selectors() {
         75,
         "none",
         () => {
-          UIComponent.setCondition(`page:${i}`);
+          UIComponent.setCondition(`page`, `${i}`);
         },
         `${i + 1}`,
         true,
@@ -281,7 +281,7 @@ createUIComponent(
   "none",
   () => {
     newgame_handler.show(`corp-${creation.corporation}`);
-    UIComponent.setCondition("ng-stage:cs");
+    UIComponent.setCondition("ng-stage", "cs");
   },
   "Confirm",
   true,

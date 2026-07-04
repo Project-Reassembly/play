@@ -4,8 +4,8 @@ import { Registries } from "../../../core/registry.js";
 import { drawImg } from "../../../core/ui.js";
 import { autoScaledEffect, Explosion, NuclearExplosion } from "../../../play/effects.js";
 import { game } from "../../../play/game.js";
+import { blockSize } from "../../../scaling.js";
 import { DroppedItemStack } from "../../item/dropped-itemstack.js";
-import { VirtualBullet } from "../../projectile/virtual-bullet.js";
 import { Timer } from "../../timer.js";
 import { Block, BreakType } from "../block.js";
 class Bomb extends Block {
@@ -38,8 +38,8 @@ class Bomb extends Block {
         this.hiddenImg,
         this.x,
         this.y,
-        this.tileSize * Block.size,
-        this.tileSize * Block.size,
+        this.tileSize * blockSize,
+        this.tileSize * blockSize
       );
   }
   interaction(ent, item) {
@@ -125,13 +125,6 @@ class Bomb extends Block {
       this.volatile ? "🟥volatile⬜" : "",
       "🟨 -------------------- ⬜",
     ];
-  }
-  /**@param {Bullet} bullet  */
-  hitByBullet(bullet) {
-    if (bullet instanceof VirtualBullet) {
-      this.#wasAccelerated = true;
-      this.activated();
-    }
   }
 }
 class NuclearBomb extends Bomb {

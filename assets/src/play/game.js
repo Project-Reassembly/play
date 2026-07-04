@@ -17,7 +17,7 @@ import { Decoration } from "../core/cmft.js";
 import { assign, construct, constructFromType } from "../core/constructor.js";
 import { Cutscene } from "../core/cutscene.js";
 import { clamp, rnd, roundNum } from "../core/number.js";
-import { PreloadRegistries, Registries } from "../core/registry.js";
+import { constructDelayed, PreloadRegistries, Registries } from "../core/registry.js";
 import { Serialiser } from "../core/serialiser.js";
 import { ImageContainer, rotatedShape, ui, UIComponent } from "../core/ui.js";
 import "../definitions/screens/any.js";
@@ -39,6 +39,7 @@ import { fonts } from "./font.js";
 import { Log } from "./messaging.js";
 
 import { GroundTile } from "../classes/block/ground-tile.js";
+import { BulletModel } from "../classes/projectile/bullet-model.js";
 import { deliverPlayer } from "../classes/world/events/event-action.js";
 import "../definitions/screens/ide.js";
 import { capturedInput, tcursor } from "../definitions/screens/ide.js";
@@ -666,12 +667,25 @@ function sizeKB(string) {
   return string ? string.length / 512 : 0;
 }
 globalThis.preload = async function () {
+  GroundTile.reloadIDs();
+
   loadStats.images = 0;
   loadStats.cutscenes = 0;
   loadStats.totalImages = PreloadRegistries.images.size;
   loadStats.totalCutscenes = PreloadRegistries.cutscenes.size;
+
   await fonts.load();
   console.log("Loaded fonts.");
+
+  createCorporationSelectors();
+
+  PreloadRegistries.bullets.forEach((el, name) => {
+    if (!Registries.bullets.has(name))
+      Registries.bullets.add(name, constructFromType(el, BulletModel));
+  });
+
+  console.log("Loaded bullets.");
+
   PreloadRegistries.images.forEach((el, name) => {
     if (el.type === "repo") {
       console.log("repository - ", el.items);
@@ -699,12 +713,12 @@ globalThis.preload = async function () {
       Registries.statuses.add(name, constructFromType(el, StatusEffect));
   });
 
-  createCorporationSelectors();
-
-  GroundTile.reloadIDs();
-
   loadStats.hide();
   console.log("All assets loaded.");
+
+  constructDelayed("preloaded");
+
+  console.log("[Setup] Done delayed constructions: <preloaded>");
 };
 //Set up the canvas, using the previous function
 globalThis.setup = function () {
@@ -915,17 +929,17 @@ function fpsUpdate() {
   //
 }
 
-ui.addReset("paused:false");
-ui.addReset("menu:none");
-ui.addReset("containerselected:false");
-ui.addReset("dead:no");
-ui.addReset("boss:no");
-ui.addReset("mode:build");
+ui.addReset("paused", "false");
+ui.addReset("menu", "none");
+ui.addReset("containerselected", "false");
+ui.addReset("dead", "no");
+ui.addReset("boss", "no");
+ui.addReset("mode", "build");
 
 function uiFrame() {
   Inventory.tooltip = null;
   //Tick UI
-  UIComponent.setCondition("containerselected:" + (Container.selectedBlock instanceof Container));
+  UIComponent.setCondition("containerselected", Container.selectedBlock instanceof Container);
   updateUIActivity();
   tickUI();
   //Reset mouse held status
@@ -935,7 +949,7 @@ function uiFrame() {
     gen.started &&
     !gen.inprogress &&
     ui.menuState === "in-game" &&
-    UIComponent.evaluateCondition("mode:build")
+    UIComponent.evaluateCondition("mode", "build")
   ) {
     ui.hoveredBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
     if (ui.hoveredBlock) ui.hoveredBlock.highlight();
@@ -978,13 +992,13 @@ function gameFrame() {
           ui.camera.x -= (ui.camera.x - game.player.x) * 0.1;
           ui.camera.y -= (ui.camera.y - game.player.y) * 0.1;
         }
-      } else UIComponent.setCondition("dead:yes");
+      } else UIComponent.setCondition("dead", "yes");
       effects.applyShake();
       world.tickAll();
       checkCreatedEntities();
     }
   });
-  UIComponent.setCondition("boss:" + (world.hasBoss() ? "yes" : "no"));
+  UIComponent.setCondition("boss", world.hasBoss() ? "yes" : "no");
   scale(ui.camera.zoom);
   rotate(radians(ui.camera.rotation));
   translate(-ui.camera.x, -ui.camera.y);
@@ -1002,10 +1016,10 @@ function gameFrame() {
 }
 
 function movePlayer() {
-  if (ui.texteditor.active) return (game.player.controllable = false);
+  if (ui.texteditor.active) return (ui.conditions.fc = "true");
   if (keyIsDown(ALT) || game.player.dead) {
     freecam = true;
-    UIComponent.setCondition("fc:true");
+    ui.conditions.fc = "true";
     if (keyIsDown(87)) {
       ui.camera.y -= 5;
     }
@@ -1018,11 +1032,11 @@ function movePlayer() {
     if (keyIsDown(68)) {
       ui.camera.x += 5;
     }
-    game.player.controllable = false;
+    // game.player.controllable = false;
   } else {
     freecam = false;
-    UIComponent.setCondition("fc:false");
-    game.player.controllable = true;
+    ui.conditions.fc = "false";
+    // game.player.controllable = true;
   }
 }
 
@@ -1304,11 +1318,9 @@ window.keyPressed = function (ev) {
   //Hotkeys
 
   // debug
-  if (key === "f3") {
-    UIComponent.setCondition("debugging:true");
-  } else if (UIComponent.evaluateCondition("debugging:true")) {
+  if (UIComponent.evaluateCondition("debugging", "true")) {
     console.log("debug: " + key);
-    UIComponent.setCondition("debugging:false");
+    UIComponent.setCondition("debugging", "false");
 
     if (key === "b") {
       debug.hitboxes = !debug.hitboxes;
@@ -1321,10 +1333,11 @@ window.keyPressed = function (ev) {
       Log.send(`#7-[#@-Debug#7-] Chunk borders ${debug.chunkBorders ? "shown" : "hidden"}`);
     } else if (key === "t") {
       UIComponent.setCondition(
-        "debug-tools:" + (UIComponent.evaluateCondition("debug-tools:true") ? "false" : "true"),
+        "debug-tools",
+        UIComponent.evaluateCondition("debug-tools", "true") ? "false" : "true",
       );
       Log.send(
-        `#7-[#@-Debug#7-] Debug tools ${UIComponent.evaluateCondition("debug-tools:true") ? "shown" : "hidden"}`,
+        `#7-[#@-Debug#7-] Debug tools ${UIComponent.evaluateCondition("debug-tools", "true") ? "shown" : "hidden"}`,
       );
     } else if (key === "r") {
       debug.regionBorders = !debug.regionBorders;
@@ -1340,7 +1353,11 @@ window.keyPressed = function (ev) {
         debug[key] = false;
       }
       Log.send(`#7-[#@-Debug#7-] Disabled everything.`);
-    }
+    } else if (key === "f3") {
+      Log.send(`#7-[#@-Debug#7-] Shortcut list:`);
+    } else Log.send(`#7-[#@-Debug#7-] Unknown feature: F3 + ${key}.`);
+  } else if (key === "f3") {
+    UIComponent.setCondition("debugging", "true");
   }
   //Pause / unpause
   else if (key === " ") togglePause();
@@ -1350,27 +1367,28 @@ window.keyPressed = function (ev) {
     if (key === "k") loadGame();
   }
   // close menu
-  else if (key === "escape" && !UIComponent.evaluateCondition("menu:none"))
-    UIComponent.setCondition("menu:none");
+  else if (key === "escape" && !UIComponent.evaluateCondition("menu", "none"))
+    UIComponent.setCondition("menu", "none");
   //Inventory
   else if (key === "e") {
-    if (UIComponent.evaluateCondition("menu:inventory")) UIComponent.setCondition("menu:none");
-    else UIComponent.setCondition("menu:inventory");
+    if (UIComponent.evaluateCondition("menu", "inventory"))
+      UIComponent.setCondition("menu", "none");
+    else UIComponent.setCondition("menu", "inventory");
   }
   //DevTools and fullscreen
   else if (key === "f12" || key === "f11") return true;
   //Recipe controls
   else if (key === "arrowright") nextRecipe();
   else if (key === "arrowleft") prevRecipe();
-  else if (key === "arrowup") UIComponent.setCondition("mode:build");
-  else if (key === "arrowdown") UIComponent.setCondition("mode:fight");
+  else if (key === "arrowup") UIComponent.setCondition("mode", "build");
+  else if (key === "arrowdown") UIComponent.setCondition("mode", "fight");
   //Command line
   else if (key === "/") openCommandLine();
   //Hotkeys
   else if (key === "b") {
-    if (UIComponent.evaluateCondition("mode:build")) UIComponent.setCondition("mode:fight");
-    else UIComponent.setCondition("mode:build");
-  } else if (UIComponent.evaluateCondition("mode:build")) {
+    if (UIComponent.evaluateCondition("mode", "build")) UIComponent.setCondition("mode", "fight");
+    else UIComponent.setCondition("mode", "build");
+  } else if (UIComponent.evaluateCondition("mode", "build")) {
     if (key === "1") game.player.inventory.hotkeySlot(0, true);
     else if (key === "2") game.player.inventory.hotkeySlot(1, true);
     else if (key === "3") game.player.inventory.hotkeySlot(2, true);
@@ -1484,11 +1502,11 @@ function prevRecipe() {
 
 function pause() {
   game.paused = true;
-  UIComponent.setCondition("paused:true");
+  UIComponent.setCondition("paused", "true");
 }
 function unpause() {
   game.paused = false;
-  UIComponent.setCondition("paused:false");
+  UIComponent.setCondition("paused", "false");
 }
 function togglePause() {
   if (game.paused) {

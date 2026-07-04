@@ -1,4 +1,5 @@
 import { constructFromType } from "../../core/constructor.js";
+import { BulletModel } from "../projectile/bullet-model.js";
 
 class ShootPattern {
   spread = 0;
@@ -21,23 +22,28 @@ class WeaponShootConfiguration {
   }
 }
 class WeaponBulletConfiguration {
-  // Defines possible bullets.
+  /** Defines possible bullets. @type {BulletModel[]} */
   types = [];
-  // Matches ammo items to bullets.
+  /** Matches ammo items to bullets. @type {({[item:string]: number|number[]})} */
   ammos = {};
-  // Hide variations
+  /** Bullet models to hide from in-game documentation. */
   unbrowsable = [];
+  init() {
+    this.types.forEach((v, i, a) => (a[i] = constructFromType(v, BulletModel)));
+  }
   get(index) {
     if (index instanceof Array) return index.map((i) => this.get(i));
     else return this.types[index] ?? null;
   }
+  /** @template {string|string[]} T @param {T} ammo @returns {T extends string[] ? BulletModel[] : (BulletModel|undefined)} */
   getAmmo(ammo) {
     if (ammo instanceof Array) return ammo.map((i) => this.getAmmo(i));
     else {
       let def = this.ammos[ammo];
-      if (def instanceof Array) return def.map((d) => this.types[d] ?? null);
-      return this.types[def] ?? null;
+      if (def instanceof Array) return def.map((d) => this.types[d]);
+      return this.types[def];
     }
   }
 }
-export {ShootPattern, WeaponBulletConfiguration, WeaponShootConfiguration}
+export { ShootPattern, WeaponBulletConfiguration, WeaponShootConfiguration };
+

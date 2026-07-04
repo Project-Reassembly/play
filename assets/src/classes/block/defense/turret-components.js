@@ -8,7 +8,7 @@ import { autoScaledEffect } from "../../../play/effects.js";
 import { blockSize } from "../../../scaling.js";
 import { TextParticle } from "../../effect/text-particle.js";
 import { WaveParticle } from "../../effect/wave-particle.js";
-import { WeaponComponent } from "../../entity/component.js";
+import { WeaponComponent } from "../../entity/entity-part.js";
 import { Entity } from "../../entity/entity.js";
 import { Inventory } from "../../inventory.js";
 import { DroppedItemStack } from "../../item/dropped-itemstack.js";
@@ -16,7 +16,6 @@ import { Item } from "../../item/item.js";
 import { WeaponBulletConfiguration, WeaponShootConfiguration } from "../../item/weapon-exts.js";
 import { Weapon } from "../../item/weapon.js";
 import { PhysicalObject, ShootableObject } from "../../physical.js";
-import { patternedBulletExpulsion } from "../../projectile/yeeter.js";
 import { Timer } from "../../timer.js";
 import { Container } from "../container.js";
 /**Turret base structural component. Connects visually to diagonally adjacent blocks. */
@@ -373,7 +372,11 @@ export class TurretController extends TurretBase {
     return true;
   }
   value() {
-    return super.value() + (this.turretinv.get(0) ? this.turretinv.get(0).getItem()?.baseSize || 0 : 0) + 2;
+    return (
+      super.value() +
+      (this.turretinv.get(0) ? this.turretinv.get(0).getItem()?.baseSize || 0 : 0) +
+      2
+    );
   }
 }
 
@@ -511,17 +514,18 @@ export class TurretItem extends Item {
       () => {
         let pos = this._getShootPos(turret);
         autoScaledEffect(shoot.effect, turret.world, pos.x, pos.y, pos.direction);
-        patternedBulletExpulsion(
-          pos.x,
-          pos.y,
-          bulletConfig.getAmmo(ammoType) ?? {},
-          shoot.pattern.amount,
-          degrees(pos.direction),
-          shoot.pattern.spread,
-          shoot.pattern.spacing,
-          turret.world,
-          turret,
-        );
+        const model = bulletConfig.getAmmo(ammoType);
+        if (model)
+          model.instantiate(
+            pos.x,
+            pos.y,
+            shoot.pattern.amount,
+            degrees(pos.direction),
+            shoot.pattern.spread,
+            shoot.pattern.spacing,
+            turret.world,
+            turret,
+          );
         if (this.component instanceof WeaponComponent) {
           this.component.trigger(shoot.recoilScale, 0);
         }

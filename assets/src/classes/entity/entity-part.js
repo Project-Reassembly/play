@@ -3,11 +3,11 @@ import { turn } from "../../core/number.js";
 import { RegisteredItem } from "../../core/registered-item.js";
 import { Registries } from "../../core/registry.js";
 import { rotatedImg } from "../../core/ui.js";
-import { EquippedEntity } from "../entity/inventory-entity.js";
 import { Weapon } from "../item/weapon.js";
 import { ShootableObject } from "../physical.js";
+import { EquippedEntity } from "./inventory-entity.js";
 //Part of an entity.
-class Component extends RegisteredItem {
+class EntityPart extends RegisteredItem {
   shape = "circle";
   fill = "red";
   image = "error";
@@ -84,7 +84,7 @@ class Component extends RegisteredItem {
   }
 }
 
-class LegComponent extends Component {
+class LegComponent extends EntityPart {
   cycleLength = 6;
   stepMagnitude = 2;
   _cycleAmount = 0;
@@ -110,7 +110,7 @@ class LegComponent extends Component {
     else this._cycleAmount += entity.velocity.magnitude;
   }
 }
-class WeaponComponent extends Component {
+class WeaponComponent extends EntityPart {
   recoil = 0;
   rotationalRecoil = 0;
   recoilSpeed = 1;
@@ -219,7 +219,7 @@ class DestructibleComponent extends ShootableObject {
   }
 }
 
-class WeaponisedComponent extends Component {
+class WeaponisedComponent extends EntityPart {
   /**@type {Weapon} */
   weapon = {};
   _ticked = false;
@@ -282,5 +282,5 @@ class WeaponisedComponent extends Component {
   }
 }
 
-export { Component, DestructibleComponent, LegComponent, WeaponComponent, WeaponisedComponent };
+export { EntityPart as Component, DestructibleComponent, LegComponent, WeaponComponent, WeaponisedComponent };
 

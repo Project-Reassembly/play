@@ -69,7 +69,7 @@ createUIComponent(
   75,
   "none",
   () => {
-    UIComponent.setCondition("startable:false");
+    UIComponent.setCondition("startable", "false");
     ui.timer.repeat((i) => (fade = i * 4), 64);
     ui.timer.do(() => {
       fade = 0;
@@ -100,7 +100,7 @@ createUIComponent(
   75,
   "none",
   () => {
-    UIComponent.setCondition("startable:false");
+    UIComponent.setCondition("startable", "false");
     ui.timer.repeat((i) => (fade = i * 4), 64);
     ui.timer.do(() => {
       fade = 0;
@@ -214,14 +214,14 @@ Object.defineProperty(globalThis, "f", { get: () => fade });
 //update info every day
 setInterval(checkUpdate, 86_400_000);
 
-UIComponent.setCondition("show-load:true");
+UIComponent.setCondition("show-load", "true");
 export const loadStats = {
   totalImages: PreloadRegistries.images.size,
   totalCutscenes: PreloadRegistries.cutscenes.size,
   images: 0,
   cutscenes: 0,
   hide() {
-    UIComponent.setCondition("show-load:false");
+    UIComponent.setCondition("show-load", "false");
   },
 };
 createUIComponent(["title"], ["show-load:true"], 0, 0, 1920, 1080).setBackgroundColour(150);

@@ -2,7 +2,6 @@ import { construct, constructFromType } from "../../core/constructor.js";
 import { rnd, tru, Vector } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { ui, UIComponent } from "../../core/ui.js";
-import Integrate from "../../lib/integrate.js";
 import { autoScaledEffect } from "../../play/effects.js";
 import { Log } from "../../play/messaging.js";
 import { blockSize, Direction, totalSize } from "../../scaling.js";
@@ -10,10 +9,9 @@ import { Inventory } from "../inventory.js";
 import { Accessory } from "../item/accessory.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { ItemStack } from "../item/item-stack.js";
-import { Bullet } from "../projectile/bullet.js";
-import { getPatternedBulletExpulsion } from "../projectile/yeeter.js";
+import { BulletModel } from "../projectile/bullet-model.js";
 import { Timer } from "../timer.js";
-import { WeaponComponent } from "./component.js";
+import { WeaponComponent } from "./entity-part.js";
 import { EquippedEntity } from "./inventory-entity.js";
 export const respawnTimer = new Timer();
 
@@ -103,14 +101,16 @@ class Player extends EquippedEntity {
     }
   }
   releasePunchLeft() {
-    this._punchWith(this.leftArmComponent, this.punchChargeL);
-    this.punchChargeL = 0;
     this.punchChargingL = false;
+    let c = this.punchChargeL;
+    this.punchChargeL = 0;
+    this._punchWith(this.leftArmComponent, c);
   }
   releasePunchRight() {
-    this._punchWith(this.rightArmComponent, this.punchChargeR);
-    this.punchChargeR = 0;
     this.punchChargingR = false;
+    let c = this.punchChargeR;
+    this.punchChargeR = 0;
+    this._punchWith(this.rightArmComponent, c);
   }
   _posOf(component) {
     let pos = component.getPosOn(this);
@@ -164,18 +164,18 @@ class Player extends EquippedEntity {
       if (t) type = t;
     });
 
-    /** @type {Integrate.Unconstructed<Bullet>} */
-    const bul = typeof type === "object" ? type : Registries.small.punch_types.get(type).bullet;
+    /** @type {{name:string, description:string, bullet:string}} */
+    const bul = typeof type === "object" ? type : Registries.small.punch_types.get(type);
     if (bul) {
-      getPatternedBulletExpulsion(x, y, bul, 1, degrees(direction), 0, 0, this.world, this).forEach(
-        (b) => {
-          const oh = b.hitb;
-          b.hitb = () => {
-            this.doToAccessories((i) => i.atkPerformed(this, charged));
-            oh.call(b);
-          };
-        },
-      );
+      /** @type {BulletModel} */
+      const model = Registries.bullets.get(bul.bullet);
+      model.emit(x, y, 1, degrees(direction), 0, 0, this.world, this).forEach((b) => {
+        const oh = b.hitex;
+        b.hitex = (obj) => {
+          this.doToAccessories((i) => i.atkPerformed(this, charged));
+          oh.call(b, obj);
+        };
+      });
     }
   }
   /** @param {(v:Accessory, i:number, stop: () => void) => void} fn  */
@@ -306,7 +306,7 @@ class Player extends EquippedEntity {
     Inventory.mouseItemStack.clear();
     respawnTimer.do(() => {
       ui.waitingForMouseUp = true;
-      UIComponent.setCondition("dead:yes");
+      UIComponent.setCondition("dead", "yes");
     }, this.respawnTime);
   }
   doAI() {
@@ -319,25 +319,25 @@ class Player extends EquippedEntity {
       totalSize - blockSize * 0.5,
       totalSize - blockSize * 0.5,
     ];
-    if (this.controllable) {
+    if (this.controllable && ui.conditions.fc == "false") {
       const v = Vector.ZERO;
       const accel = this.flying ? Math.cbrt(this.speed) / 5 : this.speed / 10;
       if (keyIsDown(87) && this.y > borders[1] /* Top */ + this.hitSize) {
         //If 'W' pressed
-        v.addXY(0, -1, true);
+        v.y -= 1;
         //this.move(0, -this.speed);
       }
       if (keyIsDown(83) && this.y < borders[3] /* Bottom */ - this.hitSize) {
         //If 'S' pressed
-        v.addXY(0, 1, true);
+        v.y += 1;
       }
       if (keyIsDown(65) && this.x > borders[0] /* Left */ + this.hitSize) {
         //If 'A' pressed
-        v.addXY(-1, 0, true);
+        v.x -= 1;
       }
       if (keyIsDown(68) && this.x < borders[2] /* Right */ - this.hitSize) {
         //If 'D' pressed
-        v.addXY(1, 0, true);
+        v.x += 1;
       }
       if (v.nonzero) this.velocity.add(v.normalise().scale(accel), true);
     }

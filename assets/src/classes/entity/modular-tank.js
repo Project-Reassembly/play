@@ -8,7 +8,7 @@ import { SignBlock } from "../block/decoration.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
 import { Weapon } from "../item/weapon.js";
 import { World } from "../world/world.js";
-import { WeaponisedComponent } from "./component.js";
+import { WeaponisedComponent } from "./entity-part.js";
 import { InventoryEntity } from "./inventory-entity.js";
 
 class ModularTankEntity extends InventoryEntity {

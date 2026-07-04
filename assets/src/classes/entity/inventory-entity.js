@@ -5,7 +5,7 @@ import { Accessory } from "../item/accessory.js";
 import { Equippable } from "../item/equippable.js";
 import { ItemStack } from "../item/item-stack.js";
 import { PhysicalObject } from "../physical.js";
-import { Component, WeaponComponent } from "./component.js";
+import { Component, WeaponComponent } from "./entity-part.js";
 import { Entity } from "./entity.js";
 class InventoryEntity extends Entity {
   /**@type {Inventory} */

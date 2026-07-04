@@ -1,12 +1,12 @@
 declare namespace Integrate {
   export const types: TypeRegistry;
   export const registries: RegistryRegistry;
-  type FieldsOf<T> = { [K in keyof T]: T[K] extends Function ? never : K }[keyof T];
-  export type Unconstructed<T> = Partial<Pick<T, FieldsOf<T>>> & {
+  export type Unconstructed<T> = Partial<{ [K in keyof T as T[K] extends Function ? never : K] : T[K] }> | {
     type?: string;
     registryName?: string;
   };
-  export type ctor = new () => any;
+  export type Constructor = new () => any;
+  export type TypedConstructor<T> = new () => T;
   /**
    * Data structure for holding **unique, case-insensitive** key-value pairs.
    * @template T
@@ -87,9 +87,9 @@ declare namespace Integrate {
      * Constructs an item from this registry, using a type from another registry.
      * @param {string} name Name of item to construct.
      * @param {TypeRegistry} registry Registry for the type of the item.
-     * @param {ctor} [defaultType=Object] Constructor function or class to use if there's no defined type.
+     * @param {Constructor<T>} [defaultType=Object] Constructor function or class to use if there's no defined type.
      */
-    create(name: string, registry: TypeRegistry, defaultType?: ctor): T;
+    create(name: string, registry: TypeRegistry, defaultType?: TypedConstructor<T>): T;
     /**
      * Searches the registry for any entries with matching content. Equivalence follows `===` rules.
      * @param {Unconstructed<T>} item Item to search for.
@@ -158,9 +158,9 @@ declare namespace Integrate {
     get size(): number;
     /** Adds an item to registry.
      * @param {string} name Registry name of item. This is not case sensitive.
-     * @param {ctor} item Item to add to registry.
+     * @param {Constructor} item Item to add to registry.
      */
-    add(name: string, item: ctor): void;
+    add(name: string, item: Constructor): void;
     /**
      * Checks for an item in registry.
      * @param {string} name Registry name to check for. Not case sensitive.
@@ -170,9 +170,9 @@ declare namespace Integrate {
     /**
      * Gets an item from registry name.
      * @param {string} [name=""] Registry name to get. Not case sensitive.
-     * @returns {ctor} The item, if present.
+     * @returns {Constructor} The item, if present.
      */
-    get(name?: string): ctor;
+    get(name?: string): Constructor;
     /**
      * Renames a registry item. Neither parameter is case-sensitive.
      * @param {string} name Registry name to change.
@@ -181,14 +181,14 @@ declare namespace Integrate {
     rename(name: string, newName: string): void;
     /**
      * Performs a function on each item in registry.
-     * @param {(item: ctor, name: string) => void} callback Function to perform on each item.
+     * @param {(item: Constructor, name: string) => void} callback Function to perform on each item.
      */
-    forEach(callback: (item: ctor, name: string) => void): void;
+    forEach(callback: (item: Constructor, name: string) => void): void;
     /**
      * Performs a function on each item in registry asynchronously.
-     * @param {(item: ctor, name: string) => void} callback Function to perform on each item.
+     * @param {(item: Constructor, name: string) => void} callback Function to perform on each item.
      */
-    forEachAsync(callback: (item: ctor, name: string) => void): Promise<void>;
+    forEachAsync(callback: (item: Constructor, name: string) => void): Promise<void>;
     /**
      * Gets the item an a certain index in the registry.
      * @param {number} index Zero-based index of the item to get.
@@ -199,16 +199,16 @@ declare namespace Integrate {
      * Constructs an item using a type from this registry. Note that this only works with objects.
      * @template {object} T
      * @param {Unconstructed<T>} object Object to construct.
-     * @param {ctor} [defaultType=Object] Constructor function or class to use if there's no defined type.
+     * @param {Constructor} [defaultType=Object] Constructor function or class to use if there's no defined type.
      * @returns {T | undefined}
      */
-    construct<T extends object>(object: Unconstructed<T>, defaultType?: ctor): T | undefined;
+    construct<T extends object>(object: Unconstructed<T>, defaultType?: TypedConstructor<T>): T | undefined;
     /**
      * Searches the registry for any entries with matching content. Equivalence follows `===` rules.
-     * @param {ctor} item Item to search for.
+     * @param {Constructor} item Item to search for.
      * @returns {string | null} Null if no entry with the item exists, the corresponding name otherwise.
      */
-    nameOf(item: ctor): string | null;
+    nameOf(item: Constructor): string | null;
   }
   export class Mod {
       /** Display name of the mod. */

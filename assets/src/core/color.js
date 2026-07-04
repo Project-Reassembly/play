@@ -37,7 +37,7 @@ export const col = new (class Int32Colours {
         if (something instanceof Array) return this.from(...something, 255);
         return this.from(something.r, something.g, something.b, something.a);
       case "function":
-        return this.normalise(something());
+        return this.convert(something());
     }
   }.bind(this);
   /**@readonly @type {color}*/

@@ -4,13 +4,12 @@ import { turn, Vector } from "../../../core/number.js";
 import { debug } from "../../../play/debug.js";
 import { autoScaledEffect } from "../../../play/effects.js";
 import { blockSize } from "../../../scaling.js";
-import { WeaponComponent } from "../../entity/component.js";
+import { WeaponComponent } from "../../entity/entity-part.js";
 import { Entity } from "../../entity/entity.js";
 import { DroppedItemStack } from "../../item/dropped-itemstack.js";
 import { WeaponBulletConfiguration, WeaponShootConfiguration } from "../../item/weapon-exts.js";
 import { Weapon } from "../../item/weapon.js";
 import { PhysicalObject, ShootableObject } from "../../physical.js";
-import { patternedBulletExpulsion } from "../../projectile/yeeter.js";
 import { Timer } from "../../timer.js";
 import { Container } from "../container.js";
 
@@ -180,17 +179,18 @@ class Turret extends Container {
       () => {
         let pos = this._getShootPos();
         autoScaledEffect(shoot.effect, this.world, pos.x, pos.y, pos.direction);
-        patternedBulletExpulsion(
-          pos.x,
-          pos.y,
-          bulletConfig.getAmmo(ammoType) ?? {},
-          shoot.pattern.amount,
-          degrees(pos.direction),
-          shoot.pattern.spread,
-          shoot.pattern.spacing,
-          this.world,
-          this,
-        );
+        const model = bulletConfig.getAmmo(ammoType);
+        if (model)
+          model.instantiate(
+            pos.x,
+            pos.y,
+            shoot.pattern.amount,
+            degrees(pos.direction),
+            shoot.pattern.spread,
+            shoot.pattern.spacing,
+            this.world,
+            this,
+          );
         if (this.component instanceof WeaponComponent) {
           this.component.trigger(shoot.recoilScale, 0);
         }

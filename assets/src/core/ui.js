@@ -2,15 +2,17 @@
  * @import { Block } from "../classes/block/block.js"
  * @import { Inventory } from "../classes/inventory.js";
  * @import { ShootableObject } from "../classes/physical.js";
+ * @import { BulletInstance } from "../classes/projectile/bullet.js";
+ * @import Integrate from "../lib/integrate.js";
  */
 import { Timer } from "../classes/timer.js";
 import { contentScale, fonts } from "../play/game.js";
-import { Direction } from "../scaling.js";
+import { blockSize, Direction } from "../scaling.js";
 import * as CMFT from "./cmft.js";
 import { col } from "./color.js";
 import { CutsceneHandler } from "./cutscene.js";
 import * as MLF1 from "./mlf1.js";
-import { Vector } from "./number.js";
+import { roundNum, Vector } from "./number.js";
 import { Registries } from "./registry.js";
 const ui = new (class UI {
   menuState = "title";
@@ -177,17 +179,18 @@ const ui = new (class UI {
     this.texteditor.active = false;
     this.previousFPS = [];
     this.hoveredBlock = null;
-    this.resets.forEach((c) => UIComponent.setCondition(c));
+    this.resets.forEach((c) => UIComponent.setCondition(...c));
     this.wasReset = true;
   }
   wasReset = false;
   timer = new Timer();
   cutscene = new CutsceneHandler((v) => (ui.menuState = v));
+  /** @type {[string,string][]} */
   resets = [];
   /** Adds a condition to be set whenever the UI resets. */
-  addReset(condition) {
-    UIComponent.setCondition(condition);
-    this.resets.push(condition);
+  addReset(condition, value) {
+    UIComponent.setCondition(condition, value);
+    this.resets.push([condition, value]);
   }
 })();
 
@@ -274,34 +277,53 @@ class UIComponent {
     return Object.defineProperty(this, prop, { get: getter });
   }
 
-  /**Evaluates property:value on game ui: input "slot:1" => if "slot" is "1" (or equivalent, e.g. 1) return true, else false
-   * The property `texteditor` cannot be set, as it is a special property of the ui.
+  /**Evaluates property:value on game ui: input `"slot:1"` => if `"slot"` is `"1"` (but not if it is equivalent, e.g. `1`) return `true`, else `false`. \
+   * The property `texteditor` cannot be set, as it is a special property of the ui. \
+   * Multiple possible properties can be tested for: `slot:1|2|3|4` returns `true` if `"slot"` is _any_ of `"1"`,`"2"`,`"3"` or `"4"`. \
+   * If more parameters are provided, then no string splitting is done.
    */
-  static evaluateCondition(condition) {
-    const parts = condition.split(":"); //Separate property <- : -> value
-    if (parts.length !== 2) {
-      //If extra parameters, or not enough:
-      return true; //Basically ignore
+  static evaluateCondition(condition, ...values) {
+    if (typeof condition !== "string") condition = `${condition}`;
+    if (values.length > 0) {
+      const c = ui.conditions[condition];
+      if (c) {
+        //If property exists
+        return values.includes(c); //Check it and return
+      }
     }
-    if (ui.conditions[parts[0]]) {
+    const i = condition.indexOf(":");
+    if (i === -1) {
+      //If no colon, simply return its presence
+      return !!ui.conditions[parts[0]];
+    }
+    const con = condition.substring(0, i);
+    const vals = condition.substring(i + 1);
+
+    const c = ui.conditions[con];
+    if (c) {
       //Separate property values
-      let values = parts[1].split("|");
+      let values = vals.split("|");
       //If property exists
-      return values.includes(ui.conditions[parts[0]]); //Check it and return
+      return values.includes(c); //Check it and return
     }
-    if (parts[0] === "texteditor") {
-      return parts[1] === "true" ? ui.texteditor.active : !ui.texteditor.active;
+    if (con === "texteditor") {
+      return vals === "true" ? ui.texteditor.active : !ui.texteditor.active;
     }
     return true; //If unsure, ignore
   }
   //Sets property:value on game ui: input "slot:1" => sets "slot" to "1"
-  static setCondition(condition) {
-    const parts = condition.split(":"); //Separate property <- : -> value
-    if (parts.length !== 2) {
-      //If extra parameters
-      return; //Cancel
+  static setCondition(condition, value) {
+    if (typeof condition !== "string") condition = `${condition}`;
+    if (value !== undefined) {
+      ui.conditions[condition] = `${value}`;
     }
-    ui.conditions[parts[0]] = parts[1]; //Set the property
+    const i = condition.indexOf(":");
+    if (i === -1) {
+      return;
+    }
+    const con = condition.substring(0, i);
+    const val = condition.substring(i + 1);
+    ui.conditions[con] = `${val}`; //Set the property
   }
   acceptedScreens = [];
   conditions = [];
@@ -730,26 +752,19 @@ class InventoryUIComponent extends UIComponent {
   }
 }
 
-class SyntaxHighlightedUIComponent extends UIComponent {
-  /**@type {() => string} */
-  text = () => "";
+class CMFTUIComponent extends UIComponent {
   /**@param {(text:string) => string} fn*/
   formatter = (t) => t;
-  lasttxt = this.text();
-  textdrawer = new CMFT.Drawer().noBG();
+  lasttxt = this.text;
+  textdrawer = CMFT.blank();
   hastext = false;
-  /**@param {() => string} fn*/
-  setText(fn) {
-    this.text = fn;
-    return this;
-  }
   /**@param {(text:string) => string} fn*/
   setFormatter(fn) {
     this.formatter = fn;
     return this;
   }
   refresh() {
-    this.#settxt(this.text());
+    this.#settxt(this.text);
     return this;
   }
   #settxt(t) {
@@ -762,7 +777,7 @@ class SyntaxHighlightedUIComponent extends UIComponent {
   }
   draw() {
     super.draw();
-    const t = this.text();
+    const t = this.text;
     if (t !== this.lasttxt) this.#settxt(t);
 
     this.textdrawer.draw(
@@ -771,6 +786,212 @@ class SyntaxHighlightedUIComponent extends UIComponent {
       col.white,
       col.accent,
     );
+  }
+}
+
+export class BulletVisualiser extends UIComponent {
+  /** @type {Integrate.Unconstructed<BulletInstance>} */
+  bullet = {};
+  #off = 0;
+  depth = Infinity;
+  draw() {
+    super.draw();
+    this.#off = this.#drawBulletPath(
+      this.x - this.width * 0.5 + 20,
+      this.y + this.height * 0.5 - this.#off,
+      degrees(this.rotation),
+      this.bullet,
+      this.depth,
+    );
+  }
+  /**
+   *
+   * @param {number} x
+   * @param {number} y
+   * @param {number} d
+   * @param {Integrate.Unconstructed<BulletInstance>} bullet
+   * @returns The height of the visual.
+   */
+  #drawBulletPath(x, y, d, bullet, maxd = Infinity, depth = 0) {
+    const start = new Vector(x, y);
+    let direction = new Vector(1, 0).rotate(d + (bullet.direction ?? 0));
+    bullet.decel ??= 0;
+
+    const updates = (bullet.extraUpdates ?? 0) + 1;
+
+    const speed = bullet.speed ?? 20;
+    const time = Math.ceil((bullet.lifetime ?? 0) / updates, 1);
+    const ptime =
+      bullet.decel > 0 ? Math.min(bullet.lifetime, bullet.speed / bullet.decel) : bullet.lifetime;
+    const range = speed * ptime + 0.5 * (-bullet.decel * ptime * ptime);
+    const color =
+      depth > maxd ? col.from(50, 50, 50, 100)
+      : bullet.trail ? (col.convert(bullet.trailColours[0]) ?? col.white)
+      : col.white;
+
+    const end = start.add(direction.scale(range));
+
+    push();
+    noFill();
+    strokeWeight(bullet.hitSize ?? 2);
+    textSize(15);
+    textFont(fonts.ocr);
+    col.stroke(color);
+    // spawning position
+    circle(x, y, 10);
+    // basic range
+    line(x, y, end.x, end.y);
+    // area damage
+    strokeWeight(2);
+    col.fill(col.withA(color, 100));
+    let toff = 0;
+    if (Array.isArray(bullet.damage))
+      for (let d of bullet.damage) {
+        if (d.radius && d.amount) {
+          if (d.radius > toff) toff = d.radius;
+          circle(end.x, end.y, d.radius * 2);
+        }
+      }
+    toff *= Math.SQRT1_2;
+    toff += 10;
+    noFill();
+    if (bullet.speed > 0) {
+      // speed indicators
+      let s = speed * updates;
+      push();
+      translate(start.x, start.y);
+      rotate(direction.angleRad);
+      for (let dist = s; dist < range; dist += s) {
+        s -= bullet.decel * updates;
+        line(dist, 0, dist - 5, -5);
+        line(dist, 0, dist - 5, 5);
+      }
+      line(range + 5, 5, range - 5, -5);
+      line(range + 5, -5, range - 5, 5);
+      pop();
+    }
+    // splits!
+    if (bullet.fragNumber > 0) {
+      this.#showEmission(
+        direction,
+        end,
+        toff,
+        bullet.fragDirection,
+        bullet.fragSpacing,
+        bullet.fragSpread,
+        bullet.fragNumber,
+        1,
+        bullet.fragBullet,
+        maxd,
+        depth + 1,
+      );
+    }
+    if (bullet.intervalNumber > 0) {
+      const mid = start.add(end).scale(0.5);
+      const off = bullet.fragNumber > 0 ? toff + 60 : toff;
+      const c = Math.max(Math.floor(ptime / ((bullet.intervalTime ?? 0) + 1)), 1);
+      this.#showEmission(
+        direction,
+        mid,
+        off,
+        bullet.intervalDirection,
+        bullet.intervalSpacing,
+        bullet.intervalSpread,
+        bullet.intervalNumber,
+        c,
+        bullet.intervalBullet,
+        maxd,
+        depth + 1,
+      );
+
+      // this.#drawBulletPath(intervalp.x, intervalp.y, direction.angle, bullet.intervalBullet);
+    }
+    // texts
+    noStroke();
+    col.fill(color);
+    textAlign(LEFT);
+    if (bullet.lifetime > 0) {
+      text(`${roundNum(time / 60, 2)}s`, x, y + 15);
+      text(`${roundNum(range / blockSize, 2)} tiles`, x, y + 30);
+    }
+    let ty = end.y + toff;
+    if (Array.isArray(bullet.damage))
+      for (let d of bullet.damage) {
+        if (d.amount) {
+          text(`${d.amount} ${d.radius ? "area " : ""}${d.type}`, end.x + toff, ty);
+          ty += 15;
+        }
+      }
+    pop();
+    return Math.max(ty - y, toff, 40);
+  }
+  /**
+   *
+   * @param {Vector} baseDir
+   * @param {Vector} position
+   * @param {number} offset Distance from 'position'.
+   * @param {number} direction
+   * @param {number} spacing
+   * @param {number} spread
+   * @param {number} count
+   * @param {Integrate.Unconstructed<BulletInstance>} bullet
+   */
+  #showEmission(
+    baseDir,
+    position,
+    offset = 0,
+    direction = 0,
+    spacing = 0,
+    spread = 0,
+    count = 1,
+    bursts = 1,
+    bullet = {},
+    maxdepth,
+    depth,
+  ) {
+    const c = depth > maxdepth ? col.from(50, 50, 50, 100) : col.accent;
+    col.stroke(c);
+    col.fill(col.withA(c, 100));
+    const middle = direction + baseDir.angle;
+    const indicatorSize = 25;
+
+    if (spacing) {
+      const diff = Math.min((Math.abs(spacing) * (count - 1)) / 2, 179);
+      for (let d = middle - diff; d <= middle + diff; d += spacing) {
+        // line(position.x, position.y, ...position.add(baseDir.rotate(d).scale(25)));
+        arc(
+          position.x,
+          position.y,
+          indicatorSize * 2,
+          indicatorSize * 2,
+          radians(d - spread),
+          radians(d + spread),
+          PIE,
+        );
+      }
+    } else if (spread)
+      arc(
+        position.x,
+        position.y,
+        indicatorSize * 2,
+        indicatorSize * 2,
+        radians(middle - spread),
+        radians(middle + spread),
+        PIE,
+      );
+    const s = Math.max(offset, bursts > 1 ? indicatorSize + 15 : indicatorSize);
+
+    line(position.x, position.y, ...position.add(baseDir.rotate(direction).scale(indicatorSize)));
+    const fragp = bullet.lifetime === 0 ? position : position.addXY(s + 30, -(s + 30));
+    line(position.x, position.y, fragp.x, fragp.y);
+
+    noStroke();
+    textAlign(RIGHT);
+    col.fill(c);
+    if (count > 1) text(`${count}x`, position.x + s + 7, position.y - s - 10);
+    if (bursts > 1) text(`${bursts} bursts`, position.x + s - 8, position.y - s + 5);
+
+    this.#drawBulletPath(fragp.x, fragp.y, baseDir.angle + direction, bullet, maxdepth, depth);
   }
 }
 
@@ -1114,6 +1335,28 @@ function createUIComponent(
   ui.components.push(component);
   return component;
 }
+export function createBulletVisualiserComponent(
+  screens = [],
+  conditions = [],
+  x = 0,
+  y = 0,
+  width = 1,
+  height = 1,
+  bevel = "none",
+  onpress = null,
+  bullet = {},
+) {
+  //Make component
+  const component = new BulletVisualiser(x, y, width, height, bevel, onpress ?? (() => {}));
+  component.bullet = bullet;
+  component.conditions = conditions;
+  //Set conditional things
+  component.acceptedScreens = screens;
+  component.isInteractive = !!onpress;
+  //Add to game
+  ui.components.push(component);
+  return component;
+}
 
 export function createCustomComponent(
   screens = [],
@@ -1381,7 +1624,7 @@ function createHealthbarComponent(
   return component;
 }
 
-function createSyntaxHighlightedComponent(
+function createCMFTComponent(
   screens = [],
   conditions = [],
   x = 0,
@@ -1395,7 +1638,7 @@ function createSyntaxHighlightedComponent(
   shownTextSize = 20,
 ) {
   //Make component
-  const component = new SyntaxHighlightedUIComponent(
+  const component = new CMFTUIComponent(
     x,
     y,
     width,
@@ -1416,11 +1659,11 @@ function createSyntaxHighlightedComponent(
 }
 
 export {
+  createCMFTComponent,
   createGamePropertySelector,
   createHealthbarComponent,
   createMultilineUIComponent,
   createSliderComponent,
-  createSyntaxHighlightedComponent,
   createUIComponent,
   createUIImageComponent,
   createUIInventoryComponent,

@@ -131,8 +131,7 @@ class LightningEmissionEffect extends LinearEmissionEffect {
           this.line.strokeFrom ?? 10,
           this.line.strokeTo ?? 0,
           this.line.deviation ?? 20,
-          this.line.lineLength ?? 3,
-          this.line.glowEffect ?? 1
+          this.line.lineLength ?? 3
         )
       );
     });

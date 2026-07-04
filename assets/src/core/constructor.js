@@ -1,13 +1,10 @@
 import Integrate from "../lib/integrate.js";
 /// <reference path="../lib/integrate"/>
-/**
- * @import {Unconstructed,ctor} from "../lib/integrate.js"
- */
 
 
 /** Generic type constructor. Uses `Integrate.types` as the source for any template.
  * @template T
- * @param {Unconstructed<T>} object Source to construct from. This object is left unchanged. Type must be present in `Integrate.types`, or else `Object` is used instead.
+ * @param {Integrate.Unconstructed<T>} object Source to construct from. This object is left unchanged. Type must be present in `Integrate.types`, or else `Object` is used instead.
  * @param {string} [defaultType="object"] Default fallback type name for when the source has no `type` property.
  * @returns {T}
  */
@@ -17,7 +14,7 @@ function construct(object, defaultType = "generic") {
 }
 /** Generic type constructor. Uses the specified registry as the source for any template.
  * @template T
- * @param {Unconstructed<T>} object Source to construct from. This object is left unchanged. Type must be present in the given registry, or else `Object` is used instead.
+ * @param {Integrate.Unconstructed<T>} object Source to construct from. This object is left unchanged. Type must be present in the given registry, or else `Object` is used instead.
  * @param {Integrate.TypeRegistry} registry Registry to get types from.
  * @param {string} defaultType Default fallback type name for when the source has no `type` property.
  * @returns {T}
@@ -31,8 +28,8 @@ function constructFromRegistry(object, registry, defaultType) {
 }
 /** Specific type constructor. Uses a given type directly, and ignores the `type` property.
  * @template T
- * @param {Unconstructed<T>} object Source to construct from. This object is left unchanged. Type must be present in the given registry, or else `Object` is used instead.
- * @param {ctor} ctor Constructor to use.
+ * @param {Integrate.Unconstructed<T>} object Source to construct from. This object is left unchanged. Type must be present in the given registry, or else `Object` is used instead.
+ * @param {Integrate.TypedConstructor<T>} ctor Constructor to use.
  * @returns {T}
  */
 function constructFromType(object, ctor) {
@@ -47,6 +44,7 @@ function constructFromType(object, ctor) {
     cloned = object;
     console.warn("Could not clone object:", error);
   }
+  if(!(instantiated instanceof Integrate.RegisteredItem)) delete cloned.type
   assign(instantiated, cloned);
   instantiated.init ? instantiated.init() : null; //Initialise if possible.
   return instantiated;
@@ -55,7 +53,7 @@ function constructFromType(object, ctor) {
 /**A version of `Object.assign()` which only copies keys present on both objects, and will not allow functions to be overridden.\
  * Mutates the original object, and returns it.
  * @template T
- * @param {Unconstructed<T>} source Object to get overrides from.
+ * @param {Integrate.Unconstructed<T>} source Object to get overrides from.
  * @param {T} target Object to override.
  */
 function assign(target, source) {

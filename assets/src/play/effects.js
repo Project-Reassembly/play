@@ -3,7 +3,9 @@ import { ImageParticle } from "../classes/effect/image-particle.js";
 import { ShapeParticle } from "../classes/effect/shape-particle.js";
 import { TextParticle } from "../classes/effect/text-particle.js";
 import { WaveParticle } from "../classes/effect/wave-particle.js";
-import { PhysicalObject } from "../classes/physical.js";
+import { DroppedItemStack } from "../classes/item/dropped-itemstack.js";
+/* @import { Entity } from "../classes/entity/entity.js"; */
+import { PhysicalObject, ShootableObject } from "../classes/physical.js";
 import { Timer } from "../classes/timer.js";
 import { col } from "../core/color.js";
 import { assign, construct } from "../core/constructor.js";
@@ -11,6 +13,7 @@ import { Vector, clamp, rnd, tru } from "../core/number.js";
 import { RegisteredItem } from "../core/registered-item.js";
 import { Registries } from "../core/registry.js";
 import { effects, world } from "../play/game.js";
+import { blockSize } from "../scaling.js";
 import { LinearEffect } from "./line-effects.js";
 const effectTimer = new Timer();
 class Explosion {
@@ -28,6 +31,7 @@ class Explosion {
   team = "neutral";
   source = null;
   effect = "explosion";
+  /**@param {import("../lib/integrate.js").Unconstructed<Explosion>} [opts={}]  */
   constructor(opts = {}) {
     assign(this, opts);
   }
@@ -39,43 +43,96 @@ class Explosion {
     //this.dealDamage();
     return this;
   }
-  dealDamage(knockmul = 1, sizemul = 2, damagemul = 1) {
+  dealDamage(knockmul = 1, sizemul = 1, damagemul = 1) {
+    this.team = this.source?.team ?? this.team;
     // Hit blocks
-    let damage = construct(
-      {
-        x: this.x,
-        y: this.y,
-        damage: [{ amount: this.amount * damagemul, spread: this.spread, type: this.type }],
-        status: this.status,
-        statusDuration: this.statusDuration,
-        pierce: Infinity,
-        despawnEffect: "none",
-        team: this.team,
-        hitSize: this.radius * sizemul,
-      },
-      "virtual",
-    );
-    damage.entity = this.source;
-    damage.world = this.world;
-    this.world.bullets.push(damage);
-    damage.step(1);
+    // const damage = new VirtualBullet();
+    // damage.x = this.x;
+    // damage.y = this.y;
+    // damage.components.push({
+    //   type: "damage",
+    //   amount: this.amount * damagemul,
+    //   spread: this.spread,
+    //   damageType: this.type,
+    // });
+    // if (this.status !== "none")
+    //   damage.components.push({
+    //     type: "status-infliction",
+    //     effect: this.status,
+    //     duration: this.statusDuration,
+    //   });
+    // damage.components.push({ type: "infinite-pierce" });
+    // damage.team = this.source?.team ?? this.team;
+    // damage.hitSize = this.radius * sizemul;
+    // damage.entity = this.source;
+    // damage.world = this.world;
+    // damage.init();
+    // damage.oncreated();
+    // this.world.bullets.push(damage);
+    // damage.step(1);
     // Hit entities
-    for (let e of this.world.entities) {
-      //If hit
-      if (!e.dead) {
-        let dist = Math.sqrt((this.x - e.x) ** 2 + (this.y - e.y) ** 2) || 1;
-        let scalar = knockmul * 25;
-        e.knockback(
-          clamp(
-            ((!isNaN(this.knockback) ? this.knockback : this.amount) * scalar) / dist ** 2,
-            0,
-            128,
-          ),
-          new Vector(e.x - this.x, e.y - this.y).angle,
-        );
-      }
-    }
+    // for (let e of this.world.entities) {
+    //   //If hit
+    //   if (!e.dead) {
+    //     let dist = Math.sqrt((this.x - e.x) ** 2 + (this.y - e.y) ** 2) || 1;
+    //     let scalar = knockmul * 25;
+    //     e.knockback(
+    //       clamp(
+    //         ((!isNaN(this.knockback) ? this.knockback : this.amount) * scalar) / dist ** 2,
+    //         0,
+    //         128,
+    //       ),
+    //       new Vector(e.x - this.x, e.y - this.y).angle,
+    //     );
+    //   }
+    // }
+    const rad = this.radius * sizemul;
+    this.world
+      .blocksInSquare(
+        Math.round(this.x / blockSize),
+        Math.round(this.y / blockSize),
+        Math.ceil(this.radius / blockSize),
+      )
+      .forEach((block) => {
+        if (block) {
+          const dist = block.epos.subXY(this.x, this.y).magnitude;
+          if (dist <= rad + blockSize * 0.5) this.hitB(block, dist, damagemul);
+        }
+      });
+    this.world.entities.forEach((entity) => {
+      const dist = entity.pos.subXY(this.x, this.y).magnitude;
+      if (
+        entity.tangible &&
+        !(entity instanceof DroppedItemStack) &&
+        dist <= rad + entity.hitSize * 0.5
+      )
+        this.hitE(entity, dist, knockmul, damagemul);
+    });
     return this;
+  }
+  /** @param {ShootableObject} thing @param {number} fromdist */
+  hit(thing, fromdist, damagemul = 1) {
+    if (thing.team !== this.team) thing.damage(this.type, this.amount * damagemul, this.source);
+  }
+  /** @param {import("../classes/entity/entity.js").Entity} thing @param {number} fromdist */
+  hitE(thing, fromdist, knockmul = 1, damagemul = 1) {
+    this.hit(thing, fromdist, damagemul);
+    if (this.status !== "none" && thing.team !== this.team)
+      thing.applyStatus(this.status, this.statusDuration);
+    const scale = knockmul * 25;
+    thing.knockback(
+      clamp(
+        ((!isNaN(this.knockback) ? this.knockback : this.amount) * scale) / fromdist ** 2,
+        0,
+        128,
+      ),
+      thing.pos.subXY(this.x, this.y).angle,
+    );
+  }
+  /** @param {import("../classes/block/block.js").Block} thing @param {number} fromdist */
+  hitB(thing, fromdist, damagemul = 1) {
+    this.hit(thing, fromdist, damagemul);
+    if(thing._explode) thing.activated();
   }
 }
 
@@ -838,6 +895,7 @@ function repeat(n, func, ...params) {
  * @returns
  */
 function createEffect(effect, world, x, y, direction, scale, pos, impact = false) {
+  if (effect === "none") return new VisualEffect();
   /**@type {VisualEffect} */
   let fx = construct(
     typeof effect === "object" ? effect : Registries.vfx.get(effect),

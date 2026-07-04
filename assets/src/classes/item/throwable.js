@@ -1,11 +1,15 @@
-import { Item } from "./item.js";
-import { Weapon } from "./weapon.js";
-import { patternedBulletExpulsion } from "../projectile/yeeter.js";
+import { constructFromType } from "../../core/constructor.js";
 import { ui } from "../../core/ui.js";
+import { BulletModel } from "../projectile/bullet-model.js";
+import { Item } from "./item.js";
 class Throwable extends Item {
   bullet = {};
   spread = 10;
   throwEffect = "none";
+  init() {
+    super.init();
+    this.bullet = constructFromType(this.bullet, BulletModel);
+  }
   useInAir(holder, stack) {
     this.throw(holder, stack);
     ui.waitingForMouseUp = true;
@@ -17,25 +21,17 @@ class Throwable extends Item {
     let offX = Math.cos(from.directionRad) * from.size,
       offY = Math.sin(from.directionRad) * from.size;
     from.emit(this.throwEffect, offX, offY);
-    patternedBulletExpulsion(
+    this.bullet.instantiate(
       from.x + offX,
       from.y + offY,
-      this.bullet,
       1,
       from.direction,
       this.spread,
       0,
       from.world,
-      from
+      from,
     );
-  }
-  createExtendedTooltip() {
-    return [
-      "🟨 ---- Throwable ----- ⬜",
-      this.spread ? this.spread + "° inaccuracy" : "",
-      ...Weapon.getBulletInfo(this.bullet),
-      "🟨 -------------------- ⬜",
-    ];
   }
 }
 export { Throwable };
+

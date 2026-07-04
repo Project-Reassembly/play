@@ -1,7 +1,7 @@
 import { col } from "../../../core/color.js";
 import { Vector } from "../../../core/number.js";
 import { ImageContainer } from "../../../core/ui.js";
-import { patternedBulletExpulsion } from "../../projectile/yeeter.js";
+import { BulletModel } from "../../projectile/bullet-model.js";
 import { World } from "../../world/world.js";
 import { Entity } from "../entity.js";
 import { Model } from "./model.js";
@@ -81,16 +81,16 @@ export class ModelPart {
    * @param {number} ox X position of the center of the model.
    * @param {number} oy Y position of the center of the model.
    * @param {number} od Direction of the model. 0 is right.
-   * @param {Integrate.Unconstructed<Bullet>} bullet Bullet definition to fire.
+   * @param {BulletModel} bullet Bullet to fire.
    * @param {number} spread Random spread.
    * @param {number} spacing Even spread.
    * @param {number} amount Number of bullets to fire.
    * @param {World} world World to fire them into.
    * @param {Entity?} entity Entity to associate the bullets with.
-   * @returns 
+   * @returns
    */
   eject(model, ox, oy, od, bullet, spread, spacing, amount, world, entity) {
     let p = this.pos(model).rotate(od).addParts(ox, oy);
-    patternedBulletExpulsion(p.x, p.y, bullet, amount, p.rotation, spread, spacing, world, entity);
+    bullet.emit(p.x, p.y, amount, p.rotation, spread, spacing, world, entity);
   }
 }

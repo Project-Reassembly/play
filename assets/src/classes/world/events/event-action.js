@@ -1,6 +1,6 @@
 import { construct, constructFromType } from "../../../core/constructor.js";
 import { index, rnd, roundNum } from "../../../core/number.js";
-import { Registries } from "../../../core/registry.js";
+import { delay, Registries } from "../../../core/registry.js";
 import Integrate from "../../../lib/integrate.js";
 import { createEffect, effectTimer, emitEffect, Explosion } from "../../../play/effects.js";
 import { createPlayer, game } from "../../../play/game.js";
@@ -9,7 +9,7 @@ import { blockSize } from "../../../scaling.js";
 import { Corporation } from "../../item/corporation.js";
 import { DroppedItemStack } from "../../item/dropped-itemstack.js";
 import { ItemStack } from "../../item/item-stack.js";
-import { patternedBulletExpulsion } from "../../projectile/yeeter.js";
+import { BulletModel } from "../../projectile/bullet-model.js";
 import { World } from "../world.js";
 
 export class WorldEventAction extends Integrate.RegisteredItem {
@@ -41,9 +41,10 @@ export class DeliverEntityAction extends WorldEventAction {
   execute(world) {
     const team = getTeamFromInput(this.targetTeam);
     let entiti = construct(Registries.entities.get(this.entity), "entity");
-    const pos = world.evaluator[
-      this.targetHighValue ? "getHighValueTargetPosition" : "getLowValueTargetPosition"
-    ](team);
+    const pos =
+      world.evaluator[
+        this.targetHighValue ? "getHighValueTargetPosition" : "getLowValueTargetPosition"
+      ](team);
     entiti.x = index.col(pos) * blockSize;
     entiti.y = index.row(pos) * blockSize;
     deliverEntity(entiti, true, world);
@@ -100,6 +101,54 @@ export function deliverPlayer(
   }
   deliverEntity(game.player, false, iworld, nuke);
 }
+const deliverShotModel = delay(
+  {
+    lifetime: 1,
+    collides: false,
+    components: [
+      { type: "movement", speed: 20 },
+      { type: "vfx-trail", effect: "land-trail" },
+      {
+        type: "incendiary",
+        fire: { damage: 6, lifetime: 2880, interval: 20, status: "burning", statusDuration: 120 },
+        count: 9,
+        spread: 50,
+      },
+      {
+        type: "frag-bullet",
+        number: 9,
+        spacing: 40,
+        spread: 40,
+        bullet: {
+          lifetime: 20,
+          components: [
+            { type: "movement", speed: 30, decel: 1.5 },
+            { type: "pierce", amount: 2 },
+            { type: "vfx-trail", effect: "fire" },
+            { type: "status-infliction", effect: "burning", duration: 360 },
+            { type: "shape-drawer", shape: "rhombus", fill: "#808080", width: 30, height: 8 },
+            { type: "explosion", damage: 40, radius: 30 },
+            { type: "damage", amount: 20, damageType: "ballistic" },
+            {
+              type: "incendiary",
+              fire: {
+                damage: 6,
+                lifetime: 1440,
+                interval: 20,
+                status: "burning",
+                statusDuration: 120,
+              },
+              count: 2,
+              spread: 10,
+            },
+          ],
+        },
+      },
+    ],
+  },
+  BulletModel,
+  "hardcoded",
+);
 
 export function deliverEntity(ent, add = false, world, clearArea = false) {
   if (add) ent.addToWorld(world);
@@ -110,49 +159,9 @@ export function deliverEntity(ent, add = false, world, clearArea = false) {
   effectTimer.do(() => {
     let y = ui.camera.y - height / ui.camera.zoom;
     let life = (ent.y - y) / 20;
-    patternedBulletExpulsion(
-      ent.x,
-      y,
-      {
-        lifetime: life - 1,
-        speed: 20,
-        trail: true,
-        trailEffect: "land-trail",
-        drawer: { hidden: true },
-        collides: false,
-        fires: 9,
-        fire: { damage: 6, lifetime: 2880, interval: 20, status: "burning", statusDuration: 120 },
-        fireSpread: 50,
-        fragNumber: 9,
-        fragSpacing: 40,
-        fragSpread: 40,
-        fragBullet: {
-          lifetime: 20,
-          speed: 30,
-          decel: 1.5,
-          pierce: 2,
-          trail: true,
-          trailEffect: "fire",
-          status: "burning",
-          statusDuration: 360,
-          drawer: { shape: "rhombus", fill: "gray", width: 30, height: 8 },
-          damage: [
-            { amount: 20, type: "ballistic" },
-            { amount: 40, type: "explosion", radius: 30 },
-          ],
-          despawnEffect: "explosion~30",
-          fires: 2,
-          fire: { damage: 6, lifetime: 1440, interval: 20, status: "burning", statusDuration: 120 },
-          fireSpread: 10,
-        },
-      },
-      1,
-      90,
-      0,
-      0,
-      world,
-      ent,
-    );
+    deliverShotModel.value
+      .emit(ent.x, y, 1, 90, 0, 0, world, ent)
+      .forEach((m) => (m.lifetime = life));
     effectTimer.do(() => {
       new Explosion({
         x: ent.x,

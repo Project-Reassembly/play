@@ -64,7 +64,7 @@ export const Decoration = new (class DecorationConsts {
       );
     },
     //Reassembly accent color
-    "=": col.accent
+    "=": col.accent,
   });
   timer = new Timer();
   styles = Object.freeze({
@@ -708,26 +708,28 @@ function drawer(string, charSize = 25, maxChars = 0) {
       Collection.createWrapped(string, maxChars)
     : Collection.createFrom(string)).drawer(charSize);
 }
+function blank() {
+  return new Drawer().noBG();
+}
 /** Assembles all possible format codes, using the input string. */
 function formatTest(char = "A") {
   const escaped = escape(char);
   return cols.flatMap((c) => styles.map((s) => `#${c}${s}${escaped}`)).join("");
 }
 
-globalThis.ft = formatTest
+globalThis.ft = formatTest;
 
 /**
  * Handler and classes for the **CMFT** (**Component Model for Formatting Text**) text formatter.
  * */
 export {
-  Collection,
+  blank, Collection,
   Directive,
   Directives,
   Drawer,
   drawer,
   Element,
-  escape,
-  formatTest,
+  escape, formatTest,
   Icon,
   Loader,
   Text

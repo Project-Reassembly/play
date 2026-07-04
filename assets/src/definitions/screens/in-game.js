@@ -5,6 +5,7 @@ import { deliverPlayer } from "../../classes/world/events/event-action.js";
 import { col } from "../../core/color.js";
 import { roundNum, shortenedNumber } from "../../core/number.js";
 import {
+  createBulletVisualiserComponent,
   createCustomComponent,
   createHealthbarComponent,
   createMultilineUIComponent,
@@ -25,9 +26,10 @@ import { totalSize } from "../../scaling.js";
 //##############################################################
 // damage / low health overlay
 createCustomComponent(["in-game"], [], 0, 0, 1920, 1080, null, () => {
-  let b = UIComponent.evaluateCondition("mode:build");
-  let intensity = (1 - game.player.health / game.player.maxHealth) * (b ? 0.5 : 1);
-  if (intensity > (b ? 0.25 : 0.5)) {
+  let b = UIComponent.evaluateCondition("mode", "build");
+  let intensity = 1 - game.player.health / game.player.maxHealth;
+  if (b) intensity *= 0.75;
+  if (intensity > 0.5) {
     intensity = (intensity - 0.35) * 2;
     for (let i = 0; i < 5; i++) {
       let f = (frameCount * 0.1 + i) % 5;
@@ -194,8 +196,9 @@ createUIComponent(
 ).anchorBottom(-63);
 
 createUIComponent(["in-game"], ["mode:build"], 420, 0, 80, 50, "reverse", () => {
-  if (!UIComponent.evaluateCondition("menu:inventory")) UIComponent.setCondition("menu:inventory");
-  else UIComponent.setCondition("menu:none");
+  if (!UIComponent.evaluateCondition("menu", "inventory"))
+    UIComponent.setCondition("menu", "inventory");
+  else UIComponent.setCondition("menu", "none");
 }).anchorBottom();
 
 createUIImageComponent(
@@ -236,7 +239,7 @@ createUIImageComponent(
   0,
   50,
   50,
-  () => UIComponent.setCondition("mode:fight"),
+  () => UIComponent.setCondition("mode", "fight"),
   "icon.arrow",
   false,
   0.5,
@@ -251,7 +254,7 @@ createUIImageComponent(
   0,
   50,
   50,
-  () => UIComponent.setCondition("mode:build"),
+  () => UIComponent.setCondition("mode", "build"),
   "icon.arrow",
   false,
   0.5,
@@ -551,7 +554,7 @@ createUIComponent(
   50,
   "none",
   () => {
-    UIComponent.setCondition("menu:none");
+    UIComponent.setCondition("menu", "none");
   },
   "X",
   false,
@@ -911,7 +914,7 @@ createUIComponent(
     if (game.money < 1200) return;
     game.money -= 1200;
     Log.send("#a-Spent $1200 on [#@-Basic Respawn#a-]");
-    UIComponent.setCondition("dead:no");
+    UIComponent.setCondition("dead", "no");
     deliverPlayer(null, totalSize / 2, totalSize / 2, false, game.player.team, undefined, true);
   },
   ">> New Player <<\nSend a new robot\nwith the basic\ncorp equipment\nto the drop\npoint.\n\n$1200",
@@ -927,7 +930,7 @@ createUIComponent(
   200,
   "none",
   () => {
-    UIComponent.setCondition("dead:no");
+    UIComponent.setCondition("dead", "no");
     deliverPlayer(null, totalSize / 2, totalSize / 2, false, "scrap", undefined, true);
   },
   ">> Scrap Player <<\nSend a robot\nmade of scrap\nto the drop\npoint.\n\nFree",
@@ -946,7 +949,7 @@ createUIComponent(
     if (game.money < 2000) return;
     game.money -= 2000;
     Log.send("#a-Spent $2000 on [#@-Convenience Respawn#a-]");
-    UIComponent.setCondition("dead:no");
+    UIComponent.setCondition("dead", "no");
     deliverPlayer(null, game.player?.x, game.player?.y, false, game.player.team, undefined, true);
   },
   "> Convenience <\n>>> Respawn <<<\nSend a new robot\nwith the basic\ncorp equipment\nto the point\nwhere you died.\n\n$2000",
@@ -966,9 +969,199 @@ createUIComponent(
     game.reset();
     gen.reset();
     ui.reset();
-    ui.menuState = "title"
+    ui.menuState = "title";
   },
   "End Game",
   true,
   15,
+);
+//##############################################################
+
+//                        DOCUMENTATION
+
+//##############################################################
+setTimeout(
+  () =>
+    createBulletVisualiserComponent(
+      [
+        /* "in-game", "title" */
+      ],
+      [],
+      0,
+      0,
+      1000,
+      400,
+      "none",
+      null,
+      {
+        lifetime: 15,
+        light: 70,
+        direction: 0,
+        speed: 20,
+        trail: true,
+        hitSize: 3,
+        // decel: -1,
+        trailShape: "rhombus",
+        trailColours: [[0, 200, 255, 200]],
+        trailLight: 70,
+        knockback: 3,
+        status: "plasma-burn",
+        statusDuration: 360,
+        drawer: { shape: "rhombus", fill: [0, 255, 255], width: 12, height: 4, image: false },
+        damage: [
+          { type: "laser", amount: 20, spread: 5 },
+          { amount: 10, spread: 3, radius: 20 },
+          {},
+          {},
+          {},
+          {},
+        ],
+        despawnEffect: "laser-caster-explosion~20",
+        fire: {
+          damage: 5,
+          interval: 10,
+          effect: "laser-caster-fire",
+          status: "plasma-burn",
+          lifetime: 180,
+        },
+        fires: 1,
+        fragNumber: 6,
+        fragSpread: 180,
+        fragBullet: {
+          targetType: "nearest",
+          trackingRange: 100,
+          light: 50,
+          trailLight: 50,
+          knockback: 0.5,
+          turnSpeed: 20,
+          lifetime: 10,
+          speed: 10,
+          trail: true,
+          pierce: 1,
+          hitSize: 1.5,
+          trailShape: "rhombus",
+          status: "plasma-burn",
+          statusDuration: 60,
+          trailColours: [
+            [0, 255, 255, 255],
+            [0, 200, 255, 255],
+            [0, 0, 255, 100],
+          ],
+          drawer: {
+            shape: "rhombus",
+            fill: "cyan", //[0, 255, 255],
+            width: 6,
+            height: 2,
+            image: false,
+          },
+          damage: [{ type: "laser", amount: 8, spread: 2 }],
+          despawnEffect: "laser-caster-frag",
+          intervalNumber: 2,
+          intervalTime: 4,
+          intervalSpacing: 130,
+          intervalSpread: 15,
+          intervalBullet: {
+            speed: 9,
+            decel: 0.6,
+            lifetime: 12,
+            hitSize: 2.5,
+            trailColours: [[80, 62, 55, 100]],
+            damage: [{ amount: 6, type: "ballistic", spread: 3 }],
+            drawer: { shape: "rhombus", fill: "#cd9f8b", width: 6, height: 4, image: false },
+            fragNumber: 1,
+            fragDirection: 180,
+            fragBullet: {
+              speed: 0,
+              lifetime: 0,
+              damage: [{ amount: 6, type: "ballistic", spread: 3 }],
+              fragNumber: 4,
+              fragSpread: 45,
+              fragBullet: {
+                lifetime: 30,
+                extraUpdates: 29,
+                light: 70,
+                speed: 10,
+                decel: 0.2,
+                trail: true,
+                hitSize: 3,
+                conditionalPierce: true,
+                trailShape: "rhombus",
+                trailInterval: 4,
+                trailColours: [
+                  [0, 255, 255],
+                  [0, 0, 255, 0],
+                ],
+                hitEffect: "laser-caster-frag",
+                status: "plasma-burn",
+                statusDuration: 20,
+                trailLife: 30,
+                knockback: 1.5,
+                drawer: { hidden: true },
+                damage: [{ type: "laser", amount: 6 }],
+                despawnEffect: "none",
+                fragNumber: 1,
+                fragBullet: {
+                  speed: 0,
+                  lifetime: 0,
+                  damage: [{ amount: 6, type: "ballistic", spread: 3 }],
+                  fragNumber: 4,
+                  fragSpread: 45,
+                  fragBullet: {
+                    lifetime: 30,
+                    extraUpdates: 1,
+                    light: 70,
+                    speed: 10,
+                    decel: 0.2,
+                    trail: true,
+                    hitSize: 3,
+                    conditionalPierce: true,
+                    trailShape: "rhombus",
+                    trailInterval: 4,
+                    trailColours: [
+                      [0, 255, 255],
+                      [0, 0, 255, 0],
+                    ],
+                    hitEffect: "laser-caster-frag",
+                    status: "plasma-burn",
+                    statusDuration: 20,
+                    trailLife: 30,
+                    knockback: 1.5,
+                    drawer: { hidden: true },
+                    damage: [{ type: "laser", amount: 6 }],
+                    despawnEffect: "none",
+                  },
+                },
+                intervalNumber: 10,
+                intervalDirection: 135,
+                intervalBullet: {
+                  lifetime: 30,
+                  extraUpdates: 29,
+                  light: 70,
+                  speed: 10,
+                  decel: 0.2,
+                  trail: true,
+                  hitSize: 3,
+                  conditionalPierce: true,
+                  trailShape: "rhombus",
+                  trailInterval: 4,
+                  trailColours: [
+                    [0, 255, 255],
+                    [0, 0, 255, 0],
+                  ],
+                  hitEffect: "laser-caster-frag",
+                  status: "plasma-burn",
+                  statusDuration: 20,
+                  trailLife: 30,
+                  knockback: 1.5,
+                  drawer: { hidden: true },
+                  damage: [{ type: "laser", amount: 6 }],
+                  despawnEffect: "none",
+                },
+              },
+            },
+          },
+        },
+      },
+    ),
+  1,
 );

@@ -1,13 +1,8 @@
-import { construct, constructFromType } from "../../core/constructor.js";
-import { roundNum } from "../../core/number.js";
+import { constructFromType } from "../../core/constructor.js";
 import { Registries } from "../../core/registry.js";
 import { autoScaledEffect } from "../../play/effects.js";
-import { WeaponComponent } from "../entity/component.js";
+import { WeaponComponent } from "../entity/entity-part.js";
 import { EquippedEntity, InventoryEntity } from "../entity/inventory-entity.js";
-import { Bullet } from "../projectile/bullet.js";
-import { Missile } from "../projectile/missile.js";
-import { PointBullet } from "../projectile/point-bullet.js";
-import { patternedBulletExpulsion } from "../projectile/yeeter.js";
 import { Timer } from "../timer.js";
 import { Equippable } from "./equippable.js";
 import { WeaponBulletConfiguration, WeaponShootConfiguration } from "./weapon-exts.js";
@@ -132,6 +127,7 @@ class Weapon extends Equippable {
     else return false;
     return true;
   }
+  /** @param {string} ammoType  */
   _internalFire(holder, shoot = this.shoot, ammoType, bulletConfig = this.bullets) {
     if (!this._useAmmo(holder, ammoType)) return;
 
@@ -143,17 +139,18 @@ class Weapon extends Equippable {
         holder.knockback((this.recoil * 100) / holder.size);
         let pos = this._getShootPos(holder);
         autoScaledEffect(shoot.effect, holder.world, pos.x, pos.y, pos.direction);
-        patternedBulletExpulsion(
-          pos.x,
-          pos.y,
-          bulletConfig.getAmmo(ammoType) ?? {},
-          shoot.pattern.amount,
-          degrees(pos.direction),
-          shoot.pattern.spread,
-          shoot.pattern.spacing,
-          holder.world,
-          holder,
-        );
+        const model = bulletConfig.getAmmo(ammoType);
+        if (model)
+          model.emit(
+            pos.x,
+            pos.y,
+            shoot.pattern.amount,
+            degrees(pos.direction),
+            shoot.pattern.spread,
+            shoot.pattern.spacing,
+            holder.world,
+            holder,
+          );
         if (this.component instanceof WeaponComponent) {
           this.component.trigger(shoot.recoilScale, shoot.rotRecoilScale);
         }
@@ -205,105 +202,6 @@ class Weapon extends Equippable {
         .padEnd(15 - ((this._cooldown - this._lastReload) / this._lastCharge) * 15, "■")
         .padEnd(15, "□")
         .substring(0, 15);
-  }
-  createExtendedTooltip() {
-    return [
-      this.hasAltFire ? "🟨 ------- Main ------- ⬜" : "🟨 -------------------- ⬜",
-      ...Weapon.infoOfShootPattern(this.shoot, this.bullets),
-      this.hasAltFire ? "🟨 ------- Alt -------- ⬜" : "",
-      ...(this.hasAltFire ?
-        Weapon.infoOfShootPattern(this.altShoot, this.altBullets ?? this.bullets)
-      : []),
-      "🟨 -------------------- ⬜",
-    ];
-  }
-  /**
-   *
-   * @param {WeaponShootConfiguration} shoot
-   * @param {WeaponBulletConfiguration} bulletConfig
-   * @returns
-   */
-  static infoOfShootPattern(shoot, bulletConfig) {
-    return [
-      `Fire Rate: ${
-        shoot.pattern.amount * shoot.pattern.burst > 1 ?
-          shoot.pattern.amount * shoot.pattern.burst + "× "
-        : ""
-      }${roundNum(60 / (shoot.reload + shoot.charge), 2)}/s`,
-      shoot.pattern.spread ? `${shoot.pattern.spread}° inaccuracy` : "",
-      shoot.pattern.spacing ? `${shoot.pattern.spacing}° shot spacing` : "",
-      "🟨Shots:⬜",
-      ...Object.keys(bulletConfig.ammos).flatMap((x) =>
-        bulletConfig.unbrowsable.includes(bulletConfig.ammos[x]) ?
-          []
-        : [
-            x == "none" ? " " : `${ind(1)}🟨${Registries.items.get(x).name}:⬜`,
-            ...Weapon.getBulletInfo(bulletConfig.getAmmo(x), x == "none" ? 1 : 2),
-          ],
-      ),
-    ];
-  }
-  static getBulletInfo(bullet = {}, idl = 0) {
-    if (Array.isArray(bullet)) return bullet.flatMap((b) => Weapon.getBulletInfo(b, idl));
-    /**@type {Bullet} */
-    let blt = construct(bullet, "bullet");
-    if (!blt) return [ind(idl) + "🟥invalid: " + bullet + "⬜"];
-    let time = blt.decel > 0 ? Math.min(blt.lifetime, blt.speed / blt.decel) : blt.lifetime;
-    return [
-      ind(idl) +
-        (blt instanceof PointBullet ? "🟪instant⬜" : (
-          `${roundNum(
-            //s = ut + ½at²
-            (blt.speed * time + 0.5 * (-blt.decel * time ** 2)) / 30,
-            1,
-          )} blocks range`
-        )),
-
-      ...blt.damage.map(
-        (x) =>
-          `${`${
-            ind(idl) + (x.amount ?? 0)
-          }${x.spread && x.spread > 0 ? ` (±${x.spread})` : ""}`} ${x.type ?? (x.radius > 0 ? "explosion" : "unknown")}${x.radius > 0 ? " area" : ""} damage${x.radius > 0 ? " ~ " + roundNum(x.radius / 30, 1) + " blocks" : ""}`,
-      ),
-
-      ind(idl) +
-        (blt.status !== "none" ?
-          `🟨${Registries.statuses.get(blt.status).name} for ${roundNum(blt.statusDuration / 60, 1)}s`
-        : ""),
-
-      ind(idl) + (blt.conditionalPierce ? "🟨continues if target destroyed⬜" : ""),
-
-      ind(idl) + (blt.pierce > 0 ? "🟨" + blt.pierce + "× pierce⬜" : ""),
-
-      ind(idl) + (blt.fires > 0 ? "🟧incendiary: " : ""),
-      ind(idl + 1) +
-        (blt.fires > 0 ?
-          blt.isFireBinomial ?
-            `${blt.fireChance * 100}% chance for a fire ${blt.fires > 1 ? blt.fires + " times" : ""}`
-          : ((blt.fireChance ?? 1) !== 1 ? `${blt.fireChance * 100}% chance for ` : "") +
-            (blt.fires > 1 ? blt.fires + " fires " : "1 fire ")
-        : ""),
-      ind(idl + 1) +
-        (blt.fires > 0 ?
-          `${blt.fire.damage ?? 1} ${blt.fire.type ?? "fire"} damage every ${roundNum((blt.fire.interval ?? 10) / 60, 1)}s`
-        : ""),
-      ind(idl + 1) +
-        (blt.fires > 0 ? `${roundNum((blt.fire.lifetime ?? 600) / 60, 1)}s lifetime⬜` : ""),
-
-      ind(idl) + (blt instanceof Missile ? "🟦homing: " : ""),
-      ind(idl + 1) +
-        (blt instanceof Missile ? roundNum(blt.trackingRange / 30, 1) + " blocks range" : ""),
-      ind(idl + 1) + (blt instanceof Missile ? roundNum(blt.turnSpeed, 1) + " strength⬜" : ""),
-
-      ind(idl) + (blt.fragNumber > 0 ? blt.fragNumber + " frags:" : ""),
-      ...(blt.fragNumber > 0 ? Weapon.getBulletInfo(blt.fragBullet, idl + 1) : []),
-
-      ind(idl) +
-        (blt.intervalNumber > 0 ?
-          roundNum((blt.intervalNumber * 60) / blt.intervalTime, 1) + "/s interval shots:"
-        : ""),
-      ...(blt.intervalNumber > 0 ? Weapon.getBulletInfo(blt.intervalBullet, idl + 1) : []),
-    ];
   }
 }
 

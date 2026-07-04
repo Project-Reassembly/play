@@ -4,7 +4,7 @@ import { ui } from "../../../core/ui.js";
 import Integrate from "../../../lib/integrate.js";
 import { autoScaledEffect } from "../../../play/effects.js";
 import { ShootPattern } from "../../item/weapon-exts.js";
-import { patternedBulletExpulsion } from "../../projectile/yeeter.js";
+import { BulletModel } from "../../projectile/bullet-model.js";
 import { Timer } from "../../timer.js";
 import { Entity } from "../entity.js";
 import { AICondition } from "./ai-conditions.js";
@@ -80,10 +80,14 @@ export class ShootBulletsTask extends AITask {
   shootX = 0;
   shootY = 0;
   shootD = 0;
+  /** @type {BulletModel} */
   bullet = {};
   pattern = new ShootPattern();
   effect = "none";
   timer = new Timer();
+  init(){
+    this.bullet = constructFromType(this.bullet, BulletModel);
+  }
   /**
    * @param {AI} ai
    * @param {Entity} entity The entity to do it to.
@@ -99,10 +103,9 @@ export class ShootBulletsTask extends AITask {
           pos.y,
           entity.directionRad + radians(this.shootD),
         );
-        patternedBulletExpulsion(
+        this.bullet.emit(
           pos.x,
           pos.y,
-          this.bullet,
           this.pattern.amount,
           entity.direction + this.shootD,
           this.pattern.spread,
@@ -124,6 +127,7 @@ export class CreateBulletsTask extends AITask {
   y = 0;
   direction = 0;
   relativeToCamera = false;
+  /** @type {BulletModel} */
   bullet = {};
   pattern = new ShootPattern();
   effect = "none";
@@ -131,6 +135,7 @@ export class CreateBulletsTask extends AITask {
   init() {
     super.init();
     this.pattern = constructFromType(this.pattern, ShootPattern);
+    this.bullet = constructFromType(this.bullet, BulletModel);
   }
   /**
    * @param {AI} ai
@@ -142,10 +147,9 @@ export class CreateBulletsTask extends AITask {
         let pos =
           this.relativeToCamera ? ui.camera.pos.addXY(this.x, this.y) : new Vector(this.x, this.y);
         autoScaledEffect(this.effect, entity.world, pos.x, pos.y, radians(this.direction));
-        patternedBulletExpulsion(
+        this.bullet.emit(
           pos.x,
           pos.y,
-          this.bullet,
           this.pattern.amount,
           this.direction,
           this.pattern.spread,

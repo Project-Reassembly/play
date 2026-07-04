@@ -163,7 +163,7 @@ class StructureReaderBlock extends Block {
     return blocks;
   }
   read() {
-    return `[${this._output.map((x) => this.x.block).join("|")}]`;
+    return `[${this._output.map((x) => x.block).join("|")}]`;
   }
 }
 class ItemCatalogBlock extends Container {
@@ -174,7 +174,7 @@ class ItemCatalogBlock extends Container {
   tick() {
     let slot = 0;
     Registries.items.forEach((v, n) => {
-      this.inventory.set(slot, new ItemStack(n));
+      if (this.inventory.get(slot).item !== n) this.inventory.set(slot, new ItemStack(n));
       slot++;
     });
   }

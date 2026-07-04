@@ -1,6 +1,6 @@
 import { constructFromType } from "../../../core/constructor.js";
 import Integrate from "../../../lib/integrate.js";
-import { Bullet } from "../../projectile/bullet.js";
+import { BulletInstance } from "../../projectile/bullet.js";
 import { Timer } from "../../timer.js";
 import { World } from "../../world/world.js";
 import { Entity } from "../entity.js";
@@ -110,7 +110,7 @@ export class Model {
    * @param {number} ox X position of the center of the model.
    * @param {number} oy Y position of the center of the model.
    * @param {number} od Direction of the model. 0 is right.
-   * @param {Integrate.Unconstructed<Bullet>} bullet Bullet definition to fire.
+   * @param {Integrate.Unconstructed<BulletInstance>} bullet Bullet definition to fire.
    * @param {number} spread Random spread.
    * @param {number} spacing Even spread.
    * @param {number} amount Number of bullets to fire.

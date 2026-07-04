@@ -10,7 +10,7 @@ import { Wall } from "../../block/defense/wall.js";
 import { PointBullet } from "../../projectile/point-bullet.js";
 import { DroppedItemStack } from "../dropped-itemstack.js";
 import { ItemStack } from "../item-stack.js";
-import { WeaponBulletConfiguration } from "../weapon-exts.js";
+import { WeaponBulletConfiguration, WeaponShootConfiguration } from "../weapon-exts.js";
 import { Weapon } from "../weapon.js";
 class BlockLauncher extends Weapon {
   ammoType = "none";
@@ -95,16 +95,14 @@ class BlockLaunchedBullet extends PointBullet {
     super.ondestroyed();
     if (
       this.world.isPositionFree(
-        Math.floor(this.x / Block.size),
-        Math.floor(this.y / Block.size),
-        "blocks",
+        Math.round(this.x / Block.size),
+        Math.round(this.y / Block.size),
       )
     ) {
       this.world.placeAt(
         this.block,
-        Math.floor(this.x / Block.size),
-        Math.floor(this.y / Block.size),
-        "blocks",
+        Math.round(this.x / Block.size),
+        Math.round(this.y / Block.size),
       ).team = this.entity.team;
     } else {
       /**@type {Block} */

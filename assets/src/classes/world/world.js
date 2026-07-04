@@ -5,7 +5,7 @@ import { clamp, rnd } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { ui } from "../../core/ui.js";
 import { debug } from "../../play/debug.js";
-import { Explosion, NuclearExplosion, repeat } from "../../play/effects.js";
+import { repeat } from "../../play/effects.js";
 import { contentScale, createPlayer } from "../../play/game.js";
 import { blockSize, chunkSize, worldSize } from "../../scaling.js";
 import { GroundTile } from "../block/ground-tile.js";
@@ -172,30 +172,6 @@ class World {
         if (this.bullets[b]?.remove && !this.bullets[b].exploded) {
           let bullet = this.bullets[b];
           bullet.exploded = true;
-          for (let instance of bullet.damage) {
-            if (!instance.spread) instance.spread = 0;
-            if (instance.radius) {
-              //If it explodes
-              let boom = new (instance.nuclear ? NuclearExplosion : Explosion)(instance);
-              boom.x = bullet.x;
-              boom.y = bullet.y;
-              boom.world = bullet.world;
-              boom.source = bullet.entity;
-              if (boom.status === "none") boom.status = bullet.status;
-              if (boom.statusDuration === 0) boom.statusDuration = bullet.statusDuration;
-              boom.dealDamage();
-            }
-            if (instance.blinds) {
-              flash(
-                bullet.x,
-                bullet.y,
-                instance.blindOpacity,
-                instance.blindDuration,
-                instance.glareSize,
-              );
-            }
-            bullet.emit(instance.effect ?? "none");
-          }
           bullet.ondestroyed();
           //Delete the bullet
           this.bullets.splice(b, 1);

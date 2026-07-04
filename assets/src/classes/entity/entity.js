@@ -54,6 +54,7 @@ class Entity extends ShootableObject {
   set turnSpeed(_) {
     this.attributes.get("turnSpeed").set(_);
   }
+  /** @type {PhysicalObject|Vector|null} */
   target = null;
 
   //nrg
@@ -251,11 +252,9 @@ class Entity extends ShootableObject {
     // } else {
     // this.knock(bullet.knockback, bullet.direction, bullet.kineticKnockback); //Knock with default resolution
     // }
-    if (bullet.knockback !== 0) this.knockback(+bullet.knockback || 0, bullet.direction);
-    if (bullet.iknockback !== 0) this.knock(+bullet.iknockback*10 || 0, bullet.direction);
-    if (bullet.status !== "none") {
-      this.applyStatus(bullet.status, bullet.statusDuration);
-    }
+    // if (bullet.status !== "none") {
+    //   this.applyStatus(bullet.status, bullet.statusDuration);
+    // }
   }
 
   tick() {

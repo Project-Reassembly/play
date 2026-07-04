@@ -1,4 +1,5 @@
 import { col } from "../../core/color.js";
+import { Vector } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { drawImg, ui } from "../../core/ui.js";
 import { createDestructionExplosion } from "../../play/effects.js";
@@ -138,6 +139,9 @@ class Block extends ShootableObject {
   }
   get y() {
     return (this.blockY + this.chunk.j * chunkSize) * blockSize;
+  }
+  get epos(){
+    return new Vector(this.x,this.y)
   }
   get gridX() {
     return this.blockX + this.chunk.i * chunkSize;

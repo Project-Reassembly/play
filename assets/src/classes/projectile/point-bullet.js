@@ -1,10 +1,10 @@
 import { col } from "../../core/color.js";
-import { Vector } from "../../core/number.js";
+import { rnd, Vector } from "../../core/number.js";
 import { createLinearEffect } from "../../play/effects.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
 import { WaveParticle } from "../effect/wave-particle.js";
-import { Bullet } from "./bullet.js";
-class PointBullet extends Bullet {
+import { BulletInstance } from "./bullet.js";
+class PointBullet extends BulletInstance {
   lifetime = 1;
   #moved = false; //If the bullet has teleported to the target entity or not.
   hitColours = [col.yellow];
@@ -16,7 +16,7 @@ class PointBullet extends Bullet {
       this.hitColours[1] = col.hide(this.hitColours); //Copy colour
     }
   }
-  step(dt) {
+  update() {
     //Move if not already done so
     if (!this.#moved) {
       this.#moved = true;
@@ -31,7 +31,7 @@ class PointBullet extends Bullet {
           let tx = epos.x;
           let ty = epos.y;
           //Create line to it
-          this.createTrailTo(tx, ty);
+          this.createTrailTo(epos);
           //Teleport to it
           this.x = tx;
           this.y = ty;
@@ -43,11 +43,11 @@ class PointBullet extends Bullet {
         }
       }
     }
-    super.step(dt);
+    super.update();
   }
   draw() {} //Totally invisible
-  createTrailTo(x, y) {
-    createLinearEffect(this.lineEffect, this.world, this.x, this.y, x, y);
+  createTrailTo(vec) {
+    createLinearEffect(this.lineEffect, this.world, [this.pos, vec]);
     // let distance = dist(this.x, this.y, x, y);
     // this.world.particles.push(
     //   new ShapeParticle(
@@ -72,7 +72,7 @@ class PointBullet extends Bullet {
   createHitEffect() {
     if (this.hitEffect) this.emit(this.hitEffect);
     else {
-      let direction = rnd(0, 360); //Random direction
+      let direction = rnd.float(360); //Random direction
       this.world.particles.push(
         //Create hit effect
         new ShapeParticle(
