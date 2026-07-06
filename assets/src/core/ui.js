@@ -757,7 +757,7 @@ class InventoryUIComponent extends UIComponent {
 class CMFTUIComponent extends UIComponent {
   /**@param {(text:string) => string} fn*/
   formatter = (t) => t;
-  lasttxt = this.text;
+  lasttxt = "";
   textdrawer = CMFT.blank();
   hastext = false;
   rarityColour = col.accent;
@@ -1652,7 +1652,6 @@ function createCMFTComponent(
   bevel = "none",
   onpress = null,
   shownText = "",
-  useOCR = false,
   shownTextSize = 20,
 ) {
   //Make component
@@ -1664,7 +1663,7 @@ function createCMFTComponent(
     bevel,
     onpress ?? (() => {}),
     shownText,
-    useOCR,
+    true,
     shownTextSize,
   );
   component.conditions = conditions;

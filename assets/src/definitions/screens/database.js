@@ -380,27 +380,27 @@ let c_close = createUIImageComponent(
   "icon.cross",
 ).setOutlineColour(col.mono(60));
 // name
-let c_name = createCMFTComponent(["database"], [], -200, -420, 1180, 50, "none", null, "", true, 40)
+let c_name = createCMFTComponent(["database"], [], -200, -420, 1180, 50, "none", null, "", 40)
   .removeBackground()
   .removeOutline()
   .setTextColour(col.accent);
 // descr
-let c_desc = createCMFTComponent(["database"], [], -475, -275, 600, 200, "none", null, "", true, 20)
+let c_desc = createCMFTComponent(["database"], [], -475, -275, 600, 200, "none", null, "", 20)
   .removeBackground()
   .setOutlineColour(col.accent)
   .setTextColour(col.white);
 // techy descr
-let c_tech = createCMFTComponent(["database"], [], 115, -275, 530, 200, "none", null, "", true, 20)
+let c_tech = createCMFTComponent(["database"], [], 115, -275, 530, 200, "none", null, "", 20)
   .removeBackground()
   .setOutlineColour(col.accent)
   .setTextColour(col.white);
 // basic detail
-let c_norm = createCMFTComponent(["database"], [], 115, 135, 530, 580, "none", null, "", true, 20)
+let c_norm = createCMFTComponent(["database"], [], 115, 135, 530, 580, "none", null, "", 20)
   .removeBackground()
   .setOutlineColour(col.accent)
   .setTextColour(col.white);
 // details
-let c_ext = createCMFTComponent(["database"], [], -475, 135, 600, 580, "none", null, "", true, 20)
+let c_ext = createCMFTComponent(["database"], [], -475, 135, 600, 580, "none", null, "", 20)
   .removeBackground()
   .setOutlineColour(col.accent)
   .setTextColour(col.white);

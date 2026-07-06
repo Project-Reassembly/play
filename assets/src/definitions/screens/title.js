@@ -4,6 +4,7 @@ import { col } from "../../core/color.js";
 import { rnd } from "../../core/number.js";
 import { PreloadRegistries } from "../../core/registry.js";
 import {
+  createCMFTComponent,
   createCustomComponent,
   createHealthbarComponent,
   createUIComponent,
@@ -37,11 +38,12 @@ createUIComponent(["title"], [], 0, -250, 0, 0, "none", null, ">> REASSEMBLY", t
   .alignLeft()
   .setTextColour(col.mono(140)).font = "something";
 
-// art bit
-createUIImageComponent(["title"], [], 450, -35, 700, 700, null, "icon.dev", true);
+ui.addReset("title-side", "welcome");
+// side area
+createUIImageComponent(["title"], ["title-side:art"], 450, -35, 700, 700, null, "icon.dev", true);
 createUIComponent(
   ["title"],
-  [],
+  ["title-side:art"],
   450,
   300,
   0,
@@ -52,6 +54,103 @@ createUIComponent(
   true,
   30,
 ).setTextColour(col.accent);
+
+createCMFTComponent(
+  ["title"],
+  ["title-side:welcome"],
+  450,
+  -35,
+  700,
+  700,
+  "none",
+  null,
+  `                        #@bWelcome!#@-
+========================================================
+#--If this is your first time playing, check out the 
+#@-controls menu#-- on the right --------------------------->#--
+
+After that, #@-start a new game#-- with the buttons on the left.
+
+The #>>icon.database#@-database#-- will populate over time as you get more items, and provides information beyond what you normally see in-game.
+`,
+  20,
+)
+  .setBackgroundColour(col.black)
+  .setOutlineColour(col.accent)
+  .setTextColour(col.white);
+
+createCMFTComponent(
+  ["title"],
+  ["title-side:controls"],
+  450,
+  -35,
+  700,
+  700,
+  "none",
+  null,
+  `                       #@bControls#@-
+========================================================
+#@bGeneral#@-
+--------------------------------------------------------
+#a-W/A/S/D#--        Move up/left/down/right
+#@iHold #d-Alt#--       Move the camera without the player
+#@iHold #d-Ctrl#--      Use a separate UI cursor
+#a-B#--              Toggle #@-build/fight mode#--
+#a-E#--              Toggle #@-inventory#--
+#d-Ctrl#@-+#i-Scroll#--    Zoom the camera in/out
+#a-Space#--          Pause/unpause the game
+#i-LMB#@i with item#--  Throw item
+#a-?#@i over item#--    Open database to item page
+
+#@bFight Mode#@-
+--------------------------------------------------------
+#a-Up Arrow#--       Switch to #@-build mode#--
+#i-LMB#--            Fire right-hand weapon
+#i-RMB#--            Fire left-hand weapon
+#@iHold #i-LMB#--       Charge right-hand attack
+#@iHold #i-RMB#--       Charge left-hand attack
+#d-Shift#@-+#i-LMB#--      Alternate-fire right-hand weapon
+#d-Shift#@-+#i-RMB#--      Alternate-fire left-hand weapon
+
+#@bBuild Mode#@-
+--------------------------------------------------------
+#a-Down Arrow#--     Switch to #@-fight mode#--.
+#i-LMB#@i with item#--  Place item as block
+#i-RMB#@i over block#-- Deconstruct block
+#i-RMB#@i with item#--  Drop item stack
+#a-Right Arrow#--    Cycle to next crafter recipe
+#a-Left Arrow#--     Cycle to previous crafter recipe
+#i-Scroll#--         Rotate block to place
+#a-1/2/#@-...#a-/8/9/0#--  Swap held item with inventory slot
+`,
+  20,
+)
+  .setBackgroundColour(col.black)
+  .setOutlineColour(col.accent)
+  .setTextColour(col.white);
+
+createUIImageComponent(
+  ["title"],
+  [],
+  850,
+  -300,
+  50,
+  50,
+  () => UIComponent.setCondition("title-side", "controls"),
+  "icon.controls",
+  true,
+).setOutlineColour(col.mono(60));
+createUIImageComponent(
+  ["title"],
+  [],
+  850,
+  -230,
+  50,
+  50,
+  () => UIComponent.setCondition("title-side", "art"),
+  "icon.edit",
+  true,
+).setOutlineColour(col.mono(60));
 
 // buttons
 
@@ -255,7 +354,6 @@ createUIComponent(["title"], [], 0, 0, 200, 50, "none", checkUpdate, "", true, 2
   );
 
 createUIComponent(["title"], [], 0, 0, 1920, 1080).define("backgroundColour", () => fade);
-Object.defineProperty(globalThis, "f", { get: () => fade });
 //update info every day
 setInterval(checkUpdate, 86_400_000);
 

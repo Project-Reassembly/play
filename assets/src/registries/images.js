@@ -27,6 +27,8 @@ add("icon.dev", "assets/textures/icon/dev.png")
 add("icon.int", "assets/textures/icon/integrate.png")
 add("icon.reassembly", "assets/textures/icon/p-r.png")
 add("icon.database", "assets/textures/icon/database.svg")
+add("icon.edit", "assets/textures/icon/pencil.png")
+add("icon.controls", "assets/textures/icon/controls.png")
 //Components
 add("entity.scrap-sentinel.head", "assets/textures/entity/component/scrap-sentinel-head.png")
 add("entity.scrap-sentinel.body", "assets/textures/entity/component/scrap-sentinel-body.png")
