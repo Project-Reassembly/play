@@ -1,0 +1,7 @@
+{
+  "type": "placeable",
+  "block": "test:supreme-tungsten-wall",
+  "name": "Supreme Tungsten Wall",
+  "image": "base.supreme-tungsten",
+  "rarity": 4
+}

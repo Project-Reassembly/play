@@ -174,7 +174,7 @@ class ItemCatalogBlock extends Container {
   tick() {
     let slot = 0;
     Registries.items.forEach((v, n) => {
-      if (this.inventory.get(slot).item !== n) this.inventory.set(slot, new ItemStack(n));
+      if (this.inventory.get(slot)?.item !== n) this.inventory.set(slot, new ItemStack(n));
       slot++;
     });
   }

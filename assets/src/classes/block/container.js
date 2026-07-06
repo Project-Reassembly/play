@@ -55,15 +55,11 @@ class Container extends Block {
     }, true);
     return item;
   }
-  createExtendedTooltip() {
-    return [
-      "🟨 -------------------- ⬜",
-      this.inventorySize + " slots",
-      "🟨 -------------------- ⬜",
-    ];
+  createExtendedDetails() {
+    return `#=-Inventory:\n  #d-${this.inventorySize}#-- slots`;
   }
   value() {
-    return (this.inventory.value() / 100) || 0;
+    return this.inventory.value() / 100 || 0;
   }
 }
 export { Container };

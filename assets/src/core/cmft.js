@@ -1,9 +1,11 @@
+import { Corporation } from "../classes/item/corporation.js";
 import { Timer } from "../classes/timer.js";
 import { Shr3 } from "../lib/q5-noise-function.js";
 import { debug } from "../play/debug.js";
 import { effectTimer } from "../play/effects.js";
 import { fonts } from "../play/font.js";
 import { col } from "./color.js";
+import { Registries } from "./registry.js";
 import { drawImg } from "./ui.js";
 //#region CMFT
 export const Decoration = new (class DecorationConsts {
@@ -59,13 +61,16 @@ export const Decoration = new (class DecorationConsts {
     // Spectrum, cycles through rainbow colours
     get "~"() {
       return col.interp(
-        [col.red, col.yellow, col.green, col.cyan, col.blue, col.magenta, col.red],
+        Decoration.spectrum,
         (Decoration.timer.ticks % 240) / 240,
       );
     },
     //Reassembly accent color
     "=": col.accent,
+    // default
+    "-": null,
   });
+  spectrum = [col.red, col.yellow, col.green, col.cyan, col.lighten(col.blue,50), col.magenta, col.red];
   timer = new Timer();
   styles = Object.freeze({
     // what do you *think* these do?
@@ -76,8 +81,12 @@ export const Decoration = new (class DecorationConsts {
     "X": "scribble",
 
     "*": "glowing",
+
+    "-": "normal",
   });
 })();
+
+const styleVals = new Set(Object.values(Decoration.styles));
 
 const cols = [..."0123456789abcdefinphrylsv@~"],
   styles = [..."bink*X"];
@@ -88,28 +97,132 @@ class Collection {
    * Codes of the form `#cs` may be used anywhere in the text, including inline, where `c` is a single-letter colour code, and `s` is a style code.
    * Any combination of those may be used.
    * Using `#>>image` will display the image stored at `image` in registry - For example, `#>>icon.iti` displays the InfiniTech Industries icon.
+   * @param {string} string
    */
   static createFrom(string) {
-    return new Collection(
-      ...string
-        .split(/(?<!\\)(?=#)/)
-        .map((x) => x.replaceAll("\\#", "#"))
-        .filter((x) => x.length > 0)
-        .map((x) => {
-          if (x.startsWith("#")) {
-            if (x.startsWith("#>>")) return new Icon(x.substring(3));
-            let c = new Text(x.substring(3));
-            let code = Decoration.colours[x[1]];
-            if (code !== undefined) c.setColour(x[1]);
-            let scode = Decoration.styles[x[2]];
-            if (scode !== undefined) c.setStyle(x[2]);
-            return c;
-          }
-          return new Text(x);
-        }),
-    )
-      .splitLines()
-      .merge();
+    return (
+      // new Collection(
+      //   ...`${string}`
+      //     .split(/(?<!\\)(?=#)/)
+      //     .map((x) => x.replaceAll("\\#", "#"))
+      //     .filter((x) => x.length > 0)
+      //     .map((x) => {
+      //       if (x.startsWith("#")) {
+      //         if (x.startsWith("#>>")) return new Icon(x.substring(3));
+      //         let c = new Text(x.substring(3));
+      //         /** @type {import("./color.js").color} */
+      //         const code = Decoration.colours[x[1]];
+      //         if (code !== undefined) c.setColour(code);
+      //         /** @type {string} */
+      //         const scode = Decoration.styles[x[2]];
+      //         if (scode !== undefined) c.setStyle(scode);
+      //         return c;
+      //       }
+      //       return new Text(x);
+      //     }),
+      // )
+      this.#parse(string).splitLines().merge()
+    );
+  }
+  static #parse(input) {
+    const source = `${input}`;
+    /** @type {Text[]} */
+    const parts = [];
+    let start = 0;
+    /** @type {import("./color.js").color?} */
+    let colour = null,
+      style = "normal",
+      isimage = false;
+    for (let i = 0; i < source.length; i++) {
+      const c = source[i];
+      // console.log(`char ${c} at ${i}/${source.length} (start ${start})`);
+      if (c === "#") {
+        parts.push(
+          isimage ?
+            new Icon(this.#unmess(source.substring(start, i)))
+          : new Text(this.#unmess(source.substring(start, i))).setColour(colour).setStyle(style),
+        );
+        // eat the hash
+        i++;
+        // now get the codes
+
+        if (source.substring(i, i + 2) === ">>") {
+          isimage = true;
+          i += 2;
+        } else {
+          isimage = false;
+          // colour code
+          if (source[i] === "[") {
+            // eat the bracket
+            let j = ++i;
+            // find closing
+            while (source[i] && source[i] !== "]") i++;
+            // throw error if not there
+            if (!source[i]) return this.#error(`Missing ']' for bracket opened at ${j - 1}`);
+            // use it
+            const colstr = source.substring(j, i);
+            if (colstr.length === 0) colour = null;
+            else if (/^-?\d+$/.test(colstr)) colour = parseInt(colstr) | 0;
+            else if (/^[0-9a-fA-F]{6,8}$/.test(colstr)) colour = col.fromHex(colstr);
+            else if (Registries.corps.has(colstr)) colour = Corporation.colorof(colstr);
+            else if (Registries.images.has(colstr))
+              colour = Registries.images.get(colstr).color ?? 0;
+            else return this.#error(`Invalid long colour specification '${colstr}'`);
+            // eat closing ]
+            i++;
+          } else if (source[i] in Decoration.colours) {
+            // console.log(`colour code at ${i}/${source.length} (start ${start})`)
+            if (Object.getOwnPropertyDescriptor(Decoration.colours, source[i]).get)
+              colour = source[i];
+            else colour = Decoration.colours[source[i]];
+            i++;
+          } else return this.#error(`Invalid colour code '${source[i]}'`);
+
+          // style code
+          if (source[i] === "[") {
+            // eat the bracket
+            let j = ++i;
+            // find closing
+            while (source[i] && source[i] !== "]") i++;
+            // throw error if not there
+            if (!source[i]) return this.#error(`Missing ']' for bracket opened at ${j - 1}`);
+            // use it
+            const stylestr = source.substring(j, i);
+            if (stylestr.length === 0) style = "normal";
+            else if (styleVals.has(stylestr)) style = parseInt(stylestr);
+            else return this.#error(`Invalid long style specification '${stylestr}'`);
+            // eat closing ]
+            i++;
+          } else if (source[i] in Decoration.styles) {
+            // console.log(`style code at ${i}/${source.length} (start ${start})`)
+            style = Decoration.styles[source[i]];
+            i++;
+          } else return this.#error(`Invalid style code '${source[i]}'`);
+        }
+        // console.log(`text component started at ${i}/${source.length} (start ${start})`)
+        start = i--;
+      } else if (source.substring(i, i + 2) === "\\#") {
+        // console.log(`escaped hash`)
+        i++;
+      }
+    }
+    parts.push(
+      isimage ?
+        new Icon(this.#unmess(source.substring(start)))
+      : new Text(this.#unmess(source.substring(start))).setColour(colour).setStyle(style),
+    );
+    return new this(...parts.filter((x) => x.length > 0));
+  }
+  /** @param {string} message  */
+  static #error(message) {
+    return new this(
+      new Icon("error.cmft"),
+      new Text(`CMFT Parse Error: ${message}`).setColour(col.red),
+    );
+  }
+  /** @param {string} string  */
+  static #unmess(string) {
+    return string.replaceAll("\\#", "#");
   }
   /**
    * Similar to `Collection.createFrom()`, but also wraps text if needed. May ignore some newlines.
@@ -264,13 +377,14 @@ class Collection {
     return d;
   }
 }
+globalThis.cc = Collection;
 /** Basic text component - a single block of styled text, formatted inline*/
 class Text {
   text = "";
+  /**@type {import("./color.js").color} */
+  colour = col.white;
   /**@type {string} */
-  colour = null;
-  /**@type {string} */
-  style = "n";
+  style = "normal";
   /**@type {string} */
   effects = "";
   constructor(text) {
@@ -285,12 +399,12 @@ class Text {
     return this;
   }
   setStyle(style) {
-    if (style === "*") {
-      this.style = "b";
-      this.effects = "g";
-    } else if (style === "X") {
-      this.style = "i";
-      this.effects = "x";
+    if (style === "glowing") {
+      this.style = "bold";
+      this.effects = "glowing";
+    } else if (style === "scribble") {
+      this.style = "italic";
+      this.effects = "scribble";
     } else this.style = style;
     return this;
   }
@@ -330,7 +444,7 @@ class Text {
     push();
     textFont(fonts.ocr);
     textSize(charsize);
-    textStyle(Decoration.styles[this.style] ?? "normal");
+    textStyle(this.style);
     let i = this.fastWidth(charsize);
     pop();
     return i;
@@ -349,7 +463,7 @@ class Icon extends Text {
   }
   /**@readonly */
   get length() {
-    return 1;
+    return 2;
   }
   split(splitter) {
     return [this];
@@ -439,16 +553,14 @@ class Element {
   draw(baseX, baseY, basecol = col.white, rarityColour = basecol) {
     push();
     textSize(this.charSize);
-    textStyle(Decoration.styles[this.component.style]);
+    textStyle(this.component.style);
     /**@type {import("./color.js").color} */
-    let c =
-      this.component.colour === "@" ?
-        rarityColour
-      : (Decoration.colours[this.component.colour] ?? basecol);
+    let c = this.component.colour === 0 ? rarityColour : (this.component.colour ?? basecol);
+    if (typeof c === "string") c = Decoration.colours[c] ?? basecol;
 
-    if (this.component.effects === "g") {
+    if (this.component.effects === "glowing") {
       this.glow(baseX, baseY, c);
-    } else if (this.component.effects === "x") {
+    } else if (this.component.effects === "scribble") {
       this.scribble(baseX, baseY, c);
     }
     col.fill(c);
@@ -723,13 +835,15 @@ globalThis.ft = formatTest;
  * Handler and classes for the **CMFT** (**Component Model for Formatting Text**) text formatter.
  * */
 export {
-  blank, Collection,
+  blank,
+  Collection,
   Directive,
   Directives,
   Drawer,
   drawer,
   Element,
-  escape, formatTest,
+  escape,
+  formatTest,
   Icon,
   Loader,
   Text

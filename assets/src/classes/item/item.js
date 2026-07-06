@@ -8,18 +8,23 @@ class Item extends Integrate.RegisteredItem {
   image = "error";
   name = "<unnamed item>";
   description = "<no description>";
+  details = "";
   rarity = 0;
   corp = "";
   stackSize = 100;
+  /** Should this item be hidden from the database? */
+  hidden = false;
 
   marketValue = 0;
-
-  _cachedTooltip = null;
   /**@type {CMFT.Drawer} */
   tooltip = null;
   init() {
     // this.description = wrapWords(this.description, 40);
-    this.tooltip = CMFT.drawer(`${this.corp ? `#>>${Corporation.iconof(this.corp)}#@b` : "#@b"}${this.name}#--`, 25, 40).conjoin(
+    this.tooltip = CMFT.drawer(
+      `${this.corp ? `#>>${Corporation.iconof(this.corp)}#@b` : "#@b"}${this.name}#--`,
+      25,
+      40,
+    ).conjoin(
       CMFT.drawer(
         this.description +
           (this.marketValue > 0 ?
@@ -75,15 +80,11 @@ class Item extends Integrate.RegisteredItem {
       }
   }
   getContextualisedInfo(entity) {}
-  getInformativeTooltip() {
-    if (!this._cachedTooltip) this._cachedTooltip = this.createExtendedTooltip();
-    return this._cachedTooltip;
-  }
   getTooltipDrawer() {
     return this.tooltip;
   }
-  createExtendedTooltip() {
-    return [];
+  createExtendedDetails() {
+    return "";
   }
   /**
    *

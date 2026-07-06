@@ -3,6 +3,7 @@ import { Registries } from "../../core/registry.js";
 
 export class Corporation {
   name = "Example Co.";
+  alias = "ECo";
   color = col.white;
   icon = "none";
   description = "A corporation.";
@@ -17,15 +18,18 @@ export class Corporation {
     return Registries.corps.tryGet(name);
   }
   static iconof(name) {
-    return this.get(name)?.icon ?? "";
+    return Registries.corps.tryGet(name)?.icon ?? "";
   }
   static colorof(name) {
-    return (this.get(name)?.color ?? 0) | 0;
+    return (Registries.corps.tryGet(name)?.color ?? 0) | 0;
   }
   static nameof(name) {
-    return this.get(name)?.name ?? "";
+    return Registries.corps.tryGet(name)?.name ?? "";
   }
-  static descriptionof(name) {
-    return this.get(name)?.description ?? "";
+  static aliasof(name) {
+    return Registries.corps.tryGet(name)?.alias ?? "";
+  }
+  static descof(name) {
+    return Registries.corps.tryGet(name)?.description ?? "";
   }
 }

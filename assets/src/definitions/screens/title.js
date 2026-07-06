@@ -12,6 +12,7 @@ import {
   UIComponent,
 } from "../../core/ui.js";
 import { gen } from "../../play/game.js";
+import { refreshDatabaseUI } from "./database.js";
 import { newgame_handler } from "./new-game.js";
 // black screen
 let fade = 0;
@@ -54,7 +55,7 @@ createUIComponent(
 
 // buttons
 
-createUIComponent(["title"], [], -800, -60, 0, 0, "none", null, "", false, 75)
+createUIComponent(["title"], [], -800, -110, 0, 0, "none", null, "", false, 75)
   .setTextColour(col.accent)
   .anchorLeft()
   .alignLeft()
@@ -64,7 +65,7 @@ createUIComponent(
   ["title"],
   ["startable:true"],
   -710,
-  -50,
+  -100,
   300,
   75,
   "none",
@@ -85,7 +86,7 @@ createUIComponent(
   .setOutlineColour(col.from(60, 60, 60))
   .setTextColour(col.accent);
 
-createUIComponent(["title"], [], -800, 40, 0, 0, "none", null, "", false, 75)
+createUIComponent(["title"], [], -800, -10, 0, 0, "none", null, "", false, 75)
   .setTextColour(col.accent)
   .anchorLeft()
   .alignLeft()
@@ -95,7 +96,7 @@ createUIComponent(
   ["title"],
   ["startable:true"],
   -710,
-  50,
+  0,
   300,
   75,
   "none",
@@ -115,6 +116,50 @@ createUIComponent(
   .setBackgroundColour(col.from(0, 0, 0))
   .setOutlineColour(col.from(60, 60, 60))
   .setTextColour(col.accent);
+
+createUIComponent(["title"], [], -800, 90, 0, 0, "none", null, "", false, 75)
+  .setTextColour(col.accent)
+  .anchorLeft()
+  .alignLeft()
+  .define("text", () => ">>>>>>>>>".substring(0, 9 * (1 - fade / 255)));
+
+createUIComponent(
+  ["title"],
+  ["startable:true"],
+  -710,
+  100,
+  300,
+  75,
+  "none",
+  () => {
+    UIComponent.setCondition("startable", "false");
+    refreshDatabaseUI();
+    ui.menuState = "database";
+  },
+  "  Database",
+  true,
+  40,
+)
+  .setBackgroundColour(col.from(0, 0, 0))
+  .setOutlineColour(col.from(60, 60, 60))
+  .setTextColour(col.accent);
+
+createUIImageComponent(
+  ["title"],
+  ["startable:true"],
+  -820,
+  100,
+  75,
+  75,
+  () => {
+    UIComponent.setCondition("startable", "false");
+    resetItemSelectors();
+    resetColl();
+    ui.menuState = "database";
+  },
+  "icon.database",
+  false,
+);
 
 // tools
 
@@ -226,7 +271,7 @@ export const loadStats = {
 };
 createUIComponent(["title"], ["show-load:true"], 0, 0, 1920, 1080).setBackgroundColour(150);
 createHealthbarComponent(
-  ["title"],
+  ["title", "new-game", "ide", "database", "in-game"],
   ["show-load:true"],
   0,
   -20,
@@ -240,7 +285,7 @@ createHealthbarComponent(
   loadStats,
 ).setGetters("images", "totalImages");
 createHealthbarComponent(
-  ["title"],
+  ["title", "new-game", "ide", "database", "in-game"],
   ["show-load:true"],
   0,
   20,

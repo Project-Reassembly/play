@@ -116,12 +116,10 @@ class Crafter extends Factory {
    * @param {Recipe} recipe Recipe to be converted.
    */
   stringifyRecipe(recipe) {
-    return (
-      `${recipe.inputs.map((x) => x.toString(true)).join("\n")}\n -  - -- \\⬇/ -- -  - \n${recipe.outputs.map((x) => x.toString(true)).join("\n")}\n${""
-        .padEnd((this.#progress / recipe.time) * 20, "■")
-        .padEnd(20, "□")
-        .substring(0, 20)} `
-    );
+    return `${recipe.inputs.map((x) => x.toString(true)).join("\n")}\n -  - -- \\⬇/ -- -  - \n${recipe.outputs.map((x) => x.toString(true)).join("\n")}\n${""
+      .padEnd((this.#progress / recipe.time) * 20, "■")
+      .padEnd(20, "□")
+      .substring(0, 20)} `;
   }
   drawTooltip(x, y, outlineColour, backgroundColour) {
     super.drawTooltip(x, y, outlineColour, backgroundColour, true);
@@ -160,16 +158,13 @@ class Crafter extends Factory {
     deserialised.results = Inventory.deserialise(creator.result);
   }
 
-  createExtendedTooltip() {
-    return [
-      "🟨 -------------------- ⬜",
-      "Recipes:",
-      ...this.recipes.map(
+  createExtendedDetails() {
+    return `#=-Inventory:\n  #d-${this.inventorySize}#-- input slots, #d-${this.resultSize}#-- output slots\n#=-Recipes:\n  ${this.recipes
+      .map(
         (rec) =>
-          `  ${rec.inputs.map((stack) => stack.count + "× " + stack.getItem().name).join(", ")} => ${rec.outputs.map((stack) => stack.count + "× " + stack.getItem().name).join(", ")} (${roundNum(rec.time / 60, 1)}s)`,
-      ),
-      "🟨 -------------------- ⬜",
-    ];
+          `${rec.inputs.map((stack) => `#>>${stack.getItem().image}#[${col.withA(col.lighten(Registries.images.tryGet(stack.getItem().image)?.color, 40), 255)}]-${stack.count}`).join(" ")}#-- => ${rec.outputs.map((stack) => `#>>${stack.getItem().image}#[${col.withA(col.lighten(Registries.images.tryGet(stack.getItem().image)?.color, 40), 255)}]-${stack.count}`).join(" ")}#--, #h-${roundNum(60/rec.time, 2)}/s#--`,
+      )
+      .join("\n  ")}`;
   }
 }
 

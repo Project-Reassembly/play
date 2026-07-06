@@ -92,14 +92,8 @@ export class LaunchPad extends Container {
       Item.getColourFromRarity(0, "light"),
     );
   }
-  createExtendedTooltip() {
-    return [
-      "🟨 -------------------- ⬜",
-      this.inventorySize + " slots",
-      this.launchAmount + " items per launch",
-      roundNum(this.launchCooldown / 60, 1) + "s launch cooldown",
-      "🟨 -------------------- ⬜",
-    ];
+  createExtendedDetails() {
+    return `${super.createExtendedDetails()}\n#=-Launching:\n  #i-${this.launchAmount} items#-- per launch\n  #h-${roundNum(this.launchCooldown / 60, 1)}s#-- launch cooldown\n  -> #e-${roundNum((60 * this.launchAmount) / this.launchCooldown, 2)} items/s#-- throughput`;
   }
 }
 /**
@@ -220,12 +214,7 @@ export class LandingPad extends Container {
       Item.getColourFromRarity(0, "light"),
     );
   }
-  createExtendedTooltip() {
-    return [
-      "🟨 -------------------- ⬜",
-      this.inventorySize + " slots",
-      roundNum(this.receiveCooldown / 60, 1) + "s buy cooldown",
-      "🟨 -------------------- ⬜",
-    ];
+  createExtendedDetails() {
+    return `${super.createExtendedDetails()}\n#=-Buying:\n  #h-${roundNum(60 / this.receiveCooldown, 2)} items/s#-- buy frequency`;
   }
 }

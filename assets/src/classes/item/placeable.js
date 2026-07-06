@@ -1,8 +1,8 @@
-import { Item } from "./item.js";
 import { construct } from "../../core/constructor.js";
 import { Registries } from "../../core/registry.js";
-import { world, game } from "../../play/game.js";
 import { selectedDirection } from "../../definitions/screens/in-game.js";
+import { game, world } from "../../play/game.js";
+import { Item } from "./item.js";
 class PlaceableItem extends Item {
   layer = "blocks";
   block = "none";
@@ -23,13 +23,14 @@ class PlaceableItem extends Item {
     }
     return false;
   }
-  createExtendedTooltip() {
-    /**@type {Block} */
-    let block = construct(Registries.blocks.get(this.block), "block");
-    let blocktooltip = block.createExtendedTooltip
-      ? block.createExtendedTooltip()
-      : [];
+  createExtendedDetails() {
+    /**@type {import("../block/block.js").Block} */
+    let block = construct(Registries.blocks.tryGet(this.block) ?? {}, "block");
+    let blocktooltip = block.createExtendedDetails
+      ? block.createExtendedDetails()
+      : "";
     return blocktooltip;
   }
 }
 export { PlaceableItem };
+

@@ -1,12 +1,15 @@
+import { col } from "../../core/color.js";
 import { construct, constructFromType } from "../../core/constructor.js";
 import { rnd, tru, Vector } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { ui, UIComponent } from "../../core/ui.js";
+import { discoverable, discovered } from "../../definitions/screens/database.js";
 import { autoScaledEffect } from "../../play/effects.js";
 import { Log } from "../../play/messaging.js";
 import { blockSize, Direction, totalSize } from "../../scaling.js";
 import { Inventory } from "../inventory.js";
 import { Accessory } from "../item/accessory.js";
+import { Corporation } from "../item/corporation.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { ItemStack } from "../item/item-stack.js";
 import { BulletModel } from "../projectile/bullet-model.js";
@@ -281,6 +284,7 @@ class Player extends EquippedEntity {
       }
       this.tickRecipe(recipe, recipe.time);
     }
+    if (this.age % 60 === 0) this.tickDiscovery();
   }
 
   //player shit
@@ -294,7 +298,6 @@ class Player extends EquippedEntity {
         .replaceAll("(1)", this.name)
         .replaceAll("(2)", source?.name)}`,
     );
-    console.log(source);
     DroppedItemStack.create(
       Inventory.mouseItemStack,
       this.world,
@@ -350,6 +353,25 @@ class Player extends EquippedEntity {
   static applyExtraProps(entity, created) {
     super.applyExtraProps(entity, created);
     entity.assemblyInventory = Inventory.deserialise(created.assinv);
+  }
+
+  tickDiscovery() {
+    this.inventories.forEach((inv) =>
+      inv.iterate((stack) => {
+        if (discoverable.all.has(stack.item) && !discovered.all.has(stack.item)) {
+          discovered.discover(stack.item);
+          const corp = stack.getItem().corp;
+          const found = discovered.collections.get(corp)?.length ?? 0;
+          const total = discoverable.collections.get(corp)?.length ?? 0;
+          const complete = found === total;
+          const c =
+            complete ? col.cyan : col.interp([col.red, col.yellow, col.green], found / (total + 1));
+          Log.send(
+            `#>>icon.database#=-Discovered #[${corp}]b${stack.getItem().name}#=- (${Corporation.aliasof(corp) || "generic"}#=- collection, ${complete ? "#[30ffff]*complete" : `#[${col.hex(c)}]b${found}/${total}`}#=-)`,
+          );
+        }
+      }, true),
+    );
   }
 }
 export { Player };

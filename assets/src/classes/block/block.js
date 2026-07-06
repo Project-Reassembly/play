@@ -6,9 +6,13 @@ import { createDestructionExplosion } from "../../play/effects.js";
 import { blockSize, chunkSize, Direction } from "../../scaling.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { ItemStack } from "../item/item-stack.js";
+
 import { ShootableObject } from "../physical.js";
 import { Chunk } from "../world/chunk.js";
-/** @import {Unconstructed} from "../../lib/integrate" */
+/** 
+ * @import {Unconstructed} from "../../lib/integrate"
+ * @import { Item } from "../item/item.js";
+ */
 /// <reference path="../../lib/integrate"/>
 /**
  * @typedef SerialisedBlock
@@ -184,6 +188,7 @@ class Block extends ShootableObject {
   value(){
     return 0;
   }
+  createExtendedDetails(){}
 }
 /** Stores values to describe how blocks are broken.
  * @enum

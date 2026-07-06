@@ -1,5 +1,4 @@
 import { construct } from "../../core/constructor.js";
-import { roundNum } from "../../core/number.js";
 import { Item } from "./item.js";
 /** Item which can be used in weapon or body slots. */
 class Equippable extends Item {
@@ -30,25 +29,7 @@ class Equippable extends Item {
   /** @param {Entity} holder The entity using this item */
   use(holder, isSecondary = false) {}
 
-  createExtendedTooltip() {
-    let mods = Object.keys(this.attributeModifiers);
-    return [
-      "🟨 -------------------- ⬜",
-      mods.length > 0
-        ? [
-            "🟨When equipped:⬜",
-            mods.map((key) => {
-              let i = this.attributeModifiers[key];
-              return (
-                `${(i < 1 ? "🟥  " : "🟩  +") +
-                roundNum((i - 1) * 100, 1)}% ${key.replace("-", " ")}⬜`
-              );
-            }),
-            "🟨 -------------------- ⬜",
-          ].flat()
-        : "🟨 -------------------- ⬜",
-    ].flat(2);
-  }
+  
 }
 export { Equippable };
 

@@ -241,6 +241,10 @@ class UIComponent {
       : this.width;
   }
 
+  disconnect() {
+    ui.components.splice(ui.components.indexOf(this), 1);
+  }
+
   alignLeft() {
     this.ox = this.x; //Save old x
     this.define("x", () => this.ox + Math.max(this.width, this.calculateTextWidth()) * 0.5);
@@ -284,23 +288,20 @@ class UIComponent {
    */
   static evaluateCondition(condition, ...values) {
     if (typeof condition !== "string") condition = `${condition}`;
-    if (values.length > 0) {
+    if (values.length !== 0) {
       const c = ui.conditions[condition];
-      if (c) {
-        //If property exists
-        return values.includes(c); //Check it and return
-      }
+      return c !== undefined && values.includes(c);
     }
     const i = condition.indexOf(":");
     if (i === -1) {
       //If no colon, simply return its presence
-      return !!ui.conditions[parts[0]];
+      return ui.conditions[condition] !== undefined;
     }
     const con = condition.substring(0, i);
     const vals = condition.substring(i + 1);
 
     const c = ui.conditions[con];
-    if (c) {
+    if (c !== undefined) {
       //Separate property values
       let values = vals.split("|");
       //If property exists
@@ -758,6 +759,13 @@ class CMFTUIComponent extends UIComponent {
   lasttxt = this.text;
   textdrawer = CMFT.blank();
   hastext = false;
+  rarityColour = col.accent;
+
+  /**@param {import("./color.js").color} col*/
+  setRarityColour(col) {
+    this.rarityColour = fn;
+    return this;
+  }
   /**@param {(text:string) => string} fn*/
   setFormatter(fn) {
     this.formatter = fn;
@@ -768,10 +776,17 @@ class CMFTUIComponent extends UIComponent {
     return this;
   }
   #settxt(t) {
+    let s = this.textSize * 0.4;
+    if (textSize) {
+      textFont(fonts.ocr);
+      textSize(this.textSize);
+      s = textWidth("a");
+    }
+    // console.log("using text width = " + s + ", height = " + this.textSize);
     this.textdrawer = CMFT.drawer(
       this.formatter(t ?? "null"),
       this.textSize,
-      Math.floor(this.width / (this.textSize * 0.6)),
+      Math.floor((this.width - 21) / s),
     ).noBG();
     this.lasttxt = t;
   }
@@ -783,8 +798,8 @@ class CMFTUIComponent extends UIComponent {
     this.textdrawer.draw(
       this.x - (this.width - 20) * 0.5,
       this.y - (this.height - 20) * 0.5,
-      col.white,
-      col.accent,
+      this.textColour,
+      this.rarityColour,
     );
   }
 }

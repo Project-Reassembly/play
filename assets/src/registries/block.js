@@ -140,6 +140,7 @@ createLinkedBlockAndItem(
   {
     description:
       "A Bomb powered by a runaway chain reaction of decaying Uranium.\n#5iPreview Content",
+    hidden: true,
     rarity: Item.rarity.BLUE,
     marketValue: 2500,
   },
@@ -161,6 +162,7 @@ createLinkedBlockAndItem(
   },
   {
     description: "#4-Now I am become Death, destroyer of worlds.\n#5iPreview Content",
+    hidden: true,
     rarity: Item.rarity.RARE,
     marketValue: 25000,
   },
@@ -672,6 +674,7 @@ createLinkedBlockAndItem(
     corp: "peti",
     description:
       "Block to increase the maximum size of turrets on a PETI Turret Controller.\n#5iPreview Content",
+    hidden: true,
     marketValue: 200, // 3 plates = 15
   },
 );
@@ -689,6 +692,7 @@ createLinkedBlockAndItem(
     corp: "peti",
     description:
       "Mounting point for PETI turrets.\nMaximum size depends on number of bases.\nPlace them in a cross-shaped pattern.\n#5iPreview Content",
+    hidden: true,
     marketValue: 1000,
   },
 );
@@ -701,6 +705,7 @@ createLinkedBlockAndItem(
   {
     description:
       "Pressurises and superheats gas in the atmosphere into plasma.\n#5iPreview Content",
+    hidden: true,
     corp: "peti",
     marketValue: 5200,
   },
@@ -712,6 +717,7 @@ createLinkedBlockAndItem(
   { type: "plasma-tank", capacity: 512, plasma: "tank.plasma-tank.plasma" },
   {
     description: "Stores plasma for later use.\n#5iPreview Content",
+    hidden: true,
     corp: "peti",
     marketValue: 3250,
   },
@@ -732,6 +738,7 @@ createLinkedBlockAndItem(
   {
     description:
       "A pressurised pipe for moving high-temperature ionised gas, known as plasma.\n#5iPreview Content",
+    hidden: true,
     corp: "peti",
     marketValue: 500,
   },
@@ -754,6 +761,7 @@ createLinkedBlockAndItem(
   {
     description:
       "A specialised pipe for increasing the pressure of plasma, allowing more to fit through the same pipes.\n2 pipes in , 1 pipe out.\n\nCan't compress plasma above 12 bar.\n#5iPreview Content",
+    hidden: true,
     corp: "peti",
     marketValue: 1500,
   },
@@ -772,6 +780,7 @@ createLinkedBlockAndItem(
   {
     description:
       "A specialised pipe for decreasing the pressure of plasma, allowing other blocks to use it.\n1 pipe in , 2 pipes out.\n\nCan't decompress plasma below 1 bar.\n#5iPreview Content",
+    hidden: true,
     corp: "peti",
     marketValue: 1500,
   },
@@ -793,6 +802,7 @@ createLinkedBlockAndItem(
   {
     description:
       "Assembles a tank out of blocks.\nContainers add inventory space, Conveyors add speed, and Weapons in containers are mounted on the tank.\n#5iPreview Content",
+    hidden: true,
     rarity: Item.rarity.RARE,
   },
 );
@@ -824,6 +834,7 @@ createLinkedBlockAndItem(
   {
     description: "Outputs a structure array into the console.\n#yiDevelopment Item",
     rarity: Item.rarity.DEV,
+    hidden: true,
   },
 );
 createLinkedBlockAndItem(
@@ -835,6 +846,7 @@ createLinkedBlockAndItem(
     description:
       "Contains an infinite supply of every currently registered item.\nAlso has a trash slot.\n#yiDevelopment Item",
     rarity: Item.rarity.DEV,
+    hidden: true,
   },
 );
 createLinkedBlockAndItem(
@@ -845,6 +857,7 @@ createLinkedBlockAndItem(
   {
     description: "Executes a pre-set command on activation.\n#yiDevelopment Item",
     rarity: Item.rarity.DEV,
+    hidden: true,
   },
 );
 createLinkedBlockAndItem(
@@ -856,6 +869,7 @@ createLinkedBlockAndItem(
     description:
       "Executes a pre-set command on activation.\nCan be pointed into another command block to chain.\n#yiDevelopment Item",
     rarity: Item.rarity.DEV,
+    hidden: true,
   },
 );
 createLinkedBlockAndItem(
@@ -867,6 +881,7 @@ createLinkedBlockAndItem(
     description:
       "Executes a pre-set command continuously on activation.\nActivation while running will stop execution.\n#yiDevelopment Item",
     rarity: Item.rarity.DEV,
+    hidden: true,
   },
 );
 //## TEST ##

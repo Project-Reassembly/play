@@ -227,7 +227,7 @@ export const col = new (class Int32Colours {
   }
   /**@param {string} col */
   fromHex(col) {
-    return parseInt(col, 16) | 0;
+    return parseInt(col.padEnd(8, "f"), 16) | 0;
   }
   /**@param {color} col */
   fill(col) {

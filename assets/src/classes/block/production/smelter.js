@@ -1,4 +1,5 @@
-import { tru } from "../../../core/number.js";
+import { roundNum, tru } from "../../../core/number.js";
+import { Registries } from "../../../core/registry.js";
 import { Crafter } from "./crafter.js";
 /**Extended Crafter which uses fuel items. */
 class Smelter extends Crafter {
@@ -27,8 +28,7 @@ class Smelter extends Crafter {
     }
   }
   createTickEffect() {
-    if (tru(this.activeTickEffectChance))
-      this.emit(this.activeTickEffect)
+    if (tru(this.activeTickEffectChance)) this.emit(this.activeTickEffect);
   }
   serialise() {
     let c = super.serialise();
@@ -50,12 +50,14 @@ class Smelter extends Crafter {
   }
   stringifyRecipe(rec) {
     let r = super.stringifyRecipe(rec);
-    r +=
-      `\nFuel: ${""
-        .padEnd((this._fuelLeft / this._fuelMax) * 14, "■")
-        .padEnd(14, "□")
-        .substring(0, 14)} `;
+    r += `\nFuel: ${""
+      .padEnd((this._fuelLeft / this._fuelMax) * 14, "■")
+      .padEnd(14, "□")
+      .substring(0, 14)} `;
     return r;
+  }
+  createExtendedDetails() {
+    return `${super.createExtendedDetails()}\n#=-Fuel Types:\n  ${Object.entries(this.fuelTypes).map(([type, time]) => `#>>${Registries.items.tryGet(type)?.image}#6- ${roundNum(time / 60, 2)}s#--`).join("\n  ")}`;
   }
 }
 export { Smelter };

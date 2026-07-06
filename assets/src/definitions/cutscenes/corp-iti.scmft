@@ -1,11 +1,15 @@
 // + cutscenes
 #>>icon.iti#i- InfiniTech Industries
+  #7-Now, #@-what's your name?
  <rtime:60>#i-[    Launching in 3...    ]
- <rtime:60>#i-[    Launching in 2...    ]
+ <rtime:60>\n\n\n\n\n\n\n\n\n\n\n#i-[    Launching in 2...    ]\n\n\n\n\n\n\n\n\n\n#7-wait what
  <rtime:60>#i-[    Launching in 1...    ]
- <rtime:90>#i-[    Launching capsule    ]
- <wait:180>
+ <rtime:90>\n\n\n\n\n\n\n\n\n\n\n#i-[    Launching capsule    ]\n\n\n\n\n\n\n\n\n\n#7-nonononononono
+ <rtime:90>#c-[       User Disconnected.      ]
+ <wait:120>
  <rtime:30>#i-[    Atmospheric entry    ]
  <rtime:30>#i-[  Activating air brakes  ]
- <rtime:30>#c-[    Impact Imminent!     ]
+ <wait:60>
+ <rtime:30>#c-[   Brakes unresponsive   ]
+ <rtime:30>#c-[    Impact imminent!     ]
 <command>ng-stage:intro

@@ -4,10 +4,11 @@
  */
 import { col } from "../../core/color.js";
 import { constructFromType } from "../../core/constructor.js";
-import { clamp, rnd, tru, Vector } from "../../core/number.js";
+import { clamp, rnd, roundNum, tru, Vector } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { rotatedImg, rotatedShape } from "../../core/ui.js";
 import { createLinearEffect, Explosion, NuclearExplosion, repeat } from "../../play/effects.js";
+import { blockSize } from "../../scaling.js";
 import { Fire } from "../effect/fire.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
 import { Entity } from "../entity/entity.js";
@@ -117,9 +118,20 @@ export class BulletComponent {
    * @param {BulletInstance} bullet
    */
   ondraw(bullet) {}
+  /** Get CMFT describing this component. @param {BulletModel} model  */
+  getInfo(model) {
+    return `#c-<? ${this.constructor.name}>`;
+  }
 }
 
-export class ExtraUpdatesComponent extends BulletComponent {
+/** Component which is invisible to the database. */
+class InvisibleBulletComponent extends BulletComponent {
+  getInfo() {
+    return "";
+  }
+}
+
+export class ExtraUpdatesComponent extends InvisibleBulletComponent {
   amount = 0;
   /**
    * Called every tick, i.e. whenever the world calls for a tick.
@@ -158,6 +170,23 @@ export class MovementComponent extends BulletComponent {
     bullet.move(movevct.x, movevct.y, true);
     if (this.decel) bullet.data.set("speed", clamp(spd - this.decel, 0, this.maxSpeed));
   }
+  /** Get CMFT describing this component. @param {BulletModel} model */
+  getInfo(model) {
+    let speed = (this.speed * 60) / blockSize;
+    let speedtxt = `Moves#-- at #i-${speed} tiles/s`;
+    if (model.has(ExtraUpdatesComponent)) {
+      const amt = model.get(ExtraUpdatesComponent).amount;
+      if (amt >= model.lifetime - 1) speedtxt = "#i-Hitscan#i-";
+      else speedtxt = `Moves#-- at #i-${speed * (amt + 1)} tiles/s`;
+    }
+    return `#i-${speedtxt}${
+      this.decel > 0 ?
+        `\n#-- decelerating to #i-${roundNum((Math.max(this.speed - this.decel * model.lifetime, 0) * 60) / blockSize, 2)} tiles/s#--`
+      : this.decel < 0 ?
+        `\n#-- accelerating to #i-${(this.speed - this.decel * model.lifetime * 60) / blockSize} tiles/s#--`
+      : ""
+    }`;
+  }
 }
 export class FollowSetPathComponent extends BulletComponent {
   onspawn(bullet) {
@@ -182,6 +211,10 @@ export class FollowSetPathComponent extends BulletComponent {
       bullet.pos.copyFrom(steps.pop());
       if (steps.length !== 0) bullet.direction = bullet.pos.sub(steps.at(-1)).scale(-1).angle;
     } else bullet.remove = true;
+  }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#d-Follows parent path`;
   }
 }
 
@@ -210,6 +243,10 @@ export class InstantMovementComponent extends BulletComponent {
       bullet.y = ty;
       bullet.data.set("instantMoved", true);
     }
+  }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#d-Instant Movement`;
   }
 }
 
@@ -266,6 +303,10 @@ export class TrackNearestComponent extends TrackingComponent {
     }
     return selected;
   }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#b-Tracks#-- the #b-nearest entity#-- within #b-${roundNum(this.range / 30, 1)} tiles`;
+  }
 }
 
 // The old 'hovered' tracking type.
@@ -299,6 +340,10 @@ export class TrackNearSourceTargetComponent extends TrackingComponent {
     }
     return selected;
   }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#b-Tracks#-- the #b-nearest entity to your mouse#-- within #b-${roundNum(this.range / 30, 1)} tiles`;
+  }
 }
 
 // old 'mouse' tracking type. Now probably actually useful.
@@ -309,9 +354,13 @@ export class TrackSourceTargetComponent extends TrackingComponent {
     if (bullet.distanceToPoint(pt.x, pt.y) < this.range) return pt;
     return null;
   }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#b-Tracks your mouse#-- if within #b-${roundNum(this.range / 30, 1)} tiles`;
+  }
 }
 
-export class VFXTrailComponent extends BulletComponent {
+export class VFXTrailComponent extends InvisibleBulletComponent {
   effect = "default";
   onupdate(bullet) {
     const from = bullet.lastpos,
@@ -323,7 +372,7 @@ export class VFXTrailComponent extends BulletComponent {
   }
 }
 
-export class ParticleTrailComponent extends BulletComponent {
+export class ParticleTrailComponent extends InvisibleBulletComponent {
   colours = [col.from(255, 255, 255, 200)];
   shape = "rhombus";
   width = 0;
@@ -458,6 +507,10 @@ export class PierceComponent extends BulletComponent {
       bullet.data.get("pierced").push(thing);
     }
   }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#e-${this.amount}#-- pierce`;
+  }
 }
 export class InfinitePierceComponent extends BulletComponent {
   lifeOnHit = 0;
@@ -474,6 +527,10 @@ export class InfinitePierceComponent extends BulletComponent {
       bullet.data.get("pierced").push(thing);
     }
   }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#~-infinite#-- pierce`;
+  }
 }
 export class DamageComponent extends BulletComponent {
   damageType = "normal";
@@ -489,6 +546,10 @@ export class DamageComponent extends BulletComponent {
       this.amount + rnd.float(-this.spread, this.spread),
       bullet.entity,
     );
+  }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#c-${this.amount}${this.spread ? `±${this.spread}` : ""} ${this.damageType}#-- damage`;
   }
 }
 // old 'conditionalPierce'
@@ -514,6 +575,10 @@ export class DamagePierceComponent extends BulletComponent {
       bullet.data.get("pierced").push(thing);
     }
   }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#c-${this.amount}${this.spread ? `±${this.spread}` : ""} ${this.damageType}#-- damage, #e-piercing#-- on overkill`;
+  }
 }
 
 export class StatusInflictionComponent extends BulletComponent {
@@ -528,6 +593,10 @@ export class StatusInflictionComponent extends BulletComponent {
       thing.applyStatus(this.effect, this.duration);
     }
   }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#--Inflicts #a-${Registries.statuses.tryGet(this.effect)?.name ?? this.effect}#-- for #a-${roundNum(this.duration / 60, 1)}s`;
+  }
 }
 
 export class KnockbackComponent extends BulletComponent {
@@ -537,6 +606,10 @@ export class KnockbackComponent extends BulletComponent {
       thing.knockback(this.amount, bullet.direction);
     }
   }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#b-${(this.amount * 60) / blockSize} tiles/s#-- impulse`;
+  }
 }
 export class InstantKnockbackComponent extends BulletComponent {
   amount = 2;
@@ -545,9 +618,13 @@ export class InstantKnockbackComponent extends BulletComponent {
       thing.knock(this.amount * 10, bullet.direction);
     }
   }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#b-${(this.amount * 10) / blockSize} tiles#-- instant knockback`;
+  }
 }
 
-export class ImageDrawerComponent extends BulletComponent {
+export class ImageDrawerComponent extends InvisibleBulletComponent {
   image = "error";
   width = 20;
   height = 20;
@@ -555,7 +632,7 @@ export class ImageDrawerComponent extends BulletComponent {
     rotatedImg(this.image, bullet.x, bullet.y, this.width, this.height, bullet.directionRad);
   }
 }
-export class ShapeDrawerComponent extends BulletComponent {
+export class ShapeDrawerComponent extends InvisibleBulletComponent {
   shape = "rect";
   width = 20;
   height = 20;
@@ -585,6 +662,9 @@ export class LinearVFXTraceComponent extends TraceComponent {
   onexpire(bullet) {
     super.onexpire(bullet);
     createLinearEffect(this.effect, bullet.world, bullet.data.get("positions"));
+  }
+  getInfo() {
+    return "";
   }
 }
 /** Traces the bullet's path with a different bullet. */
@@ -619,9 +699,13 @@ export class BulletTraceComponent extends TraceComponent {
       b.oncreated();
     });
   }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#=-Creates ${this.number} bullet(s) on expiry:\n#=-| ${this.bullet.createInfo().replaceAll("\n", "\n#=-| ")}`;
+  }
 }
 
-export class SpawnVFXComponent extends BulletComponent {
+export class SpawnVFXComponent extends InvisibleBulletComponent {
   effect = "none";
   /** impact frame helper */
   frame = "none";
@@ -630,7 +714,7 @@ export class SpawnVFXComponent extends BulletComponent {
     bullet.emit(this.effect);
   }
 }
-export class HitVFXComponent extends BulletComponent {
+export class HitVFXComponent extends InvisibleBulletComponent {
   effect = "none";
   /** impact frame helper */
   frame = "none";
@@ -639,7 +723,7 @@ export class HitVFXComponent extends BulletComponent {
     bullet.emit(this.effect);
   }
 }
-export class ExpiryVFXComponent extends BulletComponent {
+export class ExpiryVFXComponent extends InvisibleBulletComponent {
   effect = "none";
   /** impact frame helper */
   frame = "none";
@@ -649,7 +733,7 @@ export class ExpiryVFXComponent extends BulletComponent {
     bullet.emit(this.effect);
   }
 }
-export class KillVFXComponent extends BulletComponent {
+export class KillVFXComponent extends InvisibleBulletComponent {
   effect = "none";
   /** impact frame helper */
   frame = "none";
@@ -689,6 +773,10 @@ export class ExplosionComponent extends BulletComponent {
     boom.create();
     boom.dealDamage();
   }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#c-${this.damage}${this.spread ? `±${this.spread}` : ""} ${this.damageType}#-- damage ~ #e-${roundNum(this.radius / 30, 1)} tile#-- radius`;
+  }
 }
 
 export class HitExplosionComponent extends BulletComponent {
@@ -721,6 +809,10 @@ export class HitExplosionComponent extends BulletComponent {
     boom.create();
     boom.dealDamage();
   }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#c-${this.damage}${this.spread ? `±${this.spread}` : ""} ${this.damageType}#-- damage ~ #e-${roundNum(this.radius / 30, 1)} tile#-- radius`;
+  }
 }
 export class NuclearExplosionComponent extends BulletComponent {
   damage = 0;
@@ -750,6 +842,10 @@ export class NuclearExplosionComponent extends BulletComponent {
       boom.statusDuration = stat.duration;
     }
     boom.dealDamage();
+  }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#a*nuclear explosion!#--\n#c- ${this.damage}${this.spread ? `±${this.spread}` : ""} ${this.damageType}#-- damage ~ #e-${roundNum(this.radius / 30, 1)} tile#-- radius`;
   }
 }
 
@@ -786,20 +882,36 @@ export class FragBulletComponent extends BulletEmissionComponent {
   onexpire(bullet) {
     this.emit(bullet);
   }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#=-${this.number} frag bullet(s):\n#=-| ${this.bullet.createInfo().replaceAll("\n", "\n#=-| ")}`;
+  }
 }
 export class HitBulletComponent extends BulletEmissionComponent {
   onhit(bullet) {
     this.emit(bullet);
+  }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#=-${this.number} bullet(s) on hit:\n#=-| ${this.bullet.createInfo().replaceAll("\n", "\n#=-| ")}`;
   }
 }
 export class SpawnBulletComponent extends BulletEmissionComponent {
   onspawn(bullet) {
     this.emit(bullet);
   }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#=-${this.number} bullet(s) on spawn:\n#=-| ${this.bullet.createInfo().replaceAll("\n", "\n#=-| ")}`;
+  }
 }
 export class KillBulletComponent extends BulletEmissionComponent {
   onkill(bullet) {
     this.emit(bullet);
+  }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#=-${this.number} bullet(s) on kill:\n#=-| ${this.bullet.createInfo().replaceAll("\n", "\n#=-| ")}`;
   }
 }
 export class IntervalBulletComponent extends BulletEmissionComponent {
@@ -817,8 +929,13 @@ export class IntervalBulletComponent extends BulletEmissionComponent {
       bullet.data.set("intervalCounter", i);
     }
   }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#=-${this.number} bullet(s) every ${roundNum(this.interval / 60, 1)}s:\n#=-| ${this.bullet.createInfo().replaceAll("\n", "\n#=-| ")}`;
+  }
 }
 export class IncendiaryComponent extends BulletComponent {
+  /** @type {Fire} */
   fire = {};
   chance = 1;
   count = 0;
@@ -855,9 +972,13 @@ export class IncendiaryComponent extends BulletComponent {
         ),
       );
   }
+  /** Get CMFT describing this component. */
+  getInfo() {
+    return `#--${this.binomial ? "up to " : `#6-${this.chance * 100}%#-- chance of `}#6-${this.count} fires#-- ~ #6-${this.fire.damage} damage#-- every #6-${roundNum(this.fire.interval / 60, 1)}s`;
+  }
 }
 
-export class DisableDefaultVFXComponent extends BulletComponent {}
-export class NoEntityCollisionComponent extends BulletComponent {}
-export class NoBlockCollisionComponent extends BulletComponent {}
-export class CollisionFilterComponent extends BulletComponent {}
+export class DisableDefaultVFXComponent extends InvisibleBulletComponent {}
+export class NoEntityCollisionComponent extends InvisibleBulletComponent {}
+export class NoBlockCollisionComponent extends InvisibleBulletComponent {}
+export class CollisionFilterComponent extends InvisibleBulletComponent {}

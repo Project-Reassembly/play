@@ -77,16 +77,6 @@ class BlockLauncher extends Weapon {
         (1 + (block instanceof Wall ? this.scaling.pierceFromArmour * block.armour : 0));
     this._cachedTooltip = null;
   }
-  createExtendedTooltip() {
-    return [
-      "🟨 -------------------- ⬜",
-      (this.ammoType === "none" ?
-        "🟥Not loaded"
-      : "🟨Shooting " + Registries.blocks.get(this.ammoType).name) + "⬜",
-      ...Weapon.infoOfShootPattern(this.shoot, this.bullets),
-      "🟨 -------------------- ⬜",
-    ];
-  }
 }
 
 class BlockLaunchedBullet extends PointBullet {

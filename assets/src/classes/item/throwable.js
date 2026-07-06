@@ -3,6 +3,7 @@ import { ui } from "../../core/ui.js";
 import { BulletModel } from "../projectile/bullet-model.js";
 import { Item } from "./item.js";
 class Throwable extends Item {
+  /** @type {BulletModel} */
   bullet = {};
   spread = 10;
   throwEffect = "none";
@@ -21,7 +22,7 @@ class Throwable extends Item {
     let offX = Math.cos(from.directionRad) * from.size,
       offY = Math.sin(from.directionRad) * from.size;
     from.emit(this.throwEffect, offX, offY);
-    this.bullet.instantiate(
+    this.bullet.emit(
       from.x + offX,
       from.y + offY,
       1,
@@ -31,6 +32,9 @@ class Throwable extends Item {
       from.world,
       from,
     );
+  }
+  createExtendedDetails() {
+    return `#=-Throwable:\n  #[00ffac]-${this.spread}°#-- inaccuracy\n  ${this.bullet.createInfo().replaceAll("\n", "\n  ").trim()}`;
   }
 }
 export { Throwable };

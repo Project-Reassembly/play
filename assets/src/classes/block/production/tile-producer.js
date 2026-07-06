@@ -1,4 +1,3 @@
-import { construct } from "../../../core/constructor.js";
 import * as MLF1 from "../../../core/mlf1.js";
 import { roundNum, tru } from "../../../core/number.js";
 import { Registries } from "../../../core/registry.js";
@@ -51,17 +50,19 @@ class TileProducer extends Factory {
       autoScaledEffect(this.tickEffect, this.world, this.x, this.y, this.direction);
   }
   stringifyRecipe() {
-    return (
-      `${this.results[this._blockOn] ?
-        `--> ${(Registries.items.has(this.results[this._blockOn]) ?
-          Registries.items.get(this.results[this._blockOn])
+    return `${
+      this.results[this._blockOn] ?
+        `--> ${
+          (Registries.items.has(this.results[this._blockOn]) ?
+            Registries.items.get(this.results[this._blockOn])
           : { name: "Unknown" }
-        )?.name} x${this.amount}`
-        : "No recipe"}\n${""
-          .padEnd((this._progress / this.duration) * 20, "■")
-          .padEnd(20, "□")
-          .substring(0, 20)} \nSpeed: ${roundNum((60 / this.duration) * this._speed, 2)}/s`
-    );
+          )?.name
+        } x${this.amount}`
+      : "No recipe"
+    }\n${""
+      .padEnd((this._progress / this.duration) * 20, "■")
+      .padEnd(20, "□")
+      .substring(0, 20)} \nSpeed: ${roundNum((60 / this.duration) * this._speed, 2)}/s`;
   }
   drawTooltip(x, y, outlineColour, backgroundColour) {
     super.drawTooltip(x, y, outlineColour, backgroundColour, true);
@@ -75,22 +76,15 @@ class TileProducer extends Factory {
       backgroundColour,
     );
   }
-  createExtendedTooltip() {
-    return [
-      "🟨 -------------------- ⬜",
-      "Allowed Floors:",
-      ...Object.keys(this.results)
-        .map((key) => ({ in: key, out: this.results[key] }))
-        .flatMap((res) => {
-          /**@type {Tile} */
-          let blk = construct(Registries.blocks.get(res.in), "tile");
-          return [
-            `  ${blk.name} ≈> ${Registries.items.get(res.out).name}${blk.drillSpeed !== 1 ? " (" + blk.drillSpeed + "× speed)" : ""}`,
-          ];
-        }),
-      "Base Production: " + roundNum(this.amount * (60 / this.duration), 1) + "/s",
-      "🟨 -------------------- ⬜",
-    ];
+  createExtendedDetails() {
+    return `${super.createExtendedDetails()}\n#=-Production:\n  #h-${roundNum(60 / this.duration, 2)}/s#-- base speed\n  ${Object.entries(
+      this.results,
+    )
+      .map(([input, result]) => {
+        const blk = Registries.tiles.tryGet(input);
+        return `#>>${blk?.image ?? "error"}#-- -> #>>${Registries.items.tryGet(result)?.image ?? "error"}#--${blk?.drillSpeed && blk.drillSpeed !== 1 ? ` (${blk.drillSpeed < 1 ? `#c--${roundNum((1 - blk.drillSpeed) * 100, 2)}` : `#a-+${roundNum((blk.drillSpeed - 1) * 100, 2)}`}%#-- speed)` : ""}`;
+      })
+      .join("\n  ")}`;
   }
 }
 export { TileProducer };

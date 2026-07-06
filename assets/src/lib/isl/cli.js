@@ -2,7 +2,6 @@
 //Why make a command line language when there's a perfectly good one right here?
 
 import { BreakType } from "../../classes/block/block.js";
-import { GroundTile } from "../../classes/block/ground-tile.js";
 import { EquippedEntity, InventoryEntity } from "../../classes/entity/inventory-entity.js";
 import { deliverEntity } from "../../classes/world/events/event-action.js";
 import { construct } from "../../core/constructor.js";
@@ -406,7 +405,6 @@ cle.addKeyword(
     try {
       /**@type {Integrate.Mod} */
       const m = await Integrate.add(`${url?.value}`);
-      GroundTile.reloadIDs();
       preload();
       console.log(m);
       feedback(`Successfully loaded '${m.displayName}: ${m.tagline}' (${m.name}) by ${m.author}!`);
@@ -453,6 +451,19 @@ cle.addKeyword(
       });
   },
   [{ type: "string|identifier", name: "mod" }],
+);
+cle.addKeyword(
+  "mod-list",
+  async (interp, labels) => {
+    feedback(`Listing all loaded mods and their IDs:`);
+    if(mods.size > 0)
+    mods.forEach((mod, id) => {
+      s(` #@b${mod.displayName}#-- (#n-${id}#--) #i-${mod.version}#--`);
+    });
+    else 
+      s(` #7-No mods to show.`);
+  },
+  [],
 );
 
 cle.addLabel("general", ["help"]);
@@ -530,7 +541,9 @@ cle.addKeyword(
       );
       s(` Evaluation is left-to-right.`);
       s("#@-Created Entity Selectors");
-      s(` Replacing the #6-@#-- with a #6-\\##-- selects from only ISL-created entities, instead of all entities in the whole world.`);
+      s(
+        ` Replacing the #6-@#-- with a #6-\\##-- selects from only ISL-created entities, instead of all entities in the whole world.`,
+      );
     } else {
       if (!command) {
         s("Run [#3-help #7i<command>#--] to get help for a command");
@@ -680,7 +693,7 @@ cle.addKeyword(
       } else if (command === "mod") {
         s("#eimodifications #-->#3- mod");
         s(" Loads and implements an Integrate mod from the Internet, then reloads");
-        s(" game resources.")
+        s(" game resources.");
         s(" May cause lag if a large mod is loaded, so runs #-iasynchronously#--.");
         s("#@-Parameters:");
         s("  #6-<url>#--: The URL to fetch the mod from.");

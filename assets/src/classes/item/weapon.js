@@ -1,4 +1,5 @@
 import { constructFromType } from "../../core/constructor.js";
+import { roundNum } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { autoScaledEffect } from "../../play/effects.js";
 import { WeaponComponent } from "../entity/entity-part.js";
@@ -203,6 +204,30 @@ class Weapon extends Equippable {
         .padEnd(15, "□")
         .substring(0, 15);
   }
+  createExtendedDetails() {
+    let s = `#=-Main Fire:\n${infoOfShootPattern(this.shoot, this.bullets, this.ammoUse)}`;
+    if (this.hasAltFire) {
+      s += `\n#=-Alternate Fire:\n${infoOfShootPattern(this.altShoot, this.altBullets, this.ammoUse)}`;
+    }
+    return s;
+  }
+}
+/**
+ *
+ * @param {WeaponShootConfiguration} shoot
+ * @param {WeaponBulletConfiguration} bullets
+ */
+export function infoOfShootPattern(shoot, bullets, usage = 1) {
+  let s = ` #[00ffac]-${roundNum((60 / (shoot.reload + shoot.charge)) * shoot.pattern.amount * shoot.pattern.burst, 2)}#-- shots/sec\n`;
+  if (shoot.pattern.spacing || shoot.pattern.spread)
+    s += ` #[00ffac]-${roundNum(shoot.pattern.spacing * shoot.pattern.amount + shoot.pattern.spread, 2)}°#-- inaccuracy\n`;
+  if (shoot.charge) s += ` #[00ffac]-${roundNum(shoot.charge / 60, 2)}s#-- charge-up\n`;
+
+  for (const ammo in bullets.ammos) {
+    const i = Registries.items.tryGet(ammo);
+    s += ` #=-[${i?.image ? `#>>${i.image}` : "⚡"}#=-${i?.name ?? "Energy"} ${usage > 1 ? `x${usage}` : ""}#=-]\n #=-| ${bullets.getAmmo(ammo).createInfo().replaceAll("\n", "\n #=-| ").trim()}\n`;
+  }
+  return s;
 }
 
 function entityHasAmmo(ent, ammoItem, ammoAmount) {

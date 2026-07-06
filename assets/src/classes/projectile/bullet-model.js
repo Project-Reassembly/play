@@ -1,6 +1,13 @@
-import { rnd } from "../../core/number.js";
+import { rnd, roundNum } from "../../core/number.js";
 import { Model } from "../component-model/model.js";
-import { BulletComponent, DisableDefaultVFXComponent, ExpiryVFXComponent, ExplosionComponent, MovementComponent } from "./bullet-components.js";
+import {
+  BulletComponent,
+  DisableDefaultVFXComponent,
+  ExpiryVFXComponent,
+  ExplosionComponent,
+  ExtraUpdatesComponent,
+  MovementComponent,
+} from "./bullet-components.js";
 import { BulletInstance } from "./bullet.js";
 
 /** @extends {Model<BulletComponent, BulletInstance>} */
@@ -43,7 +50,7 @@ export class BulletModel extends Model {
     world,
     entity,
     speedMultMin = 1,
-    speedMultMax = 1
+    speedMultMax = 1,
   ) {
     //Max difference in direction
     const diff = (spacing * (amount - 1)) / 2;
@@ -82,5 +89,20 @@ export class BulletModel extends Model {
       result[index] = bullet;
     }
     return result;
+  }
+
+  createInfo() {
+    let div = this.has(ExtraUpdatesComponent) ? this.get(ExtraUpdatesComponent).amount + 1 : 1;
+    let s =
+      div >= this.lifetime ?
+        this.has(MovementComponent) ?
+          ""
+        : "#l-Instant\n"
+      : `#l-${roundNum(this.lifetime / (60 * div), 2)}s#-- lifetime\n`;
+    for (const comp of this.all()) {
+      const i = comp.getInfo(this);
+      if (i) s += i + "\n";
+    }
+    return s.trim();
   }
 }

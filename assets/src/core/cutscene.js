@@ -79,10 +79,10 @@ export class CutsceneHandler {
         let ld = this.lineDuration - this.ticks;
         if (this.ticks <= 30) {
           fill(0, 255 - 8.5 * this.ticks);
-          rect(0, 0, 1920, 1080);
+          rect(0, 0, 1920, 880);
         } else if (ld <= 30) {
           fill(0, 255 - 8.5 * ld);
-          rect(0, 0, 1920, 1080);
+          rect(0, 0, 1920, 880);
         }
       }
       if (--this.ticks <= 0) this.drawer = null;

@@ -8,7 +8,7 @@ import { WeaponComponent } from "../../entity/entity-part.js";
 import { Entity } from "../../entity/entity.js";
 import { DroppedItemStack } from "../../item/dropped-itemstack.js";
 import { WeaponBulletConfiguration, WeaponShootConfiguration } from "../../item/weapon-exts.js";
-import { Weapon } from "../../item/weapon.js";
+import { infoOfShootPattern } from "../../item/weapon.js";
 import { PhysicalObject, ShootableObject } from "../../physical.js";
 import { Timer } from "../../timer.js";
 import { Container } from "../container.js";
@@ -211,13 +211,8 @@ class Turret extends Container {
         .padEnd(15, "□")
         .substring(0, 15);
   }
-  createExtendedTooltip() {
-    return [
-      "🟨 -------------------- ⬜",
-      this.inventorySize + " ammo slots",
-      ...Weapon.infoOfShootPattern(this.shoot, this.bullets),
-      "🟨 -------------------- ⬜",
-    ];
+  createExtendedDetails() {
+    return `#=-Inventory:\n  #d-${this.inventorySize}#-- ammo slots\n#=-Attack:\n${infoOfShootPattern(this.shoot, this.bullets, this.ammoUse)}`;
   }
   postDraw() {
     super.postDraw();

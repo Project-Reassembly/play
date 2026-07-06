@@ -31,7 +31,7 @@ declare namespace Integrate {
      * @param {string} [name=""] Registry name to get. Not case sensitive.
      * @returns {Unconstructed<T>?} The item, if present.
      */
-    tryGet(name?: string): Unconstructed<T> | null;
+    tryGet(name?: string): Unconstructed<T>?;
     /**
      * Gets an item from registry name.
      * @param {string} [name=""] Registry name to get. Not case sensitive.

@@ -2,6 +2,7 @@ import { col } from "../../../core/color.js";
 import { construct, constructFromType } from "../../../core/constructor.js";
 import * as MLF1 from "../../../core/mlf1.js";
 import { turn, Vector } from "../../../core/number.js";
+import { Registries } from "../../../core/registry.js";
 import { drawImg, rotatedImg } from "../../../core/ui.js";
 import { debug } from "../../../play/debug.js";
 import { autoScaledEffect } from "../../../play/effects.js";
@@ -14,7 +15,7 @@ import { Inventory } from "../../inventory.js";
 import { DroppedItemStack } from "../../item/dropped-itemstack.js";
 import { Item } from "../../item/item.js";
 import { WeaponBulletConfiguration, WeaponShootConfiguration } from "../../item/weapon-exts.js";
-import { Weapon } from "../../item/weapon.js";
+import { infoOfShootPattern } from "../../item/weapon.js";
 import { PhysicalObject, ShootableObject } from "../../physical.js";
 import { Timer } from "../../timer.js";
 import { Container } from "../container.js";
@@ -89,8 +90,8 @@ export class TurretBase extends Container {
     let blk = this.world.getBlock(this.gridX + x, this.gridY + y, "blocks");
     return blk?.registryName === this.registryName || blk?.registryName === this.otherPart;
   }
-  createExtendedTooltip() {
-    return [];
+  createExtendedDetails() {
+    return `#=-Building:#--\n  Controller is #>>${Registries.blocks.tryGet(this.otherPart)?.image ?? "error"}#e-${Registries.blocks.tryGet(this.otherPart)?.name ?? this.otherPart}#--`;
   }
 }
 
@@ -192,13 +193,8 @@ export class TurretController extends TurretBase {
     super.applyExtraProps(deserialised, creator);
     deserialised.turretinv = Inventory.deserialise(creator.turretinv);
   }
-  createExtendedTooltip() {
-    return [
-      "🟨 -------------------- ⬜",
-      this.inventorySize + " ammo slots",
-      this.maxSize + " maximum cross radius",
-      "🟨 -------------------- ⬜",
-    ];
+  createExtendedDetails() {
+    return `#=-Inventory:\n  #d-${this.inventorySize}#-- ammo slots\n#=-Building:\n  #e-${this.maxSize}#-- maximum cross radius\n  Base block is #>>${Registries.blocks.tryGet(this.otherPart)?.image??"error"}#e-${Registries.blocks.tryGet(this.otherPart)?.name ?? this.otherPart}#--`;
   }
   drawTooltip(x, y, outlineColour, backgroundColour, forceVReverse = false) {
     super.drawTooltip(x, y, outlineColour, backgroundColour, forceVReverse);
@@ -546,11 +542,7 @@ export class TurretItem extends Item {
         .padEnd(15, "□")
         .substring(0, 15);
   }
-  createExtendedTooltip() {
-    return [
-      "🟨 -------------------- ⬜",
-      ...Weapon.infoOfShootPattern(this.shoot, this.bullets),
-      "🟨 -------------------- ⬜",
-    ];
+  createExtendedDetails() {
+    return `#=-Attack:\n${infoOfShootPattern(this.shoot, this.bullets, this.ammoUse)}`;
   }
 }

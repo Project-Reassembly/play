@@ -1,6 +1,6 @@
 import { Item } from "../classes/item/item.js";
 import { Registries } from "../core/registry.js";
-Registries.items.add("nothing", {});
+Registries.items.add("nothing", { hidden: true });
 //Materials
 Registries.items.add("scrap", {
   name: "Scrap Metal",
@@ -364,7 +364,7 @@ Registries.items.add("scrap-launcher", {
         components: [
           { type: "movement", speed: 0, maxSpeed: 3, decel: -0.01 },
           { type: "extra-updates", amount: 10 },
-          { type: "vfx-trail", effect: "burning", interval: 10 },
+          { type: "vfx-trail", effect: "burning" },
           { type: "damage", amount: 8, damageType: "ballistic", spread: 4 },
           { type: "explosion", damage: 45, spread: 10, radius: 60 },
           { type: "knockback", amount: 5 },
@@ -927,60 +927,6 @@ Registries.items.add("scrap-artillery", {
   bullets: {
     types: [
       {
-        lifetime: 0,
-        components: [
-          {
-            type: "frag-bullet",
-            fragNumber: 3,
-            spread: 5,
-            spacing: 5,
-            bullet: {
-              light: 30,
-              hitSize: 10,
-              lifetime: 52,
-              components: [
-                { type: "movement", speed: 10, decel: 0.1 },
-                { type: "extra-updates", amount: 2 },
-                {
-                  type: "trail",
-                  life: 45,
-                  shape: "rhombus",
-                  width: 10,
-                  colours: [
-                    [200, 200, 200, 50],
-                    [50, 50, 50, 0],
-                  ],
-                },
-                { type: "shape-drawer", shape: "rhombus", fill: "#cd9f8b", width: 28, height: 12 },
-                { type: "explosion", damageType: "ballistic", damage: 75, radius: 20 },
-                {
-                  type: "frag-bullet",
-                  spacing: 4,
-                  number: 4,
-                  spread: 1,
-                  bullet: {
-                    lifetime: 24,
-                    hitSize: 2.5,
-                    components: [
-                      { type: "movement", speed: 8, decel: 0.1 },
-                      { type: "trail", colours: [[70, 70, 70, 100]] },
-                      { type: "damage", amount: 10, damageType: "ballistic", spread: 3 },
-                      {
-                        type: "shape-drawer",
-                        shape: "rhombus",
-                        fill: "#cd9f8b",
-                        width: 8,
-                        height: 4,
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-      {
         lifetime: 72,
         hitSize: 10,
         light: 30,
@@ -1038,7 +984,7 @@ Registries.items.add("scrap-artillery", {
             ],
           },
           { type: "shape-drawer", shape: "rhombus", fill: [255, 188, 153], width: 28, height: 12 },
-          { type: "damage-pierce", damageType: "ballistic", damage: 320, radius: 30 },
+          { type: "damage-pierce", damageType: "ballistic", amount: 320 },
           { type: "expiry-vfx", effect: "explosion~60" },
         ],
       },
@@ -1061,12 +1007,12 @@ Registries.items.add("scrap-artillery", {
             ],
           },
           { type: "shape-drawer", shape: "rhombus", fill: [255, 188, 153], width: 28, height: 12 },
-          { type: "damage-pierce", damageType: "ballistic", damage: 360, radius: 30 },
+          { type: "damage-pierce", damageType: "ballistic", amount: 360 },
           { type: "expiry-vfx", effect: "explosion~60" },
         ],
       },
     ],
-    ammos: { "iron-ingot": 3, "copper-ingot": 2, "scrap": 1, "stone": 0 },
+    ammos: { "iron-ingot": 2, "copper-ingot": 1, "scrap": 0 },
   },
   shoot: { effect: "tonk-shoot", reload: 180, pattern: { spread: 2 } },
   component: {
@@ -1132,6 +1078,7 @@ Registries.items.add("deathbringer-turret", {
     rotationalRecoil: 0,
     recoilSpeed: 0.2,
   },
+  hidden: true,
 });
 //Ammo
 Registries.items.add("scrap-bullet", {
@@ -1158,7 +1105,7 @@ Registries.items.add("iti-energy-cell", {
   image: "item.iti-energy-cell",
   corp: "iti",
   stackSize: 200,
-  attributeModifiers: { "speed": 1.1, "fire-rate": 1.2, "health": 0.7 },
+  hidden: true,
 });
 Registries.items.add("iti-plasma-cell", {
   name: "Plasma Cell",
@@ -1168,6 +1115,7 @@ Registries.items.add("iti-plasma-cell", {
   image: "item.iti-plasma-cell",
   corp: "iti",
   stackSize: 200,
+  hidden: true,
 });
 Registries.items.add("iti-destabilised-cell", {
   name: "#c*Destabilised#@b Energy Cell",
@@ -1176,4 +1124,5 @@ Registries.items.add("iti-destabilised-cell", {
   image: "item.iti-destabilised-cell",
   corp: "iti",
   stackSize: 200,
+  hidden: true,
 });

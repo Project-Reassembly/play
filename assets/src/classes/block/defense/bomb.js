@@ -34,13 +34,7 @@ class Bomb extends Block {
   draw() {
     if (game.player.team === this.team) super.draw();
     else
-      drawImg(
-        this.hiddenImg,
-        this.x,
-        this.y,
-        this.tileSize * blockSize,
-        this.tileSize * blockSize
-      );
+      drawImg(this.hiddenImg, this.x, this.y, this.tileSize * blockSize, this.tileSize * blockSize);
   }
   interaction(ent, item) {
     if (keyIsDown(SHIFT)) {
@@ -56,13 +50,11 @@ class Bomb extends Block {
       this.wasActivated = true; // stop recursive death
       this.health = 0;
       let detdelay =
-        (this.detonationDelay + (this.accelerable ? rnd.float(-this.delaySpread, this.delaySpread) : 0)) *
+        (this.detonationDelay +
+          (this.accelerable ? rnd.float(-this.delaySpread, this.delaySpread) : 0)) *
         (this.accelerable && this.#wasAccelerated ? 0.6 : 1);
       this._healthbarShowTime = 0;
-      this.#detTimer.repeat(
-        () => this.emit(this.fuseEffect),
-        detdelay,
-      );
+      this.#detTimer.repeat(() => this.emit(this.fuseEffect), detdelay);
       this.#detTimer.do(() => this._explode(), detdelay);
     }
   }
@@ -108,23 +100,16 @@ class Bomb extends Block {
     }
     return super.break(type);
   }
-  createExtendedTooltip() {
-    return [
-      "🟨 -------------------- ⬜",
-      "Explosion:",
-      `  ${roundNum((this.explosion.radius ?? 0) / 30, 1)} blocks range`,
-      `  ${this.explosion.amount ?? 0}${this.explosion.type ?? " explosion"} damage`,
-      `  ${roundNum(this.explosion.knockback ?? (this.explosion.amount ?? 0) ** 0.5, 1)} knockback`,
-      `  ${this.explosion.status ?
-        `🟨${Registries.statuses.get(this.explosion.status).name} for ${roundNum((this.explosion.statusDuration ?? 0) / 60, 1)}s⬜`
-        : ""}`,
+  createExtendedDetails() {
+    return `#=-Explosion:\n  #e-${roundNum((this.explosion.radius ?? 0) / 30, 1)}#-- tiles range\n  #c-${this.explosion.amount ?? 0}${this.explosion.type ?? " explosion"}#-- damage${
+      this.explosion.status ?
+        `\n  Inflicts #a-${Registries.statuses.get(this.explosion.status).name}#-- for #a-${roundNum((this.explosion.statusDuration ?? 0) / 60, 1)}s`
+      : ""
+    }\n#=-Detonation:\n  ${
       this.autoDetonationRange > 0 ?
-        `🟨${roundNum(this.autoDetonationRange / 30, 1)} blocks detection range⬜`
-      : "",
-      `${roundNum(this.detonationDelay / 60, 1)}s fuse${this.accelerable ? " (±" + roundNum(this.delaySpread / 60, 1) + "s)" : " (exactly)"}`,
-      this.volatile ? "🟥volatile⬜" : "",
-      "🟨 -------------------- ⬜",
-    ];
+        `#d-${roundNum(this.autoDetonationRange / 30, 1)}#-- tiles enemy detection range`
+      : "#d-Manual detonation#-- only"
+    }\n  #6-${roundNum(this.detonationDelay / 60, 1)}s#-- fuse`;
   }
 }
 class NuclearBomb extends Bomb {
@@ -158,16 +143,18 @@ class NuclearBomb extends Bomb {
       `  ${this.explosion.amount ?? 0} total${this.explosion.type ?? " explosion"} damage`,
       `  ${roundNum(
         this.explosion.knockback ??
-        (((this.explosion.amount ?? 0) / ((this.explosion.radius ?? 0) / 4.5)) * 10) ** 0.5,
-        1
+          (((this.explosion.amount ?? 0) / ((this.explosion.radius ?? 0) / 4.5)) * 10) ** 0.5,
+        1,
       )} knockback per tick`,
-      `  ${this.explosion.status ?
-        "🟨" +
-        Registries.statuses.get(this.explosion.status).name +
-        " for " +
-        roundNum((this.explosion.statusDuration ?? 0) / 60, 1) +
-        "s⬜"
-        : ""}`,
+      `  ${
+        this.explosion.status ?
+          "🟨" +
+          Registries.statuses.get(this.explosion.status).name +
+          " for " +
+          roundNum((this.explosion.statusDuration ?? 0) / 60, 1) +
+          "s⬜"
+        : ""
+      }`,
       `  ${roundNum((this.explosion.radius ?? 0) / 4.5 / 6, 1)}s duration`,
       this.autoDetonationRange > 0 ?
         `🟨${roundNum(this.autoDetonationRange / 30, 1)} blocks detection range⬜`

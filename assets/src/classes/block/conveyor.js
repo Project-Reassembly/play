@@ -23,9 +23,8 @@ class Conveyor extends Block {
     super.tick();
     if (!this.istack || this.istack.isEmpty()) return;
     let vct = Direction.vectorOf(this.direction);
-    let target =
-      this.world.getBlock(this.gridX + vct.x, this.gridY + vct.y);// ??
-      // this.world.getBlock(this.gridX + vct.x * 2 ** 0.5, this.gridY + vct.y * 2 ** 0.5);
+    let target = this.world.getBlock(this.gridX + vct.x, this.gridY + vct.y); // ??
+    // this.world.getBlock(this.gridX + vct.x * 2 ** 0.5, this.gridY + vct.y * 2 ** 0.5);
     this.convey(target, this.gridX + vct.x, this.gridY + vct.y);
   }
   convey(target, posX, posY) {
@@ -73,13 +72,13 @@ class Conveyor extends Block {
     let amt = this._progress / this.moveTime;
     if (this.istack && !this.istack.isEmpty()) {
       // if (this.shape === "straight")
-        drawImg(
-          this.istack.getItem().image,
-          this.x + vct.x * (amt - 0.5) * blockSize,
-          this.y + vct.y * (amt - 0.5) * blockSize,
-          20,
-          20,
-        );
+      drawImg(
+        this.istack.getItem().image,
+        this.x + vct.x * (amt - 0.5) * blockSize,
+        this.y + vct.y * (amt - 0.5) * blockSize,
+        20,
+        20,
+      );
     }
     super.postDraw();
   }
@@ -98,12 +97,8 @@ class Conveyor extends Block {
   read() {
     return this.istack.item;
   }
-  createExtendedTooltip() {
-    return [
-      "🟨 -------------------- ⬜",
-      roundNum(60 / this.moveTime, 1) + " items/s",
-      "🟨 -------------------- ⬜",
-    ];
+  createExtendedDetails() {
+    return `#=-Throughput:\n  #h-${roundNum(60 / this.moveTime, 2)}#-- items/s`;
   }
   serialise() {
     let b = super.serialise();

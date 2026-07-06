@@ -21,6 +21,7 @@ import { constructDelayed, PreloadRegistries, Registries } from "../core/registr
 import { Serialiser } from "../core/serialiser.js";
 import { ImageContainer, rotatedShape, ui, UIComponent } from "../core/ui.js";
 import "../definitions/screens/any.js";
+import "../definitions/screens/database.js";
 import "../definitions/screens/in-game.js";
 import {
   selectors as createCorporationSelectors,
@@ -41,6 +42,7 @@ import { Log } from "./messaging.js";
 import { GroundTile } from "../classes/block/ground-tile.js";
 import { BulletModel } from "../classes/projectile/bullet-model.js";
 import { deliverPlayer } from "../classes/world/events/event-action.js";
+import { updateItemCollections } from "../definitions/screens/database.js";
 import "../definitions/screens/ide.js";
 import { capturedInput, tcursor } from "../definitions/screens/ide.js";
 let histIndex = 0;
@@ -668,6 +670,7 @@ function sizeKB(string) {
 }
 globalThis.preload = async function () {
   GroundTile.reloadIDs();
+  updateItemCollections();
 
   loadStats.images = 0;
   loadStats.cutscenes = 0;
@@ -783,11 +786,11 @@ window.draw = function () {
     errored = true;
     console.error("caught:\n", error);
     Log.send("#4-Project: Reassembly has encountered an error:");
-    Log.send(`#4-   [${error.constructor.name}] ${error.message}`);
+    Log.send(`#4-   [${error.constructor.name}] ${error.message.replaceAll("#", "\\#")}`);
     error.stack
       .split("\n")
       .slice(1)
-      .forEach((el) => Log.send("#4-  " + el));
+      .forEach((el) => Log.send("#4-  " + el.replaceAll("#", "\\#")));
     Log.send("#4-Press [Space] to continue");
     //addEventListener("keydown", fixError);
     noLoop();
@@ -1413,7 +1416,12 @@ function openCommandLine() {
   ui.texteditor.isCommandLine = true;
   ui.texteditor.save = (command) => {
     if (command.startsWith("/")) command = command.substring(1);
-    exec(command, new ExecutionContext(game.player.x, game.player.y, game.player));
+    exec(
+      command,
+      game.player ?
+        new ExecutionContext(game.player.x, game.player.y, game.player)
+      : new ExecutionContext(0, 0, null),
+    );
     cmdHistory.unshift(command);
     histIndex = -1;
   };

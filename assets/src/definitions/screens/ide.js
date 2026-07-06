@@ -2,7 +2,7 @@ import { EntityScripter } from "../../classes/entity/ai/scripter.js";
 import { col } from "../../core/color.js";
 import { createCMFTComponent, createUIComponent } from "../../core/ui.js";
 
-createUIComponent(["ide"], [], -300, 0, 1250, 1050)
+createUIComponent(["ide"], [], -200, 0, 1250, 1050)
   .setOutlineColour(col.mono(60))
   .setBackgroundColour(col.accent);
 
@@ -75,7 +75,7 @@ function write(line, col, string, ovr = true) {
 }
 globalThis.write = write;
 
-createCMFTComponent(["ide"], [], -300, 0, 1200, 1000, "none", () => {
+createCMFTComponent(["ide"], [], -200, 0, 1200, 1000, "none", () => {
   tcursor.active = !tcursor.active;
 })
   .setOutlineColour(col.mono(60))

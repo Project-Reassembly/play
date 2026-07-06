@@ -1,4 +1,5 @@
 [
   { "path": "./wall.json", "registry": "blocks", "name": "supreme-tungsten-wall" },
+  { "path": "./wall-item.json", "registry": "items", "name": "supreme-tungsten-wall" },
   { "path": "./stwimg.json", "registry": "images", "name": "imagerepo" }
 ]

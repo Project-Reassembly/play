@@ -4,6 +4,7 @@ import { Registries } from "../core/registry.js";
 
 Registries.corps.add("scrap", {
   name: "United Recyclers of Our World",
+  alias: "URoW",
   color: col.white,
   icon: "icon.scrap",
   description:
@@ -14,6 +15,7 @@ Registries.corps.add("scrap", {
 
 Registries.corps.add("iti", {
   name: "InfiniTech Industries",
+  alias: "ITI",
   color: Decoration.colours.i,
   icon: "icon.iti",
   description:
@@ -23,6 +25,7 @@ Registries.corps.add("iti", {
 
 Registries.corps.add("ccc", {
   name: "Chronological Creations Corporation",
+  alias: "3C",
   color: Decoration.colours.h,
   icon: "icon.ccc",
   description:
@@ -34,6 +37,7 @@ Registries.corps.add("ccc", {
 
 Registries.corps.add("peti", {
   name: "Prototypical and Experimental Technologies Institution",
+  alias: "PETI",
   color: Decoration.colours.p,
   icon: "icon.peti",
   description:
