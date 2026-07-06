@@ -17,7 +17,7 @@ import {
 } from "../../core/ui.js";
 import { game, gen, world } from "../../play/game.js";
 import { Log } from "../../play/messaging.js";
-import { totalSize } from "../../scaling.js";
+import { Direction, totalSize } from "../../scaling.js";
 
 //##############################################################
 
@@ -217,11 +217,17 @@ createUIImageComponent(
 createUIComponent(["in-game"], ["mode:build"], -420, 0, 80, 50, "both", () => {
   selectedDirection =
     keyIsDown(SHIFT) ?
-      Block.direction.rotateAntiClockwise(selectedDirection)
-    : Block.direction.rotateClockwise(selectedDirection);
+      Direction.rotateAntiClockwise(selectedDirection)
+    : Direction.rotateClockwise(selectedDirection);
 }).anchorBottom();
 
-export let selectedDirection = Block.direction.UP;
+export let selectedDirection = Direction.UP;
+export function rotateSelCW() {
+  selectedDirection = Direction.rotateClockwise(selectedDirection);
+}
+export function rotateSelACW() {
+  selectedDirection = Direction.rotateAntiClockwise(selectedDirection);
+}
 
 createUIImageComponent(["in-game"], ["mode:build"], -420, 0, 50, 50, null, "icon.arrow", false, 0.5)
   .anchorBottom()

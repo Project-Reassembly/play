@@ -583,7 +583,7 @@ createLinkedBlockAndItem(
 createLinkedBlockAndItem(
   "scrap-storage",
   "Scrap Storage Unit",
-  "base.scrap.smooth",
+  "storage.scrap",
   { title: "Scrap Storage Unit", type: "container", inventorySize: 12 },
   { description: "A small box for item storage.", marketValue: 30 },
 );

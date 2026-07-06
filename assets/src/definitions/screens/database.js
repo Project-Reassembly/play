@@ -101,6 +101,46 @@ export function refreshDatabaseUI() {
 // and also the actual database info
 // remember the new cmft features
 
+// BACK
+ui.addReset("is-in-game-database", "false");
+createUIComponent(
+  ["database"],
+  ["is-in-game-database:false"],
+  -880,
+  -500,
+  120,
+  40,
+  "none",
+  () => {
+    ui.menuState = "title";
+    ui.reset();
+  },
+  "< Back  ",
+  true,
+  15,
+)
+  .setBackgroundColour(col.black)
+  .setTextColour(col.accent)
+  .setOutlineColour(col.accent);
+createUIComponent(
+  ["database"],
+  ["is-in-game-database:true"],
+  -880,
+  -500,
+  120,
+  40,
+  "none",
+  () => {
+    ui.menuState = "in-game";
+  },
+  "< Back  ",
+  true,
+  15,
+)
+  .setBackgroundColour(col.black)
+  .setTextColour(col.accent)
+  .setOutlineColour(col.accent);
+
 // COLLECTION SELECTOR
 ui.addReset("selected-collection", "*");
 createUIComponent(["database"], [], 675, -300, 500, 300, "none")
@@ -151,7 +191,7 @@ function resetCollectionSelectors() {
           this.setOutlineColour(col.accent);
           resetItemSelectors();
         },
-        name === "" ? "icon.cross" : Corporation.iconof(name),
+        name === "" ? "icon.interaction" : Corporation.iconof(name),
       )
         .setBackgroundColour(col.black)
         .setOutlineColour(col.accent),
@@ -240,6 +280,26 @@ function resetItemSelectors() {
     }
   }
   pages = page;
+}
+
+export function selectItem(iname) {
+  const def = Registries.items.get(iname);
+  UIComponent.setCondition("selected-item", iname);
+  isels.forEach((s) => s.setOutlineColour(col.mono(60)));
+  const corp = def?.corp ?? "";
+  updateDescrPanels(
+    def?.name ?? iname,
+    corp,
+    Corporation.colorof(corp) || Item.getColourFromRarity(def?.rarity ?? 0),
+    def?.image ?? "error",
+    construct(def, "item"),
+    def,
+  );
+}
+export function deselectItem() {
+  UIComponent.setCondition("selected-item", "");
+  isels.forEach((s) => s.setOutlineColour(col.mono(60)));
+  updateDescrPanels();
 }
 createUIComponent(["database"], [], 675, 420, 0, 0, "none", null, "", true, 30)
   .define("text", () => `Page ${+ui.conditions["item-database-page"] + 1}/${pages + 1}`)
@@ -402,10 +462,12 @@ ${corp ? `#=-Manufacturer:#-- #[${Corporation.colorof(item.corp)}]-${Corporation
 #r-Image Name:#-- ${image}`;
 
   c_desc.text =
-    "#=bDescription#=-\n-----------------------------------------------\n#--" +
-      uncon.description ?? "<no description provided>";
+    "#=bDescription#=-\n-----------------------------------------------\n#--" + uncon.description ??
+    "<no description provided>";
   c_ext.text =
     "#ibExtended Details#i-\n-----------------------------------------------\n#--" +
     (item.createExtendedDetails() || "<no additional information provided>");
 }
 updateDescrPanels();
+
+globalThis.discoverall = () => discovered.discover(...discoverable.all);

@@ -4,7 +4,7 @@ ui.addReset("debugging:false");
 
 ui.reset();
 createUIComponent(
-  ["new-game", "ide", "database"],
+  ["new-game", "ide"],
   [],
   -880,
   -500,

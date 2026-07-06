@@ -4,7 +4,8 @@ import { construct, constructFromType } from "../core/constructor.js";
 import { dynamicSort, shortenedNumber, tru } from "../core/number.js";
 import { lookup, Registries } from "../core/registry.js";
 import { drawImg, ui } from "../core/ui.js";
-import { fonts } from "../play/game.js";
+// import { discoverable, discovered, notDiscoveredTooltip } from "../definitions/screens/database.js";
+import { fonts } from "../play/font.js";
 import { Corporation } from "./item/corporation.js";
 import { DroppedItemStack } from "./item/dropped-itemstack.js";
 import { Item } from "./item/item.js";
@@ -226,7 +227,7 @@ class Inventory {
     let found = 0;
     this.iterate((slotContent, slot) => {
       if (excludedSlots && excludedSlots.includes(slot)) return;
-      found += ((slotContent.getItem()?.marketValue || 0) * slotContent.count) || 0;
+      found += (slotContent.getItem()?.marketValue || 0) * slotContent.count || 0;
     }, true);
     return found || 0;
   }
@@ -381,7 +382,7 @@ class Inventory {
     cols = null,
     itemSize = 40,
     outlineColour = col.mono(50),
-    backgroundColour = col.from(95,100,100,160),
+    backgroundColour = col.from(95, 100, 100, 160),
     reverseVertical = false,
   ) {
     push();
@@ -558,7 +559,7 @@ class Inventory {
       pop();
     }
   }
-  static drawTooltip(outlineColour = col.mono(50), backgroundColour = col.from(95,100,100,160)) {
+  static drawTooltip(outlineColour = col.mono(50), backgroundColour = col.from(95, 100, 100, 160)) {
     if (!this?.tooltip?.item) return;
 
     // let itt = this.tooltip.item.getInformativeTooltip();
@@ -593,7 +594,7 @@ class Inventory {
       ui.mouse.y + 10,
       undefined,
       Corporation.colorof(this.tooltip.item.corp) ||
-      Item.getColourFromRarity(this.tooltip.item.rarity, "light"),
+        Item.getColourFromRarity(this.tooltip.item.rarity, "light"),
     );
 
     //this.tooltip.item.tooltip.draw(ui.mouse.x + 10, ui.mouse.y + 30);
@@ -645,7 +646,7 @@ class Inventory {
   }
 }
 
-globalThis.inv = i => Inventory.deserialise({ storage: i, size: i.length });
+globalThis.inv = (i) => Inventory.deserialise({ storage: i, size: i.length });
 
 export { Inventory };
 

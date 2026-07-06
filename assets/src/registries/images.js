@@ -144,6 +144,8 @@ add("base.copper", "assets/textures/block/blocks/copper-block-base.png")
 add("base.iron", "assets/textures/block/blocks/iron-block-base.png")
 add("base.titanium", "assets/textures/block/blocks/titanium-block-base.png")
 add("base.tungsten", "assets/textures/block/blocks/tungsten-block-base.png")
+//Blocks > Storage
+add("storage.scrap", "assets/textures/block/blocks/containers/scrap-storage.png")
 //Blocks > Dev
 add("block.dev.structurereader", "assets/textures/block/blocks/dev/structure-reader.png")
 add("block.dev.itemcatalog", "assets/textures/block/blocks/dev/item-catalog.png")

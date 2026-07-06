@@ -33,7 +33,7 @@ export class LaunchPad extends Container {
         lifetime: 360,
         collides: false,
         components: [
-          { type: "vfx-trail", effect: this.trail, spacing: "timed" },
+          { type: "vfx-trail", effect: this.trail },
           { type: "movement", speed: 0, decel: -0.05 },
         ],
       },
@@ -117,7 +117,7 @@ export class LandingPad extends Container {
         lifetime: 390,
         collides: false,
         components: [
-          { type: "vfx-trail", effect: this.trail, spacing: "timed" },
+          { type: "vfx-trail", effect: this.trail },
           { type: "movement", speed: 18, decel: 0.05 },
           { type: "expiry-vfx", effect: "land-effect" },
         ],

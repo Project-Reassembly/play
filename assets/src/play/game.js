@@ -42,9 +42,17 @@ import { Log } from "./messaging.js";
 import { GroundTile } from "../classes/block/ground-tile.js";
 import { BulletModel } from "../classes/projectile/bullet-model.js";
 import { deliverPlayer } from "../classes/world/events/event-action.js";
-import { updateItemCollections } from "../definitions/screens/database.js";
+import {
+  deselectItem,
+  discoverable,
+  discovered,
+  refreshDatabaseUI,
+  selectItem,
+  updateItemCollections,
+} from "../definitions/screens/database.js";
 import "../definitions/screens/ide.js";
 import { capturedInput, tcursor } from "../definitions/screens/ide.js";
+import { rotateSelACW, rotateSelCW, selectedDirection } from "../definitions/screens/in-game.js";
 let histIndex = 0;
 const game = {
   saveslot: 1,
@@ -1015,6 +1023,8 @@ function gameFrame() {
   rect(...borders());
   pop();
 
+  drawInGameMousePreview();
+
   pop();
 }
 
@@ -1152,6 +1162,17 @@ function createPlayer(player = null, x, y, playerType = "iti-player") {
     get: () => game.mouse, //This way, I only have to set it once.
   });
 }
+function drawInGameMousePreview() {
+  if (!Inventory.mouseItemStack.isEmpty()) {
+    const i = Inventory.mouseItemStack.getItem();
+    if (i instanceof PlaceableItem)
+      i.drawPreviewImage(
+        game.mouse.blockX * blockSize,
+        game.mouse.blockY * blockSize,
+        +selectedDirection,
+      );
+  }
+}
 function mouseInteraction() {
   if (
     ui.menuState === "in-game" &&
@@ -1238,6 +1259,7 @@ function tryPlace() {
     ) {
       if (
         heldItem.place(
+          game.player,
           Inventory.mouseItemStack,
           game.mouse.blockX,
           game.mouse.blockY,
@@ -1385,13 +1407,34 @@ window.keyPressed = function (ev) {
   else if (key === "arrowleft") prevRecipe();
   else if (key === "arrowup") UIComponent.setCondition("mode", "build");
   else if (key === "arrowdown") UIComponent.setCondition("mode", "fight");
+  //Database
+  else if (key === "?" && ui.menuState === "in-game") {
+    if (Inventory.tooltip) {
+      // Select hovered item
+      const iname = Inventory.tooltip.item.registryName;
+      if (discoverable.all.has(iname)) {
+        if (discovered.all.has(iname)) {
+          ui.menuState = "database";
+          UIComponent.setCondition("is-in-game-database", "true");
+          refreshDatabaseUI();
+          selectItem(iname);
+        } else Log.send("#>>icon.database#c-Item not discovered yet");
+      } else Log.send("#>>icon.database#c-Item has no database entry");
+    } else {
+      // just open it
+      ui.menuState = "database";
+      UIComponent.setCondition("is-in-game-database", "true");
+      refreshDatabaseUI();
+      deselectItem();
+    }
+  }
   //Command line
   else if (key === "/") openCommandLine();
   //Hotkeys
-  else if (key === "b") {
+  else if (key === "b" && ui.menuState === "in-game") {
     if (UIComponent.evaluateCondition("mode", "build")) UIComponent.setCondition("mode", "fight");
     else UIComponent.setCondition("mode", "build");
-  } else if (UIComponent.evaluateCondition("mode", "build")) {
+  } else if (UIComponent.evaluateCondition("mode", "build") && ui.menuState === "in-game") {
     if (key === "1") game.player.inventory.hotkeySlot(0, true);
     else if (key === "2") game.player.inventory.hotkeySlot(1, true);
     else if (key === "3") game.player.inventory.hotkeySlot(2, true);
@@ -1409,13 +1452,13 @@ window.keyPressed = function (ev) {
   ev.stopImmediatePropagation();
   return false;
 };
-
+let skipNext = false;
 function openCommandLine() {
+  skipNext = true;
   ui.texteditor.active = true;
   ui.texteditor.title = "Command Line";
   ui.texteditor.isCommandLine = true;
   ui.texteditor.save = (command) => {
-    if (command.startsWith("/")) command = command.substring(1);
     exec(
       command,
       game.player ?
@@ -1428,6 +1471,10 @@ function openCommandLine() {
 }
 /**@param {KeyboardEvent} ev  */
 window.keyTyped = function (ev) {
+  if (skipNext) {
+    skipNext = false;
+    return false;
+  }
   if (tcursor.active)
     capturedInput(
       ev.shiftKey || ev.getModifierState("CapsLock") ? key.toUpperCase() : key.toLowerCase(),
@@ -1453,7 +1500,6 @@ onbeforeunload = (ev) => {
     ev.preventDefault();
   }
 };
-let selectedDirection = 0;
 const zoomSpeed = 0.00125;
 /**@param {WheelEvent} ev  */
 window.mouseWheel = function (ev) {
@@ -1464,10 +1510,9 @@ window.mouseWheel = function (ev) {
     world.resetRenderer();
   }
   //scroll normally to change block placement direction
-  else
-    selectedDirection = (ev.delta > 0 ? Block.dir.rotateAntiClockwise : Block.dir.rotateClockwise)(
-      selectedDirection,
-    );
+  else if (ev.deltaY < 0) rotateSelACW();
+  else rotateSelCW();
+
   return false;
 };
 /**
