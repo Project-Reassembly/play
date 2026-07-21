@@ -337,4 +337,3 @@ export const index = {
     }
   },
 };
-globalThis.i = index;

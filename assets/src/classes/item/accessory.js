@@ -1,4 +1,5 @@
 import { constructFromRegistry } from "../../core/constructor.js";
+import { roundNum } from "../../core/number.js";
 import { Registries, TypeRegistries } from "../../core/registry.js";
 import Integrate from "../../lib/integrate.js";
 import { BulletModel } from "../projectile/bullet-model.js";
@@ -110,9 +111,16 @@ export class AttributeModifierComponent extends AccessoryModifier {
     let s = "#=-Affects Entity Attributes:\n";
     for (const key in this.attributes) {
       const mod = this.attributes[key];
-      const change = (mod < 1 ? "#c--" : "#a-+") + (mod < 1 ? 1 - mod : mod - 1) * 100 + "%";
+      const change = `${(mod < 1 ? "#c--" : "#a-+") + roundNum((mod < 1 ? 1 - mod : mod - 1) * 100, 2)}%`;
       s += ` ${change}#-- ${key.replaceAll("-", " ")}\n`;
     }
     return s.slice(0, -1);
+  }
+}
+
+export class TradeCostModifierComponent extends AccessoryModifier {
+  multiplier = 1;
+  createExtendedTooltip() {
+    return `${(this.multiplier < 1 ? "#a-" : "#c-+") + roundNum((this.multiplier < 1 ? 1 - this.multiplier : this.multiplier - 1) * 100, 2)}%#-- NPC trade cost`;
   }
 }

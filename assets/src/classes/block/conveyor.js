@@ -83,13 +83,18 @@ class Conveyor extends Block {
     super.postDraw();
   }
   /**
+   * @param {DroppedItemStack} item
+   */
+  itemOnTopOf(item) {
+    if (this.istack.isEmpty()) {
+      this.istack = item.item;
+      item.remove = true;
+    }
+  }
+  /**
    * @param {Entity} entity
    */
   steppedOnBy(entity) {
-    if (entity instanceof DroppedItemStack && this.istack.isEmpty()) {
-      this.istack = entity.item;
-      entity.dead = true;
-    }
     let vct = Direction.vectorOf(this.direction);
     let speed = blockSize / this.moveTime;
     entity.move(vct.x * speed, vct.y * speed);

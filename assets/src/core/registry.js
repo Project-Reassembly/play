@@ -66,6 +66,8 @@ const TypeRegistries = Object.freeze(
     accessory = new Integrate.TypeRegistry();
     /** Bullet behaviour components @readonly */
     bullet = new Integrate.TypeRegistry();
+    /** Dialogue option actions. @readonly */
+    dialogue = new Integrate.TypeRegistry();
   })(),
 );
 
@@ -103,7 +105,7 @@ function lookup(reg, name, prop) {
 
 /** @typedef {"hardcoded"|"preloaded"|"modded"} Stage */
 /**
- *  @typedef {{readonly value: Integrate.Unconstructed<T>|T, readonly original: Integrate.Unconstructed<T>}} DelayedConstruction
+ *  @typedef {{readonly value: T, readonly original: Integrate.Unconstructed<T>}} DelayedConstruction
  * @template T
  */
 

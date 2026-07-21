@@ -6,10 +6,10 @@ import { autoScaledEffect } from "../../../play/effects.js";
 import { blockSize } from "../../../scaling.js";
 import { WeaponComponent } from "../../entity/entity-part.js";
 import { Entity } from "../../entity/entity.js";
-import { DroppedItemStack } from "../../item/dropped-itemstack.js";
 import { WeaponBulletConfiguration, WeaponShootConfiguration } from "../../item/weapon-exts.js";
 import { infoOfShootPattern } from "../../item/weapon.js";
 import { PhysicalObject, ShootableObject } from "../../physical.js";
+import { ExtraUpdatesComponent, MovementComponent } from "../../projectile/bullet-components.js";
 import { Timer } from "../../timer.js";
 import { Container } from "../container.js";
 
@@ -71,25 +71,44 @@ class Turret extends Container {
     this.decelerate();
     this.component?.tick(this);
     if (this.target) {
-      let t = this.target;
-      let d =
-        t instanceof Entity ?
-          t.predictMotionDS(this.bullets.getAmmo(this.#lastAmmo)?.speed ?? 10, this.distanceTo(t))
-        : Vector.ZERO;
-      let res = turn(
-        this.gunDirection,
-        this.x,
-        this.y,
-        this.target.x + d.x,
-        this.target.y + d.y,
-        this.turnSpeed,
-      );
-      this.gunDirection = res.direction;
-      this.gunCanFire =
-        Math.abs(
-          this.gunDirection -
-            new Vector(this.target.x, this.target.y).sub(new Vector(this.x, this.y)).angle,
-        ) < this.shootCone;
+      if (this.target.dead) this.target = null;
+      else if (this.target instanceof Entity) {
+        const ammo = this.bullets.getAmmo(this.#lastAmmo);
+        const mc = ammo ? ammo.get(MovementComponent) : null;
+        const ef = ammo ? ammo.get(ExtraUpdatesComponent) : null;
+        const spd = (mc?.speed ?? 10) * (1 + (ef?.amount ?? 0));
+        const framesToImpact = this.distanceTo(this.target) / spd;
+        const predictedOffset =
+          this.target instanceof Entity ?
+            this.target.predictMotion(framesToImpact || 0)
+          : Vector.ZERO;
+        let res = turn(
+          this.gunDirection,
+          this.x,
+          this.y,
+          this.target.x + predictedOffset.x,
+          this.target.y + predictedOffset.y,
+          this.turnSpeed,
+        );
+        this.gunDirection = res.direction;
+        this.gunCanFire = res.left < this.shootCone;
+      } else {
+        let res = turn(
+          this.gunDirection,
+          this.x,
+          this.y,
+          this.target.x,
+          this.target.y,
+          this.turnSpeed,
+        );
+        this.gunDirection = res.direction;
+        this.gunCanFire = res.left < this.shootCone;
+      }
+      // this.gunCanFire =
+      //   Math.abs(
+      //     this.gunDirection -
+      //       new Vector(this.target.x, this.target.y).sub(new Vector(this.x, this.y)).angle,
+      //   ) < this.shootCone;
     }
     if (this.#cooldown > 0) {
       this.#cooldown--;
@@ -98,7 +117,7 @@ class Turret extends Container {
         autoScaledEffect(this.shoot.readyEffect, this.world, pos.x, pos.y, pos.direction);
       }
     }
-    this.ai((phys) => !(phys instanceof DroppedItemStack));
+    this.ai();
   }
   getAcceleratedReloadRate(shoot) {
     if (this.#acceleration <= -1 || this.#acceleration > this.maxAccel) return shoot.reload; //If bad acceleration then ignore it
@@ -181,7 +200,7 @@ class Turret extends Container {
         autoScaledEffect(shoot.effect, this.world, pos.x, pos.y, pos.direction);
         const model = bulletConfig.getAmmo(ammoType);
         if (model)
-          model.instantiate(
+          model.emit(
             pos.x,
             pos.y,
             shoot.pattern.amount,
@@ -261,21 +280,18 @@ class Turret extends Container {
   _debugAI() {
     push();
     noFill();
-    stroke(this.target instanceof ShootableObject ? col.red : col.green);
+    col.stroke(this.target instanceof ShootableObject ? col.red : col.green);
     strokeWeight(4);
     if (this.target) {
       square(this.target.x, this.target.y, this.size);
       line(this.x, this.y, this.target.x, this.target.y);
     }
-    let directionLine = this.pos.add(Vector.fromAngleRad(this.gunDirectionRad).scale(this.range));
+    let directionLine = Vector.fromAngleRad(this.gunDirectionRad).scale(this.range);
     if (this.gunCanFire) stroke(0, 255, 255);
     else stroke(100, 0, 255);
-    line(this.x, this.y, directionLine.x, directionLine.y);
-    stroke(
-      this.target instanceof ShootableObject ?
-        col.from(200, 0, 255, 100)
-      : col.from(255, 255, 0, 100),
-    );
+    line(this.x, this.y, this.x + directionLine.x, this.y + directionLine.y);
+    if (this.target instanceof ShootableObject) stroke(200, 0, 255, 100);
+    else stroke(255, 255, 0, 100);
     circle(this.x, this.y, this.attackRange * 2);
     pop();
   }

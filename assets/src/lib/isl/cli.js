@@ -456,12 +456,11 @@ cle.addKeyword(
   "mod-list",
   async (interp, labels) => {
     feedback(`Listing all loaded mods and their IDs:`);
-    if(mods.size > 0)
-    mods.forEach((mod, id) => {
-      s(` #@b${mod.displayName}#-- (#n-${id}#--) #i-${mod.version}#--`);
-    });
-    else 
-      s(` #7-No mods to show.`);
+    if (mods.size > 0)
+      mods.forEach((mod, id) => {
+        s(` #@b${mod.displayName}#-- (#n-${id}#--) #i-${mod.version}#--`);
+      });
+    else s(` #7-No mods to show.`);
   },
   [],
 );
@@ -497,11 +496,11 @@ cle.addKeyword(
       s(" #6-@p#--/#6-@player#--: The current player.");
       s(" #6-@s#--/#6-@self#--: The executor of the command. May be a block.");
       s(" #6-@r#--/#6-@random#--: A random entity.");
-      s(" #6-@c#--/#6-@closest#--: The closest entity (likely yourself if used alone).");
+      s(
+        " #6-@c#--/#6-@closest#--: The closest entity (likely yourself when used alone, unless using command blocks).",
+      );
       s(" #6-@#--/#6-@w#--/#6-@newest#--: The most recently spawned entity.");
-      s(" #6-@e#--/#6-@everything#--: All entities, including items.");
-      s(" #6-@l#--/#6-@living#--: All entities, excluding items.");
-      s(" #6-@i#--/#6-@item#--: All items.");
+      s(" #6-@e#--/#6-@everything#--: All entities.");
       s(" #6-@t#--/#6-@team#--: All entities on the team of the executor.");
       s(" #6-@a#--/#6-@ally#--: All entities allied to the team of the executor.");
       s(" #6-@n#--/#6-@enemy#--: All entities not on or allied to the team of the executor.");
@@ -560,7 +559,7 @@ cle.addKeyword(
         s(" #3-activate #7i<x> <y>");
         s(" #3-place #7i<block> <x> <y>      #3-break #7i<x> <y> [type]");
         s("#ei- storage ---------------------------------------------------------------------- ");
-        s(" #3-save #7i[name]                #3-load #7i[name]");
+        s(" #3-save #7i[name]                #3-load #7i[name]                #3-clear");
         s("#ei- ui --------------------------------------------------------------------------- ");
         s(" #3-quietmode #7i[enabled]");
         s("#ei- information ------------------------------------------------------------------ ");
@@ -679,10 +678,19 @@ cle.addKeyword(
       } else if (command === "load") {
         s("#eistorage #-->#3- load");
         s(" Loads a save file and starts playing on it.");
-        s(" Does not save the current session, so use of [save] is recommended.");
+        s(" Does not save the current session, so use of [#3-save#--] is recommended.");
         s("#@-Parameters:");
         s("  #6-[name]#--: Name of the save file. Needed for custom files.");
         s("         Leave blank to use the default save file.");
+      } else if (command === "clear") {
+        s("#eistorage #-->#3- clear");
+        s(" #c-Deletes all your save files.");
+        s(" This command will delete #cievery save file that you or the game made.");
+        s(" This includes saves from [#3-save#--], and from [#=-ctrl+j#--].");
+        s(
+          " Your #>>icon.database#=-database#-- data will not be deleted, and mod data may remain.",
+        );
+        s(" #4bUse with caution - this is #4kirreversible#4b!");
       } else if (command === "quietmode") {
         s("#eiui #-->#3- quietmode");
         s(" Enables or disables quiet mode.");
@@ -728,6 +736,6 @@ function exec(isl, context) {
   isl.split(/[\n\;]/g).forEach((line) => runCommand(line, context, commandLine));
 }
 
-console.log("ISL ready.");
+console.log("[Setup] ISL CLI ready.");
 export { commandLine, exec };
 

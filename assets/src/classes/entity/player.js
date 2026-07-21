@@ -367,7 +367,7 @@ class Player extends EquippedEntity {
           const c =
             complete ? col.cyan : col.interp([col.red, col.yellow, col.green], found / (total + 1));
           Log.send(
-            `#>>icon.database#=-Discovered #[${corp}]b${stack.getItem().name}#=- (${Corporation.aliasof(corp) || "generic"}#=- collection, ${complete ? "#[30ffff]*complete" : `#[${col.hex(c)}]b${found}/${total}`}#=-)`,
+            `#>>icon.database#=-Discovered #[${corp}]b${stack.getItem().name}#=- (${Corporation.aliasof(corp) || "generic"}#=- collection, ${complete ? "#[0x30ffff]*complete" : `#[0x${col.hex(c)}]b${found}/${total}`}#=-)`,
           );
         }
       }, true),

@@ -4,5 +4,6 @@ export const debug = {
   regionBorders: false,
   hitboxes: false,
   position: false,
-  text: false
+  text: false,
+  flags: false
 }

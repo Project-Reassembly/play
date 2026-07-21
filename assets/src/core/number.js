@@ -318,12 +318,16 @@ class Vector {
 }
 globalThis.v = Vector;
 
+/** Slow turning helper function. Returns `direction`, rotated by up to `amount` degrees, in a way such that `direction` converges to the direction of `(toX,toY) - (x,y)` 
+ * @param {number} amount Maximum amount to turn.
+*/
 function turn(direction, x, y, toX, toY, amount) {
   let delta = new Vector(toX - x, toY - y);
   //Define variables
   let currentDirection = Vector.fromAngle(direction).angle; //Find current angle, standardised
   let targetDirection = delta.angle; //Find target angle, standardised
-  if (targetDirection === currentDirection) return { direction: direction, done: true }; //Do nothing if facing the right way
+  if (targetDirection === currentDirection) return { direction, left: 0 }; //Do nothing if facing the right way
+  /** Amount left to turn */
   let deltaRot = targetDirection - currentDirection;
   //Rotation correction
   if (deltaRot < -180) {
@@ -333,17 +337,18 @@ function turn(direction, x, y, toX, toY, amount) {
   }
   let sign = deltaRot < 0 ? -1 : 1; //Get sign: -1 if negative, 1 if positive
   let deltaD = 0;
-  let done = false;
+  let left = 0;
   //Choose smaller turn
   if (Math.abs(deltaRot) > amount) {
     deltaD = amount * sign;
-    done = true;
+    left = Math.abs(deltaRot) - amount;
   } else {
     deltaD = deltaRot;
-    done = false;
+    left = 0;
   }
+  direction += deltaD;
   //Turn
-  return { direction: direction + deltaD, done: done };
+  return { direction, left };
 }
 
 /**Returns `true` with a specified chance. */

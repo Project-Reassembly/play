@@ -429,7 +429,7 @@ function updateDescrPanels(
   c_name.text = `[#>>${image}#--] #@b${name}#--`;
   c_name.rarityColour = rarity;
 
-  const color = col.hex(Corporation.colorof(item.corp) || col.white);
+  const color = "#" + col.hex(Corporation.colorof(item.corp) || col.white);
   const icolor = Registries.images.tryGet(image)?.color || col.white;
   let s = `#abStandard Details#a-\n------------------------------------------
 #>>icon.database#=-Collection:${corp ? `#[${Corporation.colorof(item.corp)}]- ${Corporation.aliasof(item.corp)}` : `#-- Generic`}
@@ -458,7 +458,7 @@ ${corp ? `#=-Manufacturer:#-- #[${Corporation.colorof(item.corp)}]-${Corporation
 #>>icon.int#n-Type:#-- ${item.type ?? "item"} #=-(#e-${item.constructor.name}#=-)
 #n-Registry Name:#-- ${item.registryName}
 #=-Corporation/Team ID:${item.corp ? ` #>>${Corporation.iconof(item.corp)}#--#[${Corporation.colorof(item.corp)}]-${item.corp}` : "#=- none"}
-#l-Colour:#[${color}]- \\#${color} #--/ #[${col.hex(col.withA(icolor, 255))}]-\\#${col.hex(icolor)}
+#l-Colour:#[${color}]- \\${color} #--/ #[0x${col.hex(col.withA(icolor, 255))}]-\\#${col.hex(icolor)}
 #r-Image Name:#-- ${image}`;
 
   c_desc.text =

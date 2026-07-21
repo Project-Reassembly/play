@@ -72,6 +72,7 @@ class InGameMessageBox {
     }
   }
   send(message, time = 240) {
+    message = `${message}`;
     let pm = this.read();
     if (pm?.msg === message) {
       pm.count += 1;

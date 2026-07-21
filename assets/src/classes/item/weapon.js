@@ -218,10 +218,10 @@ class Weapon extends Equippable {
  * @param {WeaponBulletConfiguration} bullets
  */
 export function infoOfShootPattern(shoot, bullets, usage = 1) {
-  let s = ` #[00ffac]-${roundNum((60 / (shoot.reload + shoot.charge)) * shoot.pattern.amount * shoot.pattern.burst, 2)}#-- shots/sec\n`;
+  let s = ` #[0x00ffac]-${roundNum((60 / (shoot.reload + shoot.charge)) * shoot.pattern.amount * shoot.pattern.burst, 2)}#-- shots/s\n`;
   if (shoot.pattern.spacing || shoot.pattern.spread)
-    s += ` #[00ffac]-${roundNum(shoot.pattern.spacing * shoot.pattern.amount + shoot.pattern.spread, 2)}°#-- inaccuracy\n`;
-  if (shoot.charge) s += ` #[00ffac]-${roundNum(shoot.charge / 60, 2)}s#-- charge-up\n`;
+    s += ` #[0x00ffac]-${roundNum(shoot.pattern.spacing * shoot.pattern.amount + shoot.pattern.spread, 2)}°#-- inaccuracy\n`;
+  if (shoot.charge) s += ` #[0x00ffac]-${roundNum(shoot.charge / 60, 2)}s#-- charge-up\n`;
 
   for (const ammo in bullets.ammos) {
     const i = Registries.items.tryGet(ammo);

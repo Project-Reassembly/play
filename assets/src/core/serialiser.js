@@ -53,7 +53,7 @@ const Serialiser = {
   },
   /**
    * Clears all save items from a particular namespace.
-   * @param {keyof Window.localStorage | "*"} namespace Namespace to clear items from. This differentiates saves from different mods. Use `*` to clear all saves.
+   * @param {string | "*"} namespace Namespace to clear items from. This differentiates saves from different mods. Use `*` to clear all saves.
    * @returns {Boolean} Whether or not the operation succeeded.
    */
   clear(namespace = ResourceLocation.defaultNamespace) {
@@ -92,7 +92,7 @@ class ResourceLocation {
   /** Is this a null pointer? */
   isNull = false;
   constructor(qualifier) {
-    if (!qualifier) qualifier = "null";
+    qualifier ??= "null";
     if (typeof qualifier !== "string") qualifier = qualifier.toString();
 
     if (qualifier === "null") this.isNull = true;

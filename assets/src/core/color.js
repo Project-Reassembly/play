@@ -12,17 +12,17 @@ export const col = new (class Int32Colours {
    *  @type {(something: boolean | string | number | [number,number,number]| [number,number,number,number] | {r:number, g:number, b:number, a?:number} | (() => *) | bigint | symbol) => color} something Thing to turn.
    *  ****
    * **Types**:
-   *  - `string`: Tries to parse as a hex number of the form `#rrggbbaa` or `#rrggbb`
-   *  - `number`: Just uses the number directly (as an int32).
+   *  - `string`: Tries to parse as a hex number of the form `#rrggbbaa`, `#rrggbb`, `0xrrggbbaa`, `0xrrggbb` or a string form of the decimal number.
+   *  - `number` or `bigint`: Just uses the number directly (as an int32).
    *  - `boolean`: White if true, black if false.
    *  - `symbol` or `undefined`: Red.
-   *  - `object`: If an array, maps the array as follows: `[r, g, b, a]`. If not, uses the `{r, g, b, a}` properties.
-   *  - `function`: Calls the passed thing, and normalises then result.
+   *  - `object`: If an array, maps the array as follows: `[r?, g?, b?, a?]`. If not, uses the `{r?, g?, b?, a?}` properties.
+   *  - `function`: Calls the input, and converts the result.
    */
   convert = function (something) {
     switch (typeof something) {
       case "string":
-        return this.fromHex(something.substring(1).padEnd(8, "f"));
+        return this.fromStr(something);
       case "number":
         return something | 0;
       case "bigint":
@@ -221,13 +221,24 @@ export const col = new (class Int32Colours {
       (((c1 & 0xff) * i_f + (c2 & 0xff) * fact) & 0xff)
     );
   }
+  /**@param {string} str */
+  fromStr(str) {
+    str = str.trim();
+    return (
+      // It's hex if it starts with `0x` or `#`.
+      str.startsWith("#") ? parseInt(str.substring(1).padEnd(8, "f"), 16) | 0
+      : str.startsWith("0x") ? parseInt(str.padEnd(8, "f")) | 0
+        // If not, it's (probably) decimal.
+      : parseInt(str) | 0
+    );
+  }
   /**@param {color} col */
   hex(col) {
-    return (col >>> 0).toString(16).padEnd(8, "f");
+    return (col >>> 0).toString(16).padStart(8, "0");
   }
-  /**@param {string} col */
-  fromHex(col) {
-    return parseInt(col.padEnd(8, "f"), 16) | 0;
+  /**@param {string} str */
+  fromHex(str) {
+    return parseInt(str.padEnd(6, "0").padEnd(8, "f"), 16) | 0;
   }
   /**@param {color} col */
   fill(col) {

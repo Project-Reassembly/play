@@ -7,7 +7,6 @@ import {
 export { ISLError, ISLExtension, ISLInterpreter };
 
   import { Entity } from "../../classes/entity/entity.js";
-  import { DroppedItemStack } from "../../classes/item/dropped-itemstack.js";
   import { PhysicalObject } from "../../classes/physical.js";
   import { REGION_SIZE } from "../../classes/world/factory-valuations.js";
   import { rnd, Vector } from "../../core/number.js";
@@ -119,7 +118,7 @@ function oneselect(ctx, selector, source) {
       return [ctx.self];
     case "p":
     case "player":
-      return [game.player];
+      return [game.player.entity];
 
     // General selectors
     case "t":
@@ -135,13 +134,6 @@ function oneselect(ctx, selector, source) {
     case "e":
     case "everything":
       return source;
-
-    case "l":
-    case "living":
-      return source.filter((e) => !(e instanceof DroppedItemStack));
-    case "i":
-    case "item":
-      return source.filter((e) => e instanceof DroppedItemStack);
 
     // Utility selectors
     case "r":

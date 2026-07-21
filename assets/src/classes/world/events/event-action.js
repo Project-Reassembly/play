@@ -1,14 +1,14 @@
 import { construct, constructFromType } from "../../../core/constructor.js";
-import { index, rnd, roundNum } from "../../../core/number.js";
+import { index } from "../../../core/number.js";
 import { delay, Registries } from "../../../core/registry.js";
+import { ui } from "../../../core/ui.js";
 import Integrate from "../../../lib/integrate.js";
 import { createEffect, effectTimer, emitEffect, Explosion } from "../../../play/effects.js";
 import { createPlayer, game } from "../../../play/game.js";
 import { Log } from "../../../play/messaging.js";
 import { blockSize } from "../../../scaling.js";
+import { Entity } from "../../entity/entity.js";
 import { Corporation } from "../../item/corporation.js";
-import { DroppedItemStack } from "../../item/dropped-itemstack.js";
-import { ItemStack } from "../../item/item-stack.js";
 import { BulletModel } from "../../projectile/bullet-model.js";
 import { World } from "../world.js";
 
@@ -52,7 +52,7 @@ export class DeliverEntityAction extends WorldEventAction {
 }
 
 function getTeamFromInput(inp) {
-  if (inp === "$plr") return game.player.team;
+  if (inp === "$plr") return game.player.entity.team;
   return `${inp}`;
 }
 
@@ -88,19 +88,20 @@ export function deliverPlayer(
 ) {
   const crp = constructFromType(Registries.corps.get(corp), Corporation);
   createPlayer(player, x, y, crp.player);
-  game.player.health = game.player.maxHealth;
-  game.player.statuses = {};
-  game.player.team = corp;
-  if (game.player.dead) {
-    game.player.dead = false;
-    game.player.addToWorld(iworld);
+  game.player.entity.health = game.player.entity.maxHealth;
+  game.player.entity.statuses = {};
+  game.player.entity.team = corp;
+  if (game.player.entity.dead) {
+    game.player.entity.dead = false;
+    game.player.entity.addToWorld(iworld);
   }
   if (moveCamera) {
-    ui.camera.x = game.player.x;
-    ui.camera.y = game.player.y;
+    ui.camera.x = game.player.entity.x;
+    ui.camera.y = game.player.entity.y;
   }
-  deliverEntity(game.player, false, iworld, nuke);
+  deliverEntity(game.player.entity, false, iworld, nuke);
 }
+/** @type {import("../../../core/registry.js").DelayedConstruction<BulletModel>} */
 const deliverShotModel = delay(
   {
     lifetime: 1,
@@ -146,7 +147,24 @@ const deliverShotModel = delay(
       },
     ],
   },
-  BulletModel,
+  function () {
+    return new BulletModel();
+  },
+  "hardcoded",
+);
+/** @type {import("../../../core/registry.js").DelayedConstruction<BulletModel>} */
+const undeliverShotModel = delay(
+  {
+    lifetime: 1,
+    collides: false,
+    components: [
+      { type: "movement", speed: 0, decel: -1 },
+      { type: "vfx-trail", effect: "land-trail" },
+    ],
+  },
+  function () {
+    return new BulletModel();
+  },
   "hardcoded",
 );
 
@@ -184,18 +202,37 @@ export function deliverEntity(ent, add = false, world, clearArea = false) {
         }).dealDamage();
       createEffect("land-wave", world, ent.x, ent.y, -Math.PI / 2, 1);
       createEffect("land-scorch", world, ent.x, ent.y, -Math.PI / 2, 1);
-      for (let tick = 0; tick < 10; tick++)
-        DroppedItemStack.create(
-          new ItemStack("scrap", roundNum(rnd.float(2, 20))),
-          world,
-          ent.x,
-          ent.y,
-          rnd.float(4, 10),
-          rnd.float(0, 360),
-        );
+      // for (let tick = 0; tick < 10; tick++)
+      //   DroppedItemStack.create(
+      //     new ItemStack("scrap", roundNum(rnd.float(2, 20))),
+      //     world,
+      //     ent.x,
+      //     ent.y,
+      //     rnd.float(4, 10),
+      //     rnd.float(0, 360),
+      //   );
       ent.visible = true;
       ent.controllable = true;
       ent.tangible = true;
     }, life);
   }, 180);
+  effectTimer.tick();
+}
+/** @param {Entity} ent  */
+export function undeliverEntity(ent) {
+  ent.world.entities.splice(ent.world.entities.indexOf(ent), 1);
+  ent.visible = false;
+  ent.controllable = false;
+  ent.tangible = false;
+  emitEffect("land-effect", ent);
+  effectTimer.tick();
+
+  let y = ui.camera.y - height / ui.camera.zoom;
+  // s = ut + ½at²
+  // u = 0
+  // t = √(2s / a)
+  let life = Math.sqrt(2 * (ent.y - y));
+  undeliverShotModel.value
+    .emit(ent.x, ent.y, 1, -90, 0, 0, world, ent)
+    .forEach((m) => (m.lifetime = life));
 }

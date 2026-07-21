@@ -5,6 +5,7 @@ import { EquippedEntity } from "./inventory-entity.js";
 /** Character that the player can interact with.
  * Technically enemies should be classed as NPCs too, but this class is used for specifically *friendly* NPCs which the player can talk to.
  * Can have trades
+ * @deprecated This is the old class for this, we're using a new system since the violence seemed a bit off and you can't hurt them anyway now
  */
 class NPC extends EquippedEntity {
   /**```json
@@ -64,7 +65,7 @@ class NPC extends EquippedEntity {
   }
   takeDamage(type, amount, source) {
     super.takeDamage(type, amount, source);
-    if (source === game.player) {
+    if (source === game.player.entity) {
       let relchange =
         (this.maxHealth / 250) *
         amount *

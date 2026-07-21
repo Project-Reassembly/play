@@ -224,7 +224,7 @@ export class PhysicalObject extends Integrate.RegisteredItem {
     // }
     // //Turn
     // this.direction += deltaD;
-    return res.done;
+    return res.left === 0;
   }
 
   moveTowards(x, y, speed, turnSpeed, rotate = false, ignoreBlocks = false) {
@@ -529,8 +529,16 @@ function hitboxesIntersect(o1, o2) {
  * @param {number} dy Collider height
  * @returns True if the rectangles are colliding or not.
  */
-function rectanglesIntersect(ox, oy, odx, ody, cx, cy, dx, dy) {
+export function rectanglesIntersect(ox, oy, odx, ody, cx, cy, dx, dy) {
   return ox + odx >= cx - dx && ox - odx <= cx + dx && oy + ody >= cy - dy && oy - ody <= cy + dy;
+}
+/** Point-to-rectangle collision where x,y are the center. */
+export function pointInRect(px, py, rx, ry, rw, rh) {
+  return px < rx + rw * 0.5 && px > rx - rw * 0.5 && py < ry + rh * 0.5 && py > ry - rh / 2;
+}
+/** Point-to-rectangle collision where x,y are the top-left corner. */
+export function pointInRectC(px, py, rx, ry, rw, rh) {
+  return px < rx + rw && px > rx && py < ry + rh && py > ry;
 }
 
 function createFlashingColourArray(basecol, lightness = 255) {

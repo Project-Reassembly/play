@@ -595,7 +595,7 @@ createLinkedBlockAndItem(
   {
     type: "turret",
     inventorySize: 1,
-    range: 300,
+    range: 450,
     bullets: {
       types: [
         {
@@ -812,7 +812,7 @@ createLinkedBlockAndItem(
   "Launch Pad",
   "capitalism.iti.launch",
   { type: "launch-pad", podImage: "capitalism.iti.pod" },
-  { description: "Launches batches of items to space, ready to be collected by ITI.", corp: "iti" },
+  { description: "Launches batches of items to space, ready to be collected by ITI.", corp: "iti", marketValue: 1250 },
 );
 createLinkedBlockAndItem(
   "landing-pad",
@@ -822,7 +822,7 @@ createLinkedBlockAndItem(
   {
     description:
       "Buys items from ITI, and receives them.\nMust be given an item to use for reference.",
-    corp: "iti",
+    corp: "iti", marketValue: 1250
   },
 );
 //## DEV ##

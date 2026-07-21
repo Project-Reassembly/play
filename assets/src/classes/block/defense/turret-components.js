@@ -17,6 +17,7 @@ import { Item } from "../../item/item.js";
 import { WeaponBulletConfiguration, WeaponShootConfiguration } from "../../item/weapon-exts.js";
 import { infoOfShootPattern } from "../../item/weapon.js";
 import { PhysicalObject, ShootableObject } from "../../physical.js";
+import { ExtraUpdatesComponent, MovementComponent } from "../../projectile/bullet-components.js";
 import { Timer } from "../../timer.js";
 import { Container } from "../container.js";
 /**Turret base structural component. Connects visually to diagonally adjacent blocks. */
@@ -156,28 +157,44 @@ export class TurretController extends TurretBase {
         return;
       }
       turret.tick(this);
-      const target = this.target;
-      if (target) {
-        const predictedOffset =
-          target instanceof Entity ?
-            target.predictMotion(
-              (this.distanceTo(target) / turret?.bullets?.getAmmo(this.lastAmmo)?.speed ?? 10) || 0,
-            )
-          : Vector.ZERO;
-        let res = turn(
-          this.gunDirection,
-          this.x,
-          this.y,
-          target.x + predictedOffset.x,
-          target.y + predictedOffset.y,
-          this.gunTurnSpeed ?? this.turnSpeed,
-        );
-        this.gunDirection = res.direction;
-        this.gunCanFire =
-          Math.abs(this.gunDirection - target.pos.sub(this.pos).angle) <
-          (this.gunShootCone ?? this.shootCone);
+      if (this.target) {
+        if (this.target.dead) this.target = null;
+        else if (this.target instanceof Entity) {
+          const ammo = turret.bullets.getAmmo(this.lastAmmo);
+          const mc = ammo ? ammo.get(MovementComponent) : null;
+          const ef = ammo ? ammo.get(ExtraUpdatesComponent) : null;
+          const spd = (mc?.speed ?? 10) * (1 + (ef?.amount ?? 0));
+          const framesToImpact = this.distanceTo(this.target) / spd;
+          const predictedOffset =
+            this.target instanceof Entity ?
+              this.target.predictMotion(framesToImpact || 0)
+            : Vector.ZERO;
+          let res = turn(
+            this.gunDirection,
+            this.x,
+            this.y,
+            this.target.x + predictedOffset.x,
+            this.target.y + predictedOffset.y,
+            this.gunTurnSpeed ?? this.turnSpeed,
+          );
+          this.gunDirection = res.direction;
+          this.gunCanFire = res.left < this.gunShootCone ?? this.shootCone;
+        } else {
+          let res = turn(
+            this.gunDirection,
+            this.x,
+            this.y,
+            this.target.x,
+            this.target.y,
+            this.gunTurnSpeed ?? this.turnSpeed,
+          );
+          this.gunDirection = res.direction;
+          this.gunCanFire = res.left < this.gunShootCone ?? this.shootCone;
+        }
+        // Math.abs(this.gunDirection - target.pos.sub(this.pos).angle) <
+        // (this.gunShootCone ?? this.shootCone);
       }
-      this.ai((phys) => !(phys instanceof DroppedItemStack));
+      this.ai();
     }
   }
   serialise() {
@@ -194,7 +211,7 @@ export class TurretController extends TurretBase {
     deserialised.turretinv = Inventory.deserialise(creator.turretinv);
   }
   createExtendedDetails() {
-    return `#=-Inventory:\n  #d-${this.inventorySize}#-- ammo slots\n#=-Building:\n  #e-${this.maxSize}#-- maximum cross radius\n  Base block is #>>${Registries.blocks.tryGet(this.otherPart)?.image??"error"}#e-${Registries.blocks.tryGet(this.otherPart)?.name ?? this.otherPart}#--`;
+    return `#=-Inventory:\n  #d-${this.inventorySize}#-- ammo slots\n#=-Building:\n  #e-${this.maxSize}#-- maximum cross radius\n  Base block is #>>${Registries.blocks.tryGet(this.otherPart)?.image ?? "error"}#e-${Registries.blocks.tryGet(this.otherPart)?.name ?? this.otherPart}#--`;
   }
   drawTooltip(x, y, outlineColour, backgroundColour, forceVReverse = false) {
     super.drawTooltip(x, y, outlineColour, backgroundColour, forceVReverse);
@@ -261,30 +278,30 @@ export class TurretController extends TurretBase {
   _debugAI() {
     push();
     noFill();
-    col.stroke(this.target instanceof ShootableObject ? col.red : col.green);
     strokeWeight(4);
+    col.stroke(this.target instanceof ShootableObject ? col.red : col.green);
     if (this.target) {
       square(this.target.x, this.target.y, this.size);
       line(this.x, this.y, this.target.x, this.target.y);
     }
-    let directionLine = this.pos.add(Vector.fromAngleRad(this.gunDirectionRad).scale(this.range));
+    let directionLine = Vector.fromAngle(this.gunDirection).scale(this.range);
     if (this.gunCanFire) stroke(0, 255, 255);
     else stroke(100, 0, 255);
-    line(this.x, this.y, directionLine.x, directionLine.y);
-    col.stroke(
-      this.target instanceof ShootableObject ?
-        col.from(200, 0, 255, 100)
-      : col.from(255, 255, 0, 100),
-    );
+    line(this.x, this.y, this.x + directionLine.x, this.y + directionLine.y);
+    if (this.target instanceof ShootableObject) stroke(200, 0, 255, 100);
+    else stroke(255, 255, 0, 100);
     circle(this.x, this.y, this.attackRange * 2);
     pop();
   }
   getSize() {
     for (let size = 1; size < this.maxSize; size++) {
-      if (!this.checkConnectionTo(size, size)) return size;
-      if (!this.checkConnectionTo(size, -size)) return size;
-      if (!this.checkConnectionTo(-size, size)) return size;
-      if (!this.checkConnectionTo(-size, -size)) return size;
+      if (
+        !this.checkConnectionTo(size, size) ||
+        !this.checkConnectionTo(size, -size) ||
+        !this.checkConnectionTo(-size, size) ||
+        !this.checkConnectionTo(-size, -size)
+      )
+        return size;
     }
     return this.maxSize;
   }
@@ -512,7 +529,7 @@ export class TurretItem extends Item {
         autoScaledEffect(shoot.effect, turret.world, pos.x, pos.y, pos.direction);
         const model = bulletConfig.getAmmo(ammoType);
         if (model)
-          model.instantiate(
+          model.emit(
             pos.x,
             pos.y,
             shoot.pattern.amount,

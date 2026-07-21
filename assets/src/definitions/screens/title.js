@@ -88,18 +88,17 @@ createCMFTComponent(
   700,
   "none",
   null,
-  `                       #@bControls#@-
-========================================================
+  `#@-======================= #@bControls#@- =======================
 #@bGeneral#@-
 --------------------------------------------------------
 #a-W/A/S/D#--        Move up/left/down/right
 #@iHold #d-Alt#--       Move the camera without the player
-#@iHold #d-Ctrl#--      Use a separate UI cursor
+#@iHold #d-Ctrl#--      Lock player aim point and move cursor
 #a-B#--              Toggle #@-build/fight mode#--
 #a-E#--              Toggle #@-inventory#--
 #d-Ctrl#@-+#i-Scroll#--    Zoom the camera in/out
 #a-Space#--          Pause/unpause the game
-#i-LMB#@i with item#--  Throw item
+#i-LMB#@i with item#--  Throw item (not drop, throw)
 #a-?#@i over item#--    Open database to item page
 
 #@bFight Mode#@-
@@ -116,6 +115,7 @@ createCMFTComponent(
 --------------------------------------------------------
 #a-Down Arrow#--     Switch to #@-fight mode#--.
 #i-LMB#@i with item#--  Place item as block
+#i-LMB#@i on entity#--  Talk to/trade with NPC
 #i-RMB#@i over block#-- Deconstruct block
 #i-RMB#@i with item#--  Drop item stack
 #a-Right Arrow#--    Cycle to next crafter recipe

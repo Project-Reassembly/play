@@ -8,6 +8,8 @@ add("error.cmft", "assets/textures/icon/cmft-error.png")
 add("title.project", "assets/textures/screen/project.svg")
 add("title.project.accent", "assets/textures/screen/project-yellow.svg")
 add("icon.database.large", "assets/textures/screen/database.svg")
+add("icon.database.one-third", "assets/textures/screen/database-1.svg")
+add("icon.database.two-thirds", "assets/textures/screen/database-2.svg")
 add("icon.database.complete", "assets/textures/screen/database-complete.svg")
 //Icons
 add("icon.chest", "assets/textures/icon/chest.png")
@@ -35,6 +37,7 @@ add("entity.scrap-sentinel.body", "assets/textures/entity/component/scrap-sentin
 add("entity.scrap-sentinel.legs", "assets/textures/entity/component/scrap-sentinel-foot.png")
 
 add("npc.iti.corporate-merchant.head", "assets/textures/entity/component/iti-corporate-merchant-head.png")
+add("npc.iti.defense.head", "assets/textures/entity/component/iti-defense-head.png")
 add("npc.iti.player.head", "assets/textures/entity/component/iti-player-head.png")
 add("npc.iti.generic.body", "assets/textures/entity/component/iti-npc-body.png")
 add("npc.iti.generic.legs", "assets/textures/entity/component/iti-npc-foot.png")

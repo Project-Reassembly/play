@@ -5,7 +5,6 @@ import { drawImg } from "../../../core/ui.js";
 import { autoScaledEffect, Explosion, NuclearExplosion } from "../../../play/effects.js";
 import { game } from "../../../play/game.js";
 import { blockSize } from "../../../scaling.js";
-import { DroppedItemStack } from "../../item/dropped-itemstack.js";
 import { Timer } from "../../timer.js";
 import { Block, BreakType } from "../block.js";
 class Bomb extends Block {
@@ -32,7 +31,7 @@ class Bomb extends Block {
     if (this.hiddenImg === "inherit") this.hiddenImg = this.image;
   }
   draw() {
-    if (game.player.team === this.team) super.draw();
+    if (game.player.entity.team === this.team) super.draw();
     else
       drawImg(this.hiddenImg, this.x, this.y, this.tileSize * blockSize, this.tileSize * blockSize);
   }
@@ -82,7 +81,6 @@ class Bomb extends Block {
     this.#detTimer.tick();
     for (let ent of this.world.entities) {
       if (
-        !(ent instanceof DroppedItemStack) &&
         ent.team !== this.team &&
         this.distanceTo(ent) < this.autoDetonationRange + ent.size
       ) {

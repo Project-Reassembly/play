@@ -60,17 +60,22 @@ export const Decoration = new (class DecorationConsts {
     "@": 0,
     // Spectrum, cycles through rainbow colours
     get "~"() {
-      return col.interp(
-        Decoration.spectrum,
-        (Decoration.timer.ticks % 240) / 240,
-      );
+      return col.interp(Decoration.spectrum, (Decoration.timer.ticks % 240) / 240);
     },
     //Reassembly accent color
     "=": col.accent,
     // default
     "-": null,
   });
-  spectrum = [col.red, col.yellow, col.green, col.cyan, col.lighten(col.blue,50), col.magenta, col.red];
+  spectrum = [
+    col.red,
+    col.yellow,
+    col.green,
+    col.cyan,
+    col.lighten(col.blue, 50),
+    col.magenta,
+    col.red,
+  ];
   timer = new Timer();
   styles = Object.freeze({
     // what do you *think* these do?
@@ -162,8 +167,9 @@ class Collection {
             // use it
             const colstr = source.substring(j, i);
             if (colstr.length === 0) colour = null;
+            else if (/^0x[0-9a-fA-F]{1,8}$/.test(colstr)) colour = col.fromHex(colstr.substring(2));
+            else if (/^#[0-9a-fA-F]{1,8}$/.test(colstr)) colour = col.fromHex(colstr.substring(1));
             else if (/^-?\d+$/.test(colstr)) colour = parseInt(colstr) | 0;
-            else if (/^[0-9a-fA-F]{6,8}$/.test(colstr)) colour = col.fromHex(colstr);
             else if (Registries.corps.has(colstr)) colour = Corporation.colorof(colstr);
             else if (Registries.images.has(colstr))
               colour = Registries.images.get(colstr).color ?? 0;
@@ -230,8 +236,15 @@ class Collection {
   static createWrapped(string, maxChars) {
     return this.createFrom(string).wrapWords(maxChars);
   }
+  /**
+   * Similar to `Collection.createFrom()`, but also truncates text if needed. May ignore some newlines.
+   */
+  static createTruncated(string, maxChars) {
+    return this.createFrom(string).truncateWords(maxChars);
+  }
   /**@type {Text[]} */
   components = [];
+  /**@param {...Text} parts */
   constructor(...parts) {
     this.components = parts;
   }
@@ -308,6 +321,9 @@ class Collection {
   wrapWords(maxChars = 100) {
     return this.splitLines().splitWords().wrapComponents(maxChars).merge();
   }
+  truncateWords(maxChars = 100) {
+    return this.splitLines().splitWords().truncateComponents(maxChars).merge();
+  }
   wrapComponents(maxChars = 100) {
     let output = new Collection();
     let lines = [];
@@ -340,6 +356,37 @@ class Collection {
     }
     lines.push(currentLine);
     return output.addRange(...lines);
+  }
+  /** Like `wrapComponents`, but ignores any lines that aren't the first. */
+  truncateComponents(maxChars = 100) {
+    let lines = [];
+    let currentLine = new Collection();
+    //for each word index
+    for (let index = 0; index < this.components.length; index++) {
+      let word = this.components[index];
+      // console.log(
+      //   "["+currentLine.text().replaceAll("\n","\\n")+"] length " +
+      //     currentLine.length +
+      //     "/" +
+      //     maxChars +
+      //     ", adding " +
+      //     word.length +
+      //     ": " +
+      //     word.text.replaceAll("\n","\\n"),
+      // );
+      if (currentLine.length + word.length > maxChars - 1 /** allow space for ellipsis */) {
+        // console.log("breaking: length exceeds " + maxChars);
+        currentLine.add(new Text("…"));
+        return currentLine;
+      }
+      currentLine.add(word);
+      if (word.text.includes("\n")) {
+        currentLine.add(new Text("…"));
+        // console.log("breaking: word has newline");
+        return currentLine;
+      }
+    }
+    return currentLine;
   }
   getWidth(charsize) {
     let lines = [];
@@ -410,7 +457,7 @@ class Text {
   }
   toString() {
     return `[${this.colour ?? "default"}, ${this.style}${
-      this.effects ? "<" + this.effects + ">" : ""
+      this.effects ? `<${this.effects}>` : ""
     }] "${this.text}"`;
   }
   append(str) {
@@ -441,6 +488,7 @@ class Text {
     return this.text.length;
   }
   getWidth(charsize) {
+    if (!("push" in globalThis)) return charsize * 0.6 * this.text.length;
     push();
     textFont(fonts.ocr);
     textSize(charsize);

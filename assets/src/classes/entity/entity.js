@@ -113,9 +113,6 @@ class Entity extends ShootableObject {
   predictMotion(timeToImpact) {
     return this.velocity.scale(timeToImpact);
   }
-  predictMotionDS(speedOfShot, distance) {
-    return this.predictMotion(distance / speedOfShot);
-  }
 
   init() {
     super.init();
@@ -279,6 +276,10 @@ class Entity extends ShootableObject {
         this._lastAICheck = this.age;
         if (this.aiType === "passive") {
           this._passiveAI();
+        } else if (this.aiType === "player-hostile") {
+          this._playerHostileAI();
+        } else if (this.aiType === "entity-hostile") {
+          this._entityHostileAI();
         } else if (this.aiType === "hostile") {
           this._hostileAI();
         } else if (this.aiType === "guard") {
@@ -340,21 +341,34 @@ class Entity extends ShootableObject {
   }
 
   /**Hostile AI
-   * - Follows entities within its target range.
+   * - Follows shootables within its target range.
    * - Acts as Passive when no entity can be found.
    */
   _hostileAI() {
-    if (!this._generic_AttackerAI((ent) => !ent.item, true, true)) this._passiveAI();
+    if (!this._generic_AttackerAI(undefined, true, true, true)) this._passiveAI();
+  }
+  /**Entity-Hostile AI
+   * - Follows entities within its target range.
+   * - Acts as Passive when no entity can be found.
+   */
+  _entityHostileAI() {
+    if (!this._generic_AttackerAI(undefined, true, false, true)) this._passiveAI();
+  }
+  /**Player-Hostile AI
+   * - Follows the player if within its target range.
+   * - Acts as Passive when no entity can be found.
+   */
+  _playerHostileAI() {
+    if (!this._generic_PlayerAttackerAI(true)) this._passiveAI();
   }
 
   /**Scavenger AI
-   * - Follows entities within its target range.
-   * - Prioritises dropped items and containers.
+   * - Follows shootables within its target range.
+   * - Prioritises containers.
    * - Acts as Passive when no entity can be found.
    */
   _scavengerAI() {
-    if (!this.inventory || !this._generic_AttackerAI((ent) => !!ent.item, false, false))
-      if (!this._generic_AttackerAI((blk) => !!blk.inventory, true, true, false)) this._hostileAI();
+    if (!this._generic_AttackerAI((blk) => !!blk.inventory, true, true, false)) this._hostileAI();
   }
 
   /**Guard AI
@@ -371,10 +385,10 @@ class Entity extends ShootableObject {
       this.target = { x: this.spawnX, y: this.spawnY };
   }
 
-  /** Generic AI for attacking entities.
-   * @param {(entity: Entity) => boolean} conditions Condition for selecting entities, to make this AI less generic.
+  /** Generic AI for entities which attack stuff.
+   * @param {(thing: ShootableObject) => boolean} conditions Condition for selecting stuff, to make this AI less generic.
    * @param {boolean} [shoots=true] Whether or not the entity should shoot at the new target.
-   * @returns {boolean} `true` if an entity is being targeted, `false` if not.
+   * @returns {boolean} `true` if an object is being targeted, `false` if not.
    */
   _generic_AttackerAI(
     conditions = () => true,
@@ -415,6 +429,22 @@ class Entity extends ShootableObject {
     }
   }
 
+  /** Generic AI for entities which attack only the player.
+   * @param {boolean} [shoots=true] Whether or not the entity should shoot at the player.
+   * @returns {boolean} `true` if the player is being targeted, `false` if not.
+   */
+  _generic_PlayerAttackerAI(shoots = true) {
+    this.#firing = false;
+    let tempTarget = this.target;
+    this.target = game.player.entity;
+    if (this.target && !this.target.dead) {
+      if (shoots && this.distanceTo(this.target) < this.attackRange) this.#firing = true;
+      return true;
+    } else {
+      this.target = tempTarget;
+      return false;
+    }
+  }
   attack() {}
 
   tickGroundEffects() {
@@ -566,10 +596,10 @@ class Entity extends ShootableObject {
       shield: roundNum(this.shield),
       energy: roundNum(this.energy),
       statuses: this.statuses,
-      isMainPlayer: this === game.player,
+      isMainPlayer: this === game.player.entity,
     };
   }
-  /**@param {SerialisedEntity} created  */
+  /**@param {SerialisedEntity} created @param {boolean} [inFull=true] If true, will deserialise the spawn location of the entity too. Literally never true normally. */
   static deserialise(created, inFull = true) {
     /**@type {Entity} */
     let entity = construct(Registries.entities.get(created.entity), "entity");

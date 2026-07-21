@@ -12,7 +12,6 @@ import { blockSize } from "../../scaling.js";
 import { Fire } from "../effect/fire.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
 import { Entity } from "../entity/entity.js";
-import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { BulletModel } from "./bullet-model.js";
 
 // maybe use this pattern later idk
@@ -286,7 +285,6 @@ export class TrackNearestComponent extends TrackingComponent {
       let minDist = Infinity;
       for (let entity of bullet.world.entities) {
         if (
-          !(entity instanceof DroppedItemStack) &&
           entity.team !== bullet.entity.team &&
           !entity.dead &&
           entity.visible &&
@@ -323,7 +321,6 @@ export class TrackNearSourceTargetComponent extends TrackingComponent {
       selected = bullet.distanceToPoint(pt.x, pt.y) < this.range ? pt : null;
       for (let entity of bullet.world.entities) {
         if (
-          !(entity instanceof DroppedItemStack) &&
           entity.team !== bullet.entity.team &&
           !entity.dead &&
           !bullet.componentDeniesHit(entity)
@@ -577,7 +574,7 @@ export class DamagePierceComponent extends BulletComponent {
   }
   /** Get CMFT describing this component. */
   getInfo() {
-    return `#c-${this.amount}${this.spread ? `±${this.spread}` : ""} ${this.damageType}#-- damage, #e-piercing#-- on overkill`;
+    return `#c-${this.amount}${this.spread ? `±${this.spread}` : ""} ${this.damageType}#-- damage\n#e-pierce#-- if damage remaining`;
   }
 }
 

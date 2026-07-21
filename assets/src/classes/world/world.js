@@ -22,8 +22,9 @@ import { PowerNetwork } from "./power-network.js";
 
 /**
  * @typedef SerialisedWorld
- * @prop {SerialisedChunk[][]} chunks
- * @prop {SerialisedEntity[]} entities
+ * @prop {import("./chunk.js").SerialisedChunk[][]} chunks
+ * @prop {import("../entity/entity.js").SerialisedEntity[]} entities
+ * @prop {import("../item/dropped-itemstack.js").SerialisedDroppedItem[]} items
  * @prop {string} name
  * @prop {int} seed
  * @prop {{positions: {x: int, y:int}[]}[]} networks
@@ -54,6 +55,8 @@ class World {
   impactParticles = [];
   /** @type {Entity[]} */
   entities = [];
+  /** @type {DroppedItemStack[]} */
+  items = [];
   /** @type {Bullet[]} */
   bullets = [];
   /** @type {Chunk[][]} */
@@ -67,7 +70,6 @@ class World {
   physobjs = [];
   /** @type {PowerNetwork[]} */
   networks = [];
-  name = "World";
   seed = null;
   /**Chunks to render this frame.
    * @type {Chunk[]} */
@@ -86,8 +88,7 @@ class World {
   }
   /**@type {Entity?} */
   #bossCache = null;
-  constructor(name = "World") {
-    this.name = name;
+  constructor() {
     this.evaluator = new FactoryEvaluator(this);
 
     this.addEvents();
@@ -98,6 +99,7 @@ class World {
     this.chunks = [];
     this.bullets = [];
     this.entities = [];
+    this.items = [];
     this.particles = [];
     this.floorParticles = [];
     this.impactParticles = [];
@@ -139,6 +141,11 @@ class World {
     this.floorParticles.forEach((p) => p.step(1));
     this.bullets.forEach((b) => b.tick());
     this.particles.forEach((p) => p.step(1));
+    this.items.forEach(
+      (i) =>
+        World.isInRenderDistance(i, 1, World.simulationDistance * chunkSize * blockSize, 0, 0, 1) &&
+        i.tick(),
+    );
     this.entities.forEach(
       (entity) =>
         World.isInRenderDistance(
@@ -199,6 +206,13 @@ class World {
           p--;
         }
       }
+      len = this.items.length;
+      for (let i = 0; i < len; i++) {
+        if (this.items[i]?.remove) {
+          this.items.splice(i, 1);
+          i--;
+        }
+      }
       len = this.entities.length;
       for (let e = 0; e < len; e++) {
         if (this.entities[e]?.dead) {
@@ -240,6 +254,10 @@ class World {
       particle.draw();
     }
     this.toRender.forEach((chunk) => chunk.drawBlocksOnly());
+    for (let item of this.items) {
+      if (!item.visible || !World.isInRenderDistance(item, 1, 0, 0, 0, ui.camera.zoom)) continue;
+      item.draw();
+    }
     this.toRender.forEach((chunk) => chunk.postDrawBlocksOnly());
     for (let entity of this.entities) {
       if (!entity.visible || !World.isInRenderDistance(entity, 1, 0, 0, 0, ui.camera.zoom))
@@ -538,8 +556,8 @@ class World {
   serialise() {
     return {
       chunks: this.chunks.map((x) => x.map((y) => y.serialise())),
-      name: this.name,
       entities: this.entities.map((x) => x.serialise()),
+      items: this.items.map((x) => x.serialise()),
       seed: this.seed,
       networks: this.networks.map((x) => x.serialise()),
       events: Object.entries(this.events)
@@ -557,18 +575,12 @@ class World {
         const v = wrold.events[key];
         if (created.events.includes(key)) v.disable();
       }
-    Object.values(wrold.events).forEach((v, i, a) => {});
+    // Object.values(wrold.events).forEach((v, i, a) => {});
     wrold.chunks = created.chunks?.map((x) => x.map((y) => Chunk.deserialise(y))) ?? [[]];
-    created.entities?.forEach((entity) => {
+    created.entities ??= [];
+    created.entities.forEach((entity) => {
       if (entity["-"]) {
-        DroppedItemStack.create(
-          ItemStack.deserialise(entity.stack),
-          wrold,
-          entity.x,
-          entity.y,
-          0,
-          0,
-        );
+        console.warn("Deprecated item format detected - re-save your game as soon as possible!");
       } else {
         let ent = Entity.deserialise(entity, false);
         ent.addToWorld(wrold, entity.x, entity.y);
@@ -577,7 +589,12 @@ class World {
         if (entity.isMainPlayer) createPlayer(ent);
       }
     });
-    created.networks?.forEach((x) => {
+    created.items ??= [];
+    created.items.forEach((i) =>
+      DroppedItemStack.create(ItemStack.deserialise(i.stack), wrold, i.x, i.y, 0, 0),
+    );
+    created.networks ??= [];
+    created.networks.forEach((x) => {
       let net = PowerNetwork.deserialise(x);
       net.world = wrold;
       wrold.networks.push(net);
@@ -590,7 +607,6 @@ class World {
     });
     //Set world properties
     wrold.seed = created.seed;
-    wrold.name = created.name;
     return wrold;
   }
   /**Sets everything on this world possible to those values on a source world.
@@ -640,28 +656,28 @@ class World {
   floorFlightCircle(x, y, color, speed) {
     const sp = clamp(speed, 1, 5);
     const us = speed / sp;
-    const s = Math.sqrt(speed)/25
+    const s = Math.sqrt(speed) / 25;
     repeat(Math.ceil(us), () => {
-    this.floorParticles.push(
-      new ShapeParticle(
-        x,
-        y,
-        rnd.float(0, 360),
-        speed/s,
-        sp,
-        s,
-        "circle",
-        [col.mult(color, .9), col.mult(col.hide(color), .9)],
-        sp * 6,
-        sp * 2,
-        sp * 6,
-        sp * 2,
-        0,
-        0,
-        false,
-      ),
-    );
-    })
+      this.floorParticles.push(
+        new ShapeParticle(
+          x,
+          y,
+          rnd.float(0, 360),
+          speed / s,
+          sp,
+          s,
+          "circle",
+          [col.mult(color, 0.9), col.mult(col.hide(color), 0.9)],
+          sp * 6,
+          sp * 2,
+          sp * 6,
+          sp * 2,
+          0,
+          0,
+          false,
+        ),
+      );
+    });
   }
 }
 export { World };

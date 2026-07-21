@@ -74,17 +74,17 @@ export class LaunchPad extends Container {
       }
       if (rem === 0) sotp();
     }, true);
-    game.money += value;
+    game.player.money += value;
     Log.send(`#a-Got \$${value} from selling ${sold.join("#a-, ")}`);
     this.inventory.clean();
-    this.#bulletModel.emit(this.x, this.y, 1, -90, 0, 0, this.world, game.player);
+    this.#bulletModel.emit(this.x, this.y, 1, -90, 0, 0, this.world, game.player.entity);
   }
   drawTooltip(x, y, outlineColour, backgroundColour, forceVReverse) {
     super.drawTooltip(x, y, outlineColour, backgroundColour, true);
     MLF1.draw(
       x,
       y,
-      `${this.inventory.count("*")}/${this.launchAmount}\n${this.validateLaunch() ? "Launching!" : "Not ready"}\n${""
+      `${this.inventory.count()}/${this.launchAmount}\n${this.validateLaunch() ? "Launching!" : "Not ready"}\n${""
         .padEnd((this.#launchTime / this.launchCooldown) * 20, "■")
         .padEnd(20, "□")
         .substring(0, 20)}`,
@@ -140,7 +140,7 @@ export class LandingPad extends Container {
   }
   validateBuy() {
     if (this.#currentFilter === "nothing") return false;
-    if (game.money < (Registries.items.get(this.#currentFilter)?.marketValue ?? 1)) return false;
+    if (game.player.money < (Registries.items.get(this.#currentFilter)?.marketValue ?? 1)) return false;
     if (!this.inventory.canAddItem(this.#currentFilter)) return false;
     return true;
   }
@@ -173,7 +173,7 @@ export class LandingPad extends Container {
   buy() {
     let item = Registries.items.get(this.#currentFilter);
     let value = item?.marketValue ?? 1;
-    game.money -= value;
+    game.player.money -= value;
     Log.send(`#a-Bought 1x ${item?.name ?? "nothing"}#a- for \$${value}`);
     this.timer.do(() => {
       this.world.particles.push(
@@ -196,7 +196,7 @@ export class LandingPad extends Container {
       );
       this.inventory.addItem(this.#currentFilter);
     }, 395);
-    this.#bulletModel.emit(this.x, this.y - 3249, 1, 90, 0, 0, this.world, game.player);
+    this.#bulletModel.emit(this.x, this.y - 3249, 1, 90, 0, 0, this.world, game.player.entity);
   }
   drawTooltip(x, y, outlineColour, backgroundColour, forceVReverse) {
     super.drawTooltip(x, y, outlineColour, backgroundColour, true);

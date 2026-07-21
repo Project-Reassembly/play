@@ -200,6 +200,13 @@ Registries.items.add("blast-knuckles", {
     "#7iGet it? Like brass knuckles? But boom?#--\nUses #-bMakeshift Explosive#--s to make #=-charged punches#-- explode violently.",
   modifiers: [{ type: "punch", charged: "blast-punch", ammoUsed: "makeshift-explosive" }],
 });
+Registries.items.add("trading-card", {
+  type: "accessory",
+  name: "Trading Card",
+  image: "accessory.trading-card",
+  description: "#7iIt's a card, for trading.#--\nReduces trade costs with NPCs.",
+  modifiers: [{ type: "trade", multiplier: 0.7 }],
+});
 //Weapons
 Registries.items.add("scrap-shooter", {
   type: "weapon",
@@ -424,7 +431,7 @@ Registries.items.add("construction-gun", {
 Registries.items.add("iti-laser-pistol", {
   type: "weapon",
   name: "Laser Pistol",
-  marketValue: 0,
+  marketValue: 250,
   corp: "iti",
   description:
     "Shoots medium-range small laser beams which inflict #i-Plasma Burn#-- on enemies.\n#6iStandard Issue",
@@ -450,7 +457,7 @@ Registries.items.add("iti-laser-pistol", {
             ],
             life: 30,
           },
-          { type: "damage-pierce", damageType: "laser", amount: 6 },
+          { type: "damage", damageType: "laser", amount: 6 },
           { type: "status-infliction", effect: "plasma-burn", duration: 20 },
           { type: "knockback", amount: 1.5 },
           { type: "hit-vfx", effect: "laser-caster-frag" },
@@ -572,7 +579,7 @@ Registries.items.add("iti-laser-caster", {
 Registries.items.add("iti-energy-repeater", {
   type: "weapon",
   name: "Energy Repeater",
-  marketValue: 2000,
+  marketValue: 3000,
   corp: "iti",
   description:
     "Rapid-fire mind-guided laser weapon. Homes in on whatever you want it to.\nShoots quickfire bursts of plasma bolts.\nAlt-fire to charge a larger explosive bolt.",
@@ -599,7 +606,7 @@ Registries.items.add("iti-energy-repeater", {
           { type: "knockback", amount: 1 },
           { type: "status-infliction", effect: "plasma-burn", duration: 120 },
           { type: "shape-drawer", shape: "rhombus", fill: [0, 255, 255], width: 12, height: 2 },
-          { type: "damage", damageType: "laser", amount: 10, spread: 4 },
+          { type: "damage", damageType: "laser", amount: 7, spread: 2 },
           { type: "expiry-vfx", effect: "laser-caster-frag" },
         ],
       },
@@ -622,7 +629,7 @@ Registries.items.add("iti-energy-repeater", {
         hitSize: 2.5,
         components: [
           { type: "track-near-source-target", range: 150, turnSpeed: 7 },
-          { type: "movement", speed: 10 },
+          { type: "movement", speed: 12 },
           {
             type: "trail",
             shape: "rhombus",
@@ -638,12 +645,11 @@ Registries.items.add("iti-energy-repeater", {
           {
             type: "explosion",
             damageType: "laser",
-            damage: 20,
+            damage: 25,
             spread: 5,
             radius: 30,
             effect: "laser-caster-explosion",
           },
-          { type: "expiry-vfx", effect: "laser-caster-frag" },
         ],
       },
     ],
@@ -672,7 +678,7 @@ Registries.items.add("iti-energy-repeater", {
 Registries.items.add("peti-charged-laser-blaster", {
   type: "weapon",
   name: "Charged Laser Blaster",
-  marketValue: 0,
+  marketValue: 500,
   corp: "peti",
   description:
     "Mid-range laser weapon.\nCharges up and shoots a medium-damage single-target laser, along with a secondary inaccurate burst of low-damage lasers.\n#6iStandard Issue",
@@ -738,7 +744,7 @@ Registries.items.add("peti-charged-laser-blaster", {
 Registries.items.add("peti-electrified-plasma-launcher", {
   type: "weapon",
   name: "Electrified Plasma Launcher",
-  marketValue: 500,
+  marketValue: 1500,
   corp: "peti",
   description:
     "Shoots a pair of high-energy balls which ionise the air as they travel.\nWhen the balls expire, the weapon releases a massive electrical arc through the air, which arcs between enemies that it hits.",
@@ -828,7 +834,7 @@ Registries.items.add("peti-electrified-plasma-launcher", {
 Registries.items.add("peti-plasma-railgun", {
   type: "weapon",
   name: "Plasma Railgun",
-  marketValue: 10000,
+  marketValue: 25000,
   corp: "peti",
   description: "Pierces targets with a massive bolt of red plasma.",
   image: "weapon.peti-plasma-railgun.item",
@@ -921,9 +927,11 @@ Registries.items.add("scrap-artillery", {
     "Large scrap gun, to be mounted on a Turret Controller. Shoots large bullets made of 4 material ingots.",
   baseSize: 2,
   image: "weapon.tank-gun.item",
-  ammoUse: 4,
   shootX: 30,
+  turnSpeed: 0.2,
+  shootCone: 0.2,
   range: 720,
+  ammoUse: 4,
   bullets: {
     types: [
       {
@@ -945,7 +953,7 @@ Registries.items.add("scrap-artillery", {
             ],
           },
           { type: "shape-drawer", shape: "rhombus", fill: "#cd9f8b", width: 28, height: 12 },
-          { type: "explosion", damageType: "ballistic", damage: 200, spread: 35, radius: 30 },
+          { type: "damage-pierce", damageType: "ballistic", amount: 300 },
           {
             type: "frag-bullet",
             spacing: 4,
@@ -955,7 +963,7 @@ Registries.items.add("scrap-artillery", {
               lifetime: 12,
               hitSize: 2.5,
               components: [
-                { type: "movement", speed: 15, decel: 0.2 },
+                { type: "movement", speed: 15 },
                 { type: "trail", colours: [[80, 62, 55, 100]] },
                 { type: "damage", amount: 16, damageType: "ballistic", spread: 5 },
                 { type: "pierce", amount: 1 },
@@ -984,7 +992,7 @@ Registries.items.add("scrap-artillery", {
             ],
           },
           { type: "shape-drawer", shape: "rhombus", fill: [255, 188, 153], width: 28, height: 12 },
-          { type: "damage-pierce", damageType: "ballistic", amount: 320 },
+          { type: "damage-pierce", damageType: "ballistic", amount: 340 },
           { type: "expiry-vfx", effect: "explosion~60" },
         ],
       },
@@ -1006,8 +1014,8 @@ Registries.items.add("scrap-artillery", {
               [150, 50, 50, 0],
             ],
           },
-          { type: "shape-drawer", shape: "rhombus", fill: [255, 188, 153], width: 28, height: 12 },
-          { type: "damage-pierce", damageType: "ballistic", amount: 360 },
+          { type: "shape-drawer", shape: "rhombus", fill: [188, 188, 188], width: 28, height: 12 },
+          { type: "damage-pierce", damageType: "ballistic", amount: 380 },
           { type: "expiry-vfx", effect: "explosion~60" },
         ],
       },
@@ -1097,15 +1105,12 @@ Registries.items.add("scrap-rocket", {
 });
 //Accessories
 Registries.items.add("iti-energy-cell", {
-  type: "equippable",
   name: "Energy Cell",
-  marketValue: 1000,
+  marketValue: 100,
   description:
-    "A kind of battery manufactured by InfiniTech Industries.\nCan boost most energy-using things, including you and weapons.",
+    "A kind of battery manufactured by InfiniTech Industries.",
   image: "item.iti-energy-cell",
   corp: "iti",
-  stackSize: 200,
-  hidden: true,
 });
 Registries.items.add("iti-plasma-cell", {
   name: "Plasma Cell",

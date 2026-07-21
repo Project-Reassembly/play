@@ -8,3 +8,4 @@ export const fonts = {
     this.something = await loadFont("assets/font/no_idea.woff");
   },
 };
+globalThis.f = fonts

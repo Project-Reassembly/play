@@ -10,6 +10,7 @@ import "../registries/types/type.js";
 
 import "../registries/types/accessory.js";
 import "../registries/types/bullet.js";
+import "../registries/types/dialogue.js";
 import "../registries/types/worldevent.js";
 console.log("[Setup] Imported types");
 

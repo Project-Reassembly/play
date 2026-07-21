@@ -61,6 +61,7 @@ import { EquippedEntity, InventoryEntity } from "../../classes/entity/inventory-
 import { ModularTankEntity } from "../../classes/entity/modular-tank.js";
 import { NPC } from "../../classes/entity/npc.js";
 import { Player } from "../../classes/entity/player.js";
+import { InteractableEntity } from "../../classes/interaction/interactable-entity.js";
 import { Accessory } from "../../classes/item/accessory.js";
 import { Equippable } from "../../classes/item/equippable.js";
 import { ItemStack } from "../../classes/item/item-stack.js";
@@ -102,6 +103,7 @@ TypeRegistries.default.add("destructible-component", DestructibleComponent);
 TypeRegistries.default.add("entity", Entity);
 TypeRegistries.default.add("inventory-entity", InventoryEntity);
 TypeRegistries.default.add("equipped-entity", EquippedEntity);
+TypeRegistries.default.add("interactable-entity", InteractableEntity);
 TypeRegistries.default.add("npc", NPC);
 TypeRegistries.default.add("player", Player);
 TypeRegistries.default.add("modular-tank", ModularTankEntity);

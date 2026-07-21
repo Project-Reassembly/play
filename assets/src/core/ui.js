@@ -484,7 +484,7 @@ class UIComponent {
 }
 
 export class CustomComponent extends UIComponent {
-  constructor(x = 0, y = 0, width = 1, height = 1, onpress = () => {}, drawer = () => {}) {
+  constructor(x = 0, y = 0, width = 1, height = 1, onpress = () => {}, drawer = (x, y) => {}) {
     //Initialise component
     super(x, y, width, height, "none", onpress);
     this.cdrawer = drawer;
@@ -494,7 +494,9 @@ export class CustomComponent extends UIComponent {
     push();
     noFill();
     noStroke();
-    this.cdrawer();
+    translate(this.x, this.y);
+    textAlign(CENTER, CENTER);
+    this.cdrawer(this.x, this.y);
 
     pop();
   }
@@ -764,7 +766,7 @@ class CMFTUIComponent extends UIComponent {
 
   /**@param {import("./color.js").color} col*/
   setRarityColour(col) {
-    this.rarityColour = fn;
+    this.rarityColour = col;
     return this;
   }
   /**@param {(text:string) => string} fn*/

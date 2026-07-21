@@ -1,7 +1,6 @@
 import { Vector } from "../../core/number.js";
 import { blockSize } from "../../scaling.js";
 import { ComponentData } from "../component-model/component-data.js";
-import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { PhysicalObject, ShootableObject } from "../physical.js";
 import {
   NoBlockCollisionComponent,
@@ -116,7 +115,6 @@ export class BulletInstance extends PhysicalObject {
           !this.remove &&
           this.model.collides &&
           entity.tangible &&
-          !(entity instanceof DroppedItemStack) &&
           this.collidesWith(entity) &&
           !this.componentDeniesHit(entity)
         ) {

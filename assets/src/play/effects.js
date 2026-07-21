@@ -3,7 +3,6 @@ import { ImageParticle } from "../classes/effect/image-particle.js";
 import { ShapeParticle } from "../classes/effect/shape-particle.js";
 import { TextParticle } from "../classes/effect/text-particle.js";
 import { WaveParticle } from "../classes/effect/wave-particle.js";
-import { DroppedItemStack } from "../classes/item/dropped-itemstack.js";
 /* @import { Entity } from "../classes/entity/entity.js"; */
 import { PhysicalObject, ShootableObject } from "../classes/physical.js";
 import { Timer } from "../classes/timer.js";
@@ -103,7 +102,6 @@ class Explosion {
       const dist = entity.pos.subXY(this.x, this.y).magnitude;
       if (
         entity.tangible &&
-        !(entity instanceof DroppedItemStack) &&
         dist <= rad + entity.hitSize * 0.5
       )
         this.hitE(entity, dist, knockmul, damagemul);
@@ -112,7 +110,7 @@ class Explosion {
   }
   /** @param {ShootableObject} thing @param {number} fromdist */
   hit(thing, fromdist, damagemul = 1) {
-    if (thing.team !== this.team) thing.damage(this.type, this.amount * damagemul, this.source);
+    if (thing.team !== this.team) thing.damage(this.type, (this.amount + rnd.float(-this.spread, this.spread)) * damagemul, this.source);
   }
   /** @param {import("../classes/entity/entity.js").Entity} thing @param {number} fromdist */
   hitE(thing, fromdist, knockmul = 1, damagemul = 1) {
