@@ -32,7 +32,7 @@ const Direction = {
     return Direction.UP;
   },
   vectorOf(direction) {
-    return Vector.fromAngleRad(direction);
+    return Vector.fromAngleRad(direction).round(true);
   },
   forEach(fn){
     fn(this.UP);
@@ -70,4 +70,5 @@ const Direction = {
     }
   },
 };
-export { blockSize, chunkSize, worldSize, totalSize, Direction };
+export { blockSize, chunkSize, Direction, totalSize, worldSize };
+

@@ -1,6 +1,7 @@
 import * as CMFT from "../../core/cmft.js";
 import { col } from "../../core/color.js";
 import { rnd, tru } from "../../core/number.js";
+import { Registries, TypeRegistries } from "../../core/registry.js";
 import Integrate from "../../lib/integrate.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
 import { Corporation } from "./corporation.js";
@@ -148,6 +149,29 @@ class Item extends Integrate.RegisteredItem {
       }
     },
   };
+  /** Smarter way of checking stack size than just getting shit from registry, but faster than constructing the item */
+  static stackSizeOf(itemName) {
+    const reg = Registries.items.tryGet(itemName);
+    // If not in registry, assume 100
+    if (!reg) return 100;
+
+    // If in registry and directly defined, use that
+    const def = reg.stackSize;
+    if (def) return def;
+
+    // If in registry but not directly defined, and no type present, use the item default of 100
+    if(!reg.type) return 100;
+
+    
+    // If in registry but not directly defined, and there is a type present, try to get its default stack size
+    const type = TypeRegistries.default.get(reg.type);
+    const tss = new type().stackSize;
+    // If it has one (or extends Item in some form), then use that
+    if (tss) return tss;
+
+    // if somehow none of those has a definition, fall back to 100
+    return 100;
+  }
 }
 export { Item };
 

@@ -3,7 +3,7 @@ import { Item } from "../../classes/item/item.js";
 import { PlaceableItem } from "../../classes/item/placeable.js";
 import { col } from "../../core/color.js";
 import { construct } from "../../core/constructor.js";
-import { Registries } from "../../core/registry.js";
+import { Registries, TypeRegistries } from "../../core/registry.js";
 import { Serialiser } from "../../core/serialiser.js";
 import {
   createCMFTComponent,
@@ -442,7 +442,7 @@ ${corp ? `#=-Manufacturer:#-- #[${Corporation.colorof(item.corp)}]-${Corporation
   if (item instanceof PlaceableItem) {
     const block = Registries.blocks.tryGet(item.block);
     if (block) {
-      s += `\n#3-Has Block Equivalent\n\n#=-Basic Information:\n #c-${block.health ?? 100}#-- health\n`;
+      s += `\n#3bBlock Equivalent\n------------------------------------------\n#r-Technical Information:\n #>>icon.int#n-Type:#-- ${block.type ?? "block"} #=-(#e-${TypeRegistries.default.get(block.type ?? "block").name}#=-)\n #n-Registry Name:#-- ${item.registryName}\n\n#=-Basic Information:\n #c-${block.health ?? 100}#-- health\n`;
       if (block.armour) {
         s += ` #6-${block.armour ?? 0}#-- armour\n`;
         if (block.armourToughness) s += `  (#g-${block.armourToughness}#-- toughness)\n`;

@@ -47,6 +47,8 @@ export class PhysicalObject extends Integrate.RegisteredItem {
   }
 
   oncreated() {}
+  ondestroyed() {}
+
 
   /**
    * @param {PhysicalObject} other

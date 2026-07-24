@@ -34,7 +34,7 @@ class Throwable extends Item {
     );
   }
   createExtendedDetails() {
-    return `#=-Throwable:\n  #[00ffac]-${this.spread}°#-- inaccuracy\n  ${this.bullet.createInfo().replaceAll("\n", "\n  ").trim()}`;
+    return `#=-Throwable:\n  #[0x00ffac]-${this.spread}°#-- inaccuracy\n  ${this.bullet.createInfo().replaceAll("\n", "\n  ").trim()}`;
   }
 }
 export { Throwable };

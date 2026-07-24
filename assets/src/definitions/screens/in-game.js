@@ -13,7 +13,7 @@ import {
   createUIImageComponent,
   createUIInventoryComponent,
   ui,
-  UIComponent
+  UIComponent,
 } from "../../core/ui.js";
 import { game, gen, world } from "../../play/game.js";
 import { Log } from "../../play/messaging.js";
@@ -552,7 +552,6 @@ createUIComponent(
   .define("x", () => (Container.selectedBlock?.uiCornerX ?? 0) - 35)
   .define("y", () => (Container.selectedBlock?.uiCornerY ?? 0) + 65);
 
-
 //##############################################################
 
 //                        INVENTORY
@@ -603,7 +602,7 @@ createUIComponent(
   30,
   "both",
   () => {
-    game.player.entity?.inventory.autoStack();
+    game.player.entity?.inventory.restack();
   },
   "Stack All",
   true,
@@ -944,7 +943,7 @@ createUIComponent(
       false,
       game.player.entity.team,
       undefined,
-      true,
+      false,
     );
   },
   ">> New Player <<\nSend a new robot\nwith the basic\ncorp equipment\nto the drop\npoint.\n\n$1200",
@@ -961,7 +960,7 @@ createUIComponent(
   "none",
   () => {
     UIComponent.setCondition("dead", "no");
-    deliverPlayer(null, totalSize / 2, totalSize / 2, false, "scrap", undefined, true);
+    deliverPlayer(null, totalSize / 2, totalSize / 2, false, "scrap", undefined, false);
   },
   ">> Scrap Player <<\nSend a robot\nmade of scrap\nto the drop\npoint.\n\nFree",
   true,
@@ -987,7 +986,7 @@ createUIComponent(
       false,
       game.player.entity.team,
       undefined,
-      true,
+      false,
     );
   },
   "> Convenience <\n>>> Respawn <<<\nSend a new robot\nwith the basic\ncorp equipment\nto the point\nwhere you died.\n\n$2000",

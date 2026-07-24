@@ -1,4 +1,4 @@
-import { dynamicSort, roundNum } from "./number.js";
+import { propertySort, roundNum } from "./number.js";
 
 /**@param {number} zeros The number of zeros after the one in the number of times - 6 -> 1000000 times. @param {Function[]} fns Functions to compare. @param {any[]} params What to pass to the functions. @param {any} thisArg The value to use as `this`. */
 export const perf = (zeros, fns, params, thisArg = null) => {
@@ -16,7 +16,7 @@ export const perf = (zeros, fns, params, thisArg = null) => {
   }
   console.log(` Test finished. Results:`);
   const table = {};
-  results.sort(dynamicSort("time"));
+  results.sort(propertySort("time"));
   for (const { index, name, time } of results) {
     const ms = time / t;
     table[`${name} (${index})`] = {

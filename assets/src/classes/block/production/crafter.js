@@ -6,7 +6,6 @@ import { Registries } from "../../../core/registry.js";
 import { rotatedImg } from "../../../core/ui.js";
 import { Direction } from "../../../scaling.js";
 import { Inventory } from "../../inventory.js";
-import { DroppedItemStack } from "../../item/dropped-itemstack.js";
 import { ItemStack } from "../../item/item-stack.js";
 import { Item } from "../../item/item.js";
 import { Factory } from "./factory.js";
@@ -79,10 +78,7 @@ class Crafter extends Factory {
     this.tickRecipe(recipe, recipe.time);
   }
   break(type) {
-    if (super.break(type))
-      this.results.iterate((stack) => {
-        DroppedItemStack.create(stack, this.world, this.x, this.y);
-      }, true);
+    if (super.break(type)) this.results.drop(this.world, this.x, this.y);
     return true;
   }
   /**
@@ -162,9 +158,28 @@ class Crafter extends Factory {
     return `#=-Inventory:\n  #d-${this.inventorySize}#-- input slots, #d-${this.resultSize}#-- output slots\n#=-Recipes:\n  ${this.recipes
       .map(
         (rec) =>
-          `${rec.inputs.map((stack) => `#>>${stack.getItem().image}#[${col.withA(col.lighten(Registries.images.tryGet(stack.getItem().image)?.color, 40), 255)}]-${stack.count}`).join(" ")}#-- => ${rec.outputs.map((stack) => `#>>${stack.getItem().image}#[${col.withA(col.lighten(Registries.images.tryGet(stack.getItem().image)?.color, 40), 255)}]-${stack.count}`).join(" ")}#--, #h-${roundNum(60/rec.time, 2)}/s#--`,
+          `${rec.inputs.map((stack) => `#>>${stack.getItem().image}#[${col.withA(col.lighten(Registries.images.tryGet(stack.getItem().image)?.color, 40), 255)}]-${stack.count}`).join(" ")}#-- => ${rec.outputs.map((stack) => `#>>${stack.getItem().image}#[${col.withA(col.lighten(Registries.images.tryGet(stack.getItem().image)?.color, 40), 255)}]-${stack.count}`).join(" ")}#--, #h-${roundNum(60 / rec.time, 2)}/s#--`,
       )
       .join("\n  ")}`;
+  }
+  getNextPullable() {
+    return this.results.first()?.item;
+  }
+  /**
+   * Get the current number of items of the set filter in the block's output inventory.
+   * @param {string} item
+   * @returns The number of items present.
+   */
+  getOutputLevel(item) {
+    return this.results.count(item);
+  }
+  /**
+   * Tries to pull an item from this block, as an unloader would.
+   * @param {string} filter
+   * @returns {string?} The item returned, or null if there are no items.
+   */
+  pull(filter) {
+    return this.results.removeItem(filter, 1) ? null : filter;
   }
 }
 

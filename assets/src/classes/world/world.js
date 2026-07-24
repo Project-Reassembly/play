@@ -19,6 +19,9 @@ import { Chunk } from "./chunk.js";
 import { WorldEvent } from "./events/world-event.js";
 import { FactoryEvaluator, REGION_SIZE } from "./factory-valuations.js";
 import { PowerNetwork } from "./power-network.js";
+/**
+ * @import {PhysicalObject} from "../physical.js"
+ */
 
 /**
  * @typedef SerialisedWorld
@@ -92,7 +95,7 @@ class World {
     this.evaluator = new FactoryEvaluator(this);
 
     this.addEvents();
-    console.log(`Added ${Object.keys(this.events).length} events to world '${name}'.`);
+    console.log(`Added ${Object.keys(this.events).length} events to new world.`);
   }
   reset() {
     this.physobjs = [];
@@ -208,21 +211,27 @@ class World {
       }
       len = this.items.length;
       for (let i = 0; i < len; i++) {
-        if (this.items[i]?.remove) {
+        const it = this.items[i];
+        if (it?.remove) {
+          it.ondestroyed();
           this.items.splice(i, 1);
           i--;
         }
       }
       len = this.entities.length;
       for (let e = 0; e < len; e++) {
-        if (this.entities[e]?.dead) {
+        const en = this.entities[e];
+        if (en?.dead) {
+          en.ondestroyed();
           this.entities.splice(e, 1);
           e--;
         }
       }
       len = this.physobjs.length;
       for (let p = 0; p < len; p++) {
-        if (this.physobjs[p]?.remove) {
+        const ph = this.physobjs[p];
+        if (ph?.remove) {
+          ph.ondestroyed();
           this.physobjs.splice(p, 1);
           p--;
         }

@@ -1,7 +1,7 @@
 import { col } from "../../../core/color.js";
 import { construct, constructFromType } from "../../../core/constructor.js";
 import * as MLF1 from "../../../core/mlf1.js";
-import { turn, Vector } from "../../../core/number.js";
+import { roundNum, turn, Vector } from "../../../core/number.js";
 import { Registries } from "../../../core/registry.js";
 import { drawImg, rotatedImg } from "../../../core/ui.js";
 import { debug } from "../../../play/debug.js";
@@ -12,7 +12,6 @@ import { WaveParticle } from "../../effect/wave-particle.js";
 import { WeaponComponent } from "../../entity/entity-part.js";
 import { Entity } from "../../entity/entity.js";
 import { Inventory } from "../../inventory.js";
-import { DroppedItemStack } from "../../item/dropped-itemstack.js";
 import { Item } from "../../item/item.js";
 import { WeaponBulletConfiguration, WeaponShootConfiguration } from "../../item/weapon-exts.js";
 import { infoOfShootPattern } from "../../item/weapon.js";
@@ -211,7 +210,28 @@ export class TurretController extends TurretBase {
     deserialised.turretinv = Inventory.deserialise(creator.turretinv);
   }
   createExtendedDetails() {
-    return `#=-Inventory:\n  #d-${this.inventorySize}#-- ammo slots\n#=-Building:\n  #e-${this.maxSize}#-- maximum cross radius\n  Base block is #>>${Registries.blocks.tryGet(this.otherPart)?.image ?? "error"}#e-${Registries.blocks.tryGet(this.otherPart)?.name ?? this.otherPart}#--`;
+    const base = Registries.blocks.tryGet(this.otherPart);
+    const baseImg = base?.image ?? "error";
+
+    // Make base image
+    const ms = this.maxSize;
+    const l = ms * 2 + 1;
+    /** @type {Array<string>} */
+    const visualiser = new Array(l);
+    for (let i = 0; i < ms; i++) {
+      const spacing = (ms - i) * 2 - 1;
+      visualiser[i] =
+        `${"#>>spacer".repeat(i)}#>>${baseImg}${"#>>spacer".repeat(spacing)}#>>${baseImg}${"#>>spacer".repeat(i)}#--`;
+    }
+    visualiser[ms] =
+      `${"#>>spacer".repeat(ms)}#>>${this.image ?? "error"}${"#>>spacer".repeat(ms)}#--`;
+    for (let i = 0; i < ms; i++) {
+      const spacing = (ms - i) * 2 - 1;
+      visualiser[ms * 2 - i] =
+        `${"#>>spacer".repeat(i)}#>>${baseImg}${"#>>spacer".repeat(spacing)}#>>${baseImg}${"#>>spacer".repeat(i)}#--`;
+    }
+
+    return `#=-Inventory:\n  #d-${this.inventorySize}#-- ammo slots\n#=-Building:\n  #e-${this.maxSize}#-- maximum cross radius\n  Base block is #>>${baseImg}#e-${base?.name ?? this.otherPart}#--\n  Max. size diagram:\n  ${visualiser.join("\n  ")}\n  Key:\n    #>>${baseImg}#-- Base\n    #>>${this.image ?? "error"}#-- Controller (this)\n    #>>spacer#-- Any block, including air`;
   }
   drawTooltip(x, y, outlineColour, backgroundColour, forceVReverse = false) {
     super.drawTooltip(x, y, outlineColour, backgroundColour, forceVReverse);
@@ -272,6 +292,7 @@ export class TurretController extends TurretBase {
       return true;
     } else {
       this.target = tempTarget;
+      this.gunCanFire = false;
       return false;
     }
   }
@@ -378,10 +399,7 @@ export class TurretController extends TurretBase {
     );
   }
   break(type) {
-    if (super.break(type))
-      this.turretinv.iterate((stack) => {
-        DroppedItemStack.create(stack, this.world, this.x, this.y);
-      }, true);
+    if (super.break(type)) this.turretinv.drop(this.world, this.x, this.y);
     return true;
   }
   value() {
@@ -560,6 +578,6 @@ export class TurretItem extends Item {
         .substring(0, 15);
   }
   createExtendedDetails() {
-    return `#=-Attack:\n${infoOfShootPattern(this.shoot, this.bullets, this.ammoUse)}`;
+    return `#=-Attack:\n  #d-${roundNum(this.range/30, 1)}#-- tiles detection range\n${infoOfShootPattern(this.shoot, this.bullets, this.ammoUse)}`;
   }
 }

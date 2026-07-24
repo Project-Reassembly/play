@@ -445,7 +445,6 @@ Registries.entities.add("test-npc", {
   relations: { reactions: [] },
   trades: [
     "peti-electrified-plasma-launcher",
-    "iti-destabilised-cell",
     { item: "iti-laser-caster", costX: 1.25 },
     { item: "iti-energy-repeater", costX: 1.25 },
     { item: "iti-laser-pistol", costX: 1.25 },

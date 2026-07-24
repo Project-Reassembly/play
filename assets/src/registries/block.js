@@ -28,7 +28,11 @@ createLinkedBlockAndItem(
   "Copper Wall",
   "base.copper",
   { type: "wall", health: 400 },
-  { description: "A solid copper cube.\n\nCould be used as defense.", marketValue: 15 },
+  {
+    description: "A solid copper cube.\n\nCould be used as defense.",
+    marketValue: 15,
+    hidden: true,
+  },
 );
 createLinkedBlockAndItem(
   "iron-wall",
@@ -38,6 +42,7 @@ createLinkedBlockAndItem(
   {
     description: "A solid iron cube.\nSomehow doesn't rust.\n\nCould be used as defense.",
     marketValue: 52,
+    hidden: true,
   },
 );
 createLinkedBlockAndItem(
@@ -49,6 +54,7 @@ createLinkedBlockAndItem(
     description:
       "An extremely dense cube of tungsten.\nGood thing you're a robot.\n\nCould be used as defense.",
     marketValue: 625,
+    hidden: true,
   },
 );
 createLinkedBlockAndItem(
@@ -56,7 +62,11 @@ createLinkedBlockAndItem(
   "Titanium Wall",
   "base.titanium",
   { type: "wall", health: 2000, armour: 5 },
-  { description: "A cube of titanium.\n\nCould be used as defense.", marketValue: 900 },
+  {
+    description: "A cube of titanium.\n\nCould be used as defense.",
+    marketValue: 900,
+    hidden: true,
+  },
 );
 //## OFFENSIVE ##
 createLinkedBlockAndItem(
@@ -203,20 +213,20 @@ createLinkedBlockAndItem(
       },
       {
         inputs: [
-          { item: "scrap", count: 4 },
-          { item: "plate", count: 4 },
           { item: "scrap-shooter", count: 1 },
-        ],
-        outputs: [{ item: "recycle", count: 1 }],
-        time: 1200,
-      },
-      {
-        inputs: [
-          { item: "recycle", count: 1 },
           { item: "plate", count: 2 },
+          { item: "scrap", count: 2 },
         ],
         outputs: [{ item: "recycle-mounted", count: 1 }],
         time: 120,
+      },
+      {
+        inputs: [
+          { item: "recycle-mounted", count: 1 },
+          { item: "scrap-turret-base", count: 1 },
+        ],
+        outputs: [{ item: "recycle", count: 1 }],
+        time: 1200,
       },
       {
         inputs: [
@@ -250,11 +260,11 @@ createLinkedBlockAndItem(
       },
       {
         inputs: [
-          { item: "scrap", count: 100 },
-          { item: "plate", count: 35 },
+          { item: "scrap", count: 200 },
+          { item: "plate", count: 100 },
         ],
         outputs: [{ item: "scrap-artillery", count: 1 }],
-        time: 1500,
+        time: 3000,
       },
       {
         inputs: [{ item: "scrap", count: 1 }],
@@ -301,19 +311,19 @@ createLinkedBlockAndItem(
       },
       {
         inputs: [
-          { item: "copper-ingot", count: 25 },
-          { item: "plate", count: 10 },
-        ],
-        outputs: [{ item: "basic-assembler", count: 1 }],
-        time: 1080,
-      },
-      {
-        inputs: [
           { item: "makeshift-explosive", count: 4 },
           { item: "scrap", count: 1 },
         ],
         outputs: [{ item: "bomb", count: 1 }],
         time: 180,
+      },
+      {
+        inputs: [
+          { item: "copper-ingot", count: 25 },
+          { item: "plate", count: 10 },
+        ],
+        outputs: [{ item: "basic-assembler", count: 1 }],
+        time: 1080,
       },
     ],
   },
@@ -410,6 +420,8 @@ createLinkedBlockAndItem(
     type: "crafter",
     title: "Basic Assembler",
     inventorySize: 6,
+    health: 150,
+    tickEffect: "basic-crafter-smoke",
     recipes: [
       {
         inputs: [{ item: "copper-ingot", count: 1 }],
@@ -434,11 +446,37 @@ createLinkedBlockAndItem(
       },
       {
         inputs: [
+          { item: "copper-wire", count: 3 },
+          { item: "copper-ingot", count: 1 },
+          { item: "plate", count: 1 },
+        ],
+        outputs: [{ item: "basic-level-loader", count: 1 }],
+        time: 90,
+      },
+      {
+        inputs: [
+          { item: "copper-wire", count: 3 },
+          { item: "copper-ingot", count: 3 },
+          { item: "plate", count: 2 },
+        ],
+        outputs: [{ item: "basic-level-unloader", count: 1 }],
+        time: 90,
+      },
+      {
+        inputs: [
           { item: "copper-ingot", count: 10 },
           { item: "plate", count: 5 },
         ],
         outputs: [{ item: "basic-drill", count: 1 }],
         time: 200,
+      },
+      {
+        inputs: [
+          { item: "copper-ingot", count: 40 },
+          { item: "plate", count: 15 },
+        ],
+        outputs: [{ item: "basic-smelter", count: 1 }],
+        time: 900,
       },
       {
         inputs: [
@@ -451,7 +489,6 @@ createLinkedBlockAndItem(
       },
       {
         inputs: [
-          { item: "makeshift-explosive", count: 1 },
           { item: "plate", count: 4 },
           { item: "copper-ingot", count: 2 },
           { item: "copper-wire", count: 12 },
@@ -461,7 +498,45 @@ createLinkedBlockAndItem(
       },
     ],
   },
-  { description: "Constructs machines for use in production and defense.", marketValue: 140 },
+  {
+    description: "Constructs stable machines for use in production and defense.",
+    marketValue: 140,
+  },
+);
+createLinkedBlockAndItem(
+  "Basic-smelter",
+  "Basic Smelter",
+  "crafter.basic-smelter",
+  {
+    type: "smelter",
+    title: "Basic Smelter",
+    fuelTypes: { coal: 480 },
+    inventorySize: 4,
+    tickEffect: "basic-crafter-smoke",
+    recipes: [
+      { inputs: [{ item: "scrap", count: 2 }], outputs: [{ item: "plate", count: 1 }], time: 150 },
+      {
+        inputs: [{ item: "raw-copper", count: 2 }],
+        outputs: [{ item: "copper-ingot", count: 1 }],
+        time: 45,
+      },
+      {
+        inputs: [{ item: "raw-iron", count: 2 }],
+        outputs: [{ item: "iron-ingot", count: 1 }],
+        time: 75,
+      },
+      {
+        inputs: [{ item: "raw-electrum", count: 2 }],
+        outputs: [{ item: "electrum-ingot", count: 1 }],
+        time: 105,
+      },
+    ],
+  },
+  {
+    description:
+      "Smelts and casts ores into ingot form.\nSlightly faster, and can smelt Iron and Electrum.",
+    marketValue: 215,
+  },
 );
 //## DRILLS ##
 //Scrap Tier [0]
@@ -499,6 +574,7 @@ createLinkedBlockAndItem(
     topImg: "drill.basic-drill.top",
     spinnerImg: "drill.basic-drill.spinner",
     baseImg: "drill.basic-drill.base",
+    health: 150,
     results: {
       "sand": "sand",
       "sand-water": "sand",
@@ -513,10 +589,13 @@ createLinkedBlockAndItem(
     duration: 200,
     inventorySize: 1,
     title: "Basic Drill",
-    tickEffect: "basic-drill-smoke",
+    tickEffect: "basic-crafter-smoke",
     tickEffectChance: 0.2,
   },
-  { description: "Slowly collects resources from below it.\nCan drill Iron and Electrum." },
+  {
+    description: "Slowly collects resources from below it.\nCan drill Iron and Electrum.",
+    marketValue: 60,
+  },
 );
 //## CONVEYOR ##
 //Scrap Tier [0]
@@ -561,8 +640,12 @@ createLinkedBlockAndItem(
     moveTime: 15,
     baseImg: "base.basic",
     beltImg: "conveyor.basic-conveyor.belt",
+    health: 150,
   },
-  { description: "A slightly faster-moving belt.\nTransports items from one place to another." },
+  {
+    description: "A slightly faster-moving belt.\nTransports items from one place to another.",
+    marketValue: 5,
+  },
 );
 createLinkedBlockAndItem(
   "basic-unloader",
@@ -573,10 +656,47 @@ createLinkedBlockAndItem(
     moveTime: 15,
     baseImg: "base.basic",
     beltImg: "conveyor.basic-unloader.belt",
+    health: 150,
   },
   {
     description:
       "A slightly faster-moving belt.\nTransports items from one place to another.\nPulls selected items from the block behind it.",
+    marketValue: 10,
+  },
+);
+createLinkedBlockAndItem(
+  "basic-level-unloader",
+  "Basic Level Unloader",
+  "conveyor.basic-level-unloader.ui",
+  {
+    type: "level-unloader",
+    moveTime: 15,
+    baseImg: "base.basic",
+    beltImg: "conveyor.basic-level-unloader.belt",
+    indicatorImg: "conveyor.basic-level-loader.indicator",
+    health: 150,
+  },
+  {
+    description: "A specialised unloader which will leave up to a certain number of items behind.",
+    marketValue: 25,
+  },
+);
+createLinkedBlockAndItem(
+  "basic-level-loader",
+  "Basic Level Loader",
+  "conveyor.basic-level-loader.ui",
+  {
+    type: "level-loader",
+    moveTime: 15,
+    baseImg: "base.basic",
+    beltImg: "conveyor.basic-level-loader.belt",
+    indicatorImg: "conveyor.basic-level-loader.indicator",
+    health: 150,
+  },
+  {
+    description:
+      "A specialised conveyor which only pushes to blocks, not other conveyors.\nWill stop moving items into the block if there are enough already present, to maintain a constant fill level.",
+    marketValue: 10,
   },
 );
 //## CONTAINERS ##
@@ -591,7 +711,7 @@ createLinkedBlockAndItem(
 createLinkedBlockAndItem(
   "recycle",
   "Recycle",
-  "base.scrap.smooth",
+  "turret.recycle.ui",
   {
     type: "turret",
     inventorySize: 1,
@@ -624,6 +744,7 @@ createLinkedBlockAndItem(
       recoilSpeed: 0.2,
     },
     shootX: 20,
+    baseImg: "turret.recycle.base",
   },
   {
     description: "A mounted scrap shooter.\nShoots slower but further.",
@@ -654,10 +775,11 @@ createLinkedBlockAndItem(
     type: "turret-controller",
     connectorImage: "turret-base.scrap.connector",
     otherPart: "scrap-turret-base",
+    maxSize: 2,
   },
   {
     description:
-      "Mounting point for turrets.\nMaximum size depends on number of bases.\nPlace them in a cross-shaped pattern, with the controller in the center.",
+      "Mounting point for turrets.\nMaximum turret size depends on number of bases.\nCheck the#>>icon.database#=-database#-- for placement examples.",
     marketValue: 100,
   },
 );
@@ -812,7 +934,11 @@ createLinkedBlockAndItem(
   "Launch Pad",
   "capitalism.iti.launch",
   { type: "launch-pad", podImage: "capitalism.iti.pod" },
-  { description: "Launches batches of items to space, ready to be collected by ITI.", corp: "iti", marketValue: 1250 },
+  {
+    description: "Launches batches of items to space, ready to be collected by ITI.",
+    corp: "iti",
+    marketValue: 1250,
+  },
 );
 createLinkedBlockAndItem(
   "landing-pad",
@@ -822,7 +948,8 @@ createLinkedBlockAndItem(
   {
     description:
       "Buys items from ITI, and receives them.\nMust be given an item to use for reference.",
-    corp: "iti", marketValue: 1250
+    corp: "iti",
+    marketValue: 1250,
   },
 );
 //## DEV ##

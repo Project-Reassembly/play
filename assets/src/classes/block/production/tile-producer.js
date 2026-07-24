@@ -53,10 +53,7 @@ class TileProducer extends Factory {
     return `${
       this.results[this._blockOn] ?
         `--> ${
-          (Registries.items.has(this.results[this._blockOn]) ?
-            Registries.items.get(this.results[this._blockOn])
-          : { name: "Unknown" }
-          )?.name
+          Registries.items.tryGet(this.results[this._blockOn])?.name ?? "Unknown"
         } x${this.amount}`
       : "No recipe"
     }\n${""

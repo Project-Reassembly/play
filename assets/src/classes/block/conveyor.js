@@ -1,4 +1,5 @@
-import { roundNum } from "../../core/number.js";
+import { ImageContainer } from "../../core/image.js";
+import { clamp, roundNum } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { drawImg, rotatedImg, ui } from "../../core/ui.js";
 import { Log } from "../../play/messaging.js";
@@ -8,7 +9,6 @@ import { ItemStack } from "../item/item-stack.js";
 import { ShootableObject } from "../physical.js";
 import { Block } from "./block.js";
 import { Container } from "./container.js";
-import { Crafter } from "./production/crafter.js";
 class Conveyor extends Block {
   moveTime = 10;
   _progress = 0;
@@ -42,16 +42,18 @@ class Conveyor extends Block {
         this.istack = ItemStack.EMPTY;
         this._progress = 0;
       }
-      let i = this.istack;
-      if (target instanceof Container && target.inventory.canAddItem(i.item, i.count)) {
-        this._progress = 0;
-        target.inventory.addItem(i.item, 1);
-        this.istack.clear();
+      if (target instanceof Container /* && target.inventory.canAddItem(i.item, i.count) */) {
+        // target.inventory.addItem(i.item, 1);
+        if (target.push(this.istack.item)) {
+          this._progress = 0;
+          this.istack.clear();
+        }
       } else if (target instanceof Conveyor && target.istack.isEmpty()) {
         this._progress = 0;
         target.istack = this.istack;
         this.istack = ItemStack.EMPTY;
         if (this.direction !== target.direction) target._progress = target.moveTime / 2;
+        else target._progress = 0;
       }
     }
   }
@@ -76,8 +78,8 @@ class Conveyor extends Block {
         this.istack.getItem().image,
         this.x + vct.x * (amt - 0.5) * blockSize,
         this.y + vct.y * (amt - 0.5) * blockSize,
-        20,
-        20,
+        blockSize * 0.5,
+        blockSize * 0.5,
       );
     }
     super.postDraw();
@@ -87,8 +89,11 @@ class Conveyor extends Block {
    */
   itemOnTopOf(item) {
     if (this.istack.isEmpty()) {
-      this.istack = item.item;
-      item.remove = true;
+      this.istack = item.item.copy();
+      this.istack.count = 1;
+
+      item.item.count--;
+      if (item.item.isEmpty()) item.remove = true;
     }
   }
   /**
@@ -121,10 +126,13 @@ class Conveyor extends Block {
   value() {
     return this.istack.getItem()?.marketValue / 100 || 0;
   }
+  read() {
+    return this.istack.isEmpty() ? "" : this.istack?.item;
+  }
 }
 
 class Unloader extends Conveyor {
-  filter = "nothing";
+  filter = "";
   tick() {
     this.extract();
     super.tick();
@@ -132,17 +140,14 @@ class Unloader extends Conveyor {
   extract() {
     let vct = Direction.vectorOf(this.direction);
     let extractFrom = this.world.getBlock(this.gridX - vct.x, this.gridY - vct.y);
-    if (extractFrom instanceof Container) {
-      if (extractFrom instanceof Crafter) {
-        if (extractFrom.results.hasItem(this.filter) && this.istack.isEmpty()) {
-          extractFrom.results.removeItem(this.filter, 1);
-          this.istack = new ItemStack(this.filter);
-          return;
+    if (extractFrom instanceof Container && this.istack.isEmpty()) {
+      const toPull = this.filter ? this.filter : extractFrom.getNextPullable();
+      if (toPull) {
+        const grabbed = extractFrom.pull(toPull);
+        if (grabbed) {
+          this.istack = new ItemStack(grabbed);
+          this._progress = 0;
         }
-      }
-      if (extractFrom.inventory.hasItem(this.filter) && this.istack.isEmpty()) {
-        extractFrom.inventory.removeItem(this.filter, 1);
-        this.istack = new ItemStack(this.filter);
       }
     }
   }
@@ -153,15 +158,21 @@ class Unloader extends Conveyor {
    * @returns
    */
   interaction(ent, stack = ItemStack.EMPTY) {
-    this.filter = stack.item;
-    if (stack.getItem()) Log.send("Set filter to " + stack.getItem()?.name);
-    else Log.send("Cleared filter.");
+    if (stack.isEmpty()) {
+      if (this.filter) {
+        this.filter = "";
+        Log.send("Cleared filter.");
+      }
+    } else {
+      Log.send("Set filter to " + stack.getItem()?.name);
+      this.filter = stack.item;
+    }
     ui.waitingForMouseUp = true;
     return true;
   }
   highlight(emphasised) {
     super.highlight(emphasised);
-    if (this.filter && this.filter !== "nothing") {
+    if (this.filter) {
       let img = Registries.items.get(this.filter).image;
       drawImg(
         img,
@@ -189,5 +200,142 @@ class Unloader extends Conveyor {
     return this.filter;
   }
 }
-export { Conveyor, Unloader };
+class LevelUnloader extends Unloader {
+  level = 100;
+  indicatorImg = "error";
+  #lcache = 0;
+  extract() {
+    let vct = Direction.vectorOf(this.direction);
+    let extractFrom = this.world.getBlock(this.gridX - vct.x, this.gridY - vct.y);
+    if (extractFrom instanceof Container && this.istack.isEmpty()) {
+      const toPull = this.filter ? this.filter : extractFrom.getNextPullable();
+      if (toPull) {
+        this.#lcache = extractFrom.getOutputLevel(toPull);
+
+        if (this.#lcache > this.level) {
+          const grabbed = extractFrom.pull(toPull);
+          if (grabbed) {
+            this.istack = new ItemStack(grabbed);
+            this._progress = 0;
+          }
+        }
+      }
+    }
+  }
+  serialise() {
+    let b = super.serialise();
+    b.level = this.level;
+    return b;
+  }
+  /**
+   * @param {LevelLoader} deserialised
+   * @param {object} creator
+   */
+  static applyExtraProps(deserialised, creator) {
+    super.applyExtraProps(deserialised, creator);
+    deserialised.level = creator.level;
+  }
+  postDraw2() {
+    ImageContainer.draw(this.indicatorImg, this.x, this.y, blockSize, blockSize);
+    textAlign(CENTER, CENTER);
+    textSize(8);
+    const c = 255 - clamp((this.#lcache - this.level) / this.level * 255, 0, 255);
+    fill(255, c, c);
+    text(`${this.#lcache}`, this.x, this.y - 3);
+    fill(255);
+    text(`${this.level}`, this.x, this.y + 3);
+  }
+  leftArrow() {
+    if (keyIsDown(CONTROL)) {
+      if (this.level > 100) this.level -= 100;
+      else this.level = 0;
+    } else if (keyIsDown(SHIFT)) {
+      if (this.level > 10) this.level -= 10;
+      else this.level = 0;
+    } else if (this.level > 0) this.level--;
+  }
+  rightArrow() {
+    if (keyIsDown(CONTROL)) {
+      if (this.level < 909) this.level += 100;
+      else this.level = 999;
+    } else if (keyIsDown(SHIFT)) {
+      if (this.level < 990) this.level += 10;
+      else this.level = 999;
+    } else if (this.level < 999) this.level++;
+  }
+  read() {
+    return `${this.level}`;
+  }
+  write(_) {
+    this.level = clamp(+_ || 0, 0, 999);
+  }
+}
+/** Conveyor end point - won't drop items, and tries to maintain a certain number of items in the output. */
+class LevelLoader extends Conveyor {
+  level = 100;
+  indicatorImg = "error";
+  #lcache = 0;
+  convey(target, posX, posY) {
+    if (this._progress < this.moveTime) this._progress++;
+    if (this._progress >= this.moveTime) {
+      if (target instanceof Container) {
+        this.#lcache = target.getFillLevel(this.istack.item);
+        if (this.#lcache < this.level && target.push(this.istack.item)) {
+          this._progress = 0;
+          this.istack.clear();
+          this.#lcache++;
+        }
+      }
+    }
+  }
+  serialise() {
+    let b = super.serialise();
+    b.level = this.level;
+    return b;
+  }
+  /**
+   * @param {LevelLoader} deserialised
+   * @param {object} creator
+   */
+  static applyExtraProps(deserialised, creator) {
+    super.applyExtraProps(deserialised, creator);
+    deserialised.level = creator.level;
+  }
+  postDraw2() {
+    ImageContainer.draw(this.indicatorImg, this.x, this.y, blockSize, blockSize);
+    textAlign(CENTER, CENTER);
+    textSize(8);
+    const c = (1 - this.#lcache / this.level) * 255;
+    fill(255, c, c);
+    text(`${this.#lcache}`, this.x, this.y - 3);
+    fill(255);
+    text(`${this.level}`, this.x, this.y + 3);
+  }
+  leftArrow() {
+    if (keyIsDown(CONTROL)) {
+      if (this.level > 100) this.level -= 100;
+      else this.level = 0;
+    } else if (keyIsDown(SHIFT)) {
+      if (this.level > 10) this.level -= 10;
+      else this.level = 0;
+    } else if (this.level > 0) this.level--;
+  }
+  rightArrow() {
+    if (keyIsDown(CONTROL)) {
+      if (this.level < 909) this.level += 100;
+      else this.level = 999;
+    } else if (keyIsDown(SHIFT)) {
+      if (this.level < 990) this.level += 10;
+      else this.level = 999;
+    } else if (this.level < 999) this.level++;
+  }
+  read() {
+    return `${this.level}`;
+  }
+  write(_) {
+    this.level = clamp(+_ || 0, 0, 999);
+  }
+}
+
+export { Conveyor, LevelLoader, LevelUnloader, Unloader };
 

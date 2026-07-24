@@ -44,6 +44,10 @@ class Smelter extends Crafter {
     deserialised._fuelLeft = creator.fuel;
     deserialised._fuelMax = creator.fuel;
   }
+  addFuel(_) {
+    this._fuelLeft += _;
+    this._fuelMax += _;
+  }
   setFuel(_) {
     this._fuelLeft = _;
     this._fuelMax = _;
@@ -57,7 +61,27 @@ class Smelter extends Crafter {
     return r;
   }
   createExtendedDetails() {
-    return `${super.createExtendedDetails()}\n#=-Fuel Types:\n  ${Object.entries(this.fuelTypes).map(([type, time]) => `#>>${Registries.items.tryGet(type)?.image}#6- ${roundNum(time / 60, 2)}s#--`).join("\n  ")}`;
+    return `${super.createExtendedDetails()}\n#=-Fuel Types:\n  ${Object.entries(this.fuelTypes)
+      .map(
+        ([type, time]) =>
+          `#>>${Registries.items.tryGet(type)?.image}#6- ${roundNum(time / 60, 2)}s#--`,
+      )
+      .join("\n  ")}`;
+  }
+  /**
+   * Tries to add an item to this block, as a conveyor would.
+   * @param {string} item
+   * @returns True if the item was successfully added.
+   */
+  push(item) {
+    if (item in this.fuelTypes) {
+      if (this._fuelLeft === 0) {
+        this.setFuel(this.fuelTypes[item]);
+        return true;
+      }
+      return false;
+    }
+    return this.inventory.addItem(item, 1) === 0;
   }
 }
 export { Smelter };

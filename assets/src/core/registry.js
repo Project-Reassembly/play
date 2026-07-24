@@ -13,6 +13,7 @@ import { constructFromType } from "./constructor.js";
  * @import { WorldEvent } from "../classes/world/events/world-event.js";
  * @import { GroundTile } from "../classes/block/ground-tile.js";
  * @import { BulletInstance, BulletModel } from "../classes/projectile/bullet.js"
+ * @import { Tank } from "../classes/entity/tank.js";
  */
 /// <reference path="../lib/integrate"/>
 
@@ -51,6 +52,8 @@ const Registries = Object.freeze(
       new (class SmallRegistries {
         /**@readonly @type {Integrate.Registry<{name:string, description:string, bullet:string}>} */
         punch_types = new Integrate.Registry();
+        /**@readonly @type {Integrate.Registry<Tank>} */
+        tank_bases = new Integrate.Registry();
       })(),
     );
   })(),

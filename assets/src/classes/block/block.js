@@ -99,8 +99,8 @@ class Block extends ShootableObject {
     DroppedItemStack.create(
       new ItemStack(this.dropItem, 1),
       this.world,
-      this.x + blockSize / 2,
-      this.y + blockSize / 2,
+      this.x,
+      this.y,
     );
     return true;
   }

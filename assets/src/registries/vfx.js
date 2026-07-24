@@ -23,7 +23,7 @@ Registries.vfx.add("crafter-smoke", {
     light: 0,
   },
 });
-Registries.vfx.add("basic-drill-smoke", {
+Registries.vfx.add("basic-crafter-smoke", {
   type: "particle-emission",
   cone: 30,
   amount: 3,

@@ -1,6 +1,7 @@
 import { col } from "../../../core/color.js";
 import { construct, constructFromType } from "../../../core/constructor.js";
-import { turn, Vector } from "../../../core/number.js";
+import { ImageContainer } from "../../../core/image.js";
+import { roundNum, turn, Vector } from "../../../core/number.js";
 import { debug } from "../../../play/debug.js";
 import { autoScaledEffect } from "../../../play/effects.js";
 import { blockSize } from "../../../scaling.js";
@@ -46,6 +47,7 @@ class Turret extends Container {
   /**@import {ShootableObject} from "../../physical.js" @type {ShootableObject} */
   target = null;
 
+  baseImg = "error";
   /** @type {Component} */
   component = null;
 
@@ -231,7 +233,11 @@ class Turret extends Container {
         .substring(0, 15);
   }
   createExtendedDetails() {
-    return `#=-Inventory:\n  #d-${this.inventorySize}#-- ammo slots\n#=-Attack:\n${infoOfShootPattern(this.shoot, this.bullets, this.ammoUse)}`;
+    return `#=-Inventory:\n  #d-${this.inventorySize}#-- ammo slots\n#=-Attack:\n  #d-${roundNum(this.range / 30, 1)}#-- tiles detection range\n${infoOfShootPattern(this.shoot, this.bullets, this.ammoUse)}`;
+  }
+  draw() {
+    ImageContainer.draw(this.baseImg, this.x, this.y, blockSize, blockSize);
+    ShootableObject.prototype.draw.call(this);
   }
   postDraw() {
     super.postDraw();
@@ -271,6 +277,7 @@ class Turret extends Container {
       return true;
     } else {
       this.target = tempTarget;
+      this.gunCanFire = false;
       return false;
     }
   }

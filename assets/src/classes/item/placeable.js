@@ -3,11 +3,23 @@ import { Registries } from "../../core/registry.js";
 import { ImageContainer } from "../../core/ui.js";
 import { world } from "../../play/game.js";
 import { blockSize } from "../../scaling.js";
+import { Block } from "../block/block.js";
 import { Item } from "./item.js";
+/** @type {Map<string, Block>} */
+const _blocks = new Map();
 class PlaceableItem extends Item {
   layer = "blocks";
   block = "none";
   itemsPerBlock = 1;
+  #blockCache = null;
+  /** Gets a static instance of the block that this item places. This block does not exist anywhere in the world, it's only used for placement previews and database stuff. */
+  getBlock() {
+    const b = _blocks.get(this.registryName);
+    if (b) return b;
+    const c = construct(Registries.blocks.get(this.block), "block");
+    _blocks.set(this.registryName, c);
+    return c;
+  }
   place(player, stack, bx, by, direction) {
     if (stack.count < this.itemsPerBlock) return false;
     if (this.block === "none") return false;
@@ -24,19 +36,15 @@ class PlaceableItem extends Item {
     }
     return false;
   }
-  drawPreviewImage(x, y, d=0) {
+  drawPreviewImage(x, y, d = 0) {
     push();
     translate(x, y);
     scale(0.8);
     opacity(0.5);
-    const regi = Registries.blocks.tryGet(this.block);
-    const rot =
-      regi?.type && (regi.type === "conveyor" || regi.type === "plasma-pipe") ?
-        (regi?.rotatable ?? true)
-      : false;
-    ImageContainer.draw(regi?.image, 0, 0, blockSize, blockSize, rot ? d : 0);
+    const block = this.getBlock();
+    ImageContainer.draw(block.image, 0, 0, blockSize, blockSize, block.rotatable ? d : 0);
     opacity(1);
-    if (rot)
+    if (block.rotatable)
       ImageContainer.draw(
         "icon.arrow",
         Math.cos(d) * blockSize * 0.5,
@@ -48,8 +56,7 @@ class PlaceableItem extends Item {
     pop();
   }
   createExtendedDetails() {
-    /**@type {import("../block/block.js").Block} */
-    let block = construct(Registries.blocks.tryGet(this.block) ?? {}, "block");
+    const block = this.getBlock();
     let blocktooltip = block.createExtendedDetails ? block.createExtendedDetails() : "";
     return blocktooltip;
   }

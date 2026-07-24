@@ -564,7 +564,9 @@ class Entity extends ShootableObject {
         calcAmount -= amount * resistance.amount; //Negative resistance would actually make it do more damage
       }
     }
-    return super.damage(type, calcAmount, source);
+    const r = super.damage(type, calcAmount, source);
+    if (this.dead) this.velocity = Vector.ZERO;
+    return r;
   }
 
   move(x, y) {

@@ -1,5 +1,4 @@
 import { Inventory } from "../inventory.js";
-import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { Block } from "./block.js";
 class Container extends Block {
   /** @type {Inventory} */
@@ -28,10 +27,7 @@ class Container extends Block {
     );
   }
   break(type) {
-    if (super.break(type))
-      this.inventory.iterate((stack) => {
-        DroppedItemStack.create(stack, this.world, this.x, this.y);
-      }, true);
+    if (super.break(type)) this.inventory.drop(this.world, this.x, this.y);
     return true;
   }
   serialise() {
@@ -48,18 +44,52 @@ class Container extends Block {
     deserialised.inventory = Inventory.deserialise(creator.inventory);
   }
   read() {
-    let item = "";
-    this.inventory.iterate((stack, slot, sotp) => {
-      sotp();
-      item = stack.item;
-    }, true);
-    return item;
+    return this.inventory.first()?.item ?? "";
   }
   createExtendedDetails() {
     return `#=-Inventory:\n  #d-${this.inventorySize}#-- slots`;
   }
   value() {
     return this.inventory.value() / 100 || 0;
+  }
+  /**
+   * Tries to add an item to this block, as a conveyor would.
+   * @param {string} item
+   * @returns True if the item was successfully added.
+   */
+  push(item) {
+    return this.inventory.addItem(item, 1) === 0;
+  }
+  /**
+   * Get the current number of items of the set filter in the block's output inventory.
+   * @param {string} item
+   * @returns The number of items present.
+   */
+  getOutputLevel(item) {
+    return this.inventory.count(item);
+  }
+  /**
+   * Get the current number of items of the set filter in the block's input inventory.
+   * @param {string} item
+   * @returns The number of items present.
+   */
+  getFillLevel(item) {
+    return this.inventory.count(item);
+  }
+  /**
+   * Gets the next item type available to pull.
+   * @returns {string?} The item to pull, or null if there are no items.
+   */
+  getNextPullable() {
+    return this.inventory.first()?.item;
+  }
+  /**
+   * Tries to pull an item from this block, as an unloader would.
+   * @param {string} filter
+   * @returns {string?} The item returned, or null if there are no items.
+   */
+  pull(filter) {
+    return this.inventory.removeItem(filter, 1) ? null : filter;
   }
 }
 export { Container };

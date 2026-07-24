@@ -971,7 +971,7 @@ export class IncendiaryComponent extends BulletComponent {
   }
   /** Get CMFT describing this component. */
   getInfo() {
-    return `#--${this.binomial ? "up to " : `#6-${this.chance * 100}%#-- chance of `}#6-${this.count} fires#-- ~ #6-${this.fire.damage} damage#-- every #6-${roundNum(this.fire.interval / 60, 1)}s`;
+    return `#--${this.binomial ? "up to " : `#6-${this.chance * 100}%#-- chance of `}#6-${this.count} fires#-- ~ #6-${this.fire.damage} damage#-- / #6-${roundNum(this.fire.interval / 60, 1)}s`;
   }
 }
 

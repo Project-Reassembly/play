@@ -1,7 +1,7 @@
 import { Block } from "../../classes/block/block.js";
 import { LandingPad, LaunchPad } from "../../classes/block/capitalism/launch-pad.js";
 import { Container } from "../../classes/block/container.js";
-import { Conveyor, Unloader } from "../../classes/block/conveyor.js";
+import { Conveyor, LevelLoader, LevelUnloader, Unloader } from "../../classes/block/conveyor.js";
 import { SignBlock } from "../../classes/block/decoration.js";
 import { Bomb, NuclearBomb } from "../../classes/block/defense/bomb.js";
 import {
@@ -129,24 +129,34 @@ TypeRegistries.default.add("chunk", Chunk);
 //Block
 TypeRegistries.default.add("block", Block);
 TypeRegistries.default.add("wall", Wall);
+// <!> Deprecated!
 TypeRegistries.default.add("tile", Tile);
+
 TypeRegistries.default.add("container", Container);
 TypeRegistries.default.add("crafter", Crafter);
 TypeRegistries.default.add("smelter", Smelter);
 TypeRegistries.default.add("uncrafter", Uncrafter);
+
 TypeRegistries.default.add("tile-producer", TileProducer);
 TypeRegistries.default.add("drill", Drill);
+
 TypeRegistries.default.add("conveyor", Conveyor);
+TypeRegistries.default.add("level-loader", LevelLoader);
 TypeRegistries.default.add("unloader", Unloader);
+TypeRegistries.default.add("level-unloader", LevelUnloader);
+
 TypeRegistries.default.add("sign", SignBlock);
+
 TypeRegistries.default.add("plasma-block", PlasmaBlock);
 TypeRegistries.default.add("plasma-pipe", PlasmaPipe);
 TypeRegistries.default.add("plasma-generator", PlasmaGenerator);
 TypeRegistries.default.add("plasma-tank", PlasmaTank);
 TypeRegistries.default.add("plasma-compressor", PlasmaCompressor);
 TypeRegistries.default.add("plasma-decompressor", PlasmaDecompressor);
+
 TypeRegistries.default.add("bomb", Bomb);
 TypeRegistries.default.add("nuclear-bomb", NuclearBomb);
+
 TypeRegistries.default.add("tank-assembler", TankAssemblyBay);
 //capitalism
 TypeRegistries.default.add("launch-pad", LaunchPad);

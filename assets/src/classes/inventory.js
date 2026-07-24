@@ -1,8 +1,7 @@
 import { ItemStack } from "../classes/item/item-stack.js";
 import { col } from "../core/color.js";
-import { construct, constructFromType } from "../core/constructor.js";
-import { dynamicSort, shortenedNumber, tru } from "../core/number.js";
-import { lookup, Registries } from "../core/registry.js";
+import { constructFromType } from "../core/constructor.js";
+import { propertySort, shortenedNumber, tru } from "../core/number.js";
 import { drawImg, ui } from "../core/ui.js";
 // import { discoverable, discovered, notDiscoveredTooltip } from "../definitions/screens/database.js";
 import { fonts } from "../play/font.js";
@@ -23,118 +22,159 @@ class Inventory {
     stacks ??= [];
     this.size = size;
     if (stacks instanceof Inventory) this.storage = stacks.storage;
-    else this.storage = stacks.map((x) => constructFromType(x, ItemStack));
+    else {
+      const l = stacks.length;
+      for (let i = 0; i < l; i++) {
+        const x = stacks[i];
+        this.storage[i] = x instanceof ItemStack ? x : constructFromType(x, ItemStack);
+      }
+    }
     this.storage.length = this.size;
   }
   /**@returns {SerialisedInventory} */
   serialise() {
-    return { size: this.size, storage: this.storage.map((x) => x.serialise()) };
+    this.removeEmpty();
+    return { size: this.size, storage: this.storage.map((x) => (x ? x.serialise() : null)) };
   }
   /**@param {SerialisedInventory} created  */
   static deserialise(created) {
-    let inv = new this(0);
-    inv.storage = created?.storage ?? [];
-    inv.size = inv.storage.length = created?.size ?? inv.size;
-    if (created?.storage) inv.storage = created.storage.map((x) => ItemStack.deserialise(x));
-    return inv;
+    return new this(
+      created?.size ?? 0,
+      (created?.storage ?? []).map((x) => (x ? ItemStack.deserialise(x) : x)),
+    );
   }
 
   //Manipulation
+  /** Tries to add some items. Returns the number of items that weren't added. */
   addItem(item, number = 1, stack = true) {
+    if (!item || !number) return 0;
     let toAdd = number;
-    /**@type {Item} */
-    let ritem = construct(Registries.items.get(item), "item");
+    const stackSize = Item.stackSizeOf(item);
     //Check for any stacks that can be filled
-    this.iterate((content, slot, stop) => {
-      if (content.item === item && stack && this.canPlaceInSlot(slot)) {
-        if (content.count < ritem.stackSize) {
-          let space = ritem.stackSize - content.count;
-          if (space < toAdd) {
-            content.count = ritem.stackSize;
-            toAdd -= space;
-          } else {
-            content.count += toAdd;
-            toAdd = 0;
-            stop();
+    const size = this.size;
+    if (stack) {
+      for (let slot = 0; slot < size; slot++) {
+        const content = this.storage[slot];
+        if (!content || content.isEmpty() || !this.canPlaceInSlot(slot)) continue;
+
+        if (content.item === item) {
+          if (content.count < stackSize) {
+            const space = stackSize - content.count;
+            if (space < toAdd) {
+              content.count = stackSize;
+              toAdd -= space;
+            } else {
+              content.count += toAdd;
+              // toAdd = 0;
+              return 0;
+            }
           }
         }
       }
-    }, true);
-    //If there are still items to add, add them to empty slots
-    if (toAdd <= 0) return 0;
-    this.iterate((content, slot, stop) => {
-      if (!content) this.storage[slot] = ItemStack.EMPTY;
-      if (content.isEmpty() && this.canPlaceInSlot(slot)) {
-        content.clear();
+      if (toAdd <= 0) return 0;
+    }
+    //If there are still items to add (or stacking was off), add them to empty slots
+    for (let slot = 0; slot < size; slot++) {
+      const content = this.storage[slot];
+      if (!this.canPlaceInSlot(slot)) continue;
+
+      if (!content) {
+        const count = Math.min(toAdd, stackSize);
+        toAdd -= count;
+        this.storage[slot] = new ItemStack(item, count);
+      } else if (content.isEmpty()) {
         content.item = item;
-        content.count = Math.min(toAdd, ritem.stackSize);
-        toAdd -= content.count;
+        const count = Math.min(toAdd, stackSize);
+        content.count = count;
+        toAdd -= count;
       }
-      if (toAdd <= 0) stop();
-    });
+      if (toAdd <= 0) break;
+    }
     return toAdd;
   }
+  /** Tries to remove some items. Returns the number of items that weren't removed. */
   removeItem(item, number = 1) {
     let toRemove = number;
-    this.iterate((content, slot, stop) => {
-      if ((content.item === item || item === "*") && this.canPickupFromSlot(slot)) {
+    const s = this.size;
+    for (let slot = 0; slot < s; slot++) {
+      const content = this.storage[slot];
+      if (!content || content.isEmpty() || !this.canPickupFromSlot(slot)) continue;
+
+      if (content.item === item) {
         if (content.count > toRemove) {
           content.count -= toRemove;
           toRemove = 0;
-          stop();
+          break;
         } else {
           toRemove -= content.count;
           content.clear();
         }
       }
-    }, true);
-    this.clean();
+    }
     return toRemove;
   }
 
   addItems(stacks, stack = true) {
     let didntadd = 0;
-    for (let entry of stacks) {
-      didntadd += this.addItem(entry.item, entry.count, stack);
+    for (const entry of stacks) {
+      if (entry) didntadd += this.addItem(entry.item, entry.count, stack);
     }
     return didntadd;
   }
   removeItems(stacks) {
     let didntremove;
-    for (let entry of stacks) {
-      didntremove += this.removeItem(entry.item, entry.count);
+    for (const entry of stacks) {
+      if (entry) didntremove += this.removeItem(entry.item, entry.count);
     }
     return didntremove;
   }
 
   clear() {
     this.storage.splice(0);
+    this.storage.length = this.size;
+  }
+  /** Returns the first non-empty item stack in the inventory, or null if there are none. */
+  first() {
+    const l = this.size;
+    for (let index = 0; index < l; index++) {
+      const item = this.storage[index];
+      if (item && !item.isEmpty()) return item;
+    }
+    return null;
   }
 
   //Management
-  autoStack() {
+  restack() {
     let buffer = this.storage.slice(0);
     this.storage.splice(0);
-    for (let item of buffer) {
-      if (!item) continue;
-      if (item.isEmpty()) continue;
-      this.addItem(item.item, item.count, true);
+    this.addItems(buffer);
+    // for (let item of buffer) {
+    //   if (!item) continue;
+    //   if (item.isEmpty()) continue;
+    //   this.addItem(item.item, item.count, true);
+    // }
+  }
+  removeEmpty() {
+    const l = this.size;
+    for (let index = 0; index < l; index++) {
+      const item = this.storage[index];
+      if (item && (!(item instanceof ItemStack) || item.isEmpty())) delete this.storage[index];
     }
   }
   clean() {
-    for (let index = 0; index < this.storage.length; index++) {
-      let item = this.storage[index];
-      if (!item || !(item instanceof ItemStack) || item.isEmpty())
-        this.storage[index] = ItemStack.EMPTY;
+    const l = this.size;
+    for (let index = 0; index < l; index++) {
+      const item = this.storage[index];
+      if (!item || !(item instanceof ItemStack)) this.storage[index] = ItemStack.EMPTY;
     }
   }
   sortByRegistryName() {
-    this.clean();
-    this.storage.sort(dynamicSort("item", ["nothing"]));
+    this.removeEmpty();
+    this.storage.sort(propertySort("item"));
   }
   sortByCount() {
-    this.clean();
-    this.storage.sort(dynamicSort("-count", ["nothing"]));
+    this.removeEmpty();
+    this.storage.sort(propertySort("-count"));
   }
   /**
    * Tries to transfer all the items in this inventory to another one.
@@ -142,21 +182,22 @@ class Inventory {
    * @param {boolean} stack If false, does not attempt to stack the items transferred.
    * @param {(stack: ItemStack, slot: int) => boolean} filter A function to determine whether a slot is transferred or not. Return `true` to make a stack transferred, `false` to prevent transfer.
    */
-  transfer(to, stack, filter = () => true) {
-    this.iterate((item, slot, sotp) => {
-      if (filter(item, slot)) {
+  transfer(to, stack = true, filter = null) {
+    const s = this.size;
+    for (let slot = 0; slot < s; slot++) {
+      const item = this.storage[slot];
+      if (!item || item.isEmpty()) continue;
+
+      if (!filter || filter(item, slot)) {
         let left = to.addItem(item.item, item.count, stack);
         item.count = left;
-        if (item.isEmpty()) {
-          this.storage[slot] = ItemStack.EMPTY;
-        }
       }
-    });
+    }
   }
 
   //Interaction
   /** Picks up an item from an inventory slot, or puts it back. */
-  hotkeySlot(index, pickup = !!keyIsDown(SHIFT)) {
+  hotkeySlot(index, pickup = !!keyIsDown(ALT)) {
     let mIS = Inventory.mouseItemStack ?? ItemStack.EMPTY;
     let mISItem = mIS.getItem();
     if (!this.storage[index]) this.storage[index] = ItemStack.EMPTY;
@@ -205,18 +246,30 @@ class Inventory {
   }
   //Data
   get(slot) {
-    return this.storage[slot];
+    return this.storage[slot] ?? ItemStack.EMPTY;
   }
   set(slot, item) {
-    this.storage[slot] = item || ItemStack.EMPTY;
+    if (item instanceof ItemStack) this.storage[slot] = item;
+    else delete this.storage[slot];
   }
   /**
    * Checks if a block has a certain number of a type of item in its inventory.
    * @param {string} item The item to look for.
    * @param {int} count The minimum number of items this block must have.
-   * @param {int[]} [excludedSlots=[]] The slots to ignore while searching.
+   * @param {int[]} [excludedSlots] The slots to ignore while searching.
    */
-  hasItem(item, count = 1, excludedSlots = []) {
+  hasItem(item, count = 1, excludedSlots = null) {
+    if (count <= 1) {
+      const s = this.size;
+      for (let slot = 0; slot < s; slot++) {
+        const content = this.storage[slot];
+        if (!content || content.isEmpty()) continue;
+        if (excludedSlots && excludedSlots.includes(slot)) continue;
+
+        if (content.item === item || item === "*") return true;
+      }
+      return false;
+    }
     return this.count(item, excludedSlots) >= count;
   }
   /**
@@ -225,10 +278,14 @@ class Inventory {
    */
   value(excludedSlots = null) {
     let found = 0;
-    this.iterate((slotContent, slot) => {
-      if (excludedSlots && excludedSlots.includes(slot)) return;
-      found += (slotContent.getItem()?.marketValue || 0) * slotContent.count || 0;
-    }, true);
+    const s = this.size;
+    for (let slot = 0; slot < s; slot++) {
+      const content = this.storage[slot];
+      if (!content || content.isEmpty()) continue;
+
+      if (excludedSlots && excludedSlots.includes(slot)) continue;
+      found += (content.getItem()?.marketValue || 0) * content.count || 0;
+    }
     return found || 0;
   }
   /**
@@ -238,10 +295,13 @@ class Inventory {
    */
   count(item = "*", excludedSlots = null) {
     let found = 0;
-    this.iterate((slotContent, slot) => {
-      if (excludedSlots && excludedSlots.includes(slot)) return;
-      if (slotContent.item === item || item === "*") found += slotContent.count;
-    }, true);
+    const s = this.size;
+    for (let slot = 0; slot < s; slot++) {
+      const content = this.storage[slot];
+      if (!content || content.isEmpty()) continue;
+      if (excludedSlots && excludedSlots.includes(slot)) continue;
+      if (content.item === item || item === "*") found += content.count;
+    }
     return found;
   }
   /**
@@ -250,54 +310,56 @@ class Inventory {
    * @param {int[]} excludedSlots The slots to ignore.
    */
   hasItems(stacks, excludedSlots = []) {
-    for (let entry of stacks) {
+    for (const entry of stacks) {
       if (!this.hasItem(entry.item, entry.count, excludedSlots)) return false;
     }
     return true;
   }
 
   /**
-   * Simulates adding items to this inventory, and checks whether or not this worked.
+   * Simulates adding items to this inventory, and checks whether or not this worked. Does not modify any actual objects.
    * @param {string} item The item to try to add.
    * @param {int} number The number of items to add.
    * @param {boolean} stack Whether or not to stack items.
    * @returns True if the items could fit in this inventory, false if not.
    */
   canAddItem(item, number = 1, stack = true) {
-    let toAdd = number;
+    let toAdd = +number;
+    if (!item || !toAdd) return false;
     /**@type {Item} */
-    const stackSize = lookup("items", item, "stackSize") ?? 100;
+    const stackSize = Item.stackSizeOf(item);
     //Check for any stacks that can be filled
-    this.iterate((content, slot, stop) => {
-      if (content.item === item && stack && this.canPlaceInSlot(slot)) {
-        if (content.count < stackSize) {
-          let space = stackSize - content.count;
-          if (space < toAdd) {
-            toAdd -= space;
-          } else {
-            toAdd = 0;
-            stop();
+    const size = this.size;
+    if (stack) {
+      for (let slot = 0; slot < size; slot++) {
+        const content = this.storage[slot];
+        if (!content || content.isEmpty() || !this.canPlaceInSlot(slot)) continue;
+
+        if (content.item === item) {
+          if (content.count < stackSize) {
+            let space = stackSize - content.count;
+            if (space < toAdd) {
+              toAdd -= space;
+            } else return true;
           }
         }
       }
-    }, true);
-    //If there are still items to add, add them to empty slots
-    if (toAdd <= 0) return true;
-    this.iterate((content, slot, stop) => {
-      if (!content) this.storage[slot] = ItemStack.EMPTY;
-      if (content.isEmpty() && this.canPlaceInSlot(slot)) {
+      if (toAdd <= 0) return true;
+    }
+    //If there are still items to add (or stacking is off), see if we can add them to empty slots
+    for (let slot = 0; slot < size; slot++) {
+      const content = this.storage[slot];
+      if (!this.canPlaceInSlot(slot)) continue;
+
+      if (!content || content.isEmpty()) {
         toAdd -= Math.min(toAdd, stackSize);
       }
-      if (toAdd <= 0) stop();
-    });
-    return toAdd === 0;
-    // let tempstor = this.storage.slice(0).map((x) => x.copy());
-    // let remaining = this.addItem(item, number, stack);
-    // this.storage = tempstor;
-    // return !remaining;
+      if (toAdd <= 0) return true;
+    }
+    return toAdd <= 0;
   }
   /**
-   * Simulates adding multiple item stacks to this inventory, and checks whether or not this worked.
+   * Simulates adding multiple item stacks to this inventory, and checks whether or not this worked. Does not modify any actual objects. Not the same as `stacks.every(s => canAddItems(s.item,s.count))`, as this takes the number of free slots used into account.
    * @param {{item: string, count: int}[]} stacks The item to try to add.
    * @param {boolean} stack Whether or not to stack items.
    * @returns True if the items could fit in this inventory, false if not.
@@ -306,44 +368,61 @@ class Inventory {
     let freesUsed = 0;
     for (const { item, count } of stacks) {
       let toAdd = count;
-      const stackSize = lookup("items", item, "stackSize") ?? 100;
+      const stackSize = Item.stackSizeOf(item);
       //Check for any stacks that can be filled
-      this.iterate((content, slot, stop) => {
-        if (content.item === item && stack && this.canPlaceInSlot(slot)) {
-          if (content.count < stackSize) {
-            let space = stackSize - content.count;
-            if (space < toAdd) {
-              toAdd -= space;
-            } else {
-              toAdd = 0;
-              stop();
+      const size = this.size;
+      if (stack) {
+        for (let slot = 0; slot < size; slot++) {
+          const content = this.storage[slot];
+          if (!content || content.isEmpty() || !this.canPlaceInSlot(slot)) continue;
+
+          if (content.item === item) {
+            if (content.count < stackSize) {
+              let space = stackSize - content.count;
+              if (space < toAdd) {
+                toAdd -= space;
+              } else {
+                toAdd = 0;
+                break;
+              }
             }
           }
         }
-      }, true);
-      if (toAdd <= 0) return true;
+        if (toAdd <= 0) continue;
+      }
       // now we fill empty slots
       let skipped = 0;
-      this.iterate((content, slot, stop) => {
+      for (let slot = 0; slot < size; slot++) {
         if (skipped < freesUsed) {
           skipped++;
-          return;
+          continue;
         }
-        if (!content) this.storage[slot] = ItemStack.EMPTY;
-        if (content.isEmpty() && this.canPlaceInSlot(slot)) {
+
+        const content = this.storage[slot];
+        if (!this.canPlaceInSlot(slot)) continue;
+
+        if (!content) {
+          const count = Math.min(toAdd, stackSize);
+          toAdd -= count;
+          freesUsed++;
+        } else if (content.isEmpty()) {
           toAdd -= Math.min(toAdd, stackSize);
           freesUsed++;
         }
-        if (toAdd <= 0) stop();
-      });
-      if (toAdd !== 0) return false;
+        if (toAdd <= 0) break;
+      }
+      if (toAdd > 0) return false;
     }
     return true;
   }
   drop(world, x, y) {
-    this.iterate((stack) => {
-      if (tru(stack.dropChance)) DroppedItemStack.create(stack, world, x, y);
-    }, true);
+    const s = this.size;
+    for (let slot = 0; slot < s; slot++) {
+      const content = this.storage[slot];
+      if (!content || content.isEmpty()) continue;
+
+      if (tru(content.dropChance)) DroppedItemStack.create(content, world, x, y);
+    }
   }
 
   //oh god i need this for everything
@@ -355,13 +434,12 @@ class Inventory {
    * @param {boolean} [ignoreEmpty=false] Whether or not to ignore empty slots.
    */
   iterate(func, ignoreEmpty = false, from = 0) {
-    let len = this.size;
+    const len = this.size;
     let stopped = false;
     for (let slot = from; slot < len; slot++) {
-      if (!this.storage[slot]) this.storage[slot] = ItemStack.EMPTY;
-      let slotContent = this.storage[slot];
+      const slotContent = this.storage[slot];
       if (ignoreEmpty && (!slotContent || slotContent.isEmpty())) continue;
-      void func(slotContent, slot, () => {
+      void func(slotContent ?? ItemStack.EMPTY, slot, () => {
         stopped = true;
       });
       if (stopped) break;
@@ -414,6 +492,7 @@ class Inventory {
           ui.mouse.y > displayY - itemSize * 0.5;
         if (invitemstack.item !== "nothing" && invitem) {
           if (selected) {
+            // if the same item type
             if (
               Inventory.mouseItemStack.item !== "nothing" &&
               Inventory.mouseItemStack.item === invitemstack.item &&
@@ -434,6 +513,7 @@ class Inventory {
                     invitemstack.count = invitem.stackSize;
                     Inventory.mouseItemStack.count -= toMove;
                   }
+                // place one item
                 else if (ui.mouse.button === "right")
                   if (invitemstack.count + 1 <= invitem.stackSize) {
                     //Place items
@@ -522,8 +602,7 @@ class Inventory {
           ) {
             if (ui.mouse.button === "right") {
               ui.waitingForMouseUp = true;
-              invitemstack.item = Inventory.mouseItemStack.item;
-              invitemstack.count = 1;
+              this.storage[index] = new ItemStack(Inventory.mouseItemStack.item);
               Inventory.mouseItemStack.count--;
             } else if (ui.mouse.button === "left") {
               ui.waitingForMouseUp = true;
@@ -645,8 +724,6 @@ class Inventory {
     // pop();
   }
 }
-
-globalThis.inv = (i) => Inventory.deserialise({ storage: i, size: i.length });
 
 export { Inventory };
 

@@ -1,12 +1,9 @@
-import { Corporation } from "../classes/item/corporation.js";
 import { Timer } from "../classes/timer.js";
 import { Shr3 } from "../lib/q5-noise-function.js";
 import { debug } from "../play/debug.js";
-import { effectTimer } from "../play/effects.js";
 import { fonts } from "../play/font.js";
 import { col } from "./color.js";
-import { Registries } from "./registry.js";
-import { drawImg } from "./ui.js";
+import { ImageContainer } from "./image.js";
 //#region CMFT
 export const Decoration = new (class DecorationConsts {
   colours = Object.freeze({
@@ -43,8 +40,8 @@ export const Decoration = new (class DecorationConsts {
       //Special, cycles yellow to gold and back
       return col.from(
         255,
-        230 + Math.sin(effectTimer.ticks / 30) * 25,
-        130 + Math.sin(effectTimer.ticks / 30) * 20,
+        230 + Math.sin(frameCount / 30) * 25,
+        130 + Math.sin(frameCount / 30) * 20,
       );
     },
     get "v"() {
@@ -52,7 +49,7 @@ export const Decoration = new (class DecorationConsts {
       return col.in2rp(
         col.from(255, 255, 151),
         col.from(235, 235, 80),
-        0.5 + Math.sin(effectTimer.ticks / 30) * 0.5,
+        0.5 + Math.sin(frameCount / 30) * 0.5,
       );
     },
 
@@ -92,6 +89,9 @@ export const Decoration = new (class DecorationConsts {
 })();
 
 const styleVals = new Set(Object.values(Decoration.styles));
+
+/** Additional colours from long specifications. @type {Map<string,import("./color.js").color>} */
+export const extras = new Map();
 
 const cols = [..."0123456789abcdefinphrylsv@~"],
   styles = [..."bink*X"];
@@ -170,9 +170,10 @@ class Collection {
             else if (/^0x[0-9a-fA-F]{1,8}$/.test(colstr)) colour = col.fromHex(colstr.substring(2));
             else if (/^#[0-9a-fA-F]{1,8}$/.test(colstr)) colour = col.fromHex(colstr.substring(1));
             else if (/^-?\d+$/.test(colstr)) colour = parseInt(colstr) | 0;
-            else if (Registries.corps.has(colstr)) colour = Corporation.colorof(colstr);
-            else if (Registries.images.has(colstr))
-              colour = Registries.images.get(colstr).color ?? 0;
+            else if (extras.has(colstr)) colour = extras.get(colstr);
+            // else if (Registries.corps.has(colstr)) colour = Corporation.colorof(colstr);
+            // else if (Registries.images.has(colstr))
+            //   colour = Registries.images.get(colstr).color ?? 0;
             else return this.#error(`Invalid long colour specification '${colstr}'`);
             // eat closing ]
             i++;
@@ -529,7 +530,13 @@ class Icon extends Text {
     return new Icon(this.text);
   }
   draw(baseX, baseY, charSize) {
-    drawImg(this.text, baseX + charSize * 0.5, baseY + charSize * 0.5, charSize, charSize);
+    ImageContainer.draw(
+      this.text,
+      baseX + charSize * 0.5,
+      baseY + charSize * 0.5,
+      charSize,
+      charSize,
+    );
   }
 }
 /** A class for drawing processed text to the screen.*/

@@ -2,6 +2,7 @@ import { PreloadRegistries } from "../core/registry.js";
 function add(n,i) { PreloadRegistries.images.add(n, { path: i }) };
 
 add("error", "assets/textures/error.png")
+add("spacer", "assets/textures/spacer.png")
 add("error.cmft", "assets/textures/icon/cmft-error.png")
 
 // screen
@@ -46,9 +47,11 @@ add("arm.scrap",  "assets/textures/entity/component/scrap-arm.png")
 add("arm.iti",  "assets/textures/entity/component/iti-arm.png")
 //Components > Weapons
 add("weapon.scrap-shooter.component", "assets/textures/entity/weapon/scrap-shooter.png")
-add("weapon.scrap-repeater.component", "assets/textures/entity/weapon/scrap-repeater.png")
 add("weapon.scrap-launcher.component", "assets/textures/entity/weapon/scrap-launcher.png")
+add("weapon.scrap-repeater.component", "assets/textures/entity/weapon/scrap-repeater.png")
+add("weapon.scrap-cannon.component", "assets/textures/entity/weapon/scrap-cannon.png")
 add("weapon.construction-gun.component", "assets/textures/entity/weapon/construction-gun.png")
+
 add("weapon.tank-gun.component", "assets/textures/entity/weapon/tank-gun.png")
 
 add("weapon.iti-laser-pistol.component", "assets/textures/entity/weapon/iti-laser-pistol.png")
@@ -57,47 +60,43 @@ add("weapon.iti-energy-repeater.component", "assets/textures/entity/weapon/iti-e
 
 add("weapon.peti-charged-laser-blaster.component", "assets/textures/entity/weapon/peti-charged-laser-blaster.png")
 add("weapon.peti-plasma-railgun.component", "assets/textures/entity/weapon/peti-plasma-railgun.png")
-add("weapon.peti-remote-railgun.component", "assets/textures/entity/weapon/peti-remote-railgun.png")
-//Components > Weapons > Melee
-add("weapon.slicer.component", "assets/textures/entity/weapon/slicer.png")
 //Components > Turrets
 add("turret.recycle.component", "assets/textures/block/turret/recycle.png")
 add("turret.deathbringer.component", "assets/textures/block/turret/deathbringer.png")
+//Components > Tanks
+add("tank.scrap.chassis", "assets/textures/entity/tank-parts/scrap-chassis.png")
 //Items
+add("item.scrap", "assets/textures/item/scrap.png")
+
+add("item.stone", "assets/textures/item/stone.png")
+add("item.sand", "assets/textures/item/sand.png")
+add("item.coal", "assets/textures/item/coal.png")
 add("item.raw-copper", "assets/textures/item/raw-copper.png")
-add("item.copper-ingot", "assets/textures/item/copper-ingot.png")
-add("item.copper-wire", "assets/textures/item/copper-wire.png")
-
 add("item.raw-iron", "assets/textures/item/raw-iron.png")
-add("item.iron-ingot", "assets/textures/item/iron-ingot.png")
-
 add("item.raw-electrum", "assets/textures/item/raw-electrum.png")
+add("item.raw-aluminium", "assets/textures/item/raw-aluminium.png")
+add("item.raw-tungsten", "assets/textures/item/raw-tungsten.png")
+add("item.raw-titanium", "assets/textures/item/raw-titanium.png")
+
+add("item.copper-ingot", "assets/textures/item/copper-ingot.png")
+add("item.iron-ingot", "assets/textures/item/iron-ingot.png")
 add("item.electrum-ingot", "assets/textures/item/electrum-ingot.png")
 add("item.silver-ingot", "assets/textures/item/silver-ingot.png")
 add("item.gold-ingot", "assets/textures/item/gold-ingot.png")
-add("item.gold-wire", "assets/textures/item/gold-wire.png")
-
-add("item.raw-titanium", "assets/textures/item/raw-titanium.png")
+add("item.aluminium-ingot", "assets/textures/item/aluminium-ingot.png")
+add("item.tungsten-ingot", "assets/textures/item/tungsten-ingot.png")
 add("item.titanium-ingot", "assets/textures/item/titanium-ingot.png")
 
-add("item.raw-aluminium", "assets/textures/item/raw-aluminium.png")
-add("item.aluminium-ingot", "assets/textures/item/aluminium-ingot.png")
-
-add("item.raw-tungsten", "assets/textures/item/raw-tungsten.png")
-add("item.tungsten-ingot", "assets/textures/item/tungsten-ingot.png")
-
-add("item.scrap", "assets/textures/item/scrap.png")
+add("item.sandstone", "assets/textures/item/sandstone.png")
 add("item.plate", "assets/textures/item/plate.png")
 
-add("item.stone", "assets/textures/item/stone.png")
-
-add("item.sand", "assets/textures/item/sand.png")
-add("item.sandstone", "assets/textures/item/sandstone.png")
-
-add("item.coal", "assets/textures/item/coal.png")
+add("item.copper-wire", "assets/textures/item/copper-wire.png")
+add("item.gold-wire", "assets/textures/item/gold-wire.png")
+//Items > Throwables
 add("item.makeshift-explosive", "assets/textures/item/makeshift-explosive.png")
 //Items > Accessories
 add("accessory.blast-knuckles", "assets/textures/item/blast-knuckles.png")
+add("accessory.trading-card", "assets/textures/item/trading-card.png")
 //Items > Ammo
 add("item.scrap-bullet", "assets/textures/item/scrap-bullet.png")
 add("item.scrap-rocket", "assets/textures/item/scrap-rocket.png")
@@ -106,8 +105,9 @@ add("item.iti-plasma-cell", "assets/textures/item/iti-plasma-cell.png")
 add("item.iti-destabilised-cell", "assets/textures/item/iti-destabilised-cell.png")
 //Items > Weapons
 add("weapon.scrap-shooter.item", "assets/textures/item/scrap-shooter.png")
-add("weapon.scrap-repeater.item", "assets/textures/item/scrap-repeater.png")
 add("weapon.scrap-launcher.item", "assets/textures/item/scrap-launcher.png")
+add("weapon.scrap-repeater.item", "assets/textures/item/scrap-repeater.png")
+add("weapon.scrap-cannon.item", "assets/textures/item/scrap-cannon.png")
 add("weapon.construction-gun.item", "assets/textures/item/construction-gun.png")
 add("weapon.tank-gun.item", "assets/textures/item/tank-gun.png")
 
@@ -162,6 +162,9 @@ add("block.dev.commandblock.heat", "assets/textures/block/blocks/dev/command-blo
 add("block.stone-wall", "assets/textures/block/blocks/defense/stone-wall.png")
 add("block.sandstone-wall", "assets/textures/block/blocks/defense/sandstone-wall.png")
 //Blocks > Turrets
+add("turret.recycle.base", "assets/textures/block/turret/bases/recycle.png")
+add("turret.recycle.ui", "assets/textures/block/turret/ui/recycle.png")
+
 add("turret-base.scrap.connector", "assets/textures/block/turret/bases/scrap-connector.png")
 add("turret-controller.scrap.base", "assets/textures/block/turret/bases/scrap-turret-controller.png")
 add("turret-base.peti.connector", "assets/textures/block/turret/bases/peti-connector.png")
@@ -172,6 +175,9 @@ add("crafter.scrap-assembler", "assets/textures/block/blocks/crafter/scrap-assem
 add("crafter.scrap-smelter", "assets/textures/block/blocks/crafter/scrap-smelter.png")
 add("crafter.scrap-disassembler", "assets/textures/block/blocks/crafter/scrap-disassembler.png")
 add("crafter.scrap-compressor", "assets/textures/block/blocks/crafter/scrap-compressor.png")
+
+add("crafter.basic-assembler", "assets/textures/block/blocks/crafter/basic-assembler.png")
+add("crafter.basic-smelter", "assets/textures/block/blocks/crafter/basic-smelter.png")
 //Blocks > Drills
 add("drill.scrap-drill.top", "assets/textures/block/blocks/drill/scrap-drill-top.png")
 add("drill.scrap-drill.spinner", "assets/textures/block/blocks/drill/scrap-drill-spinner.png")
@@ -192,6 +198,11 @@ add("conveyor.basic-conveyor.belt", "assets/textures/block/blocks/conveyor/basic
 add("conveyor.basic-conveyor.ui", "assets/textures/block/blocks/conveyor/basic-conveyor.png")
 add("conveyor.basic-unloader.belt", "assets/textures/block/blocks/conveyor/basic-unloader-belt.png")
 add("conveyor.basic-unloader.ui", "assets/textures/block/blocks/conveyor/basic-unloader.png")
+add("conveyor.basic-level-loader.belt", "assets/textures/block/blocks/conveyor/basic-level-loader-belt.png")
+add("conveyor.basic-level-loader.indicator", "assets/textures/block/blocks/conveyor/basic-level-loader-indicator.png")
+add("conveyor.basic-level-loader.ui", "assets/textures/block/blocks/conveyor/basic-level-loader.png")
+add("conveyor.basic-level-unloader.belt", "assets/textures/block/blocks/conveyor/basic-level-unloader-belt.png")
+add("conveyor.basic-level-unloader.ui", "assets/textures/block/blocks/conveyor/basic-level-unloader.png")
 //Blocks > Plasma
 add("ppipe.plasma-pipeline.ui", "assets/textures/block/blocks/plasma/plasma-pipeline-ui.png")
 add("ppipe.plasma-pipeline.base", "assets/textures/block/blocks/plasma/plasma-pipeline-base.png")

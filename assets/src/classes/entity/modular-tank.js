@@ -10,7 +10,8 @@ import { Weapon } from "../item/weapon.js";
 import { World } from "../world/world.js";
 import { WeaponisedComponent } from "./entity-part.js";
 import { InventoryEntity } from "./inventory-entity.js";
-
+/** @import {Tank} from "./tank.js" */
+/** @deprecated Use {@linkcode Tank} instead. */
 class ModularTankEntity extends InventoryEntity {
   inventorySize = 1;
   registryName = "tonk";
@@ -35,17 +36,14 @@ class ModularTankEntity extends InventoryEntity {
             0,
             0,
             "square",
-            [
-              col.red,
-              col.hide(col.red),
-            ],
+            [col.red, col.hide(col.red)],
             blockSize,
             blockSize,
             blockSize,
             blockSize,
             0,
-            0
-          )
+            0,
+          ),
         );
     });
     let ent = new ModularTankEntity();
@@ -85,10 +83,7 @@ class ModularTankEntity extends InventoryEntity {
             ent.targetRange = Math.max(ent.targetRange, itemwep.range ?? 0);
             ent.components.push(weapon);
           } else {
-            ent.inventory.push({
-              item: stack.item,
-              count: stack.count,
-            });
+            ent.inventory.push({ item: stack.item, count: stack.count });
             ent.inventorySize++;
           }
         }, true);
@@ -96,11 +91,7 @@ class ModularTankEntity extends InventoryEntity {
       if (block instanceof Conveyor) ent.speed += 20 / block.moveTime;
       if (block instanceof SignBlock) ent.name = block.getMsg();
     });
-    ent.addToWorld(
-      world,
-      centreX * blockSize + blockSize / 2,
-      centreY * blockSize + blockSize / 2
-    );
+    ent.addToWorld(world, centreX * blockSize + blockSize / 2, centreY * blockSize + blockSize / 2);
     ent.speed /= ent.components.length;
     ent.turnSpeed /= ent.components.length;
     ent.init();

@@ -734,8 +734,7 @@ globalThis.preload = async function () {
       Registries.images.add(name, new ImageContainer(el.path));
   });
   await Registries.images.forEachAsync(async (el, name) => {
-    await el.load();
-    loadStats.images++;
+    if (await el.load()) loadStats.images++;
   });
   console.log(`Loaded ${loadStats.images}/${loadStats.totalImages} images.`);
   await PreloadRegistries.cutscenes.forEachAsync(async (el, name) => {
@@ -1176,6 +1175,21 @@ function showMousePos() {
   stroke(255);
   line(ui.mouse.x - mouseSize, ui.mouse.y, ui.mouse.x + mouseSize, ui.mouse.y);
   line(ui.mouse.x, ui.mouse.y - mouseSize, ui.mouse.x, ui.mouse.y + mouseSize);
+  if (placing) {
+    stroke(255, 255, 0);
+    line(
+      ui.mouse.x - mouseSize,
+      ui.mouse.y - mouseSize,
+      ui.mouse.x + mouseSize,
+      ui.mouse.y + mouseSize,
+    );
+    line(
+      ui.mouse.x + mouseSize,
+      ui.mouse.y - mouseSize,
+      ui.mouse.x - mouseSize,
+      ui.mouse.y + mouseSize,
+    );
+  }
   pop();
 }
 /**
@@ -1197,7 +1211,10 @@ function createPlayer(entity = null, x, y, playerType = "iti-player") {
   });
 }
 function drawInGameMousePreview() {
-  if (!Inventory.mouseItemStack.isEmpty()) {
+  if (
+    !Inventory.mouseItemStack.isEmpty() &&
+    world.isPositionFree(game.mouse.blockX, game.mouse.blockY)
+  ) {
     const i = Inventory.mouseItemStack.getItem();
     if (i instanceof PlaceableItem)
       i.drawPreviewImage(
@@ -1208,39 +1225,41 @@ function drawInGameMousePreview() {
   }
 }
 function mouseInteraction() {
-  if (
-    ui.menuState === "in-game" &&
-    ui.mouse.down &&
-    !ui.waitingForMouseUp &&
-    game.player.entity?.controllable &&
-    ui.conditions.menu === "none"
-  ) {
-    if (ui.conditions.mode === "build") {
-      // press both buttons to replace blocks
-      if (ui.mouse.right) tryBreak();
-      if (ui.mouse.left) if (!npcInteract()) tryPlace();
-    } else if (ui.conditions.mode === "fight") {
-      if (!Inventory.mouseItemStack.isEmpty()) {
-        Inventory.mouseItemStack.getItem().useInAir(game.player.entity, Inventory.mouseItemStack);
-        return;
-      }
-      if (ui.waitingForMouseUp) return;
+  if (ui.menuState === "in-game")
+    if (!ui.waitingForMouseUp) {
+      if (ui.mouse.down && game.player.entity?.controllable && ui.conditions.menu === "none") {
+        if (ui.conditions.mode === "build") {
+          // press both buttons to replace blocks
+          if (ui.mouse.right) tryBreak();
+          if (ui.mouse.left) {
+            if (!npcInteract()) if (!tryPlace()) placing = false;
+          } else if (placing) placing = false;
+        } else if (ui.conditions.mode === "fight") {
+          if (placing) placing = false;
+          if (!Inventory.mouseItemStack.isEmpty()) {
+            Inventory.mouseItemStack
+              .getItem()
+              .useInAir(game.player.entity, Inventory.mouseItemStack);
+            return;
+          }
+          if (ui.waitingForMouseUp) return;
 
-      // LMB = right hand // primary mouse button -> dominant hand
-      if (ui.mouse.left) {
-        const rhi = game.player.entity.rightHand.get(0);
-        if (rhi instanceof ItemStack && rhi.getItem() instanceof Equippable)
-          rhi.getItem().use(game.player.entity, keyIsDown(SHIFT));
-        else game.player.entity.chargePunchRight();
-      }
-      if (ui.mouse.right) {
-        const lhi = game.player.entity.leftHand.get(0);
-        if (lhi instanceof ItemStack && lhi.getItem() instanceof Equippable)
-          lhi.getItem().use(game.player.entity, keyIsDown(SHIFT));
-        else game.player.entity.chargePunchLeft();
-      }
+          // LMB = right hand // primary mouse button -> dominant hand
+          if (ui.mouse.left) {
+            const rhi = game.player.entity.rightHand.get(0);
+            if (rhi instanceof ItemStack && rhi.getItem() instanceof Equippable)
+              rhi.getItem().use(game.player.entity, keyIsDown(SHIFT));
+            else game.player.entity.chargePunchRight();
+          }
+          if (ui.mouse.right) {
+            const lhi = game.player.entity.leftHand.get(0);
+            if (lhi instanceof ItemStack && lhi.getItem() instanceof Equippable)
+              lhi.getItem().use(game.player.entity, keyIsDown(SHIFT));
+            else game.player.entity.chargePunchLeft();
+          }
+        }
+      } else placing = false;
     }
-  }
 }
 
 function npcInteract() {
@@ -1305,13 +1324,15 @@ function tryBreak() {
       game.player.entity.leftHand.get(0).getItem().use(game.player.entity, true);
   }
 }
-
+let placing = false;
 function tryPlace() {
   let heldItem = Inventory.mouseItemStack.getItem();
   let clickedBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
+  // if an interaction is possible
   if (
     clickedBlock &&
     clickedBlock.team === game.player.entity.team &&
+    !placing &&
     clickedBlock.interaction(game.player.entity, Inventory.mouseItemStack)
   )
     return false;
@@ -1330,10 +1351,12 @@ function tryPlace() {
           game.mouse.blockY,
           selectedDirection,
         )
-      )
+      ) {
+        placing = true;
         return true;
+      }
     }
-  }
+  } else if (placing) placing = false;
   //If clicked again
   if (clickedBlock && clickedBlock === Container.selectedBlock) {
     Container.selectedBlock = null;
@@ -1519,16 +1542,16 @@ window.keyPressed = function (ev) {
     if (UIComponent.evaluateCondition("mode", "build")) UIComponent.setCondition("mode", "fight");
     else UIComponent.setCondition("mode", "build");
   } else if (UIComponent.evaluateCondition("mode", "build") && ui.menuState === "in-game") {
-    if (key === "1") game.player.entity.inventory.hotkeySlot(0, true);
-    else if (key === "2") game.player.entity.inventory.hotkeySlot(1, true);
-    else if (key === "3") game.player.entity.inventory.hotkeySlot(2, true);
-    else if (key === "4") game.player.entity.inventory.hotkeySlot(3, true);
-    else if (key === "5") game.player.entity.inventory.hotkeySlot(4, true);
-    else if (key === "6") game.player.entity.inventory.hotkeySlot(5, true);
-    else if (key === "7") game.player.entity.inventory.hotkeySlot(6, true);
-    else if (key === "8") game.player.entity.inventory.hotkeySlot(7, true);
-    else if (key === "9") game.player.entity.inventory.hotkeySlot(8, true);
-    else if (key === "0") game.player.entity.inventory.hotkeySlot(9, true);
+    if (key === "1") game.player.entity.inventory.hotkeySlot(0);
+    else if (key === "2") game.player.entity.inventory.hotkeySlot(1);
+    else if (key === "3") game.player.entity.inventory.hotkeySlot(2);
+    else if (key === "4") game.player.entity.inventory.hotkeySlot(3);
+    else if (key === "5") game.player.entity.inventory.hotkeySlot(4);
+    else if (key === "6") game.player.entity.inventory.hotkeySlot(5);
+    else if (key === "7") game.player.entity.inventory.hotkeySlot(6);
+    else if (key === "8") game.player.entity.inventory.hotkeySlot(7);
+    else if (key === "9") game.player.entity.inventory.hotkeySlot(8);
+    else if (key === "0") game.player.entity.inventory.hotkeySlot(9);
   }
   //Prevent any default behaviour
   ev.preventDefault();

@@ -58,15 +58,15 @@ function someIndexOf(array) {
   return Math.floor(rnd.float(0, array.length));
 }
 /**Creates a sort function based on an object property. Use `"-(property)"`, such as `"-health"`, to sort in reverse. Works on string and number values.*/
-function dynamicSort(property) {
+function propertySort(property) {
   let sortOrder = 1;
   if (property[0] === "-") {
     sortOrder = -1;
     property = property.substring(1);
   }
   return (a, b) =>
-    (a[property] < b[property] ? -1
-    : a[property] > b[property] ? 1
+    (!a || a[property] < b[property] ? -1
+    : !b || a[property] > b[property] ? 1
     : 0) * sortOrder;
 }
 
@@ -145,8 +145,9 @@ class Vector {
     if (mutate) {
       this.x += x;
       this.y += y;
+      return this;
     }
-    return mutate ? this : new Vector(this.x + x, this.y + y);
+    return new Vector(this.x + x, this.y + y);
   }
   /**
    * Subtracts another vector from this one.
@@ -187,8 +188,9 @@ class Vector {
     if (mutate) {
       this.x *= amtX;
       this.y *= amtY;
+      return this;
     }
-    return mutate ? this : new Vector(this.x * amtX, this.y * amtY);
+    return new Vector(this.x * amtX, this.y * amtY);
   }
   /** The angle in degrees this vector makes with the positive x-axis. */
   get angle() {
@@ -228,8 +230,9 @@ class Vector {
     if (mutate) {
       this.x = nx;
       this.y = ny;
+      return this;
     }
-    return mutate ? this : new Vector(nx, ny);
+    return new Vector(nx, ny);
   }
   /**
    * Finds the distance between this vector and another.
@@ -315,12 +318,22 @@ class Vector {
     yield this.x;
     yield this.y;
   }
+  round(mutate = false) {
+    let nx = Math.round(this.x),
+      ny = Math.round(this.y);
+    if (mutate) {
+      this.x = nx;
+      this.y = ny;
+      return this;
+    }
+    return new Vector(nx, ny);
+  }
 }
 globalThis.v = Vector;
 
-/** Slow turning helper function. Returns `direction`, rotated by up to `amount` degrees, in a way such that `direction` converges to the direction of `(toX,toY) - (x,y)` 
+/** Slow turning helper function. Returns `direction`, rotated by up to `amount` degrees, in a way such that `direction` converges to the direction of `(toX,toY) - (x,y)`
  * @param {number} amount Maximum amount to turn.
-*/
+ */
 function turn(direction, x, y, toX, toY, amount) {
   let delta = new Vector(toX - x, toY - y);
   //Define variables
@@ -395,5 +408,5 @@ export function maxI(array) {
 globalThis.mi = minIF;
 
 export const rnd = new Randomiser();
-export { clamp, colinterp, dynamicSort, index, roundNum, shortenedNumber, tru, turn, Vector };
+export { clamp, colinterp, index, propertySort, roundNum, shortenedNumber, tru, turn, Vector };
 

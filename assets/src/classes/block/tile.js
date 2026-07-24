@@ -1,6 +1,8 @@
 import { drawImg } from "../../core/ui.js";
 import { PhysicalObject } from "../physical.js";
 import { Block } from "./block.js";
+import { GroundTile } from "./ground-tile.js";
+/** @deprecated Use {@linkcode GroundTile} instead. */
 class Tile extends Block {
   speedMultiplier = 1;
   appliedStatus = "none";
@@ -11,35 +13,27 @@ class Tile extends Block {
   drillSpeed = 1;
   tick() {}
   init() {
+    console.warn(
+      `Legacy \`Tile\` used - use GroundTile instead${GroundTile.getNumericalID(this.registryName) !== 0 ? ` (registered as tile #${GroundTile.getNumericalID(this.registryName)}.)` : "."}`,
+    );
     PhysicalObject.prototype.init.call(this);
     delete this.x;
     delete this.y;
   }
   draw() {
-    drawImg(
-      this.image,
-      this.x,
-      this.y,
-      this.tileSize * Block.size,
-      this.tileSize * Block.size
-    );
+    drawImg(this.image, this.x, this.y, this.tileSize * Block.size, this.tileSize * Block.size);
   }
   /**
    * Called whenever an entity walks on this tile.
    * @param {Entity} entity Entity that walked on this block.
    */
   entityWalksOn(entity) {
-    entity.applyStatus(
-      Registry.statuses.get(this.appliedStatus),
-      this.appliedStatusDuration
-    );
+    entity.applyStatus(Registry.statuses.get(this.appliedStatus), this.appliedStatusDuration);
     entity.damage(this.damageType, this.damage);
   }
   /**@returns {SerialisedBlock} */
   serialise() {
-    return {
-      block: this.registryName,
-    };
+    return { block: this.registryName };
   }
 }
 

@@ -338,7 +338,7 @@ cle.addKeyword(
     let pos = getPos(x, y);
     let toRead;
     try {
-      toRead = world.getBlockErroring(Math.floor(pos.x / 30), Math.floor(pos.y / 30));
+      toRead = world.getBlockErroring(Math.round(pos.x / 30), Math.round(pos.y / 30));
     } catch (err) {
       throw new ISLError(err.message, err.constructor);
     }
@@ -365,7 +365,7 @@ cle.addKeyword(
     let pos = getPos(x, y);
     let toWriteTo;
     try {
-      toWriteTo = world.getBlockErroring(Math.floor(pos.x / 30), Math.floor(pos.y / 30));
+      toWriteTo = world.getBlockErroring(Math.round(pos.x / 30), Math.round(pos.y / 30));
     } catch (err) {
       throw new ISLError(err.message, err.constructor);
     }
