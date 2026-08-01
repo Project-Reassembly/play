@@ -350,7 +350,7 @@ createUIComponent(["title"], [], 0, 0, 200, 50, "none", checkUpdate, "", true, 2
   .define(
     "text",
     () =>
-      `<version ${gameVersion}${isPreview ? `-pre${preNumber}` : ""}-js>${versiongetter ? "\nReload page, update available" : ""}`,
+      `<version ${gameVersion}${isPreview ? `, preview ${preNumber}` : ""}>\n${versionName ? `"${versionName}"` : ""}${versiongetter ? "\nReload page, update available" : ""}`.trimEnd(),
   );
 
 createUIComponent(["title"], [], 0, 0, 1920, 1080).define("backgroundColour", () => fade);

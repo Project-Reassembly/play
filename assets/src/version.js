@@ -3,6 +3,7 @@ const versionGetURL = "https://cdn.jsdelivr.net/gh/Project-Reassembly/play@main/
 let gameVersion = "0.0.0";
 let preNumber = -1;
 let isPreview = true;
+let versionName = "";
 
 let notify = () => {};
 let versiongetter = false;
@@ -41,18 +42,18 @@ async function getVer() {
       gameVersion = def?.version ?? "0.0.0";
       preNumber = def?.preview ?? -1;
       isPreview = def?.isPreview ?? true;
+      versionName = def?.name ?? "";
     },
     async () => {
       console.warn("[v] Failed to get version data, retrying from local data...");
-      await fetch(`../../version.json`).then(
-        async (val) => {
-          let def = await val.json();
-          console.log("[v] Got backup version data", def);
-          gameVersion = def?.version ?? "0.0.0";
-          preNumber = def?.preview ?? -1;
-          isPreview = def?.isPreview ?? true;
-        },
-      );
+      await fetch(`../../version.json`).then(async (val) => {
+        let def = await val.json();
+        console.log("[v] Got backup version data", def);
+        gameVersion = def?.version ?? "0.0.0";
+        preNumber = def?.preview ?? -1;
+        isPreview = def?.isPreview ?? true;
+        versionName = def?.name ?? "";
+      });
     },
   );
 }
@@ -64,4 +65,5 @@ fetch(`version.json`).then(async (val) => {
   gameVersion = def?.version ?? "0.0.0(error)";
   preNumber = def?.preview ?? -1;
   isPreview = def?.isPreview ?? true;
+  versionName = def?.name ?? "";
 });

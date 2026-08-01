@@ -282,6 +282,11 @@ createLinkedBlockAndItem(
         time: 60,
       },
       {
+        inputs: [{ item: "scrap", count: 2 }, { item: "plate", count: 2 }],
+        outputs: [{ item: "scrap-player-charger", count: 1 }],
+        time: 60,
+      },
+      {
         inputs: [{ item: "scrap", count: 30 }],
         outputs: [{ item: "scrap-burner", count: 1 }],
         time: 360,
@@ -807,7 +812,7 @@ createLinkedBlockAndItem(
 createLinkedBlockAndItem(
   "scrap-player-charger",
   "Scrap Charger",
-  "pylon.scrap-pylon.ui",
+  "pylon.scrap-player-charger.ui",
   {
     type: "player-charger",
     baseImg: "pylon.scrap-pylon.base",

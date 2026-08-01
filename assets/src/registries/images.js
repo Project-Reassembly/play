@@ -218,6 +218,7 @@ add("pylon.scrap-pylon.pole-base", "assets/textures/block/blocks/pylon/scrap-pyl
 add("pylon.scrap-pylon.top", "assets/textures/block/blocks/pylon/scrap-pylon-top.png")
 
 add("pylon.scrap-player-charger.top", "assets/textures/block/blocks/pylon/scrap-player-charger-top.png")
+add("pylon.scrap-player-charger.ui", "assets/textures/block/blocks/pylon/scrap-player-charger-base.png")
 
 add("pylon.basic-pylon.ui", "assets/textures/block/blocks/pylon/basic-pylon-base.png")
 add("pylon.basic-pylon.base", "assets/textures/block/blocks/pylon/basic-pylon-base-active.png")
