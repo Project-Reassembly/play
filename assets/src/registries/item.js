@@ -50,7 +50,6 @@ Registries.items.add("raw-electrum", {
   marketValue: 25,
   description: "A lump of unrefined ore.\nMust be smelted into ingot form to be useful.",
   image: "item.raw-electrum",
-  hidden: true,
 });
 Registries.items.add("raw-aluminium", {
   name: "Raw Aluminium (Bauxite)",
@@ -259,8 +258,11 @@ Registries.items.add("scrap-repeater", {
   type: "weapon",
   marketValue: 200,
   name: "Scrap Repeater",
+  corp: "scrap",
   description:
-    "Shoots bullets far more quickly.\nMore inaccurate.\n\nIf you shoot enough bullets, you can't miss!",
+    "Shoots bullets far more quickly.\nMore inaccurate.\n\nIf you shoot enough bullets, you can't miss!\n#[0xff8080]iUnique Boss Drop",
+  details:
+    "A Gatling-style rotary machine gun, designed to put as many holes in the target in the shortest amount of time as possible. Contains a surprisingly advanced cooling system, powered by the recoil of the gun.\nIt seems to be built for mounting into a much larger frame than your own, as if there was only ever one intended user.",
   image: "weapon.scrap-repeater.item",
   range: 250,
   recoil: 0.15,
@@ -448,6 +450,8 @@ Registries.items.add("iti-laser-pistol", {
   corp: "iti",
   description:
     "Shoots medium-range small laser beams which set enemies on fire for a short time.\n#6iStandard Issue",
+  details:
+    "The Laser Pistol was InfiniTech Industries' first commercial energy weapon - a type of weapon that uses no physical ammunition, instead drawing power directly from the user's onboard battery. This made it much easier to carry around, but during periods of intense power usage, they have been known to cause shutdowns.",
   image: "weapon.iti-laser-pistol.item",
   range: 300,
   shootX: 0,
@@ -480,7 +484,7 @@ Registries.items.add("iti-laser-pistol", {
     ],
     ammos: { none: 0 },
   },
-  shoot: { reload: 15, effect: "laser-caster-frag", pattern: { spread: 3 } },
+  shoot: { reload: 15, effect: "laser-caster-frag", pattern: { spread: 3 }, power: 100 },
   component: {
     type: "weapon-component",
     width: 32,
@@ -499,6 +503,8 @@ Registries.items.add("iti-laser-caster", {
   corp: "iti",
   description:
     "Fires fast-moving incendiary bolts of explosive plasma.\nBolts release smaller fragments on hit, which home in on enemies and set them on fire.",
+  details:
+    "The Laser Caster: InfiniTech Industries' first 'big bad' weapon - a massive, fast-moving explosive bols, with additional flames whick seek their own targets. Overall, it was a massive success, but the high power use has dissuaded many users, especially those in high-combat areas.",
   image: "weapon.iti-laser-caster.item",
   range: 400,
   bullets: {
@@ -577,6 +583,7 @@ Registries.items.add("iti-laser-caster", {
     reload: 180,
     chargeEffect: "laser-caster-charge",
     effect: "laser-caster-frag",
+    power: 3500,
   },
   component: {
     type: "weapon-component",
@@ -595,7 +602,9 @@ Registries.items.add("iti-energy-repeater", {
   marketValue: 3000,
   corp: "iti",
   description:
-    "Rapid-fire mind-guided laser weapon. Homes in on whatever you want it to.\nShoots quickfire bursts of plasma bolts.\nAlt-fire to charge a larger explosive bolt.",
+    "Rapid-fire mind-guided laser weapon.\nShoots quickfire bursts of plasma bolts.\nAlt-fire to charge a larger explosive bolt.",
+  details:
+    "After many field reports of users struggling to deal with larger (groups of) targets, ITI added the alternate fire: a larger bolt with explosive potential.\nUnfortunately, some shot speed was lost in the process, but the power use per shot is still much lower than the Laser Caster, its main competitor in the role, so many (mostly newer) users swear by this weapon.",
   image: "weapon.iti-energy-repeater.item",
   range: 300,
   bullets: {
@@ -632,6 +641,7 @@ Registries.items.add("iti-energy-repeater", {
     reload: 30,
     charge: 20,
     pattern: { burst: 3, interval: 5, spread: 3 },
+    power: 500,
   },
   hasAltFire: true,
   altBullets: {
@@ -675,6 +685,7 @@ Registries.items.add("iti-energy-repeater", {
     effect: "laser-caster-explosion~15",
     recoilScale: 3,
     rotRecoilScale: 4,
+    power: 1250,
   },
   component: {
     type: "weapon-component",
@@ -900,7 +911,7 @@ Registries.items.add("recycle-mounted", {
   type: "turret-item",
   name: "Recycle (Mounted)",
   description:
-    "A version of the Recycle turret designed for use with the larger Scrap Turret Controller.",
+    "An automated modified scrap shooter.\nShoots slower but further, and must be mounted to a #>>turret-controller.scrap.base#=-Scrap Turret Controller#-- (or better)",
   image: "weapon.scrap-shooter.item",
   range: 450,
   baseSize: 1,

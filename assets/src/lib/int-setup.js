@@ -14,10 +14,11 @@ import "../registries/types/dialogue.js";
 import "../registries/types/worldevent.js";
 console.log("[Setup] Imported types");
 
-import "../registries/block.js";
 import "../registries/corps.js";
-import "../registries/entity.js";
 import "../registries/item.js";
+
+import "../registries/block.js";
+import "../registries/entity.js";
 import "../registries/tile.js";
 
 import "../registries/events.js";

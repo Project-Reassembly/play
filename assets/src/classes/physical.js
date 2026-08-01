@@ -49,7 +49,6 @@ export class PhysicalObject extends Integrate.RegisteredItem {
   oncreated() {}
   ondestroyed() {}
 
-
   /**
    * @param {PhysicalObject} other
    */
@@ -265,7 +264,28 @@ export class PhysicalObject extends Integrate.RegisteredItem {
    * @param {PhysicalObject} otherObj
    */
   distanceTo(otherObj) {
-    return ((this.y - otherObj.y) ** 2 + (this.x - otherObj.x) ** 2) ** 0.5;
+    return otherObj ? this.pos.subXY(otherObj.x, otherObj.y).magnitude : 0;
+  }
+  /**
+   * @param {PhysicalObject} otherObj
+   */
+  isWithinRange(otherObj, range) {
+    return otherObj && this.pos.subXY(otherObj.x, otherObj.y).magSqr < range * range;
+  }
+  /**
+   * @param {PhysicalObject} otherObj
+   */
+  isWithinSquareRange(otherObj, range) {
+    return rectanglesIntersect(
+      otherObj.x,
+      otherObj.y,
+      otherObj.width,
+      otherObj.height,
+      this.x,
+      this.y,
+      range,
+      range,
+    );
   }
   distanceToPoint(x, y) {
     return ((this.y - y) ** 2 + (this.x - x) ** 2) ** 0.5;

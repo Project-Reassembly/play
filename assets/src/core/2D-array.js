@@ -1,3 +1,5 @@
+import { Vector } from "./number.js";
+
 /**
  * Runs a function on each element on a 2D array. Array does not have to be square.
  * @template T
@@ -287,6 +289,17 @@ export const index = {
 
     return (col << 16) | row;
   },
+  /**
+   * Adds two indices.
+   * @param {idx} i1
+   * @param {idx} i2
+   */
+  add(i1, i2) {
+    const row = ((i1 & 0xffff) + (i2 & 0xffff)) & 0xffff,
+      col = ((i1 & 0xffff0000) + (i2 & 0xffff0000)) & 0xffff0000;
+
+    return col | row;
+  },
   /**Gets the second 'horizontal' component of the index. @param {idx} idx Index to get component of. @returns {int16} */
   col(idx) {
     return (idx >> 16) & 0xffff;
@@ -301,7 +314,7 @@ export const index = {
       (((idx & 0xffff0000) * factor) & 0xffff0000) | (((idx & 0x0000ffff) * factor) & 0x0000ffff)
     );
   },
-  /**Offsets the components of an index. @param {idx} idx Index to scale. @returns {idx} */
+  /**Offsets the components of an index. @param {idx} idx Index to move. @returns {idx} */
   offset(idx, cols, rows) {
     return ((((idx >> 16) + cols) & 0x0000ffff) << 16) | (((idx & 0x0000ffff) + rows) & 0x0000ffff);
   },
@@ -309,9 +322,17 @@ export const index = {
   reflect(idx) {
     return ((idx >> 16) & 0xffff) | ((idx & 0xffff) << 16);
   },
-  /** Converts an index to a string representation. */
+  /** Converts an index to a string representation. @param {idx} idx  */
   str(idx) {
     return `(${(idx >> 16) & 0xffff},${idx & 0xffff})`;
+  },
+  /** Converts an index to a vector. @param {idx} idx */
+  vec(idx) {
+    return new Vector((idx >> 16) & 0xffff, idx & 0xffff);
+  },
+  /** Converts a vector to an index. @param {Vector} vec @returns {idx} */
+  ofvec(vec) {
+    return (vec.x << 16) | (vec.y & 0xffff);
   },
   /** Parses an output from `index.str(...)`. Returns `(0,0)` for an invalid format, and invalid components become `0`. @param {string} str  */
   parse(str) {
@@ -337,3 +358,4 @@ export const index = {
     }
   },
 };
+globalThis.i = index;

@@ -57,7 +57,7 @@ class DroppedItemStack extends PhysicalObject {
     this.#delayLeft--;
     if (this.#delayLeft <= 0)
       for (let ent of this.world.entities) {
-        if (ent instanceof InventoryEntity && ent.collidesWith(this)) {
+        if (ent instanceof InventoryEntity && ent.collidesWith(this) && !ent.deactivated) {
           let it = this.item.item;
           if (ent instanceof EquippedEntity) {
             let leftOver =

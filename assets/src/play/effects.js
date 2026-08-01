@@ -94,7 +94,7 @@ class Explosion {
       )
       .forEach((block) => {
         if (block) {
-          const dist = block.epos.subXY(this.x, this.y).magnitude;
+          const dist = block.pos.subXY(this.x, this.y).magnitude;
           if (dist <= rad + blockSize * 0.5) this.hitB(block, dist, damagemul);
         }
       });
@@ -959,24 +959,24 @@ function emitEffect(effect, source, offX = 0, offY = 0, impact = false) {
 }
 
 export {
-  EmissionEffect,
-  Explosion,
-  ExplosionEffect,
-  ImageParticleEmissionEffect,
-  MultiEffect,
-  NuclearExplosion,
-  NuclearExplosionEffect,
-  ParticleEmissionEffect,
-  TextParticleEmissionEffect,
-  VisualEffect,
-  WaveEmissionEffect,
-  autoScaledEffect,
-  createDestructionExplosion,
-  createEffect,
-  createLinearEffect,
-  effectTimer,
-  emitEffect,
-  liquidDestructionBlast,
-  repeat
+    EmissionEffect,
+    Explosion,
+    ExplosionEffect,
+    ImageParticleEmissionEffect,
+    MultiEffect,
+    NuclearExplosion,
+    NuclearExplosionEffect,
+    ParticleEmissionEffect,
+    TextParticleEmissionEffect,
+    VisualEffect,
+    WaveEmissionEffect,
+    autoScaledEffect,
+    createDestructionExplosion,
+    createEffect,
+    createLinearEffect,
+    effectTimer,
+    emitEffect,
+    liquidDestructionBlast,
+    repeat
 };
 

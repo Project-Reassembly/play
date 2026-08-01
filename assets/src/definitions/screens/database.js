@@ -3,6 +3,7 @@ import { Item } from "../../classes/item/item.js";
 import { PlaceableItem } from "../../classes/item/placeable.js";
 import { col } from "../../core/color.js";
 import { construct } from "../../core/constructor.js";
+import { roundNum } from "../../core/number.js";
 import { Registries, TypeRegistries } from "../../core/registry.js";
 import { Serialiser } from "../../core/serialiser.js";
 import {
@@ -440,17 +441,23 @@ function updateDescrPanels(
 ${corp ? `#=-Manufacturer:#-- #[${Corporation.colorof(item.corp)}]-${Corporation.nameof(item.corp)}` : "#=-No Set Manufacturer"}
 `;
   if (item instanceof PlaceableItem) {
-    const block = Registries.blocks.tryGet(item.block);
+    const block = item.getBlock();
     if (block) {
       s += `\n#3bBlock Equivalent\n------------------------------------------\n#r-Technical Information:\n #>>icon.int#n-Type:#-- ${block.type ?? "block"} #=-(#e-${TypeRegistries.default.get(block.type ?? "block").name}#=-)\n #n-Registry Name:#-- ${item.registryName}\n\n#=-Basic Information:\n #c-${block.health ?? 100}#-- health\n`;
       if (block.armour) {
-        s += ` #6-${block.armour ?? 0}#-- armour\n`;
+        s += ` #6-${block.armour}#-- armour\n`;
         if (block.armourToughness) s += `  (#g-${block.armourToughness}#-- toughness)\n`;
       }
       if (block.shield) s += ` #i-${block.shield ?? 0}#-- initial shield\n`;
       if (block.shieldRating) s += ` #b-${block.shieldRating}#-- shield rating\n`;
-    } else s += `\n#c-Block ${item.block} failed to load (are you missing a mod?)`;
+      if (block.maxPower) {
+        s += ` #e-${shortenedNumber(block.maxPower)}#-- max power\n`;
+        if (block.powerDraw)
+          s += ` #e-${shortenedNumber(block.powerDraw * 60)}/s#-- power use #=-(#h-${roundNum(block.maxPower / (block.powerDraw * 60), 1)}s#-- off-grid time#=-)\n`;
+      }
+    } else s += `\n#c-Block [${item.block}] failed to load (are you missing a mod?)`;
   }
+  if (item.details) s += `\n#7i${item.details}`;
   c_norm.text = s;
   c_norm.rarityColour = rarity;
 

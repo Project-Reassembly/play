@@ -353,73 +353,122 @@ createHealthbarComponent(
   .removeBackground()
   .removeOutline()
   .setGetters("shield", "_lastMaxShield")
-  .define("text", () =>
-    game.player.entity?.shield > 0 ?
+  .define(
+    "text",
+    () =>
       "Shield | " +
       shortenedNumber(game.player.entity?.shield, 2, 4) +
       "/" +
-      shortenedNumber(game.player.entity?._lastMaxShield, 2, 4)
-    : "",
+      shortenedNumber(game.player.entity?._lastMaxShield, 2, 4),
   )
-  .define("healthbarColours", () => [game.player.entity?.useYellowShield ? col.yellow : col.cyan]);
-//energy bar
-createHealthbarComponent(
-  ["in-game"],
-  ["mode:fight"],
-  10,
-  10,
-  384,
-  30,
-  "reverse",
-  null,
-  "Energy",
-  true,
-  25,
-  () => game.player.entity,
-  [col.from(0, 255, 255)],
-)
-  .anchorLeft(50)
-  .anchorBottom(100)
-  .rotate(-0.1)
-  .setBackgroundColour(col.from(0, 0, 0))
-  .setGetters("energy", "maxEnergy")
-  .define(
-    "text",
-    () =>
-      "Energy | " +
-      shortenedNumber(game.player.entity?.energy, 2, 4) +
-      "/" +
-      shortenedNumber(game.player.entity.maxEnergy, 2, 4),
-  );
+  .define("healthbarColours", () => [game.player.entity?.useYellowShield ? col.yellow : col.cyan])
+  .onlyif(() => game.player.entity?.shield > 0);
 
-//build mode energy bar
-createHealthbarComponent(
-  ["in-game"],
-  ["mode:build"],
-  10,
-  10,
-  384,
-  30,
-  "reverse",
-  null,
-  "Energy",
-  true,
-  25,
-  () => game.player.entity,
-  [col.from(0, 255, 255)],
-)
-  .anchorLeft(85)
-  .anchorBottom(40)
-  .setBackgroundColour(col.from(0, 0, 0))
-  .setGetters("energy", "maxEnergy")
-  .define(
-    "text",
-    () =>
-      "Energy | " +
-      shortenedNumber(game.player.entity?.energy, 2, 4) +
-      "/" +
-      shortenedNumber(game.player.entity.maxEnergy, 2, 4),
-  );
+function nrgBar(conditions = [], l = 50, b = 100, r = -0.1) {
+  createHealthbarComponent(
+    ["in-game"],
+    conditions,
+    10,
+    10,
+    384,
+    30,
+    "reverse",
+    null,
+    "Emergency Power Reserve",
+    true,
+    25,
+    () => game.player.entity,
+    [col.red],
+  )
+    .anchorLeft(l)
+    .anchorBottom(b)
+    .rotate(r)
+    .setBackgroundColour(col.black)
+    .setTextColour(col.accent)
+    .setGetters("emergencyPower", "maxEmergencyPower")
+    .onlyif(() => game.player.entity?.power <= 0)
+    .define("healthbarColours", () => [
+      col.in2rp(col.white, col.red, Math.sin(frameCount / 10) * 0.5 + 0.5),
+    ]);
+
+  createUIComponent(
+    ["in-game"],
+    conditions,
+    10,
+    10,
+    0,
+    0,
+    "none",
+    null,
+    "Non-essential power uses disabled.",
+    true,
+    15,
+  )
+    .anchorLeft(l - 10 + 192)
+    .anchorBottom(b + 42)
+    .rotate(r)
+    .setBackgroundColour(col.black)
+    .onlyif(() => game.player.entity?.power <= 0)
+    .define("textColour", () =>
+      col.in2rp(col.white, col.red, Math.sin(frameCount / 10) * 0.5 + 0.5),
+    );
+
+  createUIComponent(
+    ["in-game"],
+    conditions,
+    10,
+    10,
+    0,
+    0,
+    "none",
+    null,
+    "Construct chargers immediately.",
+    true,
+    15,
+  )
+    .anchorLeft(l + 192)
+    .anchorBottom(b - 10)
+    .rotate(r)
+    .setBackgroundColour(col.black)
+    .onlyif(() => game.player.entity?.power <= 0)
+    .define("textColour", () =>
+      col.in2rp(col.white, col.red, Math.sin(frameCount / 10) * 0.5 + 0.5),
+    );
+
+  createHealthbarComponent(
+    ["in-game"],
+    conditions,
+    10,
+    10,
+    384,
+    30,
+    "reverse",
+    null,
+    "Power",
+    true,
+    25,
+    () => game.player.entity,
+    [col.from(0, 255, 255)],
+  )
+    .anchorLeft(l)
+    .anchorBottom(b)
+    .rotate(r)
+    .setBackgroundColour(col.black)
+    .setGetters("power", "maxPower")
+    .define(
+      "text",
+      () =>
+        "Power | " +
+        shortenedNumber(game.player.entity?.power, 2, 4) +
+        "/" +
+        shortenedNumber(game.player.entity.maxPower, 2, 4),
+    )
+    .onlyif(() => game.player.entity?.power > 0);
+}
+//energy bar(s)
+nrgBar(["mode:fight"]);
+
+nrgBar(["mode:build"], 75, 50);
 
 //##############################################################
 
@@ -551,6 +600,45 @@ createUIComponent(
 )
   .define("x", () => (Container.selectedBlock?.uiCornerX ?? 0) - 35)
   .define("y", () => (Container.selectedBlock?.uiCornerY ?? 0) + 65);
+
+ui.addReset("powerselected", "false");
+//Power thing
+createHealthbarComponent(
+  ["in-game"],
+  ["containerselected:false", "powerselected:true", "mode:build"],
+  0,
+  0,
+  80,
+  20,
+  "none",
+  null,
+  "Power",
+  true,
+  15,
+  () => Container.selectedBlock,
+  [col.yellow],
+)
+  .define("x", () => (Container.selectedBlock?.uiCornerX ?? 0) - 42)
+  .define("y", () => (Container.selectedBlock?.uiCornerY ?? 0) + 15)
+  .setGetters("power", "maxPower");
+createHealthbarComponent(
+  ["in-game"],
+  ["containerselected:true", "powerselected:true", "mode:build"],
+  0,
+  0,
+  80,
+  20,
+  "none",
+  null,
+  "Power",
+  true,
+  15,
+  () => Container.selectedBlock,
+  [col.yellow],
+)
+  .define("x", () => (Container.selectedBlock?.uiCornerX ?? 0) - 42)
+  .define("y", () => (Container.selectedBlock?.uiCornerY ?? 0) + 90)
+  .setGetters("power", "maxPower");
 
 //##############################################################
 

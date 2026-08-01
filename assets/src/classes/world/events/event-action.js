@@ -224,6 +224,7 @@ export function undeliverEntity(ent) {
   ent.visible = false;
   ent.controllable = false;
   ent.tangible = false;
+  ent.dead = true;
   emitEffect("land-effect", ent);
   effectTimer.tick();
 

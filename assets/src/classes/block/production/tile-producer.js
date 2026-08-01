@@ -34,12 +34,13 @@ class TileProducer extends Factory {
   tickProduction(result) {
     //If a recipe exists, and will fit
     if (this.inventory.canAddItem(result, this.amount))
-      if (this._progress > this.duration) {
-        if (this.onFinish(result)) this._progress = 0;
-      } else {
-        this._progress += this._speed;
-        this.createTickEffect();
-      }
+      if (!this.powerDraw || this.usePower())
+        if (this._progress > this.duration) {
+          if (this.onFinish(result)) this._progress = 0;
+        } else {
+          this._progress += this._speed;
+          this.createTickEffect();
+        }
   }
   onFinish(result) {
     this.inventory.addItem(result, this.amount);

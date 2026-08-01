@@ -1,7 +1,13 @@
 import { createLinkedBlockAndItem } from "../classes/block/block.js";
 import { Item } from "../classes/item/item.js";
-import { Registries } from "../core/registry.js";
 //## DEFENSE ##
+createLinkedBlockAndItem(
+  "sandstone-wall",
+  "Sandstone Wall",
+  "block.sandstone-wall",
+  { type: "wall", health: 90 },
+  { description: "A block of sandstone.\n\nCould be used as defense.", marketValue: 1 },
+);
 createLinkedBlockAndItem(
   "stone-wall",
   "Stone Wall",
@@ -10,11 +16,15 @@ createLinkedBlockAndItem(
   { description: "A block of solid stone.\nCould be used as defense.", marketValue: 2.5 },
 );
 createLinkedBlockAndItem(
-  "sandstone-wall",
-  "Sandstone Wall",
-  "block.sandstone-wall",
-  { type: "wall", health: 90 },
-  { description: "A block of sandstone.\n\nCould be used as defense.", marketValue: 1 },
+  "coal-wall",
+  "Coal Wall",
+  "block.coal-wall",
+  { type: "wall", health: 120, explosiveness: 0.6 },
+  {
+    description:
+      "A block of coal.\nCould be used as defense, though this may not be the best idea.",
+    marketValue: 3.3,
+  },
 );
 createLinkedBlockAndItem(
   "scrap-wall",
@@ -267,6 +277,16 @@ createLinkedBlockAndItem(
         time: 3000,
       },
       {
+        inputs: [{ item: "scrap", count: 4 }],
+        outputs: [{ item: "scrap-pylon", count: 1 }],
+        time: 60,
+      },
+      {
+        inputs: [{ item: "scrap", count: 30 }],
+        outputs: [{ item: "scrap-burner", count: 1 }],
+        time: 360,
+      },
+      {
         inputs: [{ item: "scrap", count: 1 }],
         outputs: [{ item: "scrap-conveyor", count: 1 }],
         time: 60,
@@ -326,9 +346,12 @@ createLinkedBlockAndItem(
         time: 1080,
       },
     ],
+    powerDraw: 3.3333333334,
+    maxPower: 10000,
   },
   {
-    description: "A simple construction, capable of crafting basic machinery.\n\nCan reproduce.",
+    description:
+      "A simple construction, capable of crafting basic machinery, weapons and ammunition.\n\nCan reproduce.",
     marketValue: 30,
   },
 );
@@ -361,11 +384,6 @@ createLinkedBlockAndItem(
         outputs: [{ item: "copper-ingot", count: 1 }],
         time: 60,
       },
-      {
-        inputs: [{ item: "raw-iron", count: 2 }],
-        outputs: [{ item: "iron-ingot", count: 1 }],
-        time: 90,
-      },
     ],
   },
   { description: "Smelts and casts basic ores into ingot form.", marketValue: 40 },
@@ -385,17 +403,14 @@ createLinkedBlockAndItem(
         time: 20,
       },
       {
-        inputs: [
-          { item: "coal", count: 5 },
-          { item: "scrap", count: 2 },
-        ],
-        outputs: [{ item: "makeshift-explosive", count: 2 }],
-        time: 60,
-      },
-      {
         inputs: [{ item: "sandstone", count: 4 }],
         outputs: [{ item: "sandstone-wall", count: 1 }],
         time: 80,
+      },
+      {
+        inputs: [{ item: "coal", count: 4 }],
+        outputs: [{ item: "coal-wall", count: 1 }],
+        time: 100,
       },
       {
         inputs: [{ item: "stone", count: 4 }],
@@ -407,7 +422,17 @@ createLinkedBlockAndItem(
         outputs: [{ item: "scrap-wall", count: 1 }],
         time: 100,
       },
+      {
+        inputs: [
+          { item: "coal", count: 5 },
+          { item: "scrap", count: 2 },
+        ],
+        outputs: [{ item: "makeshift-explosive", count: 2 }],
+        time: 60,
+      },
     ],
+    powerDraw: 8.3333333334,
+    maxPower: 10000,
   },
   { description: "Compresses low-tier resources into cubes.", marketValue: 60 },
 );
@@ -418,6 +443,8 @@ createLinkedBlockAndItem(
   "crafter.basic-assembler",
   {
     type: "crafter",
+    powerDraw: 4.1666666667,
+    maxPower: 10000,
     title: "Basic Assembler",
     inventorySize: 6,
     health: 150,
@@ -427,6 +454,23 @@ createLinkedBlockAndItem(
         inputs: [{ item: "copper-ingot", count: 1 }],
         outputs: [{ item: "copper-wire", count: 6 }],
         time: 120,
+      },
+      {
+        inputs: [
+          { item: "copper-wire", count: 12 },
+          { item: "plate", count: 1 },
+        ],
+        outputs: [{ item: "basic-pylon", count: 1 }],
+        time: 60,
+      },
+      {
+        inputs: [
+          { item: "plate", count: 5 },
+          { item: "copper-ingot", count: 10 },
+          { item: "copper-wire", count: 36 },
+        ],
+        outputs: [{ item: "basic-battery", count: 1 }],
+        time: 180,
       },
       {
         inputs: [
@@ -499,7 +543,8 @@ createLinkedBlockAndItem(
     ],
   },
   {
-    description: "Constructs stable machines for use in production and defense.",
+    description:
+      "Constructs stable machines for use in production and defense.\nMade in the #>>crafter.scrap-assembler#=-Scrap Assembler#--.",
     marketValue: 140,
   },
 );
@@ -541,6 +586,29 @@ createLinkedBlockAndItem(
 //## DRILLS ##
 //Scrap Tier [0]
 createLinkedBlockAndItem(
+  "coal-drill",
+  "Coal Drill",
+  "drill.coal-drill.ui",
+  {
+    type: "drill",
+    topImg: "drill.coal-drill.top",
+    spinnerImg: "drill.coal-drill.spinner",
+    baseImg: "drill.coal-drill.base",
+    results: { "coal-ore": "coal" },
+    amount: 1,
+    spinSpeed: 1,
+    duration: 600,
+    inventorySize: 1,
+    title: "Coal Drill",
+    tickEffect: "burning",
+  },
+  {
+    description:
+      "Crappy hand-made drill which slowly collects coal from below it.\nUses half of it to fuel itself.\nReplace with a powered #>>drill.scrap-drill.ui#=-Scrap Drill#-- if possible, since it's much more efficient.",
+    marketValue: 15,
+  },
+);
+createLinkedBlockAndItem(
   "scrap-drill",
   "Scrap Drill",
   "drill.scrap-drill.ui",
@@ -561,6 +629,8 @@ createLinkedBlockAndItem(
     duration: 300,
     inventorySize: 1,
     title: "Scrap Drill",
+    powerDraw: 0.5,
+    maxPower: 1000,
   },
   { description: "Slowly collects resources from below it.", marketValue: 15 },
 );
@@ -591,6 +661,8 @@ createLinkedBlockAndItem(
     title: "Basic Drill",
     tickEffect: "basic-crafter-smoke",
     tickEffectChance: 0.2,
+    powerDraw: 0.8333333334,
+    maxPower: 1000,
   },
   {
     description: "Slowly collects resources from below it.\nCan drill Iron and Electrum.",
@@ -699,6 +771,112 @@ createLinkedBlockAndItem(
     marketValue: 10,
   },
 );
+//## POWER ##
+// Scrap Tier [0]
+createLinkedBlockAndItem(
+  "scrap-pylon",
+  "Scrap Power Pylon",
+  "pylon.scrap-pylon.ui",
+  {
+    type: "pylon",
+    baseImg: "pylon.scrap-pylon.base",
+    poleImg: "pylon.scrap-pylon.pole",
+    poleBaseImg: "pylon.scrap-pylon.pole-base",
+    topImg: "pylon.scrap-pylon.top",
+    range: 2,
+    wireColour: [205, 159, 139],
+  },
+  {
+    description: "Connects to nearby blocks, distributing power from generators to factories.",
+    marketValue: 10,
+  },
+);
+createLinkedBlockAndItem(
+  "scrap-burner",
+  "Scrap Coal Burner",
+  "generator.scrap-burner",
+  {
+    type: "burner",
+    fuelTypes: { coal: 600 },
+    maxPower: 25000,
+    inventorySize: 1,
+    tickEffect: "burning",
+  },
+  { description: "Burns coal to produce power." },
+);
+createLinkedBlockAndItem(
+  "scrap-player-charger",
+  "Scrap Charger",
+  "pylon.scrap-pylon.ui",
+  {
+    type: "player-charger",
+    baseImg: "pylon.scrap-pylon.base",
+    poleImg: "pylon.scrap-pylon.pole",
+    poleBaseImg: "pylon.scrap-pylon.pole-base",
+    topImg: "pylon.scrap-player-charger.top",
+    range: 2,
+    wireColour: [205, 159, 139],
+  },
+  {
+    description:
+      "Connects to nearby players, distributing power to them from nearby generators (or batteries).",
+    marketValue: 10,
+  },
+);
+// Copper Tier [1]
+createLinkedBlockAndItem(
+  "basic-pylon",
+  "Basic Power Pylon",
+  "pylon.basic-pylon.ui",
+  {
+    type: "pylon",
+    baseImg: "pylon.basic-pylon.base",
+    poleImg: "pylon.basic-pylon.pole",
+    poleBaseImg: "pylon.basic-pylon.pole-base",
+    topImg: "pylon.basic-pylon.top",
+
+    health: 150,
+    range: 4,
+    wireColour: [255, 163, 125],
+  },
+  {
+    description: "Connects to nearby blocks, distributing power from generators to factories.",
+    marketValue: 12,
+  },
+);
+createLinkedBlockAndItem(
+  "basic-battery",
+  "Basic Battery",
+  "block.basic-battery",
+  { maxPower: 50000, selectable: true },
+  { description: "Stores a fairly large amount of power for later use." },
+);
+// Preview
+createLinkedBlockAndItem(
+  "discharge-pylon",
+  "Discharge Pylon",
+  "pylon.basic-pylon.ui",
+  {
+    type: "discharge-pylon",
+    baseImg: "pylon.basic-pylon.base",
+    poleImg: "pylon.basic-pylon.pole",
+    poleBaseImg: "pylon.basic-pylon.pole-base",
+    topImg: "pylon.basic-pylon.top",
+
+    zapEffect: "peti-zap",
+    blastEffect: "laser-caster-explosion-destabilised~60",
+    zapDamage: 6,
+
+    health: 150,
+    range: 4,
+    wireColour: [255, 0, 0],
+  },
+  {
+    description:
+      "Connects to nearby blocks, distributing power from generators to factories.\nStores and distributes this power to up to 10 enemies unfortunate enough to be in its vicinity.",
+    hidden: true,
+  },
+);
 //## CONTAINERS ##
 createLinkedBlockAndItem(
   "scrap-storage",
@@ -745,9 +923,11 @@ createLinkedBlockAndItem(
     },
     shootX: 20,
     baseImg: "turret.recycle.base",
+    maxPower: 10000,
+    powerDraw: 4.1666666667,
   },
   {
-    description: "A mounted scrap shooter.\nShoots slower but further.",
+    description: "The Recycle turret mounted on its own small base.\nRequires power.",
     marketValue: 100, //65
   },
 );
@@ -913,7 +1093,7 @@ createLinkedBlockAndItem(
   "Message Unit",
   "block.message",
   { type: "sign" },
-  { description: "A small digital storage device for holding messages." },
+  { description: "A small digital storage device for holding messages.", hidden: true },
 );
 //## TONK ##
 createLinkedBlockAndItem(
@@ -1011,15 +1191,3 @@ createLinkedBlockAndItem(
     hidden: true,
   },
 );
-//## TEST ##
-Registries.blocks.add("test-provider", {
-  name: "Test Provider",
-  maxPower: 1000,
-  power: 1000,
-  isProvider: true,
-});
-Registries.blocks.add("test-subscriber", {
-  name: "Test Subscriber",
-  maxPower: 1000,
-  powerDraw: 10,
-});

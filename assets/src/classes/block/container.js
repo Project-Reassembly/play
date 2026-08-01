@@ -3,7 +3,7 @@ import { Block } from "./block.js";
 class Container extends Block {
   /** @type {Inventory} */
   inventory = null;
-  inventorySize = 30;
+  inventorySize = 5;
   selectable = true;
   title = "";
   /**@type {Block | null} */
@@ -94,3 +94,4 @@ class Container extends Block {
 }
 export { Container };
 
+Object.defineProperty(globalThis, "sel", { get: () => Container.selectedBlock });

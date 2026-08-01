@@ -791,7 +791,7 @@ window.windowResized = function () {
 };
 
 function frameSkippingFunction(func) {
-  if (framesToDraw > 1000) {
+  if (framesToDraw > 25) {
     func();
     framesToDraw = 0;
     return;
@@ -982,6 +982,7 @@ function uiFrame() {
   Inventory.tooltip = null;
   //Tick UI
   UIComponent.setCondition("containerselected", Container.selectedBlock instanceof Container);
+  UIComponent.setCondition("powerselected", !!Container.selectedBlock?.maxPower);
   updateUIActivity();
   tickUI();
   //Reset mouse held status
@@ -1024,22 +1025,26 @@ function tickTimers() {
   respawnTimer.tick();
 }
 
+function tickPausableStuff() {
+  tickTimers();
+  if (game.player.entity) {
+    if (world.impactParticles.length == 0) movePlayer();
+    if (!freecam) {
+      ui.camera.x -= (ui.camera.x - game.player.entity.x) * 0.1;
+      ui.camera.y -= (ui.camera.y - game.player.entity.y) * 0.1;
+    }
+  } else UIComponent.setCondition("dead", "yes");
+  effects.applyShake();
+  world.tickAll();
+  checkCreatedEntities();
+}
+
+globalThis.tick = tickPausableStuff;
+
 function gameFrame() {
   push();
   frameSkippingFunction(() => {
-    if (!game.paused) {
-      tickTimers();
-      if (game.player.entity) {
-        if (world.impactParticles.length == 0) movePlayer();
-        if (!freecam) {
-          ui.camera.x -= (ui.camera.x - game.player.entity.x) * 0.1;
-          ui.camera.y -= (ui.camera.y - game.player.entity.y) * 0.1;
-        }
-      } else UIComponent.setCondition("dead", "yes");
-      effects.applyShake();
-      world.tickAll();
-      checkCreatedEntities();
-    }
+    if (!game.paused) tickPausableStuff();
   });
   UIComponent.setCondition("boss", world.hasBoss() ? "yes" : "no");
   scale(ui.camera.zoom);
@@ -1288,6 +1293,16 @@ function npcInteract() {
     ) {
       game.player.conversation = game.player.dialogue.get(ent.registryName);
       ui.waitingForMouseUp = true;
+      return true;
+    } else if (
+      ent instanceof Player &&
+      ent.deactivated &&
+      ent.pos.distanceToXY(game.mouse.x, game.mouse.y) <= ent.hitSize
+    ) {
+      ent.inventories.forEach((i) => {
+        i.drop(ent.world, ent.x, ent.y);
+        i.clear();
+      });
       return true;
     }
   return false;

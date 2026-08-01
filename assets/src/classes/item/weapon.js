@@ -10,6 +10,7 @@ import { WeaponBulletConfiguration, WeaponShootConfiguration } from "./weapon-ex
 class Weapon extends Equippable {
   timer = new Timer();
   ammoUse = 1;
+  powerUse = 0;
   shootX = 15;
   shootY = 0;
   bullets = new WeaponBulletConfiguration();
@@ -96,6 +97,7 @@ class Weapon extends Equippable {
    */
   fire(holder, shoot = this.shoot, bulletConfig = this.bullets) {
     if (this._cooldown <= 0) {
+      if (Object.hasOwn(holder, "power") && holder.power < this.powerUse) return;
       //choose ammo
       let ammoType = "-";
       for (let ammo in bulletConfig.ammos) {
@@ -130,7 +132,12 @@ class Weapon extends Equippable {
   }
   /** @param {string} ammoType  */
   _internalFire(holder, shoot = this.shoot, ammoType, bulletConfig = this.bullets) {
-    if (!this._useAmmo(holder, ammoType)) return;
+    if (ammoType === "none") {
+      if (Object.hasOwn(holder, "power")) {
+        if (holder.power >= shoot.power) holder.power -= shoot.power;
+        else return;
+      }
+    } else if (!this._useAmmo(holder, ammoType)) return;
 
     this._cooldown = this.getAcceleratedReloadRate(shoot);
     this.accelerate(shoot); //Apply acceleration effects
@@ -189,7 +196,7 @@ class Weapon extends Equippable {
         ammoType === "-" ?
           "None Available"
         : `${crop(Registries.items.get(ammoType).name, 12)} ×${this.ammoUse}`
-      : "Free"
+      : `${this.powerUse} power`
     }\n${this.createProgressBar()} `;
   }
   createProgressBar() {
@@ -217,15 +224,16 @@ class Weapon extends Equippable {
  * @param {WeaponShootConfiguration} shoot
  * @param {WeaponBulletConfiguration} bullets
  */
-export function infoOfShootPattern(shoot, bullets, usage = 1) {
-  let s = `  #[0x00ffac]-${roundNum((60 / (shoot.reload + shoot.charge)) * shoot.pattern.amount * shoot.pattern.burst, 2)}#-- shots/s\n`;
+export function infoOfShootPattern(shoot, bullets, usage = 1, powerUse = 0) {
+  const count = shoot.pattern.amount * shoot.pattern.burst;
+  let s = `  #[0x00ffac]-${roundNum((60 / (shoot.reload + shoot.charge)) * count, 2)}#-- shots/s\n`;
   if (shoot.pattern.spacing || shoot.pattern.spread)
     s += `  #[0x00ffac]-${roundNum(shoot.pattern.spacing * shoot.pattern.amount + shoot.pattern.spread, 2)}°#-- inaccuracy\n`;
   if (shoot.charge) s += `  #[0x00ffac]-${roundNum(shoot.charge / 60, 2)}s#-- charge-up\n`;
 
   for (const ammo in bullets.ammos) {
     const i = Registries.items.tryGet(ammo);
-    s += `  #=-[${i?.image ? `#>>${i.image}` : "⚡"}#=-${i?.name ?? "Energy"} ${usage > 1 ? `x${usage}` : ""}#=-]\n  #=-| ${bullets.getAmmo(ammo).createInfo().replaceAll("\n", "\n  #=-| ").trim()}\n`;
+    s += `  #=-[${i?.image ? `#>>${i.image}` : ` #e-${shortenedNumber(shoot.power/count)} `}#=-${i?.name ?? "Power"} ${usage > 1 ? `x${usage}` : ""}#=-]\n  #=-| ${bullets.getAmmo(ammo).createInfo().replaceAll("\n", "\n  #=-| ").trim()}\n`;
   }
   return s;
 }

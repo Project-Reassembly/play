@@ -159,8 +159,9 @@ add("block.dev.commandblock.chain", "assets/textures/block/blocks/dev/command-bl
 add("block.dev.commandblock.loop", "assets/textures/block/blocks/dev/command-block-repeat.png")
 add("block.dev.commandblock.heat", "assets/textures/block/blocks/dev/command-block-heat.png")
 //Blocks > Defense
-add("block.stone-wall", "assets/textures/block/blocks/defense/stone-wall.png")
 add("block.sandstone-wall", "assets/textures/block/blocks/defense/sandstone-wall.png")
+add("block.coal-wall", "assets/textures/block/blocks/defense/coal-wall.png")
+add("block.stone-wall", "assets/textures/block/blocks/defense/stone-wall.png")
 //Blocks > Turrets
 add("turret.recycle.base", "assets/textures/block/turret/bases/recycle.png")
 add("turret.recycle.ui", "assets/textures/block/turret/ui/recycle.png")
@@ -179,6 +180,10 @@ add("crafter.scrap-compressor", "assets/textures/block/blocks/crafter/scrap-comp
 add("crafter.basic-assembler", "assets/textures/block/blocks/crafter/basic-assembler.png")
 add("crafter.basic-smelter", "assets/textures/block/blocks/crafter/basic-smelter.png")
 //Blocks > Drills
+add("drill.coal-drill.top", "assets/textures/block/blocks/drill/coal-drill-top.png")
+add("drill.coal-drill.spinner", "assets/textures/block/blocks/drill/coal-drill-spinner.png")
+add("drill.coal-drill.base", "assets/textures/block/blocks/drill/coal-drill-base.png")
+add("drill.coal-drill.ui", "assets/textures/block/blocks/drill/coal-drill.png")
 add("drill.scrap-drill.top", "assets/textures/block/blocks/drill/scrap-drill-top.png")
 add("drill.scrap-drill.spinner", "assets/textures/block/blocks/drill/scrap-drill-spinner.png")
 add("drill.scrap-drill.base", "assets/textures/block/blocks/drill/scrap-drill-base.png")
@@ -203,6 +208,24 @@ add("conveyor.basic-level-loader.indicator", "assets/textures/block/blocks/conve
 add("conveyor.basic-level-loader.ui", "assets/textures/block/blocks/conveyor/basic-level-loader.png")
 add("conveyor.basic-level-unloader.belt", "assets/textures/block/blocks/conveyor/basic-level-unloader-belt.png")
 add("conveyor.basic-level-unloader.ui", "assets/textures/block/blocks/conveyor/basic-level-unloader.png")
+//Blocks > Power
+add("generator.scrap-burner", "assets/textures/block/blocks/generator/scrap-burner.png")
+
+add("pylon.scrap-pylon.ui", "assets/textures/block/blocks/pylon/scrap-pylon-base.png")
+add("pylon.scrap-pylon.base", "assets/textures/block/blocks/pylon/scrap-pylon-base-active.png")
+add("pylon.scrap-pylon.pole", "assets/textures/block/blocks/pylon/scrap-pylon-tower.png")
+add("pylon.scrap-pylon.pole-base", "assets/textures/block/blocks/pylon/scrap-pylon-tower-bottom.png")
+add("pylon.scrap-pylon.top", "assets/textures/block/blocks/pylon/scrap-pylon-top.png")
+
+add("pylon.scrap-player-charger.top", "assets/textures/block/blocks/pylon/scrap-player-charger-top.png")
+
+add("pylon.basic-pylon.ui", "assets/textures/block/blocks/pylon/basic-pylon-base.png")
+add("pylon.basic-pylon.base", "assets/textures/block/blocks/pylon/basic-pylon-base-active.png")
+add("pylon.basic-pylon.pole", "assets/textures/block/blocks/pylon/basic-pylon-tower.png")
+add("pylon.basic-pylon.pole-base", "assets/textures/block/blocks/pylon/basic-pylon-tower-bottom.png")
+add("pylon.basic-pylon.top", "assets/textures/block/blocks/pylon/basic-pylon-top.png")
+
+add("block.basic-battery", "assets/textures/block/blocks/battery/basic-battery.png")
 //Blocks > Plasma
 add("ppipe.plasma-pipeline.ui", "assets/textures/block/blocks/plasma/plasma-pipeline-ui.png")
 add("ppipe.plasma-pipeline.base", "assets/textures/block/blocks/plasma/plasma-pipeline-base.png")

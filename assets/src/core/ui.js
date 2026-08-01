@@ -274,6 +274,10 @@ class UIComponent {
     this.rotation += rotation;
     return this;
   }
+  onlyif(fn = () => true) {
+    this.iffns.push(fn);
+    return this;
+  }
 
   /**  @template {keyof ({[T in keyof this as this[T] extends Function ? never : T]: this[T] })} K god this type is horrible @param {K} prop  @param {() => this[K]} getter */
   define(prop, getter) {
@@ -329,6 +333,7 @@ class UIComponent {
   }
   acceptedScreens = [];
   conditions = [];
+  iffns = [];
   interactive = false;
   active = false;
   inverted = false;
@@ -343,7 +348,10 @@ class UIComponent {
 
   updateActivity() {
     //It's active if it should show *and* all the conditions are met
-    this.active = this.acceptedScreens.includes(ui.menuState) && this.getActivity();
+    this.active =
+      this.acceptedScreens.includes(ui.menuState) &&
+      this.getActivity() &&
+      this.iffns.every((i) => i());
   }
   getActivity() {
     if (this.conditions[0] === "any") {

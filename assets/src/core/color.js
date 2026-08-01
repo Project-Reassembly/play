@@ -9,7 +9,7 @@ export const col = new (class Int32Colours {
     Object.freeze(this);
   }
   /** Turns almost anything into a colour.
-   *  @type {(something: boolean | string | number | [number,number,number]| [number,number,number,number] | {r:number, g:number, b:number, a?:number} | (() => *) | bigint | symbol) => color} something Thing to turn.
+   *  @type {(something: boolean | string | number | [number,number,number]| [number,number,number,number] | {r:number, g:number, b:number, a?:number} | (() => *) | bigint | symbol) => color}
    *  ****
    * **Types**:
    *  - `string`: Tries to parse as a hex number of the form `#rrggbbaa`, `#rrggbb`, `0xrrggbbaa`, `0xrrggbb` or a string form of the decimal number.

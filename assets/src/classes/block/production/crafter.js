@@ -87,13 +87,14 @@ class Crafter extends Factory {
   tickRecipe(recipe, time) {
     //If items for recipe are present, and outputs fit
     if (this.inventory.hasItems(recipe.inputs) && this.results.canAddItems(recipe.outputs))
-      if (this.#progress > time) {
-        if (this.onFinish(recipe)) this.#progress = 0;
-      } else {
-        this.#progress += this.#speed;
-        this.createTickEffect();
-        return true;
-      }
+      if (!this.powerDraw || this.usePower())
+        if (this.#progress > time) {
+          if (this.onFinish(recipe)) this.#progress = 0;
+        } else {
+          this.#progress += this.#speed;
+          this.createTickEffect();
+          return true;
+        }
     return false;
   }
   /**@param {Recipe} recipe  */
@@ -195,11 +196,14 @@ class Uncrafter extends Crafter {
     strokeTo: 0,
   };
   init() {
-    this.recipes = (Registries.blocks.get(this.counterpart).recipes ?? []).map((recipe) => ({
+    const b = Registries.blocks.get(this.counterpart);
+    this.recipes = (b.recipes ?? []).map((recipe) => ({
       outputs: recipe.inputs,
       inputs: recipe.outputs,
       time: recipe.time * 1.5,
     }));
+    this.powerDraw ||= b.powerDraw * 1.5 || 0;
+    this.maxPower ||= b.maxPower * 1.5 || 0;
     super.init();
   }
 }

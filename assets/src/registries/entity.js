@@ -1,4 +1,32 @@
 import { Registries } from "../core/registry.js";
+const assrec = [
+  { inputs: [{ item: "scrap", count: 5 }], outputs: [{ item: "coal-drill", count: 1 }], time: 180 },
+  {
+    inputs: [{ item: "scrap", count: 4 }],
+    outputs: [{ item: "scrap-pylon", count: 1 }],
+    time: 180,
+  },
+  {
+    inputs: [{ item: "scrap", count: 30 }],
+    outputs: [{ item: "scrap-burner", count: 1 }],
+    time: 480,
+  },
+  {
+    inputs: [{ item: "scrap", count: 10 }],
+    outputs: [{ item: "scrap-drill", count: 1 }],
+    time: 300,
+  },
+  {
+    inputs: [{ item: "scrap", count: 25 }],
+    outputs: [{ item: "scrap-assembler", count: 1 }],
+    time: 600,
+  },
+  {
+    inputs: [{ item: "scrap", count: 20 }],
+    outputs: [{ item: "scrap-storage", count: 1 }],
+    time: 180,
+  },
+];
 Registries.entities.add("tonk", { type: "modular-tank" });
 Registries.entities.add("recycled", {
   type: "player",
@@ -16,33 +44,7 @@ Registries.entities.add("recycled", {
   height: 25,
   speed: 3,
   assemblySlots: 4,
-  assemblyRecipes: [
-    {
-      inputs: [{ item: "scrap", count: 20 }],
-      outputs: [{ item: "scrap-storage", count: 1 }],
-      time: 150,
-    },
-    {
-      inputs: [{ item: "scrap", count: 10 }],
-      outputs: [{ item: "scrap-drill", count: 1 }],
-      time: 300,
-    },
-    {
-      inputs: [{ item: "scrap", count: 25 }],
-      outputs: [{ item: "scrap-assembler", count: 1 }],
-      time: 600,
-    },
-    {
-      inputs: [{ item: "scrap", count: 40 }],
-      outputs: [{ item: "scrap-compressor", count: 1 }],
-      time: 600,
-    },
-    {
-      inputs: [{ item: "scrap", count: 30 }],
-      outputs: [{ item: "scrap-smelter", count: 1 }],
-      time: 600,
-    },
-  ],
+  assemblyRecipes: assrec,
   rightHand: [{ item: "scrap-shooter" }],
   ammo: [{ item: "scrap-bullet", count: 1000 }],
 });
@@ -63,33 +65,7 @@ Registries.entities.add("integrity", {
   height: 25,
   speed: 4,
   assemblySlots: 4,
-  assemblyRecipes: [
-    {
-      inputs: [{ item: "scrap", count: 20 }],
-      outputs: [{ item: "scrap-storage", count: 1 }],
-      time: 150,
-    },
-    {
-      inputs: [{ item: "scrap", count: 10 }],
-      outputs: [{ item: "scrap-drill", count: 1 }],
-      time: 300,
-    },
-    {
-      inputs: [{ item: "scrap", count: 25 }],
-      outputs: [{ item: "scrap-assembler", count: 1 }],
-      time: 600,
-    },
-    {
-      inputs: [{ item: "scrap", count: 40 }],
-      outputs: [{ item: "scrap-compressor", count: 1 }],
-      time: 600,
-    },
-    {
-      inputs: [{ item: "scrap", count: 30 }],
-      outputs: [{ item: "scrap-smelter", count: 1 }],
-      time: 600,
-    },
-  ],
+  assemblyRecipes: assrec,
   rightHand: [{ item: "iti-laser-pistol" }],
 });
 Registries.entities.alias("integrity", "iti-player");
@@ -109,33 +85,7 @@ Registries.entities.add("endeavour", {
   height: 25,
   speed: 4,
   assemblySlots: 4,
-  assemblyRecipes: [
-    {
-      inputs: [{ item: "scrap", count: 20 }],
-      outputs: [{ item: "scrap-storage", count: 1 }],
-      time: 150,
-    },
-    {
-      inputs: [{ item: "scrap", count: 10 }],
-      outputs: [{ item: "scrap-drill", count: 1 }],
-      time: 300,
-    },
-    {
-      inputs: [{ item: "scrap", count: 25 }],
-      outputs: [{ item: "scrap-assembler", count: 1 }],
-      time: 600,
-    },
-    {
-      inputs: [{ item: "scrap", count: 40 }],
-      outputs: [{ item: "scrap-compressor", count: 1 }],
-      time: 600,
-    },
-    {
-      inputs: [{ item: "scrap", count: 30 }],
-      outputs: [{ item: "scrap-smelter", count: 1 }],
-      time: 600,
-    },
-  ],
+  assemblyRecipes: assrec,
 });
 Registries.entities.alias("endeavour", "ccc-player");
 Registries.entities.add("proton", {
@@ -154,33 +104,7 @@ Registries.entities.add("proton", {
   height: 25,
   speed: 5,
   assemblySlots: 4,
-  assemblyRecipes: [
-    {
-      inputs: [{ item: "scrap", count: 20 }],
-      outputs: [{ item: "scrap-storage", count: 1 }],
-      time: 150,
-    },
-    {
-      inputs: [{ item: "scrap", count: 10 }],
-      outputs: [{ item: "scrap-drill", count: 1 }],
-      time: 300,
-    },
-    {
-      inputs: [{ item: "scrap", count: 25 }],
-      outputs: [{ item: "scrap-assembler", count: 1 }],
-      time: 600,
-    },
-    {
-      inputs: [{ item: "scrap", count: 40 }],
-      outputs: [{ item: "scrap-compressor", count: 1 }],
-      time: 600,
-    },
-    {
-      inputs: [{ item: "scrap", count: 30 }],
-      outputs: [{ item: "scrap-smelter", count: 1 }],
-      time: 600,
-    },
-  ],
+  assemblyRecipes: assrec,
   rightHand: [{ item: "peti-charged-laser-blaster" }],
 });
 Registries.entities.alias("proton", "peti-player");

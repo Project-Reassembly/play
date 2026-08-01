@@ -72,54 +72,58 @@ class Turret extends Container {
     this.timer.tick();
     this.decelerate();
     this.component?.tick(this);
-    if (this.target) {
-      if (this.target.dead) this.target = null;
-      else if (this.target instanceof Entity) {
-        const ammo = this.bullets.getAmmo(this.#lastAmmo);
-        const mc = ammo ? ammo.get(MovementComponent) : null;
-        const ef = ammo ? ammo.get(ExtraUpdatesComponent) : null;
-        const spd = (mc?.speed ?? 10) * (1 + (ef?.amount ?? 0));
-        const framesToImpact = this.distanceTo(this.target) / spd;
-        const predictedOffset =
-          this.target instanceof Entity ?
-            this.target.predictMotion(framesToImpact || 0)
-          : Vector.ZERO;
-        let res = turn(
-          this.gunDirection,
-          this.x,
-          this.y,
-          this.target.x + predictedOffset.x,
-          this.target.y + predictedOffset.y,
-          this.turnSpeed,
-        );
-        this.gunDirection = res.direction;
-        this.gunCanFire = res.left < this.shootCone;
-      } else {
-        let res = turn(
-          this.gunDirection,
-          this.x,
-          this.y,
-          this.target.x,
-          this.target.y,
-          this.turnSpeed,
-        );
-        this.gunDirection = res.direction;
-        this.gunCanFire = res.left < this.shootCone;
+    if (!this.powerDraw || this.usePower()) {
+      this.selectTarget();
+      if (this.target) {
+        const d = this.distanceTo(this.target);
+        if (this.target.dead || d > this.range) this.target = null;
+        else if (this.target instanceof Entity) {
+          const ammo = this.bullets.getAmmo(this.#lastAmmo);
+          const mc = ammo ? ammo.get(MovementComponent) : null;
+          const ef = ammo ? ammo.get(ExtraUpdatesComponent) : null;
+          const spd = (mc?.speed ?? 10) * (1 + (ef?.amount ?? 0));
+          const framesToImpact = d / spd;
+          const predictedOffset =
+            this.target instanceof Entity ?
+              this.target.predictMotion(framesToImpact || 0)
+            : Vector.ZERO;
+          let res = turn(
+            this.gunDirection,
+            this.x,
+            this.y,
+            this.target.x + predictedOffset.x,
+            this.target.y + predictedOffset.y,
+            this.turnSpeed,
+          );
+          this.gunDirection = res.direction;
+          this.gunCanFire = res.left < this.shootCone;
+        } else {
+          let res = turn(
+            this.gunDirection,
+            this.x,
+            this.y,
+            this.target.x,
+            this.target.y,
+            this.turnSpeed,
+          );
+          this.gunDirection = res.direction;
+          this.gunCanFire = res.left < this.shootCone;
+        }
+        // this.gunCanFire =
+        //   Math.abs(
+        //     this.gunDirection -
+        //       new Vector(this.target.x, this.target.y).sub(new Vector(this.x, this.y)).angle,
+        //   ) < this.shootCone;
+        this.fireIfPossible();
       }
-      // this.gunCanFire =
-      //   Math.abs(
-      //     this.gunDirection -
-      //       new Vector(this.target.x, this.target.y).sub(new Vector(this.x, this.y)).angle,
-      //   ) < this.shootCone;
-    }
-    if (this.#cooldown > 0) {
-      this.#cooldown--;
-      if (this.#cooldown <= 0) {
-        let pos = this._getShootPos();
-        autoScaledEffect(this.shoot.readyEffect, this.world, pos.x, pos.y, pos.direction);
+      if (this.#cooldown > 0) {
+        this.#cooldown--;
+        if (this.#cooldown <= 0) {
+          let pos = this._getShootPos();
+          autoScaledEffect(this.shoot.readyEffect, this.world, pos.x, pos.y, pos.direction);
+        }
       }
-    }
-    this.ai();
+    } else this.gunCanFire = false;
   }
   getAcceleratedReloadRate(shoot) {
     if (this.#acceleration <= -1 || this.#acceleration > this.maxAccel) return shoot.reload; //If bad acceleration then ignore it
@@ -245,10 +249,8 @@ class Turret extends Container {
   }
   /** Generic AI for attacking entities.
    * @param {(phys: PhysicalObject) => boolean} conditions Condition for selecting entities, to make this AI less generic.
-   * @param {boolean} [shoots=true] Whether or not the entity should shoot at the new target.
-   * @returns {boolean} `true` if an entity is being targeted, `false` if not.
    */
-  ai(conditions = () => true, shoots = true, attackBlocks = true, attackEntities = true) {
+  selectTarget(conditions = () => true, shoots = true, attackBlocks = true, attackEntities = true) {
     let tempTarget = this.target;
     let entity =
       attackEntities ?
@@ -272,11 +274,13 @@ class Turret extends Container {
         )
       : null;
     this.target = this.closestFrom([entity, block], this.range);
+    if (!this.target) this.target = tempTarget;
+  }
+  fireIfPossible() {
     if (this.target) {
-      if (this.gunCanFire && shoots && this.distanceTo(this.target) < this.range) this.fire();
+      if (this.gunCanFire && this.distanceTo(this.target) < this.range) this.fire();
       return true;
     } else {
-      this.target = tempTarget;
       this.gunCanFire = false;
       return false;
     }

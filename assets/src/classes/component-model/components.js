@@ -72,16 +72,16 @@ export class HasComponents {
     for (const T of Ts) if (this.#map.has(T)) return true;
     return false;
   }
-  /** @template {keyof {[K in keyof V as V[K] extends Function ? K : never]: V[K]}} K @param {K} name @param {V[K] extends (...args: infer A) => * ? A : never} params @returns {boolean} True if any function returned `false` to cancel the event. */ //@returns {V[K] extends (...args: *) => infer R ? R : never} 
+  /** @template {keyof {[K in keyof V as V[K] extends Function ? K : never]: V[K]}} K @param {K} name @param {V[K] extends (...args: infer A) => * ? A : never} params @returns {boolean} True if any function returned `false` to cancel the event. */ //@returns {V[K] extends (...args: *) => infer R ? R : never}
   call(name, ...params) {
     for (const stuff of this.#map.values())
-      for (const c of stuff) /* if (name in c) */ 
+      for (const c of stuff /* if (name in c) */)
         if (c[name].apply(c, params) === false) return true;
     return false;
   }
   /** @template T @param {Integrate.TypedConstructor<T>} T  */
   #checkT(T) {
-    if (!(T.prototype instanceof this.V))
+    if (!(T.prototype instanceof this.V || T === this.V))
       throw new TypeError(
         `Component type ${T.name} is not applicable to holder which accepts ${this.V.name}`,
       );

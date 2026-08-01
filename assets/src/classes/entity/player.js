@@ -1,6 +1,6 @@
 import { col } from "../../core/color.js";
 import { construct, constructFromType } from "../../core/constructor.js";
-import { rnd, tru, Vector } from "../../core/number.js";
+import { rnd, roundNum, tru, Vector } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { ui, UIComponent } from "../../core/ui.js";
 import { discoverable, discovered } from "../../definitions/screens/database.js";
@@ -14,6 +14,7 @@ import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { ItemStack } from "../item/item-stack.js";
 import { BulletModel } from "../projectile/bullet-model.js";
 import { Timer } from "../timer.js";
+import { undeliverEntity } from "../world/events/event-action.js";
 import { WeaponComponent } from "./entity-part.js";
 import { EquippedEntity } from "./inventory-entity.js";
 export const respawnTimer = new Timer();
@@ -27,6 +28,7 @@ class Player extends EquippedEntity {
   assemblySlots = 4;
   /**@type {import("../block/production/crafter.js").Recipe[]} */
   assemblyRecipes = [];
+  assemblerPowerUse = 1.6666666667;
   craftEffect = "crafter-craft";
   tickEffectChance = 0.1;
   tickEffect = "crafter-smoke";
@@ -34,10 +36,19 @@ class Player extends EquippedEntity {
   _progress = 0;
   _maxprog = 0;
 
+  //nrg
+  power = 50000;
+  maxPower = 50000;
+
+  emergencyPower = 1000;
+  maxEmergencyPower = 1000;
+
   /** @type {WeaponComponent} */
   leftArmComponent;
   /** @type {WeaponComponent} */
   rightArmComponent;
+
+  passivePowerUse = 0.2314814815; // one hour default play time until problems
   /*
   Recipes are like
   {
@@ -59,6 +70,8 @@ class Player extends EquippedEntity {
     */
   init() {
     super.init();
+    this.maxPower = this.power;
+    this.maxEmergencyPower = this.emergencyPower;
     if (this.assemblySlots !== 0) {
       this.assemblyInventory = new Inventory(this.assemblySlots, this.assemblyInventory);
       this.assemblyResult = new Inventory(1, this.assemblyResult);
@@ -237,9 +250,13 @@ class Player extends EquippedEntity {
       if (this._progress > time) {
         if (this.onFinish(recipe)) this._progress = 0;
       } else {
-        this._progress += 1;
-        this.createTickEffect();
-        return true;
+        if (this.power > this.assemblerPowerUse) {
+          this.power -= this.assemblerPowerUse;
+
+          this._progress += 1;
+          this.createTickEffect();
+          return true;
+        } else this.power = 0;
       }
     return false;
   }
@@ -266,11 +283,24 @@ class Player extends EquippedEntity {
       : "Assembler\nNot available";
     //this.title + "   [" + this._recipe + "]"
   }
-
+  deactivated = false;
   tick() {
+    if (this.deactivated) {
+      if (this.power && this.emergencyPower < this.maxEmergencyPower) {
+        const reserve = Math.min(this.power, this.maxEmergencyPower - this.emergencyPower);
+
+        this.emergencyPower += reserve;
+        this.power -= reserve;
+      } else if (this.emergencyPower >= this.maxEmergencyPower) {
+        undeliverEntity(this);
+      }
+      return;
+    }
+
     super.tick();
     this.leftArmComponent.tick(this);
     this.rightArmComponent.tick(this);
+
     if (this.punchChargingR && this.punchChargeR > 20)
       this._chargeEffectAt(this.rightArmComponent, this.punchChargeR);
     if (this.punchChargingL && this.punchChargeL > 20)
@@ -284,7 +314,65 @@ class Player extends EquippedEntity {
       }
       this.tickRecipe(recipe, recipe.time);
     }
+
+    if (this.power >= this.passivePowerUse) {
+      this.power -= this.passivePowerUse;
+    } else if (this.emergencyPower >= this.passivePowerUse) {
+      this.emergencyPower -= this.passivePowerUse;
+    } else {
+      this.deactivated = true;
+      this.controllable = false;
+      respawnTimer.do(() => {
+        ui.waitingForMouseUp = true;
+        UIComponent.setCondition("dead", "yes");
+      }, this.respawnTime);
+      Log.send("#4-Ran out of power!");
+    }
+
+    if (this.power && this.emergencyPower < this.maxEmergencyPower) {
+      const reserve = Math.min(this.power * 0.1, this.maxEmergencyPower - this.emergencyPower);
+
+      this.emergencyPower += reserve;
+      this.power -= reserve;
+    }
     if (this.age % 60 === 0) this.tickDiscovery();
+  }
+
+  postDraw() {
+    super.postDraw();
+
+    if (this.deactivated) {
+      push();
+      fill(255, 0, 0);
+      stroke(255, 0, 0);
+      strokeWeight(1);
+      textAlign(CENTER, CENTER);
+      textSize(20);
+      text("Out of Power", this.x, this.y - 25);
+      strokeWeight(4);
+      line(this.x - 12, this.y - 12, this.x + 12, this.y + 12);
+      line(this.x - 12, this.y + 12, this.x + 12, this.y - 12);
+
+      textSize(10);
+      strokeWeight(0.5);
+      text("Recharge to remove", this.x, this.y + 20);
+      rectMode(CORNER);
+      stroke(0);
+      strokeWeight(1);
+      fill(0);
+      rect(this.x - this.width, this.y + this.height * 0.5 + 15, this.width * 2, 5);
+      col.fill(
+        col.interp([col.red, col.yellow, col.green], this.emergencyPower / this.maxEmergencyPower),
+      );
+      noStroke();
+      rect(
+        this.x - this.width,
+        this.y + this.height * 0.5 + 15,
+        (this.width * 2 * this.emergencyPower) / this.maxEmergencyPower,
+        5,
+      );
+      pop();
+    }
   }
 
   //player shit
@@ -348,10 +436,15 @@ class Player extends EquippedEntity {
   serialise() {
     let e = super.serialise();
     e.assinv = this.assemblyInventory.serialise();
+    e.power = roundNum(this.power);
+    e.energy = roundNum(this.emergencyPower);
     return e;
   }
+  /** @param {typeof Player.prototype.serialise extends () => infer R ? R : never} created  */
   static applyExtraProps(entity, created) {
     super.applyExtraProps(entity, created);
+    entity.power = created.power ?? entity.maxPower;
+    entity.emergencyPower = created.energy ?? entity.emergencyPower;
     entity.assemblyInventory = Inventory.deserialise(created.assinv);
   }
 

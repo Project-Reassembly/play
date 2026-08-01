@@ -9,6 +9,7 @@ class ShootPattern {
   burst = 1;
 }
 class WeaponShootConfiguration {
+  power = 0;
   pattern = new ShootPattern();
   charge = 0;
   chargeEffect = "none";

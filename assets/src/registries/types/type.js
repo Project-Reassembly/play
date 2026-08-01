@@ -22,6 +22,10 @@ import {
   PlasmaGenerator,
 } from "../../classes/block/plasma-gen-and-compressor.js";
 import { PlasmaBlock, PlasmaPipe, PlasmaTank } from "../../classes/block/plasma-pipe.js";
+import { Burner } from "../../classes/block/power/burner.js";
+import { PowerGenerator } from "../../classes/block/power/generator.js";
+import { PlayerCharger } from "../../classes/block/power/player-charger.js";
+import { DischargePylon, PowerPylon } from "../../classes/block/power/pylon.js";
 import { Crafter, Uncrafter } from "../../classes/block/production/crafter.js";
 import { Drill } from "../../classes/block/production/drill.js";
 import { Smelter } from "../../classes/block/production/smelter.js";
@@ -67,9 +71,7 @@ import { Equippable } from "../../classes/item/equippable.js";
 import { ItemStack } from "../../classes/item/item-stack.js";
 import { Item } from "../../classes/item/item.js";
 import { PlaceableItem } from "../../classes/item/placeable.js";
-import {
-  BlockLauncher
-} from "../../classes/item/special-weapons/block-launcher.js";
+import { BlockLauncher } from "../../classes/item/special-weapons/block-launcher.js";
 import { Throwable } from "../../classes/item/throwable.js";
 import { Weapon } from "../../classes/item/weapon.js";
 import { Chunk } from "../../classes/world/chunk.js";
@@ -145,6 +147,13 @@ TypeRegistries.default.add("level-loader", LevelLoader);
 TypeRegistries.default.add("unloader", Unloader);
 TypeRegistries.default.add("level-unloader", LevelUnloader);
 
+TypeRegistries.default.add("pylon", PowerPylon);
+TypeRegistries.default.add("player-charger", PlayerCharger);
+TypeRegistries.default.add("discharge-pylon", DischargePylon);
+
+TypeRegistries.default.add("generator", PowerGenerator);
+TypeRegistries.default.add("burner", Burner);
+
 TypeRegistries.default.add("sign", SignBlock);
 
 TypeRegistries.default.add("plasma-block", PlasmaBlock);
@@ -207,4 +216,3 @@ TypeRegistries.default.add("aicon.data", DataComparisonCondition);
 
 TypeRegistries.default.add("aicon.all", CombinedCondition);
 TypeRegistries.default.add("aicon.any", AlternativeCondition);
-

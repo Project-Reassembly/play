@@ -18,18 +18,6 @@ import { AI } from "./ai/ai.js";
 import "./ai/scripter.js";
 import { AttributeMap } from "./attribute.js";
 import { Model } from "./models/model.js";
-/**
- * @typedef SerialisedEntity
- * @prop {number} health
- * @prop {number} shield
- * @prop {string} entity Registry name.
- * @prop {{effect: string, duration: int}[]} statuses
- * @prop {number} x
- * @prop {number} y
- * @prop {number} spawnX
- * @prop {number} spawnYs
- * @prop {boolean} isMainPlayer
- */
 /** Shootable object which moves off the chunk grid, possibly with a complex model. */
 class Entity extends ShootableObject {
   name = "Entity";
@@ -56,10 +44,6 @@ class Entity extends ShootableObject {
   }
   /** @type {PhysicalObject|Vector|null} */
   target = null;
-
-  //nrg
-  energy = 100;
-  maxEnergy = 0;
 
   //AI
   aiType = "passive";
@@ -116,7 +100,6 @@ class Entity extends ShootableObject {
 
   init() {
     super.init();
-    this.maxEnergy = this.energy;
 
     if (this.model) {
       this.model.draw(this.x, this.y, this.direction);
@@ -586,7 +569,6 @@ class Entity extends ShootableObject {
     );
     createDestructionExplosion(this.x, this.y, this);
   }
-  /**@returns {SerialisedEntity} */
   serialise() {
     return {
       entity: this.registryName,
@@ -596,19 +578,19 @@ class Entity extends ShootableObject {
       spawnY: roundNum(this.spawnY),
       health: roundNum(this.health),
       shield: roundNum(this.shield),
-      energy: roundNum(this.energy),
+      // energy: roundNum(this.energy),
       statuses: this.statuses,
       isMainPlayer: this === game.player.entity,
     };
   }
-  /**@param {SerialisedEntity} created @param {boolean} [inFull=true] If true, will deserialise the spawn location of the entity too. Literally never true normally. */
+  /**@param {typeof Entity.prototype.serialise extends () => infer R ? R : never} created @param {boolean} [inFull=true] If true, will deserialise the spawn location of the entity too. Literally never true normally. */
   static deserialise(created, inFull = true) {
     /**@type {Entity} */
     let entity = construct(Registries.entities.get(created.entity), "entity");
     entity.statuses = created.statuses;
     entity.health = created.health;
     entity.shield = created.shield ?? 0;
-    entity.energy = created.energy ?? entity.maxEnergy;
+    // entity.energy = created.energy ?? entity.maxEnergy; // removed
     entity._lastMaxShield = created.shield ?? 0;
     entity.constructor.applyExtraProps(entity, created);
     //Rest handled in-chunk, but here it is:

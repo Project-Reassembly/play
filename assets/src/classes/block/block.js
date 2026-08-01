@@ -9,7 +9,7 @@ import { ItemStack } from "../item/item-stack.js";
 
 import { ShootableObject } from "../physical.js";
 import { Chunk } from "../world/chunk.js";
-/** 
+/**
  * @import {Unconstructed} from "../../lib/integrate"
  * @import { Item } from "../item/item.js";
  */
@@ -63,6 +63,7 @@ class Block extends ShootableObject {
     super.init();
     delete this.x;
     delete this.y;
+    delete this.pos;
   }
   draw() {
     drawImg(this.image, this.x, this.y, this.tileSize * blockSize, this.tileSize * blockSize);
@@ -84,9 +85,10 @@ class Block extends ShootableObject {
     return true;
   }
   onHealthZeroed(type, source) {
-    this.break(BreakType.attack);
-    //Block go boom
-    createDestructionExplosion(this.x, this.y, this);
+    if (this.break(BreakType.attack))
+      //Block go boom
+      createDestructionExplosion(this.x, this.y, this);
+    else this.health = 1;
   }
   /** Fired when a block should be broken. Should handle block breaking itself.
    * @param {symbol} [type=BreakType.entity] What broke this block. Should be a property of `BreakType`.
@@ -96,12 +98,7 @@ class Block extends ShootableObject {
     this.world.break(this.gridX, this.gridY);
     if (type !== BreakType.deconstruct && type !== BreakType.replace) return true;
     if (!this.dropItem) return true;
-    DroppedItemStack.create(
-      new ItemStack(this.dropItem, 1),
-      this.world,
-      this.x,
-      this.y,
-    );
+    DroppedItemStack.create(new ItemStack(this.dropItem, 1), this.world, this.x, this.y);
     return true;
   }
   /** Fired when this block is attempted to be placed. Can specify the result of the place attempt. Still respects default placement rules.
@@ -137,6 +134,13 @@ class Block extends ShootableObject {
     this.power = Math.max(tryTransfer, 0);
     return Math.max(0, -tryTransfer);
   }
+  usePower() {
+    if (this.power >= this.powerDraw) {
+      this.power -= this.powerDraw;
+      return true;
+    }
+    return false;
+  }
 
   get x() {
     return (this.blockX + this.chunk.i * chunkSize) * blockSize;
@@ -144,8 +148,8 @@ class Block extends ShootableObject {
   get y() {
     return (this.blockY + this.chunk.j * chunkSize) * blockSize;
   }
-  get epos(){
-    return new Vector(this.x,this.y)
+  get pos() {
+    return new Vector(this.x, this.y);
   }
   get gridX() {
     return this.blockX + this.chunk.i * chunkSize;
@@ -185,10 +189,10 @@ class Block extends ShootableObject {
   read() {
     return this.registryName;
   }
-  value(){
+  value() {
     return 0;
   }
-  createExtendedDetails(){}
+  createExtendedDetails() {}
 }
 /** Stores values to describe how blocks are broken.
  * @enum
