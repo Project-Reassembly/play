@@ -121,8 +121,7 @@ createUIComponent(
   15,
 )
   .setBackgroundColour(col.black)
-  .setTextColour(col.accent)
-  .setOutlineColour(col.accent);
+  .setTextColour(col.accent);
 createUIComponent(
   ["database"],
   ["is-in-game-database:true"],
@@ -139,8 +138,7 @@ createUIComponent(
   15,
 )
   .setBackgroundColour(col.black)
-  .setTextColour(col.accent)
-  .setOutlineColour(col.accent);
+  .setTextColour(col.accent);
 
 // COLLECTION SELECTOR
 ui.addReset("selected-collection", "*");

@@ -95,6 +95,10 @@ export class ImageContainer {
     noSmooth();
     if (loaded instanceof this) {
       loaded.draw(x, y, width, height, angle, flipV);
+    } else if (!loaded) {
+      //Replace with a 'missing texture' image
+      const i = Registries.images.tryGet("error")?.image;
+      if (i) image(i, x, y, width, height);
     } else {
       //Try to draw it directly if not
       try {

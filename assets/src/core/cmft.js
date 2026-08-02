@@ -4,6 +4,7 @@ import { debug } from "../play/debug.js";
 import { fonts } from "../play/font.js";
 import { col } from "./color.js";
 import { ImageContainer } from "./image.js";
+import { roundNum } from "./number.js";
 //#region CMFT
 export const Decoration = new (class DecorationConsts {
   colours = Object.freeze({
@@ -137,25 +138,39 @@ class Collection {
     /** @type {import("./color.js").color?} */
     let colour = null,
       style = "normal",
-      isimage = false;
+      partType = Text,
+      cparam2 = undefined;
     for (let i = 0; i < source.length; i++) {
       const c = source[i];
       // console.log(`char ${c} at ${i}/${source.length} (start ${start})`);
       if (c === "#") {
         parts.push(
-          isimage ?
-            new Icon(this.#unmess(source.substring(start, i)))
-          : new Text(this.#unmess(source.substring(start, i))).setColour(colour).setStyle(style),
+          new partType(this.#unmess(source.substring(start, i)), cparam2)
+            .setColour(colour)
+            .setStyle(style),
         );
         // eat the hash
         i++;
         // now get the codes
 
         if (source.substring(i, i + 2) === ">>") {
-          isimage = true;
+          partType = Icon;
           i += 2;
         } else {
-          isimage = false;
+          if (source[i] === "/") {
+            partType = ProgressBar;
+            // time to grab the fraction
+
+            let j = ++i;
+            // find closing
+            while (source[i] && source[i] !== "/") i++;
+            // throw error if not there
+            if (!source[i]) return this.#error(`Missing '/' for progress bar opened at ${j - 1}`);
+            // use it
+            cparam2 = source.substring(j, i);
+            i++;
+          } else partType = Text;
+
           // colour code
           if (source[i] === "[") {
             // eat the bracket
@@ -174,7 +189,7 @@ class Collection {
             // else if (Registries.corps.has(colstr)) colour = Corporation.colorof(colstr);
             // else if (Registries.images.has(colstr))
             //   colour = Registries.images.get(colstr).color ?? 0;
-            else return this.#error(`Invalid long colour specification '${colstr}'`);
+            else return this.#error(`Invalid long colour specification '${colstr}' at ${i}`);
             // eat closing ]
             i++;
           } else if (source[i] in Decoration.colours) {
@@ -183,7 +198,7 @@ class Collection {
               colour = source[i];
             else colour = Decoration.colours[source[i]];
             i++;
-          } else return this.#error(`Invalid colour code '${source[i]}'`);
+          } else return this.#error(`Invalid colour code '${source[i]}' at ${i}`);
 
           // style code
           if (source[i] === "[") {
@@ -197,14 +212,14 @@ class Collection {
             const stylestr = source.substring(j, i);
             if (stylestr.length === 0) style = "normal";
             else if (styleVals.has(stylestr)) style = parseInt(stylestr);
-            else return this.#error(`Invalid long style specification '${stylestr}'`);
+            else return this.#error(`Invalid long style specification '${stylestr}' at ${i}`);
             // eat closing ]
             i++;
           } else if (source[i] in Decoration.styles) {
             // console.log(`style code at ${i}/${source.length} (start ${start})`)
             style = Decoration.styles[source[i]];
             i++;
-          } else return this.#error(`Invalid style code '${source[i]}'`);
+          } else return this.#error(`Invalid style code '${source[i]}' at ${i}`);
         }
         // console.log(`text component started at ${i}/${source.length} (start ${start})`)
         start = i--;
@@ -214,9 +229,7 @@ class Collection {
       }
     }
     parts.push(
-      isimage ?
-        new Icon(this.#unmess(source.substring(start)))
-      : new Text(this.#unmess(source.substring(start))).setColour(colour).setStyle(style),
+      new partType(this.#unmess(source.substring(start))).setColour(colour).setStyle(style),
     );
     return new this(...parts.filter((x) => x.length > 0));
   }
@@ -267,7 +280,7 @@ class Collection {
   }
   newline() {
     let c = this.components.at(-1);
-    if (c) c.append("\n");
+    if (c instanceof Text) c.append("\n");
     else this.components.push(new Text("\n"));
   }
   hasNewline() {
@@ -317,7 +330,9 @@ class Collection {
   }
   /**@param {(s:string) => string} mutator  */
   map(mutator) {
-    return new Collection(...this.components.map((x) => new Text(mutator(x.text)).copyVisuals(x)));
+    return new Collection(
+      ...this.components.map((x) => new x.constructor(mutator(x.text)).copyVisuals(x)),
+    );
   }
   wrapWords(maxChars = 100) {
     return this.splitLines().splitWords().wrapComponents(maxChars).merge();
@@ -431,7 +446,7 @@ class Text {
   text = "";
   /**@type {import("./color.js").color} */
   colour = col.white;
-  /**@type {string} */
+  /**@type {keyof { [X in keyof typeof Decoration.styles as (typeof Decoration.styles)[X]]}} */
   style = "normal";
   /**@type {string} */
   effects = "";
@@ -457,7 +472,7 @@ class Text {
     return this;
   }
   toString() {
-    return `[${this.colour ?? "default"}, ${this.style}${
+    return `[#${col.hex(this.colour)}, ${this.style}${
       this.effects ? `<${this.effects}>` : ""
     }] "${this.text}"`;
   }
@@ -478,7 +493,7 @@ class Text {
   /**@param {Text} other  */
   hasSameStyle(other) {
     return (
-      !(other instanceof Icon) &&
+      other.constructor === Text &&
       this.style === other.style &&
       this.colour === other.colour &&
       this.effects === other.effects
@@ -537,6 +552,85 @@ class Icon extends Text {
       charSize,
       charSize,
     );
+  }
+}
+/** Another "text" component, but this one draws a healthbar-style meter with a caption. */
+class ProgressBar extends Text {
+  frac = 0.45;
+  constructor(caption, fraction) {
+    super(" " + caption+" ");
+    this.frac = +fraction || 0.45;
+  }
+  split(splitter) {
+    return [this];
+  }
+  toString() {
+    return `[bar ${roundNum(this.frac * 100, 1)}%] [#${col.hex(this.colour)}] "${this.text}"`;
+  }
+  getWidth(charsize) {
+    return super.getWidth(charsize) * 0.93;
+  }
+  fastWidth() {
+    return super.fastWidth() * 0.93;
+  }
+  clone() {
+    return new ProgressBar(this.text.slice(1,-1), this.frac);
+  }
+  hasSameStyle(other) {
+    return false;
+  }
+  static outlineColour = col.mono(80);
+  static boldOutlineColour = col.accent;
+  static baseColour = col.black;
+  draw(baseX, baseY, charSize) {
+    const w = this.getWidth(charSize) - 5;
+    const h = charSize - 5;
+    const frac = this.frac;
+
+    const oc =
+      this.style === "bold" || this.style === "bold italic" ?
+        ProgressBar.boldOutlineColour
+      : ProgressBar.outlineColour;
+    push();
+    noStroke();
+    //outline
+    col.stroke(ProgressBar.outlineColour);
+    strokeWeight(5);
+
+    noFill();
+    this.#shape(baseX, baseY + 2, w, h);
+    //bar
+    noStroke();
+    col.fill(ProgressBar.baseColour);
+    this.#shape(baseX, baseY + 2, w, h);
+
+    col.fill(this.colour);
+    this.#shape(baseX, baseY + 2, w * frac, h);
+    //Draw optional text
+    noStroke();
+    col.stroke(oc);
+    col.fill(oc);
+    strokeWeight(charSize / 20);
+    textAlign(LEFT, TOP);
+    textSize(charSize * 0.85);
+    textStyle(NORMAL);
+    text(this.text, baseX, baseY + 2);
+    pop();
+  }
+  #shape(x, y, width, height) {
+    beginShape();
+    if (this.style === "normal") {
+      vertex(x, y + height);
+      vertex(x + width, y + height);
+      vertex(x + width, y);
+      vertex(x, y);
+    } else if (this.style === "italic" || this.style === "bold italic") {
+      vertex(x - height * 0.5, y + height);
+      vertex(x + width - height * 0.5, y + height);
+      vertex(x + width + height * 0.5, y);
+      vertex(x + height * 0.5, y);
+    }
+    endShape(CLOSE);
   }
 }
 /** A class for drawing processed text to the screen.*/

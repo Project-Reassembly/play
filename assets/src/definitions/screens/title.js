@@ -69,7 +69,7 @@ createCMFTComponent(
 #--If this is your first time playing, check out the 
 #@-controls menu#-- on the right --------------------------->#--
 
-After that, #@-start a new game#-- with the buttons on the left.
+After that, #@-start a new game#-- with the buttons on the left - you can get help on how to start with this #@-startup guide#-- on the right. --------------------------------->
 
 The #>>icon.database#@-database#-- will populate over time as you get more items, and provides information beyond what you normally see in-game.
 `,
@@ -129,6 +129,39 @@ createCMFTComponent(
   .setOutlineColour(col.accent)
   .setTextColour(col.white);
 
+createCMFTComponent(
+  ["title"],
+  ["title-side:guide"],
+  450,
+  -35,
+  700,
+  700,
+  "none",
+  null,
+  `#@-==================== #@bStartup Guide#@- =====================
+#@bFighting and Weapons#@-
+--------------------------------------------------------#--
+To survive long enough to build a factory, you'll need to #@-fight back#--. Press #a-[B]#-- or #a-[Down Arrow]#-- to enter #@-Fight Mode#--, then press #d-either mouse button#-- to shoot. 
+Your weapon may be changed by moving an #@-item#-- into one of the two #@-inventory slots#-- that show on the bottom of the screen in #@-Fight Mode#--, or next to your body in the#@- Inventory#--.
+
+#@bInventory Crafting#@-
+--------------------------------------------------------#--
+In your #@-Inventory#--, there are 4 slots in a square - this is the #@-Inventory Assembler#--. It will be needed to start your factory. It can make: #>>drill.coal-drill.ui#>>pylon.scrap-pylon.ui#>>generator.scrap-burner#>>drill.scrap-drill.ui#>>crafter.scrap-assembler#>>storage.scrap#-- - click on the recipe information to cycle the recipe.
+
+#@bThe Power Bar#@-
+--------------------------------------------------------#--
+If using an #>>weapon.iti-laser-pistol.item#>>weapon.peti-charged-laser-blaster.item#b-energy weapon#--, keep an eye on your #b-power bar#-- #/.6/biPower | 6k/10k#-- - it will passively go down, but using energy weapons will decrease it faster.
+If this bar empties, you will start using your built-in #--  #/.8/[0xff0000]kEmergency Power Reserve#--. This lasts for a shorter time, and prevents the use of energy weapons, but it keeps you alive. If it runs out, you will shut down and need to drop a new body to continue.
+
+#abTip:#-- Craft one of each inventory-craftable item, then craft a #>>pylon.scrap-player-charger.ui#@-Player Charger#-- in a #>>crafter.scrap-assembler#@-Scrap Assembler#--.
+Place a #>>generator.scrap-burner#@-Scrap Burner#--, connect it with #>>pylon.scrap-pylon.ui#@-a pylon#-- to the #>>pylon.scrap-player-charger.ui#@-Scrap Charger#--. Standing near the charger will refill your power bar, if there is #>>item.coal#@-Coal#-- in the burner.
+`,
+  20,
+)
+  .setBackgroundColour(col.black)
+  .setOutlineColour(col.accent)
+  .setTextColour(col.white);
+
 createUIImageComponent(
   ["title"],
   [],
@@ -145,6 +178,17 @@ createUIImageComponent(
   [],
   850,
   -230,
+  50,
+  50,
+  () => UIComponent.setCondition("title-side", "guide"),
+  "icon.question",
+  true,
+).setOutlineColour(col.mono(60));
+createUIImageComponent(
+  ["title"],
+  [],
+  850,
+  -160,
   50,
   50,
   () => UIComponent.setCondition("title-side", "art"),
