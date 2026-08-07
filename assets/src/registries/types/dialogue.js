@@ -10,6 +10,7 @@ import {
   DemoteFromBestFriendAction,
   DemoteFromMortalEnemyAction,
   DialogueAction,
+  FireBulletAction,
   FuckOffAction,
   OpenTradingMenuAction,
   PlaceholderTextDialogueAction,
@@ -23,7 +24,7 @@ import {
 import { TypeRegistries } from "../../core/registry.js";
 
 TypeRegistries.dialogue.add("no-op", DialogueAction);
-TypeRegistries.dialogue.add("ph-text", PlaceholderTextDialogueAction);
+TypeRegistries.dialogue.add("placeholder-text", PlaceholderTextDialogueAction);
 TypeRegistries.dialogue.add("change-relation", ChangeRelationAction);
 TypeRegistries.dialogue.add("change-relation-with", ChangeRelationWithAction);
 TypeRegistries.dialogue.add("flag", AddFlagAction);
@@ -42,3 +43,5 @@ TypeRegistries.dialogue.add("repeat", RepeatedAction);
 TypeRegistries.dialogue.add("close", CloseDialogueMenuAction);
 TypeRegistries.dialogue.add("leave", FuckOffAction);
 TypeRegistries.dialogue.add("deliver", DeliverEntityAction);
+
+TypeRegistries.dialogue.add("fire-bullet", FireBulletAction);

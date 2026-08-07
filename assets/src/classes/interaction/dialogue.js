@@ -1,15 +1,14 @@
 import * as CMFT from "../../core/cmft.js";
 import { col } from "../../core/color.js";
-import { constructFromRegistry, constructFromType } from "../../core/constructor.js";
+import { constructFromType } from "../../core/constructor.js";
 import { roundNum } from "../../core/number.js";
-import { TypeRegistries } from "../../core/registry.js";
 import { ui } from "../../core/ui.js";
 import Integrate from "../../lib/integrate.js";
 import { debug } from "../../play/debug.js";
 import { game } from "../../play/game.js";
 import { pointInRectC } from "../physical.js";
 import {
-  actionFromString,
+  action,
   AddFlagAction,
   AddGlobalFlagAction,
   ChangeRelationAction,
@@ -22,6 +21,7 @@ import {
 } from "./actions.js";
 import { InteractableEntity } from "./interactable-entity.js";
 import { RelationManager } from "./relations.js";
+import { FlagAddedTrigger, FlagRemovedTrigger } from "./triggers.js";
 
 /** Something you can say to an NPC. */
 class DialogueOption {
@@ -50,13 +50,7 @@ class DialogueOption {
     this.excludeFlags = new Set(this.excludeFlags);
 
     // expand shorthand
-    this.#actions = this.actions
-      .map((x) => {
-        if (typeof x !== "string")
-          return constructFromRegistry(x, TypeRegistries.dialogue, "no-op");
-        return actionFromString(x);
-      })
-      .filter((x) => x instanceof DialogueAction);
+    this.#actions = this.actions.map(action).filter((x) => x instanceof DialogueAction);
     delete this.actions;
     this.#drawer = CMFT.drawer(this.text, 25, 20);
     delete this.text;
@@ -67,7 +61,7 @@ class DialogueOption {
       tt = "",
       onlyflags = true;
     this.#actions.forEach((a) => {
-      const t = a.text(manager);
+      const t = a.text(manager.entity);
       if (t && t.length > 0) tt += t + "\n";
       if (a instanceof ChangeRelationAction) relc += a.change;
       if (
@@ -91,7 +85,7 @@ class DialogueOption {
   /** @param {DialogueManager} manager  */
   choose(manager) {
     for (const a of this.#actions) {
-      a.do(manager);
+      a.do(manager.entity);
     }
   }
   /** @readonly */
@@ -184,15 +178,15 @@ export class DialogueManager {
     this.#fragments = Object.entries(this.fragments).map(([str, val], i, a) => {
       const v = DialogueManager.normaliseOptions(val);
 
+      if (str === "*") return new DialogueFragment(v);
       const flags = str.split(",");
-      return str === "*" ?
-          new DialogueFragment(v)
-        : new DialogueFragment(
-            v,
-            flags.filter((x) => x && !x.startsWith("!")),
-            flags.filter((x) => x && x.startsWith("!")).map((f) => f.substring(1)),
-          );
+      return new DialogueFragment(
+        v,
+        flags.filter((x) => x && !x.startsWith("!")),
+        flags.filter((x) => x && x.startsWith("!")).map((f) => f.substring(1)),
+      );
     });
+      console.log(this.#fragments)
     delete this.fragments;
     delete this.conversations;
   }
@@ -208,6 +202,22 @@ export class DialogueManager {
       if (v.makesBF) v.colour = RelationManager.bfCols[0];
       else if (v.makesME) v.colour = RelationManager.meCols[1];
     }
+  }
+  /** @param {string} flag The flag to add. */
+  flag(flag) {
+    flag = `${flag}`;
+    this.flags.add(flag);
+
+    const react = game.player.reactions.get(this.entity.registryName);
+    if (react) react.fire(this, FlagAddedTrigger, flag);
+  }
+  /** @param {string} flag The flag to remove. */
+  unflag(flag) {
+    flag = `${flag}`;
+    this.flags.delete(flag);
+
+    const react = game.player.reactions.get(this.entity.registryName);
+    if (react) react.fire(this, FlagRemovedTrigger, flag);
   }
   postEntInit() {
     // entity-based stuff
@@ -263,6 +273,11 @@ export class DialogueManager {
         Math.floor(dialogueWidth / 12),
       ).noBG();
     else this.#txt = DialogueManager.noTxt;
+
+    if (!opts) {
+      this.#options = [];
+      return;
+    }
     this.#options = opts.filter((v) => v.excludeFlags.isDisjointFrom(allflags));
     for (const f of this.#fragments) {
       if (f.canShow(allflags)) this.#options.push(...f.options);

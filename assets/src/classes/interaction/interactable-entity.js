@@ -2,8 +2,23 @@ import { constructFromType } from "../../core/constructor.js";
 import Integrate from "../../lib/integrate.js";
 import { game } from "../../play/game.js";
 import { EquippedEntity } from "../entity/inventory-entity.js";
+import { BulletInstance } from "../projectile/bullet.js";
+import { DialogueAction } from "./actions.js";
 import { DialogueManager } from "./dialogue.js";
+import { ReactionManager } from "./reactions.js";
 import { TradeInfo, TradingManager } from "./trading.js";
+import {
+  DamageTakenTrigger,
+  DeathTrigger,
+  HealedTrigger,
+  HealthPercentTrigger,
+  HitByBulletTrigger,
+  KillTrigger,
+  ReactionTrigger,
+  ShieldBrokenTrigger,
+  StatusAppliedTrigger,
+  TargetDiedTrigger,
+} from "./triggers.js";
 
 /**
  * An entity which the player can interact with.\
@@ -23,15 +38,17 @@ export class InteractableEntity extends EquippedEntity {
   /** Doesn't exist for long. @type {Integrate.Unconstructed<TradeInfo>[]} */
   trades = null;
   tradeCostX = 1;
+  /** Doesn't exist for long. @type {[Integrate.Unconstructed<ReactionTrigger>[], Integrate.Unconstructed<DialogueAction>[]][]} */
+  reactions = [];
+
   init() {
     super.init();
     if (this.dialogue) {
       // centralised dialogue for better saving
-      const d =
-        game.player.dialogue.get(this.registryName) ??
-        constructFromType(this.dialogue, DialogueManager);
+      const d = game.player.dialogue.getOrInsertComputed(this.registryName, () =>
+        constructFromType(this.dialogue, DialogueManager),
+      );
 
-      game.player.dialogue.set(this.registryName, d);
       d.flags = game.player.savedLocalFlags.get(this.registryName) ?? new Set();
 
       d.entity = this;
@@ -39,16 +56,75 @@ export class InteractableEntity extends EquippedEntity {
       d.updateNode();
     }
     if (this.trades) {
-      const t =
-        game.player.trades.get(this.registryName) ??
-        constructFromType({ trades: this.trades, tradeCostX: this.tradeCostX }, TradingManager);
-
-      game.player.trades.set(this.registryName, t);
+      const t = game.player.trades.getOrInsertComputed(this.registryName, () =>
+        constructFromType({ trades: this.trades, tradeCostX: this.tradeCostX }, TradingManager),
+      );
 
       t.entity = this;
       t.updateEverything();
     }
+    if (this.reactions) {
+      const r = game.player.reactions.getOrInsertComputed(
+        this.registryName,
+        () => new ReactionManager(this.reactions),
+      );
+
+      r.reset();
+    }
     delete this.dialogue;
     delete this.trades;
+    delete this.reactions;
+    delete this.tradeCostX;
   }
+  get playerRelation() {
+    return game.player.relations.getRelation(this.registryName);
+  }
+  get _dialogue() {
+    return game.player.dialogue.get(this.registryName);
+  }
+  get _trades() {
+    return game.player.trades.get(this.registryName);
+  }
+  get _reactions() {
+    return game.player.reactions.get(this.registryName);
+  }
+  takeDamage(type, amount, source) {
+    this._reactions.fire(this, DamageTakenTrigger, amount, type);
+    this._reactions.fire(this, HealthPercentTrigger, this);
+    super.takeDamage(type, amount, source);
+  }
+  applyStatus(effect, time) {
+    this._reactions.fire(this, StatusAppliedTrigger, effect);
+    super.applyStatus(effect, time);
+  }
+  breakShield() {
+    this._reactions.fire(this, ShieldBrokenTrigger);
+    super.breakShield();
+  }
+  // add for these methods
+  heal(amount) {
+    this._reactions.fire(this, HealedTrigger, amount);
+    super.heal(amount);
+  } // healed
+  /** @param {BulletInstance} bullet  */
+  hitByBullet(bullet) {
+    if (bullet.entity?.team !== this.team) this._reactions.fire(this, HitByBulletTrigger, bullet);
+    super.hitByBullet(bullet);
+  } // shot
+  onHealthZeroed(type, source) {
+    this._reactions.fire(this, DeathTrigger);
+    super.onHealthZeroed(type, source);
+  } // death
+  kills(other) {
+    this._reactions.fire(this, KillTrigger, other);
+  } // kill entity
+  doAI() {
+    if (this.target?.dead) {
+      this._reactions.fire(this, TargetDiedTrigger, this.target);
+      this.target = null;
+    }
+    super.doAI();
+  }
+  // hitSomething // slammed into wall
+  // knockback // yeeted
 }

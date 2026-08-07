@@ -43,6 +43,7 @@ import { GroundTile } from "../classes/block/ground-tile.js";
 import { InteractableEntity } from "../classes/interaction/interactable-entity.js";
 import { PersistentPlayer } from "../classes/interaction/persistent-player.js";
 import { RelationManager } from "../classes/interaction/relations.js";
+import { ReactionTrigger } from "../classes/interaction/triggers.js";
 import { BulletModel } from "../classes/projectile/bullet-model.js";
 import { deliverPlayer } from "../classes/world/events/event-action.js";
 import {
@@ -942,7 +943,7 @@ export function drawNeutralBackground(yo = 0) {
     rotatedShape("rect", -1920 + (((time + offset) * 3) % (1920 * 2)), yo, 20, 1080 * 1.43, PI / 4);
   }
   fill(40);
-  rect(0, yo, 1920, 1080 * 0.85);
+  rect(0, yo, 1920*1.1, 1080 * 0.85);
   noFill();
   stroke(60);
   strokeWeight(15);
@@ -951,7 +952,7 @@ export function drawNeutralBackground(yo = 0) {
   rect(0, yo, 1920 * 1.2, 1080 * 0.85);
   noStroke();
   fill(80);
-  rect(0, yo - 555, 1920, 20);
+  rect(0, yo - 555, 1920*1.1, 20);
   fill(20);
   rect(0, yo + 555, 1920, 20);
   pop();
@@ -1027,6 +1028,7 @@ function tickTimers() {
 
 function tickPausableStuff() {
   tickTimers();
+  ReactionTrigger.time++;
   if (game.player.entity) {
     if (world.impactParticles.length == 0) movePlayer();
     if (!freecam) {

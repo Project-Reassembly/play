@@ -187,7 +187,11 @@ export class TradingManager {
       if (selected) {
         rect(basex + 195, cy, 340, 30);
 
+        textSize(15);
         triangle(basex + 370, cy - 20, basex + 370, cy + 20, basex + 390, cy);
+        textAlign(RIGHT);
+        text("SHIFT to add 1 stack", basex, cy - 10);
+        text("CTRL to add max affordable", basex, cy + 10);
       }
       rect(basex + 40, cy, 30, 30);
       ImageContainer.draw(i?.image ?? "error", basex + 40, cy, 30, 30);
@@ -225,6 +229,7 @@ export class TradingManager {
       if (selected) {
         rect(basex + 195 + 400, cy, 340, 30);
 
+        textSize(15);
         triangle(basex + 410, cy - 20, basex + 410, cy + 20, basex + 390, cy);
         textAlign(LEFT);
         text("SHIFT to remove 1 stack", basex + 790, cy - 10);
@@ -361,12 +366,17 @@ export class TradingManager {
   }
   queue(item) {
     item = `${item}`;
-    const count = this.#shoppingList.get(item);
-    const toadd = keyIsDown(SHIFT) ? (this.#trades.get(item)?.stackSize ?? 100) : 1;
+    const count = this.#shoppingList.get(item),
+      cost = this.#trades.get(item)?.cost || 0;
+    const toadd =
+      keyIsDown(CONTROL) ? Math.floor((game.player.money - this.#listCost) / cost)
+      : keyIsDown(SHIFT) ? (this.#trades.get(item)?.stackSize ?? 100)
+      : 1;
+    if (!toadd) return;
     if (!count) {
       if (this.#shoppingList.size >= tradesPerPage) Log.send("#c-Too many item types in list.");
       else this.#shoppingList.set(item, toadd);
     } else this.#shoppingList.set(item, count + toadd);
-    this.#listCost += (this.#trades.get(item)?.cost || 0) * toadd;
+    this.#listCost += cost * toadd;
   }
 }

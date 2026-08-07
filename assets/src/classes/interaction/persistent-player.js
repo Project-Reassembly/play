@@ -1,7 +1,9 @@
 import { Player } from "../entity/player.js";
 import { DialogueManager } from "./dialogue.js";
+import { ReactionManager } from "./reactions.js";
 import { RelationManager } from "./relations.js";
 import { TradingManager } from "./trading.js";
+import { ReactionTrigger } from "./triggers.js";
 
 export class PersistentPlayer {
   /** @type {Player} */
@@ -13,6 +15,8 @@ export class PersistentPlayer {
   dialogue = new Map();
   /** Current available NPC trades. @type {Map<string, TradingManager>} */
   trades = new Map();
+  /** Current available NPC reactions. @type {Map<string, ReactionManager>} */
+  reactions = new Map();
   /** Saved global dialogue flags to be shared between managers. @type {Set<string>} */
   flags = new Set();
   /** Saved local dialogue flags to be added to each manager. @type {Map<string, Set<string>>} */
@@ -30,7 +34,7 @@ export class PersistentPlayer {
     }
     pop();
     if (this.trade) {
-      this.trade.draw(-380,0);
+      this.trade.draw(-380, 0);
     }
   }
   reset() {
@@ -45,6 +49,13 @@ export class PersistentPlayer {
       /** @type {[string, string[]][]} */
       savedLocalFlags: [...this.dialogue.entries()].map(([s, m]) => [s, [...m.flags]]),
     };
+  }
+  /** @template {ReactionTrigger} T @param {DialogueManager} dialogue  @param {string} entityType @param {new () => T} type @param {T["isTriggered"] extends (...args: infer A) => * ? A : never} data  */
+  react(entityType, type, ...data) {
+    const dm = this.dialogue.get(entityType);
+    for (const reaction of this.reactions.getOrInsert(entityType, [])) {
+      reaction.fire(dm, type);
+    }
   }
   /** @param {typeof PersistentPlayer.prototype.serialise extends () => infer R ? R : never} created  */
   static deserialise(created) {

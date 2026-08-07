@@ -196,7 +196,7 @@ class Weapon extends Equippable {
         ammoType === "-" ?
           "None Available"
         : `${crop(Registries.items.get(ammoType).name, 12)} ×${this.ammoUse}`
-      : `${this.powerUse} power`
+      : `${shortenedNumber(this.shoot.power)}${this.altShoot ? `|${shortenedNumber(this.altShoot.power)}` : ""} power`
     }\n${this.createProgressBar()} `;
   }
   createProgressBar() {

@@ -558,7 +558,7 @@ class Icon extends Text {
 class ProgressBar extends Text {
   frac = 0.45;
   constructor(caption, fraction) {
-    super(" " + caption+" ");
+    super(" " + caption + " ");
     this.frac = +fraction || 0.45;
   }
   split(splitter) {
@@ -574,7 +574,7 @@ class ProgressBar extends Text {
     return super.fastWidth() * 0.93;
   }
   clone() {
-    return new ProgressBar(this.text.slice(1,-1), this.frac);
+    return new ProgressBar(this.text.slice(1, -1), this.frac);
   }
   hasSameStyle(other) {
     return false;
@@ -643,9 +643,11 @@ class Drawer {
   constructor(...text) {
     this.#texts = text;
   }
-  draw(baseX, baseY, basecol = col.white, rarityColour = col.accent) {
-    if (baseX + this.width > 960) baseX = 960 - this.width;
-    if (baseY + this.height > 540) baseY = 540 - this.height;
+  draw(baseX, baseY, basecol = col.white, rarityColour = col.accent, bounded = true) {
+    if (bounded) {
+      if (baseX + this.width > 960) baseX = 960 - this.width;
+      if (baseY + this.height > 540) baseY = 540 - this.height;
+    }
     push();
     rectMode(CORNER);
     if (this.bg) {

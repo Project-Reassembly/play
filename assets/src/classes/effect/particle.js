@@ -1,5 +1,4 @@
 import { col } from "../../core/color.js";
-import { Vector } from "../../core/number.js";
 import { rotatedShape, rotatedShapeExt } from "../../core/ui.js";
 class Particle {
   _rotOffset = 0;
@@ -14,7 +13,7 @@ class Particle {
     colours = [col.red],
     rotateSpeed = 0,
     light = 0,
-    space = false
+    space = false,
   ) {
     this.x = x;
     this.y = y;
@@ -64,11 +63,13 @@ class Particle {
   }
   movement(dt) {
     //Move
-    this.moveToVct(
-      new Vector(this.x, this.y).add(
-        Vector.fromAngleRad(this.direction).scale(this.speed * dt)
-      )
+    this.moveTo(
+      this.x + Math.cos(this.direction) * this.speed * dt,
+      this.y + Math.sin(this.direction) * this.speed * dt,
     );
+    // this.moveToVct(
+    //   new Vector(this.x, this.y).add(Vector.fromAngleRad(this.direction).scale(this.speed * dt)),
+    // );
     if (this.rotateSpeed) {
       this._rotOffset += this.rotateSpeed * dt;
     }

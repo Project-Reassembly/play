@@ -555,8 +555,10 @@ class Entity extends ShootableObject {
   move(x, y) {
     super.move(x, y, this.flying);
   }
+  kills(other) {}
   onHealthZeroed(type, source) {
     super.onHealthZeroed(type, source);
+    if (source instanceof Entity) source.kills(this);
     liquidDestructionBlast(
       this.x,
       this.y,

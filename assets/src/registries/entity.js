@@ -165,7 +165,50 @@ Registries.entities.add("iti-corporate-merchant", {
   ],
   tradeCostX: 1.25,
   trades: ["iti-laser-caster", "iti-energy-repeater", "launch-pad", "landing-pad"],
+  reactions: [
+    [["shot:240"], ['"Cease hostility immediately."']],
+    [
+      ["health:75"],
+      [
+        '"[[Unit damage detected]]\nRequesting backup immediately."',
+        { type: "deliver", xOff: 300, yOff: 300, entity: "iti-defense" },
+      ],
+    ],
+    [
+      ["health:50"],
+      [
+        '"[[Major damage sustained]]\nRequesting additional backup."',
+        { type: "deliver", xOff: 300, yOff: 300, entity: "iti-defense" },
+      ],
+    ],
+    [
+      ["health:25"],
+      [
+        '"[[System critically damaged]]\nDeploying last resort force."',
+        {
+          type: "repeat",
+          count: 2,
+          action: { type: "deliver", xOff: 300, yOff: 300, entity: "iti-defense" },
+        },
+      ],
+    ],
+    [["death"], ['"#4-[[Catastrophic System Failure]]"']],
+  ],
   dialogue: {
+    fragments: {
+      "!*iti-defenses-called": {
+        "I think we need some reinforcements.": [
+          "<close>",
+          "*iti-defenses-called",
+          '"Agreed. Calling reinforcements."',
+          {
+            type: "repeat",
+            action: { type: "deliver", xOff: 300, yOff: 300, entity: "iti-defense" },
+            count: 3,
+          },
+        ],
+      },
+    },
     conversations: {
       "*": {
         line: "#i-InfiniTech Industries#--, corporate merchant model.\nState your intentions.",
@@ -210,7 +253,7 @@ Registries.entities.add("iti-corporate-merchant", {
             "*iti-defenses-called",
             {
               type: "repeat",
-              action: { type: "deliver", xOff: 300, yOff: 300, entity: "iti-defense" },
+              action: { type: "deliver", xOff: 300, yOff: 300, entity: "instigated-iti-defense" },
               count: 3,
             },
           ],
@@ -229,11 +272,17 @@ Registries.entities.add("iti-corporate-merchant", {
   // leftHand: [{ item: "iti-laser-caster", dropChance: 0.125 }],
 });
 // a special entity which attacks only the player.
-Registries.entities.add("iti-defense", {
-  type: "equipped-entity",
+Registries.entities.add("instigated-iti-defense", {
+  type: "interactable-entity",
   name: "ITI Personnel Defender",
   health: 500,
   light: 100,
+  reactions: [
+    [["target-died:0"], [['"[[Target Eliminated]]"', '"[[Hostile Neutralized]]"'], "<leave>"]],
+    [["shot"], ['"Stop resisting."']],
+    [["health:50"], ['"Requesting backup...\n#c-Network Error"']],
+    [["death"], ['"#4-[[Catastrophic System Failure]]"']],
+  ],
   components: [
     { image: "npc.iti.defense.head", width: 32, height: 32, xOffset: -3 },
     { image: "npc.iti.generic.body", width: 32, height: 32 },
@@ -244,6 +293,35 @@ Registries.entities.add("iti-defense", {
   width: 25,
   height: 25,
   aiType: "player-hostile",
+  attackRange: 300,
+  targetRange: 1000,
+  speed: 4,
+  inventory: [{ item: "iti-energy-cell", dropChance: 0.25, min: 5, max: 25 }],
+  rightHand: [{ item: "iti-laser-pistol", dropChance: 0.25 }],
+  leftHand: [{ item: "iti-laser-pistol", dropChance: 0.25 }],
+});
+// a special entity which attacks only entities.
+Registries.entities.add("iti-defense", {
+  type: "interactable-entity",
+  name: "ITI Personnel Defender",
+  health: 500,
+  light: 100,
+  reactions: [
+    [["target-died:0"], [['"[[Target Eliminated]]"', '"[[Potential Hostile Neutralized]]"']]],
+    [["shot"], ['"Stop resisting."']],
+    [["health:50"], ['"Requesting backup...\n#c-Network Error"']],
+    [["death"], ['"#4-[[Catastrophic System Failure]]"']],
+  ],
+  components: [
+    { image: "npc.iti.defense.head", width: 32, height: 32, xOffset: -3 },
+    { image: "npc.iti.generic.body", width: 32, height: 32 },
+    { type: "leg-component", image: "npc.iti.generic.legs", width: 32, height: 32 },
+  ],
+  armType: { width: 32, height: 11, yOffset: 13, xOffset: 6, image: "arm.iti" },
+  team: "iti",
+  width: 25,
+  height: 25,
+  aiType: "entity-hostile",
   attackRange: 300,
   targetRange: 1000,
   speed: 4,
@@ -366,7 +444,43 @@ Registries.entities.add("test-npc", {
   name: "Test NPC",
   health: 350,
   light: 100,
-  relations: { reactions: [] },
+  reactions: [
+    [["damage:30:3"], ['"Ow!"']],
+    [
+      [
+        "shot:120:track-source-target",
+        "shot:120:track-near-source-target",
+        "shot:120:track-nearest",
+      ],
+      ['"Really? Homing bullets?"'],
+    ],
+    [
+      ["health:30"],
+      [
+        '"#5-You.. absolute.. FUCK!"',
+        "<mortal-enemy>",
+        {
+          type: "fire-bullet",
+          amount: 32,
+          spacing: 11.25,
+          bullet: {
+            lifetime: 100,
+            light: 70,
+            hitSize: 10,
+            components: [
+              { type: "extra-updates", amount: 99 },
+              { type: "damage-pierce", damageType: "laser", amount: 2400 },
+              { type: "movement", speed: 10 },
+              { type: "vfx-trail", effect: "plasma-railgun-trail" },
+              { type: "hit-vfx", effect: "plasma-railgun-hit~70" },
+              { type: "expiry-vfx", effect: "plasma-railgun-impact~120" },
+              { type: "knockback", amount: 17 },
+            ],
+          },
+        },
+      ],
+    ],
+  ],
   trades: [
     "peti-electrified-plasma-launcher",
     { item: "iti-laser-caster", costX: 1.25 },
@@ -390,6 +504,7 @@ Registries.entities.add("test-npc", {
           "[Friend Options]": ["'Options to #a-increase relations#--.'", "friend"],
           "[External Effect Options]": ["'Options to #=-affect other entities#--.'", "extern"],
           "[Trade Options]": ["'Options to #=-modify trades#--.'", "trades"],
+          "[Gambling]": ["'Let's go #=-gambling#--!'", ["-1*scrap", "+2*scrap"]],
         },
       },
       "friend": {

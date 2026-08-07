@@ -7,6 +7,7 @@ import {
   NoEntityCollisionComponent,
 } from "./bullet-components.js";
 /// <reference path="../../lib/integrate"/>
+/** @import {BulletModel} from "./bullet-model.js" */
 export class BulletInstance extends PhysicalObject {
   // Core properties
   lifetime = 1;

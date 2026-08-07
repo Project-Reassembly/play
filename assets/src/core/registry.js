@@ -71,6 +71,8 @@ const TypeRegistries = Object.freeze(
     bullet = new Integrate.TypeRegistry();
     /** Dialogue option actions. @readonly */
     dialogue = new Integrate.TypeRegistry();
+    /** Reaction triggers. @readonly */
+    reactions = new Integrate.TypeRegistry();
   })(),
 );
 
