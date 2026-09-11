@@ -20,6 +20,8 @@ import {
   RemoveGlobalFlagAction,
   RemoveTradeFromMenuAction,
   RepeatedAction,
+  SpeechAction,
+  WarningBarAction,
 } from "../../classes/interaction/actions.js";
 import { TypeRegistries } from "../../core/registry.js";
 
@@ -43,5 +45,7 @@ TypeRegistries.dialogue.add("repeat", RepeatedAction);
 TypeRegistries.dialogue.add("close", CloseDialogueMenuAction);
 TypeRegistries.dialogue.add("leave", FuckOffAction);
 TypeRegistries.dialogue.add("deliver", DeliverEntityAction);
+TypeRegistries.dialogue.add("say", SpeechAction);
+TypeRegistries.dialogue.add("warn-bar", WarningBarAction);
 
 TypeRegistries.dialogue.add("fire-bullet", FireBulletAction);

@@ -1600,3 +1600,4 @@ export {
   UIComponent
 };
 
+Object.defineProperty(globalThis, "hov", { get: () => ui.hoveredBlock });

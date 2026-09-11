@@ -272,7 +272,7 @@ function resetItemSelectors() {
       px = 460;
       py += 60;
     }
-    if (py > -115 + 60 * 8) {
+    if (py > -115 + 60 * 9) {
       px = 460;
       py = -115;
       page++;

@@ -15,7 +15,7 @@ import {
   ui,
   UIComponent,
 } from "../../core/ui.js";
-import { game, gen, world } from "../../play/game.js";
+import { game, gen, loadGame, world } from "../../play/game.js";
 import { Log } from "../../play/messaging.js";
 import { Direction, totalSize } from "../../scaling.js";
 
@@ -996,26 +996,26 @@ createUIImageComponent(
 //                       DEATH SCREEN
 
 //##############################################################
-createUIComponent(["in-game"], ["dead:yes"], 0, 30, 600, 340, "none");
+// createUIComponent(["in-game"], ["dead:yes"], 0, 30, 600, 340, "none");
 createUIComponent(["in-game"], ["dead:yes"], 0, -170, 700, 60, "both", null, "You Died", false, 50);
 createUIComponent(
   ["in-game"],
   ["dead:yes"],
   0,
-  -100,
+  -120,
   0,
   0,
   "none",
   null,
-  "Choose Respawn Option:",
+  "/// Choose Respawn Option ///",
   true,
   20,
 );
 createUIComponent(
   ["in-game"],
   ["dead:yes"],
-  -175,
-  25,
+  -255,
+  0,
   150,
   200,
   "none",
@@ -1041,24 +1041,8 @@ createUIComponent(
 createUIComponent(
   ["in-game"],
   ["dead:yes"],
+  255,
   0,
-  25,
-  150,
-  200,
-  "none",
-  () => {
-    UIComponent.setCondition("dead", "no");
-    deliverPlayer(null, totalSize / 2, totalSize / 2, false, "scrap", undefined, false);
-  },
-  ">> Scrap Player <<\nSend a robot\nmade of scrap\nto the drop\npoint.\n\nFree",
-  true,
-  15,
-);
-createUIComponent(
-  ["in-game"],
-  ["dead:yes"],
-  175,
-  25,
   150,
   200,
   "none",
@@ -1085,7 +1069,39 @@ createUIComponent(
   ["in-game"],
   ["dead:yes"],
   0,
-  175,
+  120,
+  0,
+  0,
+  "none",
+  null,
+  "/// Alternatively: ///",
+  true,
+  20,
+);
+createUIComponent(["in-game"], ["dead:yes"], 0, 170, 700, 60, "both");
+createUIComponent(
+  ["in-game"],
+  ["dead:yes"],
+  -120,
+  170,
+  200,
+  30,
+  "none",
+  () => {
+    game.reset();
+    ui.reset();
+    ui.menuState = "in-game";
+    loadGame();
+  },
+  "Load Game",
+  true,
+  15,
+);
+createUIComponent(
+  ["in-game"],
+  ["dead:yes"],
+  120,
+  170,
   200,
   30,
   "none",
@@ -1105,6 +1121,7 @@ createUIComponent(
 //                        DOCUMENTATION
 
 //##############################################################
+// really outdated by now, still as useless as when i added it
 setTimeout(
   () =>
     createBulletVisualiserComponent(

@@ -199,6 +199,7 @@ class Inventory {
   /** Picks up an item from an inventory slot, or puts it back. */
   hotkeySlot(index, pickup = !!keyIsDown(ALT)) {
     let mIS = Inventory.mouseItemStack ?? ItemStack.EMPTY;
+    if (mIS.isEmpty()) mIS = ItemStack.EMPTY;
     let mISItem = mIS.getItem();
     if (!this.storage[index]) this.storage[index] = ItemStack.EMPTY;
     if (this.storage[index].isEmpty() && mIS.isEmpty()) return;

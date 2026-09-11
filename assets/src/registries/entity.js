@@ -164,7 +164,7 @@ Registries.entities.add("iti-corporate-merchant", {
     { type: "leg-component", image: "npc.iti.generic.legs", width: 35, height: 35 },
   ],
   tradeCostX: 1.25,
-  trades: ["iti-laser-caster", "iti-energy-repeater", "launch-pad", "landing-pad"],
+  trades: ["iti-laser-caster", "iti-energy-repeater", "iti-energy-cell", "launch-pad", "landing-pad"],
   reactions: [
     [["shot:240"], ['"Cease hostility immediately."']],
     [

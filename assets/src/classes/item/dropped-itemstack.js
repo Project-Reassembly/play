@@ -100,9 +100,8 @@ class DroppedItemStack extends PhysicalObject {
   }
   tickGroundEffects() {
     let blockIn = this.world.getBlock(
-      Math.floor(this.x / Block.size),
-      Math.floor(this.y / Block.size),
-      "blocks",
+      Math.round(this.x / Block.size),
+      Math.round(this.y / Block.size)
     );
     if (blockIn && blockIn.walkable && blockIn.itemOnTopOf) blockIn.itemOnTopOf(this);
   }

@@ -18,7 +18,6 @@ import { ItemStack } from "../item/item-stack.js";
 import { Chunk } from "./chunk.js";
 import { WorldEvent } from "./events/world-event.js";
 import { FactoryEvaluator, REGION_SIZE } from "./factory-valuations.js";
-import { PowerNetwork } from "./power-network.js";
 /**
  * @import {PhysicalObject} from "../physical.js"
  */
@@ -30,7 +29,6 @@ import { PowerNetwork } from "./power-network.js";
  * @prop {import("../item/dropped-itemstack.js").SerialisedDroppedItem[]} items
  * @prop {string} name
  * @prop {int} seed
- * @prop {{positions: {x: int, y:int}[]}[]} networks
  */
 
 /** */
@@ -71,8 +69,6 @@ class World {
    * Use one of `particles`, `floorParticles`, `entities` or `bullets` instead of this where possible.
    */
   physobjs = [];
-  /** @type {PowerNetwork[]} */
-  networks = [];
   seed = null;
   /**Chunks to render this frame.
    * @type {Chunk[]} */
@@ -106,7 +102,6 @@ class World {
     this.particles = [];
     this.floorParticles = [];
     this.impactParticles = [];
-    this.networks = [];
     this.toRender = [];
     this.toTick = [];
     this.evaluator.reset();
@@ -568,10 +563,10 @@ class World {
       entities: this.entities.map((x) => x.serialise()),
       items: this.items.map((x) => x.serialise()),
       seed: this.seed,
-      networks: this.networks.map((x) => x.serialise()),
       events: Object.entries(this.events)
         .filter((x) => x[1].disabled)
         .map((x) => x[0]), //this.events.map((x) => ({ duration: x.time, name: x.name, full: x.full })),
+      age: this.age,
     };
   }
   /**@param {SerialisedWorld} created  */
@@ -590,6 +585,7 @@ class World {
     created.entities.forEach((entity) => {
       if (entity["-"]) {
         console.warn("Deprecated item format detected - re-save your game as soon as possible!");
+        DroppedItemStack.create(ItemStack.deserialise(entity.item), wrold, i.x, i.y, 0, 0);
       } else {
         let ent = Entity.deserialise(entity, false);
         ent.addToWorld(wrold, entity.x, entity.y);
@@ -602,12 +598,6 @@ class World {
     created.items.forEach((i) =>
       DroppedItemStack.create(ItemStack.deserialise(i.stack), wrold, i.x, i.y, 0, 0),
     );
-    created.networks ??= [];
-    created.networks.forEach((x) => {
-      let net = PowerNetwork.deserialise(x);
-      net.world = wrold;
-      wrold.networks.push(net);
-    });
     iterate2DArray(wrold.chunks, (chunk) => {
       chunk.world = wrold;
       iterate2DArray(chunk.blocks, (block) => {
@@ -616,6 +606,7 @@ class World {
     });
     //Set world properties
     wrold.seed = created.seed;
+    wrold.age = +created.age || 0;
     return wrold;
   }
   /**Sets everything on this world possible to those values on a source world.

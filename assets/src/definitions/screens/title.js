@@ -61,7 +61,7 @@ createCMFTComponent(
   450,
   -35,
   700,
-  700,
+  750,
   "none",
   null,
   `                        #@bWelcome!#@-
@@ -85,7 +85,7 @@ createCMFTComponent(
   450,
   -35,
   700,
-  700,
+  750,
   "none",
   null,
   `#@-======================= #@bControls#@- =======================
@@ -115,11 +115,13 @@ createCMFTComponent(
 --------------------------------------------------------
 #a-Down Arrow#--     Switch to #@-fight mode#--.
 #i-LMB#@i with item#--  Place item as block
-#i-LMB#@i on entity#--  Talk to/trade with NPC
+#i-LMB#@i on NPC#--     Talk/trade with NPC
+#i-LMB#@i on block#--   Configure block/open block inventory
+#@- ^ #@iwith #d-Shift#--  Activate block / Reset block state
 #i-RMB#@i over block#-- Deconstruct block
 #i-RMB#@i with item#--  Drop item stack
-#a-Right Arrow#--    Cycle to next crafter recipe
-#a-Left Arrow#--     Cycle to previous crafter recipe
+#a-Right Arrow#--    Cycle block setting right (or up)
+#a-Left Arrow#--     Cycle block setting left (or down)
 #i-Scroll#--         Rotate block to place
 #a-1/2/#@-...#a-/8/9/0#--  Swap held item with inventory slot
 `,
@@ -135,7 +137,7 @@ createCMFTComponent(
   450,
   -35,
   700,
-  700,
+  750,
   "none",
   null,
   `#@-==================== #@bStartup Guide#@- =====================

@@ -16,6 +16,7 @@ import {
   ItemCatalogBlock,
   StructureReaderBlock,
 } from "../../classes/block/devblocks.js";
+import { ItemAttractor } from "../../classes/block/extra-automation/item-attractor.js";
 import {
   PlasmaCompressor,
   PlasmaDecompressor,
@@ -26,6 +27,7 @@ import { Burner } from "../../classes/block/power/burner.js";
 import { PowerGenerator } from "../../classes/block/power/generator.js";
 import { PlayerCharger } from "../../classes/block/power/player-charger.js";
 import { DischargePylon, PowerPylon } from "../../classes/block/power/pylon.js";
+import { CoreRelay, PowerRelay } from "../../classes/block/power/relay.js";
 import { Crafter, Uncrafter } from "../../classes/block/production/crafter.js";
 import { Drill } from "../../classes/block/production/drill.js";
 import { Smelter } from "../../classes/block/production/smelter.js";
@@ -71,6 +73,7 @@ import { Equippable } from "../../classes/item/equippable.js";
 import { ItemStack } from "../../classes/item/item-stack.js";
 import { Item } from "../../classes/item/item.js";
 import { PlaceableItem } from "../../classes/item/placeable.js";
+import { PortableBattery } from "../../classes/item/portable-battery.js";
 import { BlockLauncher } from "../../classes/item/special-weapons/block-launcher.js";
 import { Throwable } from "../../classes/item/throwable.js";
 import { Weapon } from "../../classes/item/weapon.js";
@@ -121,6 +124,7 @@ TypeRegistries.default.add("placeable", PlaceableItem);
 TypeRegistries.default.add("itemstack", ItemStack);
 TypeRegistries.default.add("equippable", Equippable);
 TypeRegistries.default.add("accessory", Accessory);
+TypeRegistries.default.add("portable-battery", PortableBattery);
 //Weapons
 TypeRegistries.default.add("weapon", Weapon);
 TypeRegistries.default.add("throwable", Throwable);
@@ -148,11 +152,15 @@ TypeRegistries.default.add("unloader", Unloader);
 TypeRegistries.default.add("level-unloader", LevelUnloader);
 
 TypeRegistries.default.add("pylon", PowerPylon);
+TypeRegistries.default.add("relay", PowerRelay);
+TypeRegistries.default.add("core-relay", CoreRelay);
 TypeRegistries.default.add("player-charger", PlayerCharger);
 TypeRegistries.default.add("discharge-pylon", DischargePylon);
 
 TypeRegistries.default.add("generator", PowerGenerator);
 TypeRegistries.default.add("burner", Burner);
+
+TypeRegistries.default.add("item-attractor", ItemAttractor);
 
 TypeRegistries.default.add("sign", SignBlock);
 

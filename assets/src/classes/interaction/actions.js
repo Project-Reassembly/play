@@ -404,13 +404,35 @@ export class SpeechAction extends DialogueAction {
         entity.x,
         entity.y - 10,
         -Math.PI * 0.5,
-        this.line.length*5,
+        this.line.length * 5,
         2,
         0.075,
         `${this.line}`,
         10,
       ),
     );
+  }
+}
+
+export class WarningBarAction extends DialogueAction {
+  constructor(line, subline) {
+    super();
+    this.text = `${line}`;
+    this.subline = `${subline}`;
+  }
+  text = "Sample text";
+  subtext = "SUBTEXT";
+  color = col.white;
+  subcolor = col.black;
+  init() {
+    this.color = col.convert(this.color);
+    this.subcolor = col.convert(this.subcolor);
+  }
+  /**
+   * @param {InteractableEntity} entity
+   */
+  do(entity) {
+    warnTapeNotification(this.text, this.color, this.subtext, this.subcolor);
   }
 }
 

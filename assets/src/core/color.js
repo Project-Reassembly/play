@@ -76,7 +76,7 @@ export const col = new (class Int32Colours {
   get black() {
     return 255 | 0;
   }
-  /**@readonly @type {color}*/
+  /**[230, 170, 0] @readonly @type {color}*/
   get accent() {
     return -425066241 | 0;
   }

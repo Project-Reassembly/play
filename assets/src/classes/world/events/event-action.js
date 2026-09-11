@@ -1,7 +1,9 @@
+import { col } from "../../../core/color.js";
 import { construct, constructFromType } from "../../../core/constructor.js";
-import { index } from "../../../core/number.js";
+import { index, rnd } from "../../../core/number.js";
 import { delay, Registries } from "../../../core/registry.js";
 import { ui } from "../../../core/ui.js";
+import { warnTapeNotification } from "../../../definitions/notify.js";
 import Integrate from "../../../lib/integrate.js";
 import { createEffect, effectTimer, emitEffect, Explosion } from "../../../play/effects.js";
 import { createPlayer, game } from "../../../play/game.js";
@@ -30,6 +32,23 @@ export class MessageAction extends WorldEventAction {
   }
 }
 
+export class WarningBarAction extends WorldEventAction {
+  text = "Sample text";
+  subtext = "SUBTEXT";
+  color = col.white;
+  subcolor = col.black;
+  init() {
+    this.color = col.convert(this.color);
+    this.subcolor = col.convert(this.subcolor);
+  }
+  /**
+   * @param {World} world
+   */
+  execute(world) {
+    warnTapeNotification(this.text, this.color, this.subtext, this.subcolor);
+  }
+}
+
 export class DeliverEntityAction extends WorldEventAction {
   entity = "scavenger";
   // aiming parameters
@@ -42,11 +61,17 @@ export class DeliverEntityAction extends WorldEventAction {
     const team = getTeamFromInput(this.targetTeam);
     let entiti = construct(Registries.entities.get(this.entity), "entity");
     const pos =
-      world.evaluator[
-        this.targetHighValue ? "getHighValueTargetPosition" : "getLowValueTargetPosition"
-      ](team);
-    entiti.x = index.col(pos) * blockSize;
-    entiti.y = index.row(pos) * blockSize;
+      this.targetHighValue ?
+        world.evaluator.getHighValueTargetPosition(team)
+      : world.evaluator.getLowValueTargetPosition(team);
+    let x = index.col(pos),
+      y = index.row(pos);
+    while (!world.isPositionFree(x, y)) {
+      x += rnd.int(-1, 1);
+      y += rnd.int(-1, 1);
+    }
+    entiti.x = x * blockSize;
+    entiti.y = y * blockSize;
     deliverEntity(entiti, true, world);
   }
 }

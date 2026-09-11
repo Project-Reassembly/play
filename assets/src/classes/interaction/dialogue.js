@@ -186,7 +186,6 @@ export class DialogueManager {
         flags.filter((x) => x && x.startsWith("!")).map((f) => f.substring(1)),
       );
     });
-      console.log(this.#fragments)
     delete this.fragments;
     delete this.conversations;
   }

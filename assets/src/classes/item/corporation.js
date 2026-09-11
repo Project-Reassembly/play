@@ -1,7 +1,8 @@
 import { col } from "../../core/color.js";
 import { Registries } from "../../core/registry.js";
+import Integrate from "../../lib/integrate.js";
 
-export class Corporation {
+export class Corporation extends Integrate.RegisteredItem {
   name = "Example Co.";
   alias = "ECo";
   color = col.white;

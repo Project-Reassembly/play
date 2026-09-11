@@ -30,7 +30,7 @@ Registries.items.add("sand", {
 Registries.items.add("coal", {
   name: "Coal",
   marketValue: 0.75,
-  description: "A small chunk of coal.\nUsed as fuel in smelters.\nYay, pollution!",
+  description: "A small chunk of coal.\nUsed as fuel in smelters, and for power generation.\nYay, pollution!",
   image: "item.coal",
 });
 Registries.items.add("raw-copper", {
@@ -1132,9 +1132,12 @@ Registries.items.add("scrap-rocket", {
 });
 // Chargers
 Registries.items.add("iti-energy-cell", {
+  type: "portable-battery",
   name: "Energy Cell",
   marketValue: 100,
-  description: "A kind of battery manufactured by InfiniTech Industries.",
+  description: "A kind of battery manufactured by InfiniTech Industries.\nUse in air to instantly charge yourself with the battery's energy.",
+  details: "Possibly the oldest product of InfiniTech Industries, predating the name itself - several of these still hold the inscription 'Infinity Technologies' on their back sides.\nIt's probably just a hydrogen fuel cell, yet almost every fielded construct carries at least a few of these with them, just in case.",
   image: "item.iti-energy-cell",
+  recovery: 5000,
   corp: "iti",
 });

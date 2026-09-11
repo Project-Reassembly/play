@@ -5,6 +5,7 @@ import { Registries } from "../../core/registry.js";
 import { ui, UIComponent } from "../../core/ui.js";
 import { discoverable, discovered } from "../../definitions/screens/database.js";
 import { autoScaledEffect } from "../../play/effects.js";
+import { game } from "../../play/game.js";
 import { Log } from "../../play/messaging.js";
 import { blockSize, Direction, totalSize } from "../../scaling.js";
 import { Inventory } from "../inventory.js";
@@ -318,6 +319,7 @@ class Player extends EquippedEntity {
     if (this.power >= this.passivePowerUse) {
       this.power -= this.passivePowerUse;
     } else if (this.emergencyPower >= this.passivePowerUse) {
+      this.power = 0;
       this.emergencyPower -= this.passivePowerUse;
     } else {
       this.deactivated = true;
@@ -326,7 +328,13 @@ class Player extends EquippedEntity {
         ui.waitingForMouseUp = true;
         UIComponent.setCondition("dead", "yes");
       }, this.respawnTime);
-      Log.send("#4-Ran out of power!");
+
+      Log.send(
+        `#4-${(rnd.in(Registries.deathmsg.tryGet("power-off")[0]) ?? "(1) died").replaceAll(
+          "(1)",
+          this.name,
+        )}`,
+      );
     }
 
     if (this.power && this.emergencyPower < this.maxEmergencyPower) {
@@ -379,13 +387,21 @@ class Player extends EquippedEntity {
 
   onHealthZeroed(type, source) {
     super.onHealthZeroed(type, source);
-    let messagearray =
-      Registries.deathmsg.has(type) ? Registries.deathmsg.get(type)[source ? 1 : 0] : ["(1) died"];
-    Log.send(
-      `#4-${(messagearray[Math.floor(rnd.float(0, messagearray.length))] ?? "(1) died")
-        .replaceAll("(1)", this.name)
-        .replaceAll("(2)", source?.name)}`,
-    );
+
+    if (!this.deactivated) {
+      let dm = Registries.deathmsg.tryGet(type);
+      let messagearray = dm ? dm[source ? 1 : 0] : ["(1) died"];
+      Log.send(
+        `#4-${(rnd.in(messagearray) ?? "(1) died")
+          .replaceAll("(1)", this.name)
+          .replaceAll("(2)", source?.name)}`,
+      );
+      if (game.player.entity === this)
+        respawnTimer.do(() => {
+          ui.waitingForMouseUp = true;
+          UIComponent.setCondition("dead", "yes");
+        }, this.respawnTime);
+    }
     DroppedItemStack.create(
       Inventory.mouseItemStack,
       this.world,
@@ -395,10 +411,6 @@ class Player extends EquippedEntity {
       3,
     );
     Inventory.mouseItemStack.clear();
-    respawnTimer.do(() => {
-      ui.waitingForMouseUp = true;
-      UIComponent.setCondition("dead", "yes");
-    }, this.respawnTime);
   }
   doAI() {
     if (this.target) {

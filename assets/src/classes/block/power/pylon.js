@@ -12,12 +12,12 @@ import {
   LinearVFXTraceComponent,
 } from "../../projectile/bullet-components.js";
 import { BulletModel } from "../../projectile/bullet-model.js";
-import { PowerNetwork } from "../../world/power-network.js";
+import { PylonNetwork } from "../../world/power-network.js";
 import { Block } from "../block.js";
 
 /** Connects blocks to its power grid. Not the most advanced, though. */
 export class PowerPylon extends Block {
-  network = new PowerNetwork(this.world);
+  network = new PylonNetwork(this.world);
   _extension = 0;
   baseImg = "error";
   poleImg = "error";
@@ -144,7 +144,10 @@ export class DischargePylon extends PowerPylon {
     this.#shot.get(DamageComponent).amount = this.zapDamage;
   }
   tick() {
-    if (!this.network.world) this.network.world = this.world;
+    if (!this.network.world) {
+      this.network.world = this.world;
+      this.resetConnections();
+    }
     if (this.power >= this.powerDraw) {
       if (this.#discharging) {
         if (this._extension > 4) {

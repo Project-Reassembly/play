@@ -46,6 +46,7 @@ import { RelationManager } from "../classes/interaction/relations.js";
 import { ReactionTrigger } from "../classes/interaction/triggers.js";
 import { BulletModel } from "../classes/projectile/bullet-model.js";
 import { deliverPlayer } from "../classes/world/events/event-action.js";
+import { notifyTimer } from "../definitions/notify.js";
 import {
   deselectItem,
   discoverable,
@@ -943,7 +944,7 @@ export function drawNeutralBackground(yo = 0) {
     rotatedShape("rect", -1920 + (((time + offset) * 3) % (1920 * 2)), yo, 20, 1080 * 1.43, PI / 4);
   }
   fill(40);
-  rect(0, yo, 1920*1.1, 1080 * 0.85);
+  rect(0, yo, 1920 * 1.1, 1080 * 0.85);
   noFill();
   stroke(60);
   strokeWeight(15);
@@ -952,7 +953,7 @@ export function drawNeutralBackground(yo = 0) {
   rect(0, yo, 1920 * 1.2, 1080 * 0.85);
   noStroke();
   fill(80);
-  rect(0, yo - 555, 1920*1.1, 20);
+  rect(0, yo - 555, 1920 * 1.1, 20);
   fill(20);
   rect(0, yo + 555, 1920, 20);
   pop();
@@ -1022,6 +1023,7 @@ function uiFrame() {
 
 function tickTimers() {
   if (world.impactParticles.length > 0) return;
+  notifyTimer.tick();
   effectTimer.tick();
   respawnTimer.tick();
 }
@@ -1069,7 +1071,7 @@ function gameFrame() {
 
 function movePlayer() {
   if (ui.texteditor.active) return (ui.conditions.fc = "true");
-  if (keyIsDown(ALT) || game.player.entity.dead) {
+  if (keyIsDown(ALT) /*||  game.player.entity.dead */) {
     freecam = true;
     ui.conditions.fc = "true";
     if (keyIsDown(87)) {
@@ -1247,7 +1249,6 @@ function mouseInteraction() {
             Inventory.mouseItemStack
               .getItem()
               .useInAir(game.player.entity, Inventory.mouseItemStack);
-            return;
           }
           if (ui.waitingForMouseUp) return;
 
@@ -1666,13 +1667,13 @@ window.mouseWheel = function (ev) {
 // }
 
 function nextRecipe() {
-  let block = ui.hoveredBlock ?? Container.selectedBlock;
+  let block = Container.selectedBlock ?? ui.hoveredBlock;
   if (!block) return;
   block.rightArrow();
 }
 
 function prevRecipe() {
-  let block = ui.hoveredBlock ?? Container.selectedBlock;
+  let block = Container.selectedBlock ?? ui.hoveredBlock;
   if (!block) return;
   block.leftArrow();
 }

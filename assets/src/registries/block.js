@@ -282,7 +282,10 @@ createLinkedBlockAndItem(
         time: 60,
       },
       {
-        inputs: [{ item: "scrap", count: 2 }, { item: "plate", count: 2 }],
+        inputs: [
+          { item: "scrap", count: 2 },
+          { item: "plate", count: 2 },
+        ],
         outputs: [{ item: "scrap-player-charger", count: 1 }],
         time: 60,
       },
@@ -850,6 +853,25 @@ createLinkedBlockAndItem(
   },
 );
 createLinkedBlockAndItem(
+  "basic-relay",
+  "Basic Power Relay",
+  "pylon.basic-pylon.ui",
+  {
+    type: "relay",
+    baseImg: "pylon.basic-pylon.base",
+    poleImg: "pylon.basic-pylon.pole",
+    poleBaseImg: "pylon.basic-pylon.pole-base",
+    topImg: "pylon.basic-pylon.top",
+
+    health: 150,
+    range: 32,
+    wireColour: [255, 163, 125],
+  },
+  {
+    description: "Connects multiple Power Pylons together, allowing power transfer between them.\nMuch longer range, but doesn't connect to blocks directly.",
+  },
+);
+createLinkedBlockAndItem(
   "basic-battery",
   "Basic Battery",
   "block.basic-battery",
@@ -1003,6 +1025,31 @@ createLinkedBlockAndItem(
     marketValue: 1000,
   },
 );
+//## ADDITIONAL AUTOMATION ##
+createLinkedBlockAndItem(
+  "scavenger-gun",
+  "Scavenger Gun",
+  "turret.recycle.ui",
+  {
+    type: "item-attractor",
+    range: 480,
+    pointer: {
+      type: "weapon-component",
+      width: 32,
+      height: 11,
+      xOffset: 5,
+      image: "turret.recycle.component",
+      recoil: 4,
+      recoilSpeed: 0.2,
+    },
+    beamX: 20,
+    baseImg: "turret.recycle.base",
+  },
+  {
+    description: "A specialised turret that pulls items towards it, and puts them into its inventory.\nRequires power.",
+    marketValue: 100, //65
+  },
+);
 //## PLASMA ##
 createLinkedBlockAndItem(
   "plasma-generator",
@@ -1120,7 +1167,7 @@ createLinkedBlockAndItem(
   "capitalism.iti.launch",
   { type: "launch-pad", podImage: "capitalism.iti.pod" },
   {
-    description: "Launches batches of items to space, ready to be collected by ITI.",
+    description: "Launches batches of items to space, ready to be collected by #>>icon.iti#i-InfiniTech Industries#--.",
     corp: "iti",
     marketValue: 1250,
   },
@@ -1132,7 +1179,7 @@ createLinkedBlockAndItem(
   { type: "landing-pad", podImage: "capitalism.iti.pod" },
   {
     description:
-      "Buys items from ITI, and receives them.\nMust be given an item to use for reference.",
+      "Buys items from #>>icon.iti#i-InfiniTech Industries#--, and receives them.\nMust be given an item to use for reference.",
     corp: "iti",
     marketValue: 1250,
   },

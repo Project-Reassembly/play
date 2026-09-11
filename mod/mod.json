@@ -2,7 +2,7 @@
   "name": "test",
   "displayName": "Test Mod",
   "tagline": "Example mod for Integrate",
-  "description": "Example mod for Integrate & Project: Reassembly.",
+  "description": "Example mod for Integrate & Project: Reassembly.\nCMFT tests: #c-red text#--",
   "author": "Deez nuts",
   "definitions": "./defs.json"
 }

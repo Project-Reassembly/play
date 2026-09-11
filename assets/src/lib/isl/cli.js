@@ -406,14 +406,13 @@ cle.addKeyword(
       /**@type {Integrate.Mod} */
       const m = await Integrate.add(`${url?.value}`);
       preload();
-      console.log(m);
       feedback(`Successfully loaded '${m.displayName}: ${m.tagline}' (${m.name}) by ${m.author}!`);
       mods.set(m.name, m);
     } catch (e) {
       feedback(`#ciMod loading from '${url?.value}' failed: ${e.message}`);
     }
   },
-  [{ type: "string", name: "url" }],
+  [{ type: "string|identifier", name: "url" }],
 );
 cle.addKeyword(
   "mod-info",
@@ -425,9 +424,9 @@ cle.addKeyword(
     }
     const affectedReg = [...new Set(lmod.content.map((c) => c.registry))];
     feedback(`Listing info for mod '${lmod.displayName}':`);
-    s(`#@b${lmod.displayName}#@- by ${lmod.author}#--`);
-    s(`#@i${lmod.tagline.replaceAll("#", "\#")}#--`);
-    s(`#7-${lmod.description.replaceAll("#", "\#")}#--`);
+    s(`#@b${lmod.displayName.replaceAll("#--", "#@b")}#@- by ${lmod.author.replaceAll("#--", "#@-")}#--`);
+    s(`#@i${lmod.tagline.replaceAll("#--", "#@i")}#--`);
+    s(`#7-${lmod.description.replaceAll("#--", "#7-")}#--`);
     s(
       `#h-${lmod.content.length}#-- content item${lmod.content.length === 1 ? "" : "s"} ${affectedReg.length === 1 ? `in #n-Registries#--.#i-${affectedReg[0]}#--` : `across #h-${affectedReg.length}#-- registries`}:`,
     );
@@ -435,8 +434,9 @@ cle.addKeyword(
       lmod.content
         .filter((c) => c.registry === affectedReg[0])
         .forEach((c) => {
+          const n = c.name.split(":",2)
           s(
-            ` - #e-${c.name}#--: ${c.constructible.type ?? "unknown type"}, #6-${roundNum((c.JSON.length * 2) / 1024, 3)}kb#--`,
+            ` - ${n.length > 1 ? `#7i${n[0]}:#e-${n[1]}` : `#e-${n[0]}`}#--: ${c.value.type ?? "unknown type"}, #6-est. ${roundNum((JSON.stringify(c.value).length * 2) / 1024, 3)}kb#--`,
           );
         });
     } else
@@ -444,8 +444,9 @@ cle.addKeyword(
         const incl = lmod.content.filter((c) => c.registry === v);
         s(` #h-${incl.length}#-- in #n-Registries#--.#i-${v}#--: `);
         incl.forEach((c) => {
+          const n = c.name.split(":",2)
           s(
-            `  - #e-${c.name}#--: ${c.constructible.type ?? "unknown type"}, #6-${roundNum((c.JSON.length * 2) / 1024, 3)}kb#--`,
+            `  - ${n.length > 1 ? `#7i${n[0]}:#e-${n[1]}` : `#e-${n[0]}`}#--: ${c.value?.type ?? "unknown type"}, #6-est. ${roundNum((JSON.stringify(c.value).length * 2) / 1024, 3)}kb#--`,
           );
         });
       });
@@ -458,7 +459,7 @@ cle.addKeyword(
     feedback(`Listing all loaded mods and their IDs:`);
     if (mods.size > 0)
       mods.forEach((mod, id) => {
-        s(` #@b${mod.displayName}#-- (#n-${id}#--) #i-${mod.version}#--`);
+        s(` #@b${mod.displayName.replaceAll("#--", "#@b")}#-- (#n-${id}#--) #i-${mod.version}#--`);
       });
     else s(` #7-No mods to show.`);
   },
