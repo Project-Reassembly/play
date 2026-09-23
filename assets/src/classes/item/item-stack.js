@@ -13,15 +13,17 @@ class ItemStack /* extends Integrate.RegisteredItem **/ {
   item = "nothing";
   count = 1;
   //Non-copiable attributes
-  min = null;
-  max = null;
+  /** @type {number|undefined} */
+  min;
+  /** @type {number|undefined} */
+  max;
   dropChance = 1;
   /** @type {Map<string, string|number|boolean>} */
   tags = new Map();
   //Internal
   #itemCache = null;
   init() {
-    if (this.min != null && this.max != null) {
+    if (this.min !== undefined && this.max !== undefined) {
       this.count = roundNum(rnd.float(this.min, this.max));
     }
   }
@@ -67,11 +69,10 @@ class ItemStack /* extends Integrate.RegisteredItem **/ {
    */
   stacksWith(otherStack) {
     return (
-      this.isEmpty() ||
-      otherStack.isEmpty() ||
-      otherStack.specialStackCondition(this) ||
-      (this.item === otherStack.item &&
-        this.count + otherStack.count <= this.getItem().stackSize)
+      this.isEmpty()
+      || otherStack.isEmpty()
+      || otherStack.specialStackCondition(this)
+      || (this.item === otherStack.item && this.count + otherStack.count <= this.getItem().stackSize)
     );
   }
   /**
@@ -96,7 +97,14 @@ class ItemStack /* extends Integrate.RegisteredItem **/ {
   copy() {
     let ist = new ItemStack(this.item, this.count);
     ist.init();
-    this.tags.forEach((v, k) => ist.addTag(k, v));
+    for (const [k, v] of this.tags) ist.addTag(k, v);
+    return ist;
+  }
+  /** Duplicates this ItemStack, but with a different count. */
+  withCount(count) {
+    let ist = new ItemStack(this.item, count);
+    ist.init();
+    for (const [k, v] of this.tags) ist.addTag(k, v);
     return ist;
   }
   constructor(item = "nothing", count = 1) {

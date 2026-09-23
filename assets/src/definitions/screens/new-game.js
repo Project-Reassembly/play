@@ -281,7 +281,7 @@ createUIComponent(
   "none",
   () => {
     newgame_handler.show(`corp-${creation.corporation}`);
-    UIComponent.setCondition("ng-stage", "cs");
+    ui.set("ng-stage", "cs");
   },
   "Confirm",
   true,

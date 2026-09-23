@@ -1,5 +1,5 @@
 import { constructFromType } from "../../core/constructor.js";
-import { roundNum } from "../../core/number.js";
+import { roundNum, time } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { autoScaledEffect } from "../../play/effects.js";
 import { WeaponComponent } from "../entity/entity-part.js";
@@ -42,8 +42,7 @@ class Weapon extends Equippable {
     this.shoot = constructFromType(this.shoot, WeaponShootConfiguration);
     this.bullets = constructFromType(this.bullets, WeaponBulletConfiguration);
     if (this.altShoot) this.altShoot = constructFromType(this.altShoot, WeaponShootConfiguration);
-    if (this.altBullets)
-      this.altBullets = constructFromType(this.altBullets, WeaponBulletConfiguration);
+    if (this.altBullets) this.altBullets = constructFromType(this.altBullets, WeaponBulletConfiguration);
   }
 
   /**@param {EquippedEntity} holder  */
@@ -113,9 +112,7 @@ class Weapon extends Equippable {
       this._lastCharge = shoot.charge;
       if (shoot.charge > 0) {
         let pos = this._getShootPos(holder);
-        autoScaledEffect(shoot.chargeEffect, holder.world, pos.x, pos.y, pos.direction, () =>
-          this._getShootPos(holder),
-        );
+        autoScaledEffect(shoot.chargeEffect, holder.world, pos.x, pos.y, pos.direction, () => this._getShootPos(holder));
         this._cooldown = shoot.reload + shoot.charge;
         this.timer.do(() => {
           this._internalFire(holder, shoot, ammoType, bulletConfig);
@@ -125,8 +122,7 @@ class Weapon extends Equippable {
   }
   _useAmmo(holder, ammoType) {
     if (ammoType === "none") return true;
-    if (entityHasAmmo(holder, ammoType, this.ammoUse))
-      entityAmmoUse(holder, ammoType, this.ammoUse);
+    if (entityHasAmmo(holder, ammoType, this.ammoUse)) entityAmmoUse(holder, ammoType, this.ammoUse);
     else return false;
     return true;
   }
@@ -149,16 +145,7 @@ class Weapon extends Equippable {
         autoScaledEffect(shoot.effect, holder.world, pos.x, pos.y, pos.direction);
         const model = bulletConfig.getAmmo(ammoType);
         if (model)
-          model.emit(
-            pos.x,
-            pos.y,
-            shoot.pattern.amount,
-            degrees(pos.direction),
-            shoot.pattern.spread,
-            shoot.pattern.spacing,
-            holder.world,
-            holder,
-          );
+          model.emit(pos.x, pos.y, shoot.pattern.amount, degrees(pos.direction), shoot.pattern.spread, shoot.pattern.spacing, holder.world, holder);
         if (this.component instanceof WeaponComponent) {
           this.component.trigger(shoot.recoilScale, shoot.rotRecoilScale);
         }
@@ -229,11 +216,11 @@ export function infoOfShootPattern(shoot, bullets, usage = 1, powerUse = 0) {
   let s = `  #[0x00ffac]-${roundNum((60 / (shoot.reload + shoot.charge)) * count, 2)}#-- shots/s\n`;
   if (shoot.pattern.spacing || shoot.pattern.spread)
     s += `  #[0x00ffac]-${roundNum(shoot.pattern.spacing * shoot.pattern.amount + shoot.pattern.spread, 2)}°#-- inaccuracy\n`;
-  if (shoot.charge) s += `  #[0x00ffac]-${roundNum(shoot.charge / 60, 2)}s#-- charge-up\n`;
+  if (shoot.charge) s += `  #[0x00ffac]-${time(shoot.charge)}s#-- charge-up\n`;
 
   for (const ammo in bullets.ammos) {
     const i = Registries.items.tryGet(ammo);
-    s += `  #=-[${i?.image ? `#>>${i.image}` : ` #e-${shortenedNumber(shoot.power/count)} `}#=-${i?.name ?? "Power"} ${usage > 1 ? `x${usage}` : ""}#=-]\n  #=-| ${bullets.getAmmo(ammo).createInfo().replaceAll("\n", "\n  #=-| ").trim()}\n`;
+    s += `  #=-[${i?.image ? `#>>${i.image}` : ` #e-${shortenedNumber(shoot.power / count)} `}#=-${i?.name ?? "Power"} ${usage > 1 ? `x${usage}` : ""}#=-]\n  #=-| ${bullets.getAmmo(ammo).createInfo().replaceAll("\n", "\n  #=-| ").trim()}\n`;
   }
   return s;
 }

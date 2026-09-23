@@ -1,4 +1,4 @@
-import { rnd, roundNum } from "../../core/number.js";
+import { rnd, time } from "../../core/number.js";
 import { Model } from "../component-model/model.js";
 import {
   BulletComponent,
@@ -24,8 +24,7 @@ export class BulletModel extends Model {
   init() {
     super.init();
 
-    if (!this.hasOneOf(DisableDefaultVFXComponent, ExpiryVFXComponent, ExplosionComponent))
-      this.add(ExpiryVFXComponent, { effect: "explosion~5" });
+    if (!this.hasOneOf(DisableDefaultVFXComponent, ExpiryVFXComponent, ExplosionComponent)) this.add(ExpiryVFXComponent, { effect: "explosion~5" });
 
     this.removeAll(DisableDefaultVFXComponent);
   }
@@ -40,18 +39,7 @@ export class BulletModel extends Model {
    * @param {import("../world/world.js").World} world
    * @param {import("../entity/entity.js").Entity} entity
    */
-  emit(
-    x,
-    y,
-    amount,
-    direction,
-    spread,
-    spacing,
-    world,
-    entity,
-    speedMultMin = 1,
-    speedMultMax = 1,
-  ) {
+  emit(x, y, amount, direction, spread, spacing, world, entity, speedMultMin = 1, speedMultMax = 1) {
     //Max difference in direction
     const diff = (spacing * (amount - 1)) / 2;
     //Current angle
@@ -98,7 +86,7 @@ export class BulletModel extends Model {
         this.has(MovementComponent) ?
           ""
         : "#l-Instant\n"
-      : `#l-${roundNum(this.lifetime / (60 * div), 2)}s#-- lifetime\n`;
+      : `#l-${time(this.lifetime / div)}#-- lifetime\n`;
     for (const comp of this.all()) {
       const i = comp.getInfo(this);
       if (i) s += i + "\n";

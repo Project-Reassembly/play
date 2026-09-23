@@ -1,4 +1,4 @@
-import { roundNum, tru } from "../../../core/number.js";
+import { time, tru } from "../../../core/number.js";
 import { Registries } from "../../../core/registry.js";
 import { Crafter } from "./crafter.js";
 /**Extended Crafter which uses fuel items. */
@@ -63,8 +63,8 @@ class Smelter extends Crafter {
   createExtendedDetails() {
     return `${super.createExtendedDetails()}\n#=-Fuel Types:\n  ${Object.entries(this.fuelTypes)
       .map(
-        ([type, time]) =>
-          `#>>${Registries.items.tryGet(type)?.image}#6- ${roundNum(time / 60, 2)}s#--`,
+        ([type, tme]) =>
+          `#>>${Registries.items.tryGet(type)?.image}#6- ${time(tme / 60, 2)}#--`,
       )
       .join("\n  ")}`;
   }

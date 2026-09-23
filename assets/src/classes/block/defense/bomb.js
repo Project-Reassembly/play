@@ -1,5 +1,5 @@
 import { col } from "../../../core/color.js";
-import { rnd, roundNum } from "../../../core/number.js";
+import { rnd, roundNum, time } from "../../../core/number.js";
 import { Registries } from "../../../core/registry.js";
 import { drawImg } from "../../../core/ui.js";
 import { autoScaledEffect, Explosion, NuclearExplosion } from "../../../play/effects.js";
@@ -32,8 +32,7 @@ class Bomb extends Block {
   }
   draw() {
     if (game.player.entity.team === this.team) super.draw();
-    else
-      drawImg(this.hiddenImg, this.x, this.y, this.tileSize * blockSize, this.tileSize * blockSize);
+    else drawImg(this.hiddenImg, this.x, this.y, this.tileSize * blockSize, this.tileSize * blockSize);
   }
   interaction(ent, item) {
     if (keyIsDown(SHIFT)) {
@@ -49,9 +48,8 @@ class Bomb extends Block {
       this.wasActivated = true; // stop recursive death
       this.health = 0;
       let detdelay =
-        (this.detonationDelay +
-          (this.accelerable ? rnd.float(-this.delaySpread, this.delaySpread) : 0)) *
-        (this.accelerable && this.#wasAccelerated ? 0.6 : 1);
+        (this.detonationDelay + (this.accelerable ? rnd.float(-this.delaySpread, this.delaySpread) : 0))
+        * (this.accelerable && this.#wasAccelerated ? 0.6 : 1);
       this._healthbarShowTime = 0;
       this.#detTimer.repeat(() => this.emit(this.fuseEffect), detdelay);
       this.#detTimer.do(() => this._explode(), detdelay);
@@ -61,9 +59,7 @@ class Bomb extends Block {
     this.break(BreakType.explode);
     autoScaledEffect(this.impactFrame, this.world, this.x, this.y, 0, undefined, true);
     autoScaledEffect(
-      this.explosionEffect.includes("~") ?
-        this.explosionEffect
-      : this.explosionEffect + "~" + (this.explosion.radius ?? 0),
+      this.explosionEffect.includes("~") ? this.explosionEffect : this.explosionEffect + "~" + (this.explosion.radius ?? 0),
       this.world,
       this.x,
       this.y,
@@ -80,10 +76,7 @@ class Bomb extends Block {
     super.tick();
     this.#detTimer.tick();
     for (let ent of this.world.entities) {
-      if (
-        ent.team !== this.team &&
-        this.distanceTo(ent) < this.autoDetonationRange + ent.size
-      ) {
+      if (ent.team !== this.team && this.distanceTo(ent) < this.autoDetonationRange + ent.size) {
         this.activated();
         return;
       }
@@ -101,13 +94,13 @@ class Bomb extends Block {
   createExtendedDetails() {
     return `#=-Explosion:\n  #e-${roundNum((this.explosion.radius ?? 0) / 30, 1)}#-- tiles range\n  #c-${this.explosion.amount ?? 0}${this.explosion.type ?? " explosion"}#-- damage${
       this.explosion.status ?
-        `\n  Inflicts #a-${Registries.statuses.get(this.explosion.status).name}#-- for #a-${roundNum((this.explosion.statusDuration ?? 0) / 60, 1)}s`
+        `\n  Inflicts #a-${Registries.statuses.get(this.explosion.status).name}#-- for #a-${time(this.explosion.statusDuration ?? 0)}`
       : ""
     }\n#=-Detonation:\n  ${
       this.autoDetonationRange > 0 ?
         `#d-${roundNum(this.autoDetonationRange / 30, 1)}#-- tiles enemy detection range`
       : "#d-Manual detonation#-- only"
-    }\n  #6-${roundNum(this.detonationDelay / 60, 1)}s#-- fuse`;
+    }\n  #6-${time(this.detonationDelay)}#-- fuse`;
   }
 }
 class NuclearBomb extends Bomb {
@@ -118,9 +111,7 @@ class NuclearBomb extends Bomb {
     this.break(BreakType.explode);
     autoScaledEffect(this.impactFrame, this.world, this.x, this.y, 0, undefined, true);
     autoScaledEffect(
-      this.explosionEffect.includes("~") ?
-        this.explosionEffect
-      : this.explosionEffect + "~" + (this.explosion.radius ?? 0),
+      this.explosionEffect.includes("~") ? this.explosionEffect : this.explosionEffect + "~" + (this.explosion.radius ?? 0),
       this.world,
       this.x,
       this.y,
@@ -133,34 +124,8 @@ class NuclearBomb extends Bomb {
     ex.source = this;
     ex.dealDamage();
   }
-  createExtendedTooltip() {
-    return [
-      "🟨 -------------------- ⬜",
-      "🟩Nuclear Explosion:⬜",
-      `  ${roundNum((this.explosion.radius ?? 0) / 30, 1)} blocks range`,
-      `  ${this.explosion.amount ?? 0} total${this.explosion.type ?? " explosion"} damage`,
-      `  ${roundNum(
-        this.explosion.knockback ??
-          (((this.explosion.amount ?? 0) / ((this.explosion.radius ?? 0) / 4.5)) * 10) ** 0.5,
-        1,
-      )} knockback per tick`,
-      `  ${
-        this.explosion.status ?
-          "🟨" +
-          Registries.statuses.get(this.explosion.status).name +
-          " for " +
-          roundNum((this.explosion.statusDuration ?? 0) / 60, 1) +
-          "s⬜"
-        : ""
-      }`,
-      `  ${roundNum((this.explosion.radius ?? 0) / 4.5 / 6, 1)}s duration`,
-      this.autoDetonationRange > 0 ?
-        `🟨${roundNum(this.autoDetonationRange / 30, 1)} blocks detection range⬜`
-      : "",
-      `${roundNum(this.detonationDelay / 60, 1)}s fuse${this.accelerable ? " (±" + roundNum(this.delaySpread / 60, 1) + "s)" : " (exactly)"}`,
-      this.volatile ? "🟥volatile⬜" : "",
-      "🟨 -------------------- ⬜",
-    ];
+  createExtendedDetails() {
+    return super.createExtendedDetails().replace("Explosion:\n", "Explosion:\n  #a*Nuclear!");
   }
 }
 

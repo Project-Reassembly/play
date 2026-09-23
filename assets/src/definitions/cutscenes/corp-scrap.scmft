@@ -1,0 +1,14 @@
+// + cutscenes
+#>>icon.scrap#s- United Recyclers of Our World
+  <wait:60>
+  #7-...#8-it's...
+  <wait:60>
+  #8-is it?
+  <wait:180>
+  #7-You're awake?
+  <wait:60>
+  #7-Eh, close enough.
+  #7-Finally, you're active! Our little factory project.
+  #7-Our- Well, we'll leave the 'what is my purpose' stuff for later.
+  #7-Let's go - I have a #v-lot#7- to show you.
+<command:>ng-stage:intro

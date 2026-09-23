@@ -11,8 +11,8 @@ import { assign, construct } from "../core/constructor.js";
 import { Vector, clamp, rnd, tru } from "../core/number.js";
 import { RegisteredItem } from "../core/registered-item.js";
 import { Registries } from "../core/registry.js";
-import { effects, world } from "../play/game.js";
 import { blockSize } from "../scaling.js";
+import { effects, world } from "./game.js";
 import { LinearEffect } from "./line-effects.js";
 const effectTimer = new Timer();
 class Explosion {

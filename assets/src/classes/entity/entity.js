@@ -3,11 +3,7 @@ import { construct, constructFromType } from "../../core/constructor.js";
 import { clamp, rnd, roundNum, tru, Vector } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { debug } from "../../play/debug.js";
-import {
-  autoScaledEffect,
-  createDestructionExplosion,
-  liquidDestructionBlast,
-} from "../../play/effects.js";
+import { autoScaledEffect, createDestructionExplosion, liquidDestructionBlast } from "../../play/effects.js";
 import { game } from "../../play/game.js";
 import { blockSize, totalSize } from "../../scaling.js";
 import { GroundTile } from "../block/ground-tile.js";
@@ -21,9 +17,12 @@ import { Model } from "./models/model.js";
 /** Shootable object which moves off the chunk grid, possibly with a complex model. */
 class Entity extends ShootableObject {
   name = "Entity";
+  description = "";
+  details = "";
   resistances = [];
   age = 0;
-
+  /** @type {string} */
+  uiImage;
   isBoss = false;
 
   hitSize = 20;
@@ -69,13 +68,7 @@ class Entity extends ShootableObject {
 
   //Status effects
   /** @type {AttributeMap} */
-  attributes = new AttributeMap({
-    "speed": 5,
-    "turnSpeed": 10,
-    "health": 1,
-    "resistances": 1,
-    "fire-rate": 1,
-  });
+  attributes = new AttributeMap({ "speed": 5, "turnSpeed": 10, "health": 1, "resistances": 1, "fire-rate": 1 });
 
   statuses = {};
 
@@ -101,9 +94,12 @@ class Entity extends ShootableObject {
   init() {
     super.init();
 
+    // images
+    this.uiImage ??= `entity.${this.registryName}.ui`;
+
     if (this.model) {
       this.model.draw(this.x, this.y, this.direction);
-    } else this.components = this.components.map((x) => construct(x, "component"));
+    } else this.components = this.components.map(x => construct(x, "component"));
 
     if (!(this.attributes instanceof AttributeMap)) {
       console.warn("Invalid attribute map!");
@@ -112,16 +108,13 @@ class Entity extends ShootableObject {
     }
 
     if (this.ai) this.ai = constructFromType(this.ai, AI);
+
+    delete this.description;
+    delete this.details;
   }
 
   moveTowards(x, y, rotate = true) {
-    super.moveTowards(
-      x,
-      y,
-      this.speed * (this.aiType === "passive" ? this.passiveIncentiveModifier : 1),
-      this.turnSpeed,
-      rotate,
-    );
+    super.moveTowards(x, y, this.speed * (this.aiType === "passive" ? this.passiveIncentiveModifier : 1), this.turnSpeed, rotate);
   }
 
   /** Intent to move in a direction. @param {Vector} vct */
@@ -151,10 +144,7 @@ class Entity extends ShootableObject {
   }
 
   addToWorld(world, x, y) {
-    if (!(world instanceof World))
-      throw new TypeError(
-        `Cannot add entity to non-world object of type '${world?.constructor?.name}'`,
-      );
+    if (!(world instanceof World)) throw new TypeError(`Cannot add entity to non-world object of type '${world?.constructor?.name}'`);
     world.entities.push(this);
     this.world = world;
     if (x != null) this.x = x;
@@ -164,13 +154,7 @@ class Entity extends ShootableObject {
   }
 
   /** @deprecated */
-  knock(
-    amount = 0,
-    direction = -this.direction,
-    kineticKnockback = false,
-    resolution = 1,
-    collided = [],
-  ) {
+  knock(amount = 0, direction = -this.direction, kineticKnockback = false, resolution = 1, collided = []) {
     if (resolution < 0) resolution *= -1; //Fix possilility of infinite loop
     if (resolution == 0) resolution = 1;
     //so sin and cos only happen once
@@ -185,11 +169,11 @@ class Entity extends ShootableObject {
         for (let entity of this.world.entities) {
           if (
             //If a valid collision
-            entity !== this &&
-            !entity.dead &&
-            this.team === entity.team &&
-            !collided.includes(entity) && //Not if already hit
-            this.collidesWith(entity)
+            entity !== this
+            && !entity.dead
+            && this.team === entity.team
+            && !collided.includes(entity) //Not if already hit
+            && this.collidesWith(entity)
           ) {
             //It's hit something!
             hit = true;
@@ -199,13 +183,7 @@ class Entity extends ShootableObject {
             this.move(-resolution * xmove, -resolution * ymove, this.flying);
 
             //Propagate knockback
-            entity.knock(
-              amount * 0.75 /* exponential decay */,
-              direction,
-              true,
-              resolution,
-              collided,
-            ); //Pass on collided entities to prevent infinite loop
+            entity.knock(amount * 0.75 /* exponential decay */, direction, true, resolution, collided); //Pass on collided entities to prevent infinite loop
           }
         }
         if (hit) break;
@@ -239,7 +217,7 @@ class Entity extends ShootableObject {
 
   tick() {
     this._lastPos = new Vector(this.x, this.y);
-    this.components.forEach((c) => c.tick(this));
+    this.components.forEach(c => c.tick(this));
     if (this.controllable) this.doAI();
     this.moveVct(this.velocity, this.flying);
     if (this.flying) this.velocity.scale(0.975, true);
@@ -285,10 +263,7 @@ class Entity extends ShootableObject {
     if (this.target) {
       this._waiting--;
       if (this._waiting <= 0) {
-        if (
-          this.distanceToPoint(this.target.x, this.target.y) >
-          (this.size * 0.5 + this.approachDist) * (0.6 + this.velocity.magnitude ** 1.11)
-        )
+        if (this.distanceToPoint(this.target.x, this.target.y) > (this.size * 0.5 + this.approachDist) * (0.6 + this.velocity.magnitude ** 1.11))
           this.moveTowards(this.target.x, this.target.y, true);
       }
     }
@@ -300,17 +275,10 @@ class Entity extends ShootableObject {
    * - Won't go over the world edge.
    */
   _passiveAI() {
-    if (!this.target || this.target instanceof PhysicalObject)
-      this.target = { x: this.x, y: this.y };
+    if (!this.target || this.target instanceof PhysicalObject) this.target = { x: this.x, y: this.y };
     if (this.distanceTo(this.target) < this.size * 2) {
-      let xOffset =
-        rnd.float(this.targetRange, this.targetRange / 4) *
-        (tru(0.5) ? -1 : 1) *
-        this.passiveIncentiveModifier;
-      let yOffset =
-        rnd.float(this.targetRange, this.targetRange / 4) *
-        (tru(0.5) ? -1 : 1) *
-        this.passiveIncentiveModifier;
+      let xOffset = rnd.float(this.targetRange, this.targetRange / 4) * (tru(0.5) ? -1 : 1) * this.passiveIncentiveModifier;
+      let yOffset = rnd.float(this.targetRange, this.targetRange / 4) * (tru(0.5) ? -1 : 1) * this.passiveIncentiveModifier;
 
       this.target.x += xOffset;
       this.target.y += yOffset;
@@ -351,7 +319,7 @@ class Entity extends ShootableObject {
    * - Acts as Passive when no entity can be found.
    */
   _scavengerAI() {
-    if (!this._generic_AttackerAI((blk) => !!blk.inventory, true, true, false)) this._hostileAI();
+    if (!this._generic_AttackerAI(blk => !!blk.inventory, true, true, false)) this._hostileAI();
   }
 
   /**Guard AI
@@ -360,11 +328,7 @@ class Entity extends ShootableObject {
    * - Just waits at the spawnpoint, no passive movement.
    */
   _guardAI() {
-    if (
-      !this._generic_AttackerAI(
-        (ent) => !ent.item && ent.distanceToPoint(this.spawnX, this.spawnY) < this.targetRange,
-      )
-    )
+    if (!this._generic_AttackerAI(ent => !ent.item && ent.distanceToPoint(this.spawnX, this.spawnY) < this.targetRange))
       this.target = { x: this.spawnX, y: this.spawnY };
   }
 
@@ -373,21 +337,12 @@ class Entity extends ShootableObject {
    * @param {boolean} [shoots=true] Whether or not the entity should shoot at the new target.
    * @returns {boolean} `true` if an object is being targeted, `false` if not.
    */
-  _generic_AttackerAI(
-    conditions = () => true,
-    shoots = true,
-    attackBlocks = true,
-    attackEntities = true,
-  ) {
+  _generic_AttackerAI(conditions = () => true, shoots = true, attackBlocks = true, attackEntities = true) {
     this.#firing = false;
     let tempTarget = this.target;
     let entity =
       attackEntities ?
-        this.closestFrom(
-          this.world.entities,
-          this.targetRange,
-          (ent) => !ent.dead && ent.team !== this.team && ent.visible && conditions(ent),
-        )
+        this.closestFrom(this.world.entities, this.targetRange, ent => !ent.dead && ent.team !== this.team && ent.visible && conditions(ent))
       : null;
     let block =
       attackBlocks ?
@@ -399,7 +354,7 @@ class Entity extends ShootableObject {
             "blocks",
           ),
           this.attackRange,
-          (blk) => blk.team !== this.team && conditions(blk),
+          blk => blk.team !== this.team && conditions(blk),
         )
       : null;
     this.target = this.closestFrom([entity, block], this.targetRange);
@@ -443,9 +398,7 @@ class Entity extends ShootableObject {
         this.world.floorFlightCircle(
           this.x,
           this.y,
-          ore ?
-            col.blend(GroundTile.colorOf(ore), GroundTile.colorOf(tile))
-          : GroundTile.colorOf(tile),
+          ore ? col.blend(GroundTile.colorOf(ore), GroundTile.colorOf(tile)) : GroundTile.colorOf(tile),
           (this.velocity.magnitude + 1) * 0.25,
         );
       } else {
@@ -472,35 +425,19 @@ class Entity extends ShootableObject {
     col.stroke(this.target instanceof ShootableObject ? col.red : col.green);
     strokeWeight(4);
     if (this.target) {
-      square(
-        this.target.x,
-        this.target.y,
-        (this.size * 0.5 + this.approachDist) * (0.6 + this.velocity.magnitude ** 1.11),
-      );
+      square(this.target.x, this.target.y, (this.size * 0.5 + this.approachDist) * (0.6 + this.velocity.magnitude ** 1.11));
       line(this.x, this.y, this.target.x, this.target.y);
     }
     if (this.aiType === "hostile" || this.aiType === "guard") {
-      col.stroke(
-        this.target instanceof ShootableObject ?
-          col.from(200, 0, 255, 100)
-        : col.from(255, 255, 0, 100),
-      );
+      col.stroke(this.target instanceof ShootableObject ? col.from(200, 0, 255, 100) : col.from(255, 255, 0, 100));
       circle(this.x, this.y, this.attackRange * 2);
     }
     if (this.aiType === "hostile" || this.aiType === "scavenger") {
-      col.stroke(
-        this.target instanceof ShootableObject ?
-          col.from(255, 0, 0, 100)
-        : col.from(0, 255, 0, 100),
-      );
+      col.stroke(this.target instanceof ShootableObject ? col.from(255, 0, 0, 100) : col.from(0, 255, 0, 100));
       circle(this.x, this.y, this.targetRange * 2);
     }
     if (this.aiType === "guard") {
-      col.stroke(
-        this.target instanceof ShootableObject ?
-          col.from(255, 128, 0, 100)
-        : col.from(0, 255, 255, 100),
-      );
+      col.stroke(this.target instanceof ShootableObject ? col.from(255, 128, 0, 100) : col.from(0, 255, 255, 100));
       circle(this.spawnX, this.spawnY, this.targetRange * 2);
     }
     pop();
@@ -517,11 +454,7 @@ class Entity extends ShootableObject {
       /**@type {StatusEffect} */
       let effect = Registries.statuses.get(status);
       if (tru(effect.effectChance))
-        this.emit(
-          effect.effect,
-          rnd.float(-this.width / 2, this.width / 2),
-          rnd.float(-this.height / 2, this.height / 2),
-        );
+        this.emit(effect.effect, rnd.float(-this.width / 2, this.width / 2), rnd.float(-this.height / 2, this.height / 2));
       if (time % effect.interval === clamp(10, 0, effect.interval - 1)) {
         this.damage(effect.damageType, effect.damage);
         this.heal(effect.healing);
@@ -539,9 +472,7 @@ class Entity extends ShootableObject {
   }
 
   damage(type = "normal", amount = 0, source = null) {
-    let calcAmount =
-      (amount / this.attributes.getValue("health")) *
-      (source?.attributes ? source.attributes.getValue("damageMult") : 1); //Get damage multiplier of source, if there is one
+    let calcAmount = (amount / this.attributes.getValue("health")) * (source?.attributes ? source.attributes.getValue("damageMult") : 1); //Get damage multiplier of source, if there is one
     for (let resistance of this.resistances) {
       if (resistance.type === type) {
         calcAmount -= amount * resistance.amount; //Negative resistance would actually make it do more damage

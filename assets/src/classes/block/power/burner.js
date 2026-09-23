@@ -1,5 +1,5 @@
 import * as MLF1 from "../../../core/mlf1.js";
-import { roundNum, tru } from "../../../core/number.js";
+import { time, tru } from "../../../core/number.js";
 import { Registries } from "../../../core/registry.js";
 import { Item } from "../../item/item.js";
 import { PowerGenerator } from "./generator.js";
@@ -79,8 +79,8 @@ class Burner extends PowerGenerator {
       this.fuelTypes,
     )
       .map(
-        ([type, time]) =>
-          `#>>${Registries.items.tryGet(type)?.image}#6- ${roundNum(time / 60, 2)}s#-- #=-(#e-${shortenedNumber(this.powerGeneration * time)}#-- total power#=-)`,
+        ([type, tme]) =>
+          `#>>${Registries.items.tryGet(type)?.image}#6- ${time(tme)}#-- #=-(#e-${shortenedNumber(this.powerGeneration * time)}#-- total power#=-)`,
       )
       .join("\n  ")}`;
   }

@@ -19,20 +19,15 @@ import { Cutscene } from "../core/cutscene.js";
 import { clamp, rnd, roundNum } from "../core/number.js";
 import { constructDelayed, PreloadRegistries, Registries } from "../core/registry.js";
 import { Serialiser } from "../core/serialiser.js";
-import { ImageContainer, rotatedShape, ui, UIComponent } from "../core/ui.js";
+import { ImageContainer, rotatedShape, ui } from "../core/ui.js";
 import "../definitions/screens/any.js";
-import "../definitions/screens/database.js";
 import "../definitions/screens/in-game.js";
-import {
-  selectors as createCorporationSelectors,
-  creation,
-} from "../definitions/screens/new-game.js";
+import "../definitions/screens/item-database.js";
+import { selectors as createCorporationSelectors, creation } from "../definitions/screens/new-game.js";
 import { loadStats, setupTips } from "../definitions/screens/title.js";
-import { cmdHistory } from "../definitions/text-edit.js";
 
 import { StatusEffect } from "../classes/effect/status-effect.js";
-import { exec } from "../lib/isl/cli.js";
-import { checkCreatedEntities, ExecutionContext } from "../lib/isl/core.js";
+import { checkCreatedEntities } from "../lib/isl/core.js";
 import { blockSize, totalSize } from "../scaling.js";
 import { debug } from "./debug.js";
 import { effectTimer } from "./effects.js";
@@ -46,27 +41,31 @@ import { RelationManager } from "../classes/interaction/relations.js";
 import { ReactionTrigger } from "../classes/interaction/triggers.js";
 import { BulletModel } from "../classes/projectile/bullet-model.js";
 import { deliverPlayer } from "../classes/world/events/event-action.js";
+
 import { notifyTimer } from "../definitions/notify.js";
-import {
-  deselectItem,
-  discoverable,
-  discovered,
-  refreshDatabaseUI,
-  selectItem,
-  updateItemCollections,
-} from "../definitions/screens/database.js";
+
+import { updateEntityCollections } from "../definitions/screens/entity-database.js";
 import "../definitions/screens/ide.js";
 import { capturedInput, tcursor } from "../definitions/screens/ide.js";
 import { rotateSelACW, rotateSelCW, selectedDirection } from "../definitions/screens/in-game.js";
-let histIndex = 0;
-const game = {
-  saveslot: 1,
+import { updateItemCollections } from "../definitions/screens/item-database.js";
+import "../definitions/text-edit.js";
+
+import { keybinds } from "../definitions/controls/_list.js";
+import "../definitions/controls/all-modes.js";
+import "../definitions/controls/build-mode.js";
+import "../definitions/controls/fight-mode.js";
+import "../definitions/controls/menus.js";
+import "../definitions/controls/text-editor.js";
+
+const game = new (class Game {
+  saveslot = 1;
   //Control type
-  control: "keyboard",
+  control = "keyboard";
   /** @type {PersistentPlayer} Player of the game. */
-  player: null,
-  paused: false,
-  mouse: {
+  player = null;
+  paused = false;
+  mouse = {
     get x() {
       return ui.lastMousePos.x / ui.camera.zoom + ui.camera.x;
     },
@@ -79,12 +78,12 @@ const game = {
     get blockY() {
       return Math.round(this.y / blockSize); //* contentScale;
     },
-  },
+  };
   reset() {
     this.player.reset();
     this.paused = false;
-  },
-};
+  }
+})();
 Object.defineProperty(globalThis, "p", { get: () => game.player });
 //Slightly laggy effect stuff
 const effects = {
@@ -103,13 +102,7 @@ const effects = {
   /** @type {{ x: float, y: float, intensity: float, duration: int, originalDuration: int}[]} */
   screenShakeInstances: [],
   shake(x, y, intensity, duration) {
-    this.screenShakeInstances.push({
-      x: x,
-      y: y,
-      intensity: intensity,
-      duration: duration,
-      originalDuration: duration,
-    });
+    this.screenShakeInstances.push({ x: x, y: y, intensity: intensity, duration: duration, originalDuration: duration });
   },
   applyShake() {
     if (world.impactParticles.length > 0) return;
@@ -120,8 +113,8 @@ const effects = {
         a.splice(i, 1);
       } else {
         let int =
-          (v.intensity * (v.duration / v.originalDuration) * this.screenShakeScale * 100) /
-          Math.max(game.player.entity.distanceToPoint(v.x, v.y), 50);
+          (v.intensity * (v.duration / v.originalDuration) * this.screenShakeScale * 100)
+          / Math.max(game.player.entity.distanceToPoint(v.x, v.y), 50);
         intensity += int;
       }
     });
@@ -129,12 +122,7 @@ const effects = {
     ui.camera.y += rnd.float(-intensity, intensity);
   },
 };
-const borders = () => [
-  -blockSize * 0.5,
-  -blockSize * 0.5,
-  totalSize - blockSize * 0.5,
-  totalSize - blockSize * 0.5,
-];
+const borders = () => [-blockSize * 0.5, -blockSize * 0.5, totalSize - blockSize * 0.5, totalSize - blockSize * 0.5];
 let preloadTicks = 100;
 let timePerFrame = 1000 / 60;
 let time = 0;
@@ -213,11 +201,8 @@ function sortByE1(a, b) {
 /** @type {Worker | null} */
 let worldGenWorker = null;
 try {
-  worldGenWorker = new Worker("assets/src/worker/generator.js", {
-    name: "[World Gen]",
-    type: "module",
-  });
-  worldGenWorker.onmessage = (ev) => {
+  worldGenWorker = new Worker("assets/src/worker/generator.js", { name: "[World Gen]", type: "module" });
+  worldGenWorker.onmessage = ev => {
     try {
       if (ev.data === "finish") {
         console.log("Generation finished.");
@@ -315,16 +300,15 @@ try {
           for (let block of ev.data.blocks) {
             //Create block, and overwrite properties
             if (
-              world.isPositionFree(ev.data.x + block.x, ev.data.y + block.y) &&
-              (!(ev.data.target || block.target) ||
-                world.getBlock(ev.data.x + block.x, ev.data.y + block.y, "tiles") ===
-                  (block.target ?? ev.data.target))
+              world.isPositionFree(ev.data.x + block.x, ev.data.y + block.y)
+              && (!(ev.data.target || block.target)
+                || world.getBlock(ev.data.x + block.x, ev.data.y + block.y, "tiles") === (block.target ?? ev.data.target))
             ) {
               if (block.block)
                 try {
                   let blk = world.placeAt(block.block, ev.data.x + block.x, ev.data.y + block.y);
                   Object.assign(blk, block.construction ?? {});
-
+                  blk.team = ev.data.team ?? "neutral";
                   blk.direction = Block.dir.fromEnum(block.direction);
 
                   stats.placed[`​[Struct] ${block.block}`] ??= 0;
@@ -340,11 +324,7 @@ try {
               else if (block.entity)
                 try {
                   let ent = construct(Registries.entities.get(block.entity), "entity");
-                  ent.addToWorld(
-                    world,
-                    (ev.data.x + block.x) * blockSize,
-                    (ev.data.y + block.y) * blockSize,
-                  );
+                  ent.addToWorld(world, (ev.data.x + block.x) * blockSize, (ev.data.y + block.y) * blockSize);
 
                   ent.direction = Block.dir.fromEnum(block.direction);
 
@@ -385,17 +365,13 @@ try {
         if (ev.data.type === "place") {
           if (!ev.data.target || world.getTile(ev.data.x, ev.data.y) === ev.data.target)
             if (
-              ev.data.layer !== "blocks" ||
-              (world.isPositionFree(ev.data.x, ev.data.y) &&
-                (world.getTileData(ev.data.x, ev.data.y, "tiles")?.buildable ||
-                  (ev.data.layer !== "floor" &&
-                    world.getBlock(ev.data.x, ev.data.y, "floor")?.buildable)))
+              ev.data.layer !== "blocks"
+              || (world.isPositionFree(ev.data.x, ev.data.y)
+                && (world.getTileData(ev.data.x, ev.data.y, "tiles")?.buildable
+                  || (ev.data.layer !== "floor" && world.getBlock(ev.data.x, ev.data.y, "floor")?.buildable)))
             ) {
               try {
-                assign(
-                  world.placeAt(ev.data.block, ev.data.x, ev.data.y, ev.data.layer),
-                  ev.data.construction ?? {},
-                );
+                assign(world.placeAt(ev.data.block, ev.data.x, ev.data.y, ev.data.layer), ev.data.construction ?? {});
                 stats.placed[`​[Ore] ${ev.data.block}`] ??= 0;
                 stats.placed[`​[Ore] ${ev.data.block}`]++;
               } catch (e) {
@@ -424,11 +400,11 @@ try {
       e.stack
         .split("\n")
         .slice(1)
-        .forEach((el) => Log.send("#4-  " + el));
+        .forEach(el => Log.send("#4-  " + el));
     }
   };
 
-  worldGenWorker.onerror = (ev) => {
+  worldGenWorker.onerror = ev => {
     if (ev.message) {
       let errmsg = `[World Gen] Error: \n${ev.message}\n - in ${ev.filename}\nat ${ev.lineno}:${ev.colno}`;
       console.error(errmsg, ev.error, ev);
@@ -437,7 +413,7 @@ try {
     ev.preventDefault();
   };
 
-  worldGenWorker.onmessageerror = (ev) => {
+  worldGenWorker.onmessageerror = ev => {
     console.warn("Message could not be deserialised.");
     Log.send("#y-Message could not be deserialised.");
   };
@@ -466,11 +442,7 @@ const propertyReplacements = [
   ['"spawnY":', "ŷ"],
   ['"storage":', "§"],
   ['"recipe":', "®"],
-  [
-    /{"item":"nothing","count":[0-9]+,"tags":\[[^}]*\]}/gi,
-    "л",
-    '{"item":"nothing","count":0,"tags":[]}',
-  ],
+  [/{"item":"nothing","count":[0-9]+,"tags":\[[^}]*\]}/gi, "л", '{"item":"nothing","count":0,"tags":[]}'],
   ['"item":', "ī"],
   ['"tags":', "θ"],
   ['"count":', "©"],
@@ -547,8 +519,7 @@ function saveGame(name) {
   let wrld = world.serialise();
   file.world = wrld;
   file.player = game.player.serialise();
-  if (Inventory.mouseItemStack && !Inventory.mouseItemStack.isEmpty())
-    file.mis = Inventory.mouseItemStack.serialise();
+  if (Inventory.mouseItemStack && !Inventory.mouseItemStack.isEmpty()) file.mis = Inventory.mouseItemStack.serialise();
   // deprecated
   // file.money = game.player.money;
   file = JSON.stringify(file);
@@ -577,7 +548,7 @@ function saveGame(name) {
     dict.add(name);
   });
   const d = new Set();
-  dict.forEach((name) => {
+  dict.forEach(name => {
     file = file.replaceAll(`"${name}"`, () => {
       d.add(name);
       return `⁝${d.size - 1}⁝`;
@@ -588,8 +559,8 @@ function saveGame(name) {
   //   return "…" + tile.substring(3, tile.length - 1);
   // });
   //Dictionary compression: RLE
-  file = file.replaceAll(/(⁝[0-9]+⁝),?(?:\1,?)*/gi, (tile) => {
-    let arr = tile.split(",").filter((x) => x.length > 0);
+  file = file.replaceAll(/(⁝[0-9]+⁝),?(?:\1,?)*/gi, tile => {
+    let arr = tile.split(",").filter(x => x.length > 0);
     return `×${arr.length}${arr[0]}`;
   });
   //Postdict replacers
@@ -604,12 +575,8 @@ function saveGame(name) {
     Log.send(`#a-Game has been saved (#=-${roundNum(spaceUsed, 2)}#a-KB).`);
   } else {
     const space = localStorageSpace();
-    console.warn(
-      `Game not saved (${5120 - localStorageSpace()}KB available, ${roundNum(spaceUsed, 2)}KB required).`,
-    );
-    Log.send(
-      `#c-Game could not be saved (#=-${5120 - localStorageSpace()}KB#c- available, #=-${roundNum(spaceUsed, 2)}KB#c- required).`,
-    );
+    console.warn(`Game not saved (${5120 - localStorageSpace()}KB available, ${roundNum(spaceUsed, 2)}KB required).`);
+    Log.send(`#c-Game could not be saved (#=-${5120 - localStorageSpace()}KB#c- available, #=-${roundNum(spaceUsed, 2)}KB#c- required).`);
   }
 }
 
@@ -631,16 +598,13 @@ function loadGame(name) {
   }
   //Deminify the file
   //Unreplace first
-  let reversedPDReplacers = postDictReplacers.map((x) => x.slice(0));
+  let reversedPDReplacers = postDictReplacers.map(x => x.slice(0));
   for (let replacer of reversedPDReplacers.reverse()) {
-    file = file.replaceAll(
-      replacer[1],
-      (typeof replacer[0] === "string" ? replacer[0] : replacer[2]) ?? replacer[0],
-    );
+    file = file.replaceAll(replacer[1], (typeof replacer[0] === "string" ? replacer[0] : replacer[2]) ?? replacer[0]);
   }
   //Dictionary decompression: Run Length Decoding
   file = file
-    .replaceAll(/×[0-9]+⁝[0-9]+⁝/gi, (tile) => {
+    .replaceAll(/×[0-9]+⁝[0-9]+⁝/gi, tile => {
       let str = tile.match(/⁝[0-9]+⁝/)[0] + ",",
         count = parseInt(tile.match(/(?<=×)[0-9]+(?=⁝)/)[0]);
       // console.log("rle'd "+count+" times '"+str+"'")
@@ -652,26 +616,23 @@ function loadGame(name) {
   // console.log(file)
   /** @type {[string,number][]} */
   let dict = [];
-  file = file.replace(/DICT<.*?>/gim, (dictionary) => {
+  file = file.replace(/DICT<.*?>/gim, dictionary => {
     let encoded = dictionary.substring(5, dictionary.length - 1);
-    dict = encoded.split("|").map((entry) => {
+    dict = encoded.split("|").map(entry => {
       const ei = entry.indexOf("=");
       if (ei === -1) return [entry, ""];
       return [entry.substring(0, ei), entry.substring(ei + 1)];
     });
     return "";
   });
-  dict.forEach((entry) => {
+  dict.forEach(entry => {
     file = file.replaceAll(`⁝${entry[0]}⁝`, `"${entry[1]}"`);
   });
   // console.log(file)
   //Unreplace
-  let reversedReplacers = propertyReplacements.map((x) => x.slice(0));
+  let reversedReplacers = propertyReplacements.map(x => x.slice(0));
   for (let replacer of reversedReplacers.reverse()) {
-    file = file.replaceAll(
-      replacer[1],
-      (typeof replacer[0] === "string" ? replacer[0] : replacer[2]) ?? replacer[0],
-    );
+    file = file.replaceAll(replacer[1], (typeof replacer[0] === "string" ? replacer[0] : replacer[2]) ?? replacer[0]);
   }
   // console.log(file)
   effectTimer.cancel("*");
@@ -707,6 +668,7 @@ globalThis.preload = async function () {
   RelationManager.createRelationGradients();
   GroundTile.reloadIDs();
   updateItemCollections();
+  updateEntityCollections();
 
   loadStats.images = 0;
   loadStats.cutscenes = 0;
@@ -719,8 +681,7 @@ globalThis.preload = async function () {
   createCorporationSelectors();
 
   PreloadRegistries.bullets.forEach((el, name) => {
-    if (!Registries.bullets.has(name))
-      Registries.bullets.add(name, constructFromType(el, BulletModel));
+    if (!Registries.bullets.has(name)) Registries.bullets.add(name, constructFromType(el, BulletModel));
   });
 
   console.log("Loaded bullets.");
@@ -728,27 +689,23 @@ globalThis.preload = async function () {
   PreloadRegistries.images.forEach((el, name) => {
     if (el.type === "repo") {
       console.log("repository - ", el.items);
-      [...el.items].forEach((x) => {
-        if (!Registries.images.has(x[0]))
-          Registries.images.add(x[0], new ImageContainer(x[1] ?? x[0]));
+      [...el.items].forEach(x => {
+        if (!Registries.images.has(x[0])) Registries.images.add(x[0], new ImageContainer(x[1] ?? x[0]));
       });
-    } else if (!Registries.images.has(name))
-      Registries.images.add(name, new ImageContainer(el.path));
+    } else if (!Registries.images.has(name)) Registries.images.add(name, new ImageContainer(el.path));
   });
   await Registries.images.forEachAsync(async (el, name) => {
     if (await el.load()) loadStats.images++;
   });
   console.log(`Loaded ${loadStats.images}/${loadStats.totalImages} images.`);
   await PreloadRegistries.cutscenes.forEachAsync(async (el, name) => {
-    if (!Registries.cutscenes.has(name))
-      Registries.cutscenes.add(name, await Cutscene.from(el.path));
+    if (!Registries.cutscenes.has(name)) Registries.cutscenes.add(name, await Cutscene.from(el.path));
     loadStats.cutscenes++;
   });
   console.log(`Loaded ${loadStats.cutscenes}/${loadStats.totalCutscenes} cutscenes.`);
 
   PreloadRegistries.stati.forEach((el, name) => {
-    if (!Registries.statuses.has(name))
-      Registries.statuses.add(name, constructFromType(el, StatusEffect));
+    if (!Registries.statuses.has(name)) Registries.statuses.add(name, constructFromType(el, StatusEffect));
   });
 
   loadStats.hide();
@@ -761,7 +718,7 @@ globalThis.preload = async function () {
 //Set up the canvas, using the previous function
 globalThis.setup = function () {
   let cnv = createCanvas(...getCanvasDimensions(baseWidth, baseHeight));
-  cnv.addEventListener("contextmenu", (event) => event.preventDefault());
+  cnv.addEventListener("contextmenu", event => event.preventDefault());
   rectMode(CENTER);
   imageMode(CENTER);
   colorMode("rgb", 255);
@@ -770,9 +727,7 @@ globalThis.setup = function () {
   Space.setup();
   setupTips();
   if (!Serialiser.available) {
-    Log.send(
-      "#4bLocal storage is unavailable. Games and database progress will not be saved or loaded.",
-    );
+    Log.send("#4bLocal storage is unavailable. Games and database progress will not be saved or loaded.");
   }
 };
 
@@ -829,7 +784,7 @@ window.draw = function () {
     error.stack
       .split("\n")
       .slice(1)
-      .forEach((el) => Log.send("#4-  " + el.replaceAll("#", "\\#")));
+      .forEach(el => Log.send("#4-  " + el.replaceAll("#", "\\#")));
     Log.send("#4-Press [Space] to continue");
     //addEventListener("keydown", fixError);
     noLoop();
@@ -896,11 +851,7 @@ function frame() {
     textSize(18);
     text(`${(gen.progress * 100).toFixed(2)}%`, 0, 60);
     textSize(12);
-    text(
-      `Stage ${Registries.worldgen.size * gen.stageProgress}/${Registries.worldgen.size}`,
-      0,
-      130,
-    );
+    text(`Stage ${Registries.worldgen.size * gen.stageProgress}/${Registries.worldgen.size}`, 0, 130);
   } else {
     //Draw everything else
     if (ui.menuState === "in-game") {
@@ -921,12 +872,12 @@ function frame() {
     }
     fpsUpdate();
     uiFrame();
-    if (!ui.waitingForMouseUp) mouseInteraction();
-    if (!game.paused && game.player?.entity) {
-      if (!ui.mouse.left && game.player.entity.punchChargeR > 0)
-        game.player.entity.releasePunchRight();
-      if (!ui.mouse.right && game.player.entity.punchChargeL > 0)
-        game.player.entity.releasePunchLeft();
+    if (game.player?.entity) {
+      if (!ui.waitingForMouseUp) mouseInteraction();
+      if (!game.paused) {
+        if (!ui.mouse.left && game.player.entity.punchChargeR > 0) game.player.entity.releasePunchRight();
+        if (!ui.mouse.right && game.player.entity.punchChargeL > 0) game.player.entity.releasePunchLeft();
+      }
     }
   }
 }
@@ -983,28 +934,20 @@ ui.addReset("mode", "build");
 function uiFrame() {
   Inventory.tooltip = null;
   //Tick UI
-  UIComponent.setCondition("containerselected", Container.selectedBlock instanceof Container);
-  UIComponent.setCondition("powerselected", !!Container.selectedBlock?.maxPower);
+  ui.set("containerselected", Container.selectedBlock instanceof Container);
+  ui.set("powerselected", !!Container.selectedBlock?.maxPower);
   updateUIActivity();
   tickUI();
   //Reset mouse held status
   if (ui.waitingForMouseUp && !mouseIsPressed) ui.waitingForMouseUp = false;
   //Draw UI and mouse pos
-  if (
-    gen.started &&
-    !gen.inprogress &&
-    ui.menuState === "in-game" &&
-    UIComponent.evaluateCondition("mode", "build")
-  ) {
+  if (gen.started && !gen.inprogress && ui.menuState === "in-game" && ui.is("mode", "build")) {
     ui.hoveredBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
     if (ui.hoveredBlock) ui.hoveredBlock.highlight();
     let conblock = Container.selectedBlock;
     if (conblock) {
       conblock.highlight(true);
-      conblock.drawTooltip(
-        conblock.uiX + blockSize * 0.5 * ui.camera.zoom,
-        conblock.uiY - blockSize * 0.5 * ui.camera.zoom,
-      );
+      conblock.drawTooltip(conblock.uiX + blockSize * 0.5 * ui.camera.zoom, conblock.uiY - blockSize * 0.5 * ui.camera.zoom);
     }
   }
   drawUI();
@@ -1037,7 +980,7 @@ function tickPausableStuff() {
       ui.camera.x -= (ui.camera.x - game.player.entity.x) * 0.1;
       ui.camera.y -= (ui.camera.y - game.player.entity.y) * 0.1;
     }
-  } else UIComponent.setCondition("dead", "yes");
+  } else ui.set("dead", "yes");
   effects.applyShake();
   world.tickAll();
   checkCreatedEntities();
@@ -1050,9 +993,9 @@ function gameFrame() {
   frameSkippingFunction(() => {
     if (!game.paused) tickPausableStuff();
   });
-  UIComponent.setCondition("boss", world.hasBoss() ? "yes" : "no");
+  ui.set("boss", world.hasBoss() ? "yes" : "no");
   scale(ui.camera.zoom);
-  rotate(radians(ui.camera.rotation));
+  // rotate(radians(ui.camera.rotation));
   translate(-ui.camera.x, -ui.camera.y);
   world.drawAll();
 
@@ -1070,10 +1013,10 @@ function gameFrame() {
 }
 
 function movePlayer() {
-  if (ui.texteditor.active) return (ui.conditions.fc = "true");
+  if (ui.is("texteditor", "true")) return ui.set("fc", "true");
   if (keyIsDown(ALT) /*||  game.player.entity.dead */) {
     freecam = true;
-    ui.conditions.fc = "true";
+    ui.set("fc", "true");
     if (keyIsDown(87)) {
       ui.camera.y -= 5;
     }
@@ -1089,7 +1032,7 @@ function movePlayer() {
     // game.player.controllable = false;
   } else {
     freecam = false;
-    ui.conditions.fc = "false";
+    ui.set("fc", "false");
     // game.player.controllable = true;
   }
 }
@@ -1120,7 +1063,7 @@ function drawUI() {
 function tickUI() {
   ui.timer.tick();
   for (let component of ui.components) {
-    if (component.active && component.isInteractive) {
+    if (component.active && component.interactive) {
       component.checkMouse();
       if (ui.wasReset) {
         ui.wasReset = false;
@@ -1140,64 +1083,28 @@ function showMousePos() {
     strokeWeight(2);
     textSize(20);
     fill(255, 150, 150);
-    text(
-      "UI X:" + Math.round(ui.mouse.x) + " Y:" + Math.round(ui.mouse.y),
-      ui.mouse.x,
-      ui.mouse.y - (ui.menuState === "in-game" ? 80 : 20),
-    );
+    text("UI X:" + Math.round(ui.mouse.x) + " Y:" + Math.round(ui.mouse.y), ui.mouse.x, ui.mouse.y - (ui.menuState === "in-game" ? 80 : 20));
     if (ui.menuState === "in-game") {
       fill(0, 200, 255);
-      text(
-        "Block X:" + Math.round(game.mouse.blockX) + " Y:" + Math.round(game.mouse.blockY),
-        ui.mouse.x,
-        ui.mouse.y - 60,
-      );
+      text("Block X:" + Math.round(game.mouse.blockX) + " Y:" + Math.round(game.mouse.blockY), ui.mouse.x, ui.mouse.y - 60);
       fill(0, 255, 200);
-      text(
-        "Player X:" + Math.round(game.player.entity.x) + " Y:" + Math.round(game.player.entity.y),
-        ui.mouse.x,
-        ui.mouse.y - 40,
-      );
+      text("Player X:" + Math.round(game.player.entity.x) + " Y:" + Math.round(game.player.entity.y), ui.mouse.x, ui.mouse.y - 40);
       fill(255);
-      text(
-        "Mouse X:" + Math.round(game.mouse.x) + " Y:" + Math.round(game.mouse.y),
-        ui.mouse.x,
-        ui.mouse.y - 20,
-      );
+      text("Mouse X:" + Math.round(game.mouse.x) + " Y:" + Math.round(game.mouse.y), ui.mouse.x, ui.mouse.y - 20);
     }
   }
   const mouseSize = 15;
   stroke(255, 0, 0);
   strokeWeight(2);
-  line(
-    ui.lastMousePos.x - mouseSize,
-    ui.lastMousePos.y,
-    ui.lastMousePos.x + mouseSize,
-    ui.lastMousePos.y,
-  );
-  line(
-    ui.lastMousePos.x,
-    ui.lastMousePos.y - mouseSize,
-    ui.lastMousePos.x,
-    ui.lastMousePos.y + mouseSize,
-  );
+  line(ui.lastMousePos.x - mouseSize, ui.lastMousePos.y, ui.lastMousePos.x + mouseSize, ui.lastMousePos.y);
+  line(ui.lastMousePos.x, ui.lastMousePos.y - mouseSize, ui.lastMousePos.x, ui.lastMousePos.y + mouseSize);
   stroke(255);
   line(ui.mouse.x - mouseSize, ui.mouse.y, ui.mouse.x + mouseSize, ui.mouse.y);
   line(ui.mouse.x, ui.mouse.y - mouseSize, ui.mouse.x, ui.mouse.y + mouseSize);
   if (placing) {
     stroke(255, 255, 0);
-    line(
-      ui.mouse.x - mouseSize,
-      ui.mouse.y - mouseSize,
-      ui.mouse.x + mouseSize,
-      ui.mouse.y + mouseSize,
-    );
-    line(
-      ui.mouse.x + mouseSize,
-      ui.mouse.y - mouseSize,
-      ui.mouse.x - mouseSize,
-      ui.mouse.y + mouseSize,
-    );
+    line(ui.mouse.x - mouseSize, ui.mouse.y - mouseSize, ui.mouse.x + mouseSize, ui.mouse.y + mouseSize);
+    line(ui.mouse.x + mouseSize, ui.mouse.y - mouseSize, ui.mouse.x - mouseSize, ui.mouse.y + mouseSize);
   }
   pop();
 }
@@ -1220,49 +1127,37 @@ function createPlayer(entity = null, x, y, playerType = "iti-player") {
   });
 }
 function drawInGameMousePreview() {
-  if (
-    !Inventory.mouseItemStack.isEmpty() &&
-    world.isPositionFree(game.mouse.blockX, game.mouse.blockY)
-  ) {
+  if (!Inventory.mouseItemStack.isEmpty() && world.isPositionFree(game.mouse.blockX, game.mouse.blockY)) {
     const i = Inventory.mouseItemStack.getItem();
-    if (i instanceof PlaceableItem)
-      i.drawPreviewImage(
-        game.mouse.blockX * blockSize,
-        game.mouse.blockY * blockSize,
-        +selectedDirection,
-      );
+    if (i instanceof PlaceableItem) i.drawPreviewImage(game.mouse.blockX * blockSize, game.mouse.blockY * blockSize, +selectedDirection);
   }
 }
 function mouseInteraction() {
   if (ui.menuState === "in-game")
     if (!ui.waitingForMouseUp) {
-      if (ui.mouse.down && game.player.entity?.controllable && ui.conditions.menu === "none") {
-        if (ui.conditions.mode === "build") {
+      if (ui.mouse.down && game.player.entity?.controllable && ui.is("menu", "none")) {
+        if (ui.is("mode", "build")) {
           // press both buttons to replace blocks
           if (ui.mouse.right) tryBreak();
           if (ui.mouse.left) {
             if (!npcInteract()) if (!tryPlace()) placing = false;
           } else if (placing) placing = false;
-        } else if (ui.conditions.mode === "fight") {
+        } else if (ui.is("mode", "fight")) {
           if (placing) placing = false;
           if (!Inventory.mouseItemStack.isEmpty()) {
-            Inventory.mouseItemStack
-              .getItem()
-              .useInAir(game.player.entity, Inventory.mouseItemStack);
+            Inventory.mouseItemStack.getItem().useInAir(game.player.entity, Inventory.mouseItemStack);
           }
           if (ui.waitingForMouseUp) return;
 
           // LMB = right hand // primary mouse button -> dominant hand
           if (ui.mouse.left) {
             const rhi = game.player.entity.rightHand.get(0);
-            if (rhi instanceof ItemStack && rhi.getItem() instanceof Equippable)
-              rhi.getItem().use(game.player.entity, keyIsDown(SHIFT));
+            if (rhi instanceof ItemStack && rhi.getItem() instanceof Equippable) rhi.getItem().use(game.player.entity, keyIsDown(SHIFT));
             else game.player.entity.chargePunchRight();
           }
           if (ui.mouse.right) {
             const lhi = game.player.entity.leftHand.get(0);
-            if (lhi instanceof ItemStack && lhi.getItem() instanceof Equippable)
-              lhi.getItem().use(game.player.entity, keyIsDown(SHIFT));
+            if (lhi instanceof ItemStack && lhi.getItem() instanceof Equippable) lhi.getItem().use(game.player.entity, keyIsDown(SHIFT));
             else game.player.entity.chargePunchLeft();
           }
         }
@@ -1290,19 +1185,12 @@ function npcInteract() {
     return true;
   }
   for (const ent of game.player.entity.world.entities)
-    if (
-      ent instanceof InteractableEntity &&
-      ent.pos.distanceToXY(game.mouse.x, game.mouse.y) <= ent.hitSize
-    ) {
+    if (ent instanceof InteractableEntity && ent.pos.distanceToXY(game.mouse.x, game.mouse.y) <= ent.hitSize) {
       game.player.conversation = game.player.dialogue.get(ent.registryName);
       ui.waitingForMouseUp = true;
       return true;
-    } else if (
-      ent instanceof Player &&
-      ent.deactivated &&
-      ent.pos.distanceToXY(game.mouse.x, game.mouse.y) <= ent.hitSize
-    ) {
-      ent.inventories.forEach((i) => {
+    } else if (ent instanceof Player && ent.deactivated && ent.pos.distanceToXY(game.mouse.x, game.mouse.y) <= ent.hitSize) {
+      ent.inventories.forEach(i => {
         i.drop(ent.world, ent.x, ent.y);
         i.clear();
       });
@@ -1326,19 +1214,15 @@ function tryBreak() {
     return;
   }
   let block = world.getBlock(game.mouse.blockX, game.mouse.blockY);
-  if (block && block.team === game.player.entity.team && ui.conditions.mode === "build")
+  if (block && block.team === game.player.entity.team && ui.is("mode", "build"))
     if (block.dropItem) {
       //Break breakables
 
-      if (block.break(BreakType.deconstruct))
-        if (block === Container.selectedBlock) Container.selectedBlock = null;
+      if (block.break(BreakType.deconstruct)) if (block === Container.selectedBlock) Container.selectedBlock = null;
       return;
     }
-  if (ui.conditions.mode === "fight") {
-    if (
-      game.player.entity.leftHand.get(0) instanceof ItemStack &&
-      game.player.entity.leftHand.get(0).getItem() instanceof Equippable
-    )
+  if (ui.is("mode", "fight")) {
+    if (game.player.entity.leftHand.get(0) instanceof ItemStack && game.player.entity.leftHand.get(0).getItem() instanceof Equippable)
       game.player.entity.leftHand.get(0).getItem().use(game.player.entity, true);
   }
 }
@@ -1348,28 +1232,20 @@ function tryPlace() {
   let clickedBlock = world.getBlock(game.mouse.blockX, game.mouse.blockY);
   // if an interaction is possible
   if (
-    clickedBlock &&
-    clickedBlock.team === game.player.entity.team &&
-    !placing &&
-    clickedBlock.interaction(game.player.entity, Inventory.mouseItemStack)
+    clickedBlock
+    && clickedBlock.team === game.player.entity.team
+    && !placing
+    && clickedBlock.interaction(game.player.entity, Inventory.mouseItemStack)
   )
     return false;
   //Place items on free space
   if (heldItem instanceof PlaceableItem) {
     //If space is free, and buildable
     if (
-      world.getBlock(game.mouse.blockX, game.mouse.blockY, "floor")?.buildable ||
-      (Registries.tiles.get(world.getTile(game.mouse.blockX, game.mouse.blockY)).buildable ?? true)
+      world.getBlock(game.mouse.blockX, game.mouse.blockY, "floor")?.buildable
+      || (Registries.tiles.get(world.getTile(game.mouse.blockX, game.mouse.blockY)).buildable ?? true)
     ) {
-      if (
-        heldItem.place(
-          game.player.entity,
-          Inventory.mouseItemStack,
-          game.mouse.blockX,
-          game.mouse.blockY,
-          selectedDirection,
-        )
-      ) {
+      if (heldItem.place(game.player.entity, Inventory.mouseItemStack, game.mouse.blockX, game.mouse.blockY, selectedDirection)) {
         placing = true;
         return true;
       }
@@ -1401,60 +1277,13 @@ function tryPlace() {
   return false;
 }
 
-function reset() {
-  world.entities.splice(0);
-  world.particles.splice(0);
-  world.bullets.splice(0);
-  game.level = 1;
-  game.paused = false;
-
-  for (let slot of game.player.entity.weaponSlots) {
-    slot.clear(); //Remove any weapons
-  }
-
-  //garbage collect player
-  game.player.entity = null;
-}
-
-let db = false;
 /**Triggers on any key press
  * @param {KeyboardEvent} ev
  */
 window.keyPressed = function (ev) {
-  //CAPS LOCK doesn't matter
-  key = key.toString().toLowerCase();
-  if (ui.texteditor.active) {
-    if (key === "enter") {
-      ui.endEdit();
-    }
-    if (key === "escape") ui.texteditor.active = false;
-    if (ui.texteditor.isCommandLine) {
-      if (key === "arrowup") {
-        histIndex++;
-        let last = cmdHistory[histIndex];
-        if (last !== undefined) ui.texteditor.text = last;
-        else histIndex--;
-      }
-      if (key === "arrowdown") {
-        histIndex--;
-        let last = cmdHistory[histIndex];
-        if (last !== undefined) ui.texteditor.text = last;
-        else histIndex++;
-      }
-    }
-    if (key === "backspace")
-      ui.texteditor.text = ui.texteditor.text.substring(0, ui.texteditor.text.length - 1);
-    return false;
-  }
-  //hold grave to log keys
-  if (keyIsDown("`")) console.log(ev, key);
-
-  //Hotkeys
-
   // debug
-  if (UIComponent.evaluateCondition("debugging", "true")) {
-    console.log("debug: " + key);
-    UIComponent.setCondition("debugging", "false");
+  if (ui.is("debugging", "true")) {
+    ui.set("debugging", "false");
 
     if (key === "b") {
       debug.hitboxes = !debug.hitboxes;
@@ -1466,18 +1295,11 @@ window.keyPressed = function (ev) {
       debug.chunkBorders = !debug.chunkBorders;
       Log.send(`#7-[#@-Debug#7-] Chunk borders ${debug.chunkBorders ? "shown" : "hidden"}`);
     } else if (key === "t") {
-      UIComponent.setCondition(
-        "debug-tools",
-        UIComponent.evaluateCondition("debug-tools", "true") ? "false" : "true",
-      );
-      Log.send(
-        `#7-[#@-Debug#7-] Debug tools ${UIComponent.evaluateCondition("debug-tools", "true") ? "shown" : "hidden"}`,
-      );
+      ui.set("debug-tools", ui.is("debug-tools", "true") ? "false" : "true");
+      Log.send(`#7-[#@-Debug#7-] Debug tools ${ui.is("debug-tools", "true") ? "shown" : "hidden"}`);
     } else if (key === "r") {
       debug.regionBorders = !debug.regionBorders;
-      Log.send(
-        `#7-[#@-Debug#7-] Evaluation region borders ${debug.regionBorders ? "shown" : "hidden"}`,
-      );
+      Log.send(`#7-[#@-Debug#7-] Evaluation region borders ${debug.regionBorders ? "shown" : "hidden"}`);
     } else if (key === "p") {
       debug.position = !debug.position;
       Log.send(`#7-[#@-Debug#7-] Cursor position ${debug.position ? "shown" : "hidden"}`);
@@ -1487,7 +1309,7 @@ window.keyPressed = function (ev) {
     } else if (key === "f") {
       debug.flags = !debug.flags;
       Log.send(`#7-[#@-Debug#7-] Dialogue flags ${debug.flags ? "shown" : "hidden"}`);
-      game.player.dialogue.forEach((c) => c.updateNode());
+      game.player.dialogue.forEach(c => c.updateNode());
     } else if (key === "escape") {
       for (const key in debug) {
         debug[key] = false;
@@ -1507,119 +1329,36 @@ window.keyPressed = function (ev) {
       Log.send(` #=-F3+Esc#-- Disable everything`);
     } else Log.send(`#7-[#@-Debug#7-] Unknown feature: F3 + ${key}.`);
   } else if (key === "f3") {
-    UIComponent.setCondition("debugging", "true");
+    ui.set("debugging", "true");
   }
-  //Pause / unpause
-  else if (key === " ") togglePause();
-  // save/load, ctrl buttons
-  else if (ev.ctrlKey && ui.menuState === "in-game") {
-    if (key === "j") saveGame();
-    if (key === "k") loadGame();
-  }
-  // close menu
-  else if (key === "escape" && !UIComponent.evaluateCondition("menu", "none"))
-    UIComponent.setCondition("menu", "none");
-  //Inventory
-  else if (key === "e") {
-    if (UIComponent.evaluateCondition("menu", "inventory"))
-      UIComponent.setCondition("menu", "none");
-    else UIComponent.setCondition("menu", "inventory");
-  }
+
   //DevTools and fullscreen
   else if (key === "f12" || key === "f11") return true;
-  //Recipe controls
-  else if (key === "arrowright") nextRecipe();
-  else if (key === "arrowleft") prevRecipe();
-  else if (key === "arrowup") UIComponent.setCondition("mode", "build");
-  else if (key === "arrowdown") UIComponent.setCondition("mode", "fight");
-  //Database
-  else if (key === "?" && ui.menuState === "in-game") {
-    if (Inventory.tooltip) {
-      // Select hovered item
-      const iname = Inventory.tooltip.item.registryName;
-      if (discoverable.all.has(iname)) {
-        if (discovered.all.has(iname)) {
-          ui.menuState = "database";
-          UIComponent.setCondition("is-in-game-database", "true");
-          refreshDatabaseUI();
-          selectItem(iname);
-        } else Log.send("#>>icon.database#c-Item not discovered yet");
-      } else Log.send("#>>icon.database#c-Item has no database entry");
-    } else {
-      // just open it
-      ui.menuState = "database";
-      UIComponent.setCondition("is-in-game-database", "true");
-      refreshDatabaseUI();
-      deselectItem();
-    }
+  else {
+    if (keyIsDown("`")) console.log(ev);
+    keybinds.down(ev);
   }
-  //Command line
-  else if (key === "/") openCommandLine();
-  //Hotkeys
-  else if (key === "b" && ui.menuState === "in-game") {
-    if (UIComponent.evaluateCondition("mode", "build")) UIComponent.setCondition("mode", "fight");
-    else UIComponent.setCondition("mode", "build");
-  } else if (UIComponent.evaluateCondition("mode", "build") && ui.menuState === "in-game") {
-    if (key === "1") game.player.entity.inventory.hotkeySlot(0);
-    else if (key === "2") game.player.entity.inventory.hotkeySlot(1);
-    else if (key === "3") game.player.entity.inventory.hotkeySlot(2);
-    else if (key === "4") game.player.entity.inventory.hotkeySlot(3);
-    else if (key === "5") game.player.entity.inventory.hotkeySlot(4);
-    else if (key === "6") game.player.entity.inventory.hotkeySlot(5);
-    else if (key === "7") game.player.entity.inventory.hotkeySlot(6);
-    else if (key === "8") game.player.entity.inventory.hotkeySlot(7);
-    else if (key === "9") game.player.entity.inventory.hotkeySlot(8);
-    else if (key === "0") game.player.entity.inventory.hotkeySlot(9);
-  }
+
   //Prevent any default behaviour
   ev.preventDefault();
   ev.stopPropagation();
   ev.stopImmediatePropagation();
   return false;
 };
-let skipNext = false;
-function openCommandLine() {
-  skipNext = true;
-  ui.texteditor.active = true;
-  ui.texteditor.title = "Command Line";
-  ui.texteditor.isCommandLine = true;
-  ui.texteditor.save = (command) => {
-    exec(
-      command,
-      game.player.entity ?
-        new ExecutionContext(game.player.entity.x, game.player.entity.y, game.player.entity)
-      : new ExecutionContext(0, 0, null),
-    );
-    cmdHistory.unshift(command);
-    histIndex = -1;
-  };
-}
 /**@param {KeyboardEvent} ev  */
 window.keyTyped = function (ev) {
-  if (skipNext) {
-    skipNext = false;
-    return false;
-  }
-  if (tcursor.active)
-    capturedInput(
-      ev.shiftKey || ev.getModifierState("CapsLock") ? key.toUpperCase() : key.toLowerCase(),
-    );
-  if (!ui.texteditor.active) return false;
-  // if (key === "/") return false;
-  if (key === "c" && ev.ctrlKey) navigator.clipboard.writeText(ui.texteditor.text);
-  else if (key === "x" && ev.ctrlKey)
-    navigator.clipboard.writeText(ui.texteditor.text).then((x) => (ui.texteditor.text = ""));
-  else if (key === "v" && ev.ctrlKey)
-    navigator.clipboard.readText(ui.texteditor.text).then((v) => (ui.texteditor.text = v));
+  if (tcursor.active) capturedInput(ev.shiftKey || ev.getModifierState("CapsLock") ? key.toUpperCase() : key.toLowerCase());
+  if (ui.is("texteditor", "false")) return false;
+  if (ui.texteditor.keyTriggered) return (ui.texteditor.keyTriggered = false);
+  if (ev.ctrlKey || ev.altKey) return false;
   else {
-    ui.texteditor.text +=
-      ev.shiftKey || ev.getModifierState("CapsLock") ? key.toUpperCase() : key.toLowerCase();
+    ui.texteditor.text += ev.shiftKey || ev.getModifierState("CapsLock") ? key.toUpperCase() : key.toLowerCase();
   }
   return false;
 };
 
 //Show dialog box if game in progress
-onbeforeunload = (ev) => {
+onbeforeunload = ev => {
   if (ui.menuState === "in-game") {
     ev.stopPropagation();
     ev.preventDefault();
@@ -1666,32 +1405,13 @@ window.mouseWheel = function (ev) {
 //   });
 // }
 
-function nextRecipe() {
-  let block = Container.selectedBlock ?? ui.hoveredBlock;
-  if (!block) return;
-  block.rightArrow();
-}
-
-function prevRecipe() {
-  let block = Container.selectedBlock ?? ui.hoveredBlock;
-  if (!block) return;
-  block.leftArrow();
-}
-
 function pause() {
   game.paused = true;
-  UIComponent.setCondition("paused", "true");
+  ui.set("paused", "true");
 }
 function unpause() {
   game.paused = false;
-  UIComponent.setCondition("paused", "false");
-}
-function togglePause() {
-  if (game.paused) {
-    unpause();
-  } else {
-    pause();
-  }
+  ui.set("paused", "false");
 }
 window.mousePressed = function () {
   return false;
@@ -1699,5 +1419,5 @@ window.mousePressed = function () {
 
 window.world = world;
 
-export { clearData, createPlayer, effects, fonts, game, gen, loadGame, saveGame, world };
+export { clearData, createPlayer, effects, fonts, game, gen, loadGame, pause, saveGame, unpause, world };
 

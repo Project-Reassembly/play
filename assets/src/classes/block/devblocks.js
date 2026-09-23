@@ -31,13 +31,7 @@ class StructureReaderBlock extends Block {
     "dev::itemcatalog",
   ];
   drawTooltip(x, y, outline, background) {
-    MLF1.draw(
-      x,
-      y,
-      this._outTxt,
-      `${this.title} [${this._range} blocks]`,
-      Item.getColourFromRarity(0, "light"),
-    );
+    MLF1.draw(x, y, this._outTxt, `${this.title} [${this._range} blocks]`, Item.getColourFromRarity(0, "light"));
   }
   leftArrow() {
     if (this._range > 1) this._range--;
@@ -51,21 +45,14 @@ class StructureReaderBlock extends Block {
     noFill();
     stroke(255, emphasised ? 0 : 255, emphasised ? 0 : 255);
     strokeWeight((emphasised ? 2 : 1) * ui.camera.zoom);
-    rect(
-      this.uiX,
-      this.uiY,
-      (this._range * 2 + 1) * blockSize * ui.camera.zoom,
-      (this._range * 2 + 1) * blockSize * ui.camera.zoom,
-    );
+    rect(this.uiX, this.uiY, (this._range * 2 + 1) * blockSize * ui.camera.zoom, (this._range * 2 + 1) * blockSize * ui.camera.zoom);
     pop();
   }
   /**@param {ItemStack | undefined} istack  */
   interaction(ent, istack) {
     if (keyIsDown(SHIFT)) {
       this._output = this.outputStructure();
-      this._outTxt = this._output
-        .map((x) => `${x.block}: ${x.x < 0 ? "" : "+"}${x.x}, ${x.y < 0 ? "" : "+"}${x.y}`)
-        .join("\n");
+      this._outTxt = this._output.map(x => `${x.block}: ${x.x < 0 ? "" : "+"}${x.x}, ${x.y < 0 ? "" : "+"}${x.y}`).join("\n");
       ui.waitingForMouseUp = true;
       return true;
     }
@@ -86,8 +73,7 @@ class StructureReaderBlock extends Block {
     strokeWeight(1);
     rect(this.uiX, this.uiY, (this._range * 2 + 1) * blockSize, (this._range * 2 + 1) * blockSize);
     opacity(0.66);
-    if (this._becomes)
-      drawImg(Registries.blocks.get(this._becomes).image, this.x, this.y, blockSize, blockSize);
+    if (this._becomes) drawImg(Registries.blocks.get(this._becomes).image, this.x, this.y, blockSize, blockSize);
     pop();
   }
   outputStructure() {
@@ -147,13 +133,7 @@ class StructureReaderBlock extends Block {
             blocks.push({ x: x, y: y, block: this._becomes });
           }
           if (!unreadable) {
-            if (block.direction !== 0)
-              blocks.push({
-                x: x,
-                y: y,
-                block: block.registryName,
-                direction: Direction.toEnum(block.direction),
-              });
+            if (block.direction !== 0) blocks.push({ x: x, y: y, block: block.registryName, direction: Direction.toEnum(block.direction) });
             else blocks.push({ x: x, y: y, block: block.registryName });
           }
         }
@@ -163,7 +143,7 @@ class StructureReaderBlock extends Block {
     return blocks;
   }
   read() {
-    return `[${this._output.map((x) => x.block).join("|")}]`;
+    return `[${this._output.map(x => x.block).join("|")}]`;
   }
 }
 class ItemCatalogBlock extends Container {
@@ -213,22 +193,7 @@ class CommandExecutorBlock extends Block {
   }
   run() {
     this.world.particles.push(
-      new ImageParticle(
-        this.x,
-        this.y,
-        0,
-        120,
-        0,
-        0,
-        "block.dev.commandblock.heat",
-        1,
-        0,
-        blockSize,
-        blockSize,
-        blockSize,
-        blockSize,
-        0,
-      ),
+      new ImageParticle(this.x, this.y, 0, 120, 0, 0, "block.dev.commandblock.heat", 1, 0, blockSize, blockSize, blockSize, blockSize, 0),
     );
     exec(this._command, new ExecutionContext(this.x, this.y, this));
     //Activate next block
@@ -247,15 +212,7 @@ class CommandExecutorBlock extends Block {
       noStroke();
       let pulse = Math.sin(frameCount / 60);
       fill(80 + pulse * 20, 205 + 50 * pulse, 80 + pulse * 20);
-      rotatedShape(
-        "moved-triangle",
-        this.uiX,
-        this.uiY,
-        blockSize * ui.camera.zoom,
-        (blockSize / 2) * ui.camera.zoom,
-        this.direction,
-        false,
-      );
+      rotatedShape("moved-triangle", this.uiX, this.uiY, blockSize * ui.camera.zoom, (blockSize / 2) * ui.camera.zoom, this.direction, false);
       pop();
     }
   }
@@ -273,10 +230,10 @@ class CommandExecutorBlock extends Block {
       return true;
     }
     ui.texteditor.text = this._command;
-    ui.texteditor.active = true;
+    ui.set("texteditor", "true");
     ui.texteditor.isCommandLine = true;
     ui.texteditor.title = "Set Console Command:";
-    ui.texteditor.save = (cmd) => {
+    ui.texteditor.save = cmd => {
       Log.send(`#-iSet command to '${cmd}'`);
       this._command = cmd;
     };

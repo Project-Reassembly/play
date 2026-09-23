@@ -9,11 +9,10 @@ import {
   createHealthbarComponent,
   createUIComponent,
   createUIImageComponent,
-  ui,
-  UIComponent,
+  ui
 } from "../../core/ui.js";
 import { gen } from "../../play/game.js";
-import { refreshDatabaseUI } from "./database.js";
+import { refreshDatabaseUI } from "./item-database.js";
 import { newgame_handler } from "./new-game.js";
 // black screen
 let fade = 0;
@@ -168,10 +167,10 @@ createUIImageComponent(
   ["title"],
   [],
   850,
-  -300,
+  -330,
   50,
   50,
-  () => UIComponent.setCondition("title-side", "controls"),
+  () => ui.set("title-side", "controls"),
   "icon.controls",
   true,
 ).setOutlineColour(col.mono(60));
@@ -179,10 +178,10 @@ createUIImageComponent(
   ["title"],
   [],
   850,
-  -230,
+  -260,
   50,
   50,
-  () => UIComponent.setCondition("title-side", "guide"),
+  () => ui.set("title-side", "guide"),
   "icon.question",
   true,
 ).setOutlineColour(col.mono(60));
@@ -190,10 +189,10 @@ createUIImageComponent(
   ["title"],
   [],
   850,
-  -160,
+  -190,
   50,
   50,
-  () => UIComponent.setCondition("title-side", "art"),
+  () => ui.set("title-side", "art"),
   "icon.edit",
   true,
 ).setOutlineColour(col.mono(60));
@@ -215,7 +214,7 @@ createUIComponent(
   75,
   "none",
   () => {
-    UIComponent.setCondition("startable", "false");
+    ui.set("startable", "false");
     ui.timer.repeat((i) => (fade = i * 4), 64);
     ui.timer.do(() => {
       fade = 0;
@@ -246,7 +245,7 @@ createUIComponent(
   75,
   "none",
   () => {
-    UIComponent.setCondition("startable", "false");
+    ui.set("startable", "false");
     ui.timer.repeat((i) => (fade = i * 4), 64);
     ui.timer.do(() => {
       fade = 0;
@@ -277,7 +276,7 @@ createUIComponent(
   75,
   "none",
   () => {
-    UIComponent.setCondition("startable", "false");
+    ui.set("startable", "false");
     refreshDatabaseUI();
     ui.menuState = "database";
   },
@@ -296,12 +295,7 @@ createUIImageComponent(
   100,
   75,
   75,
-  () => {
-    UIComponent.setCondition("startable", "false");
-    resetItemSelectors();
-    resetColl();
-    ui.menuState = "database";
-  },
+  null,
   "icon.database",
   false,
 );
@@ -396,21 +390,21 @@ createUIComponent(["title"], [], 0, 0, 200, 50, "none", checkUpdate, "", true, 2
   .define(
     "text",
     () =>
-      `<version ${gameVersion}${isPreview ? `, preview ${preNumber}` : ""}>\n${versionName ? `"${versionName}"` : ""}${versiongetter ? "\nReload page, update available" : ""}`.trimEnd(),
+      `<version ${gameVersion}${preNumber ? `, preview ${preNumber}` : ""}>\n${versionName ? `"${versionName}"` : ""}${versiongetter ? "\nReload page, update available" : ""}`.trimEnd(),
   );
 
 createUIComponent(["title"], [], 0, 0, 1920, 1080).define("backgroundColour", () => fade);
 //update info every day
 setInterval(checkUpdate, 86_400_000);
 
-UIComponent.setCondition("show-load", "true");
+ui.set("show-load", "true");
 export const loadStats = {
   totalImages: PreloadRegistries.images.size,
   totalCutscenes: PreloadRegistries.cutscenes.size,
   images: 0,
   cutscenes: 0,
   hide() {
-    UIComponent.setCondition("show-load", "false");
+    ui.set("show-load", "false");
   },
 };
 createUIComponent(["title"], ["show-load:true"], 0, 0, 1920, 1080).setBackgroundColour(150);

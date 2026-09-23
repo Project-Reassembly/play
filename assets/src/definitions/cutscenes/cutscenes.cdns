@@ -4,7 +4,7 @@
 // This file can be imported to use these namespaced directives.
 * <time> [number]
   "Sustains this line for a certain amount of time, specified in frames (60fps). A base value of 60 is added to this for fade time."
-* <rtime> [number] "Sustains this line for a certain amount of time, specified in frames (60fps). Also removes fade time."
+* <rtime> [number] "Sustains this line for a certain amount of time, specified in frames (60fps). No fade time is added to this number."
 * <wait> [number] "Blanks the screen for a certain amount of time, specified in frames (60fps)."
 * <command> "Executes the handler's `command` function with this line's unformatted text as its argument."
 * <cut> "Marks this text as having no fade time."

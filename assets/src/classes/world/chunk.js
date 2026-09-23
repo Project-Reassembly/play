@@ -11,7 +11,7 @@ import { World } from "./world.js";
  * @prop {SerialisedBlock[][]} blocks
  * @prop {string[][]} tiles
  * @prop {string[][]} ores
- * @prop {SerialisedBlock[][]?} floors @deprecated version of 'ores'.
+ * @prop {SerialisedBlock[][]?} floors Deprecated version of 'ores'.
  * @prop {int} i
  * @prop {int} j
  */

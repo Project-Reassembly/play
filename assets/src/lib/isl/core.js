@@ -1,19 +1,19 @@
 import { ISLExtension } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@main/core/extensions.js";
 import {
-  ISLError,
-  ISLInterpreter,
+    ISLError,
+    ISLInterpreter,
 } from "https://cdn.jsdelivr.net/gh/LightningLaser8/ISL@main/core/interpreter.js";
 
 export { ISLError, ISLExtension, ISLInterpreter };
 
   import { Entity } from "../../classes/entity/entity.js";
-  import { PhysicalObject } from "../../classes/physical.js";
-  import { REGION_SIZE } from "../../classes/world/factory-valuations.js";
-  import { rnd, Vector } from "../../core/number.js";
-  import { Registries } from "../../core/registry.js";
-  import { game, world } from "../../play/game.js";
-  import { Log } from "../../play/messaging.js";
-  import { blockSize, chunkSize } from "../../scaling.js";
+    import { PhysicalObject } from "../../classes/physical.js";
+    import { REGION_SIZE } from "../../classes/world/factory-valuations.js";
+    import { rnd, Vector } from "../../core/number.js";
+    import { Registries } from "../../core/registry.js";
+    import { game, world } from "../../play/game.js";
+    import { Log } from "../../play/messaging.js";
+    import { blockSize, chunkSize } from "../../scaling.js";
 
 export class ExecutionContext {
   get isEntity() {

@@ -95,6 +95,9 @@ export class TradingManager {
   tradeCostX = 1;
   #page = 0;
   #pages = 1;
+  get currentTrades(){
+    return [...this.#trades];
+  }
   init() {
     [...this.trades].forEach((x) => {
       if (typeof x === "string") this.#trades.set(x, new TradeInfo(1));

@@ -330,7 +330,7 @@ export class PhysicalObject extends Integrate.RegisteredItem {
 export class ShootableObject extends PhysicalObject {
   health = 100;
   maxHealth = 0;
-  team = "scrap";
+  team = "neutral";
   dead = false;
   hasHealthbar = true;
   _healthbarShowTime = 0;

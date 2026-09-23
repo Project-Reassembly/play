@@ -2314,7 +2314,7 @@ Registries.vfx.add("charged-punch-trail", {
   },
 });
 
-// lines
+// laser/lightning lines
 Registries.vfx.add("snipe-trail", {
   type: "line-emission",
   amount: 1,
@@ -2329,6 +2329,22 @@ Registries.vfx.add("snipe-trail", {
     strokeTo: 0,
   },
 });
+
+Registries.vfx.add("iti-laser", {
+  type: "line-emission",
+  amount: 1,
+  line: {
+    lifetime: 20,
+    light: 20,
+    colours: [
+      [255, 30, 30],
+      [255, 0, 0, 50],
+    ],
+    strokeFrom: 6,
+    strokeTo: 0,
+  },
+});
+
 Registries.vfx.add("peti-zap", {
   type: "lightning-emission",
   amount: 1,
@@ -2385,6 +2401,7 @@ Registries.vfx.add("peti-laser-mini", {
     strokeTo: 0,
   },
 });
+
 
 // hmmmmmm
 

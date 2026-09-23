@@ -7,8 +7,9 @@ import { deliverEntity } from "../../classes/world/events/event-action.js";
 import { construct } from "../../core/constructor.js";
 import { roundNum } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
+import { Serialiser } from "../../core/serialiser.js";
 import { Explosion, NuclearExplosion } from "../../play/effects.js";
-import { clearData, loadGame, saveGame, world } from "../../play/game.js";
+import { loadGame, saveGame, world } from "../../play/game.js";
 import { Log } from "../../play/messaging.js";
 import { blockSize } from "../../scaling.js";
 import Integrate from "../integrate.js";
@@ -29,12 +30,9 @@ import {
   quietMode,
   runCommand,
 } from "./core.js";
-const s = (str) => Log.send(str);
+const s = str => Log.send(str);
 function give(entity, item, amount = 1) {
-  let leftover =
-    entity instanceof EquippedEntity && entity.ammo.hasItem(item) ?
-      entity.ammo.addItem(item, amount)
-    : (amount ?? 0);
+  let leftover = entity instanceof EquippedEntity && entity.ammo.hasItem(item) ? entity.ammo.addItem(item, amount) : (amount ?? 0);
   let notgiven = 0;
   if (leftover) notgiven = entity.inventory.addItem(item, leftover);
   return notgiven;
@@ -50,7 +48,7 @@ cle.addKeyword(
       feedback(`#ciItem ${item?.value} does not exist!`);
       return;
     }
-    const d = doTo(target, (ent) => {
+    const d = doTo(target, ent => {
       if (!(ent instanceof InventoryEntity)) {
         feedback(`#ci${ent.name}#ci has no inventory to give items to.`);
         return false;
@@ -59,9 +57,7 @@ cle.addKeyword(
       given.add((amount?.value ?? 1) - notgiven);
       return true;
     });
-    feedback(
-      `Given ${given.size === 0 ? "no" : `${[...given]}x`} ${Registries.items.get(item?.value).name}#7i to ${d}`,
-    );
+    feedback(`Given ${given.size === 0 ? "no" : `${[...given]}x`} ${Registries.items.get(item?.value).name}#7i to ${d}`);
   },
   [
     { name: "target", type: "entity" },
@@ -79,14 +75,12 @@ cle.addKeyword(
       return;
     }
 
-    const d = doTo(target, (ent) => {
+    const d = doTo(target, ent => {
       ent.applyStatus(status?.value, (duration?.value ?? 10) * 60);
       return true;
     });
 
-    feedback(
-      `Given effect ${Registries.statuses.get(status?.value).name}#7i to ${d} for ${duration?.value ?? 1}s`,
-    );
+    feedback(`Given effect ${Registries.statuses.get(status?.value).name}#7i to ${d} for ${duration?.value ?? 1}s`);
   },
   [
     { name: "target", type: "entity" },
@@ -99,7 +93,7 @@ cle.addKeyword(
   (interp, labels, entity, amount) => {
     let target = entity?.value;
 
-    const d = doTo(target, (ent) => {
+    const d = doTo(target, ent => {
       ent.addShield(amount?.value ?? 0);
       return true;
     });
@@ -181,7 +175,7 @@ cle.addKeyword(
   "tp",
   (interp, labels, target, x, y) => {
     const pos = getPos(x, y);
-    const d = doTo(target.value, (ent) => {
+    const d = doTo(target.value, ent => {
       ent.x = pos.x;
       ent.y = pos.y;
       return true;
@@ -201,7 +195,7 @@ cle.addKeyword(
       feedback(`#ciTeam ${team?.value} does not exist!`);
       return;
     }
-    const d = doTo(target.value, (ent) => {
+    const d = doTo(target.value, ent => {
       ent.team = `${team.value}`;
       return true;
     });
@@ -247,7 +241,10 @@ cle.addKeyword(
 cle.addKeyword(
   "clear",
   (interp, labels) => {
-    clearData();
+    if (Serialiser.clear("pr")) {
+      console.log("All saves deleted.");
+      Log.send("#4-Stored game saves deleted.");
+    }
   },
   [],
 );
@@ -257,10 +254,7 @@ cle.addKeyword(
     let pos = getPos(x, y);
     let toActivate;
     try {
-      toActivate = world.getBlockErroring(
-        Math.round(pos.x / blockSize),
-        Math.round(pos.y / blockSize),
-      );
+      toActivate = world.getBlockErroring(Math.round(pos.x / blockSize), Math.round(pos.y / blockSize));
     } catch (err) {
       feedback(`#ci${err.message}.`);
       return;
@@ -306,14 +300,11 @@ cle.addKeyword(
     type.value ??= "ignore";
     try {
       let toBreak = world.getBlockErroring(Math.round(pos.x / 30), Math.round(pos.y / 30));
-      if (type.value === "ignore" || toBreak.break(BreakType[type.value] ?? "delete"))
-        world.break(Math.round(pos.x / 30), Math.round(pos.y / 30));
+      if (type.value === "ignore" || toBreak.break(BreakType[type.value] ?? "delete")) world.break(Math.round(pos.x / 30), Math.round(pos.y / 30));
     } catch (err) {
       throw new ISLError(err.message, err.constructor);
     }
-    feedback(
-      `Broken block at ${pos.x}, ${pos.y}${type.value !== "ignore" ? ` as '${type.value}'` : ""}`,
-    );
+    feedback(`Broken block at ${pos.x}, ${pos.y}${type.value !== "ignore" ? ` as '${type.value}'` : ""}`);
   },
   [
     { name: "x", type: positionType, optional: true },
@@ -346,9 +337,7 @@ cle.addKeyword(
     if (as.value === "to") {
       interp.setVar(variable.value, val);
     } else {
-      Log.send(
-        "#niISL#yi> Actually, extensions can't create variables (yet). This is here as a placeholder.",
-      );
+      Log.send("#niISL#yi> Actually, extensions can't create variables (yet). This is here as a placeholder.");
     }
   },
   [
@@ -385,11 +374,11 @@ cle.addKeyword(
   "at",
   (interp, labels, target, ...code) => {
     const cmd = code
-      .map((x) => x.value)
+      .map(x => x.value)
       .join(" ")
       .replaceAll("&", ";");
     feedback(`Doing ${cmd} at ${target.value}`);
-    const d = doTo(target.value, (ent) => {
+    const d = doTo(target.value, ent => {
       exec(cmd, new ExecutionContext(ent.x, ent.y, ent));
     });
   },
@@ -422,7 +411,7 @@ cle.addKeyword(
       feedback(`#ciThere is no loaded mod with ID '${mod?.value}'.`);
       return;
     }
-    const affectedReg = [...new Set(lmod.content.map((c) => c.registry))];
+    const affectedReg = [...new Set(lmod.content.map(c => c.registry))];
     feedback(`Listing info for mod '${lmod.displayName}':`);
     s(`#@b${lmod.displayName.replaceAll("#--", "#@b")}#@- by ${lmod.author.replaceAll("#--", "#@-")}#--`);
     s(`#@i${lmod.tagline.replaceAll("#--", "#@i")}#--`);
@@ -432,19 +421,19 @@ cle.addKeyword(
     );
     if (affectedReg.length === 1) {
       lmod.content
-        .filter((c) => c.registry === affectedReg[0])
-        .forEach((c) => {
-          const n = c.name.split(":",2)
+        .filter(c => c.registry === affectedReg[0])
+        .forEach(c => {
+          const n = c.name.split(":", 2);
           s(
             ` - ${n.length > 1 ? `#7i${n[0]}:#e-${n[1]}` : `#e-${n[0]}`}#--: ${c.value.type ?? "unknown type"}, #6-est. ${roundNum((JSON.stringify(c.value).length * 2) / 1024, 3)}kb#--`,
           );
         });
     } else
       affectedReg.forEach((v, i) => {
-        const incl = lmod.content.filter((c) => c.registry === v);
+        const incl = lmod.content.filter(c => c.registry === v);
         s(` #h-${incl.length}#-- in #n-Registries#--.#i-${v}#--: `);
-        incl.forEach((c) => {
-          const n = c.name.split(":",2)
+        incl.forEach(c => {
+          const n = c.name.split(":", 2);
           s(
             `  - ${n.length > 1 ? `#7i${n[0]}:#e-${n[1]}` : `#e-${n[0]}`}#--: ${c.value?.type ?? "unknown type"}, #6-est. ${roundNum((JSON.stringify(c.value).length * 2) / 1024, 3)}kb#--`,
           );
@@ -497,53 +486,29 @@ cle.addKeyword(
       s(" #6-@p#--/#6-@player#--: The current player.");
       s(" #6-@s#--/#6-@self#--: The executor of the command. May be a block.");
       s(" #6-@r#--/#6-@random#--: A random entity.");
-      s(
-        " #6-@c#--/#6-@closest#--: The closest entity (likely yourself when used alone, unless using command blocks).",
-      );
+      s(" #6-@c#--/#6-@closest#--: The closest entity (likely yourself when used alone, unless using command blocks).");
       s(" #6-@#--/#6-@w#--/#6-@newest#--: The most recently spawned entity.");
       s(" #6-@e#--/#6-@everything#--: All entities.");
       s(" #6-@t#--/#6-@team#--: All entities on the team of the executor.");
       s(" #6-@a#--/#6-@ally#--: All entities allied to the team of the executor.");
       s(" #6-@n#--/#6-@enemy#--: All entities not on or allied to the team of the executor.");
       s("#@-Generated/Programmatic Selectors");
-      s(
-        ` #6-@${[...Registries.corps]
-          .map((x) => x.key)
-          .join("#--/#6-@")}#--: All entities on the specified team.`,
-      );
-      s(
-        ` #6-@=<type>#--: All entities of the specified #6-<type>#--, e.g. #6-@=scavenger#-- matches all scavengers.`,
-      );
-      s(
-        ` #6-@{<property>}#--: All entities with the specified #6-<property>#--, such as #6-@{relation}#--.`,
-      );
-      s(
-        ` #6-@{<property>:<value>}#--: All entities with the specified #6-<value>#-- of #6-<property>#--, such as #6-@{health:100}#--`,
-      );
+      s(` #6-@${[...Registries.corps].map(x => x.key).join("#--/#6-@")}#--: All entities on the specified team.`);
+      s(` #6-@=<type>#--: All entities of the specified #6-<type>#--, e.g. #6-@=scavenger#-- matches all scavengers.`);
+      s(` #6-@{<property>}#--: All entities with the specified #6-<property>#--, such as #6-@{relation}#--.`);
+      s(` #6-@{<property>:<value>}#--: All entities with the specified #6-<value>#-- of #6-<property>#--, such as #6-@{health:100}#--`);
       s("#@-Compound Selectors");
-      s(
-        ` Here, #6-x#-- and #6-y#-- are generic selectors, i.e. anything from the lists above, or '#6-x#-- can be another compound selector.`,
-      );
-      s(
-        ` #6-@x>y#--: All entities that matched #6-x#-- which also match #6-y#--, such as #6-@n>c#-- for closest enemy.`,
-      );
-      s(
-        ` #6-@x+y#--: All entities that matched #6-x#-- or match #6-y#--, such as #6-@iti+ccc#-- for entities in either #6-iti#-- or #6-ccc#--.`,
-      );
-      s(
-        ` #6-@x!y#--: All entities that matched #6-x#-- which don't match #6-y#--, such as #6-@n!peti#-- for enemies which aren't #6-peti#--`,
-      );
-      s(
-        ` #6-@x|y#--: The same as #6-@x+y#--, except further combinations only affect #6-y#--, not #6-x#--.`,
-      );
+      s(` Here, #6-x#-- and #6-y#-- are generic selectors, i.e. anything from the lists above, or '#6-x#-- can be another compound selector.`);
+      s(` #6-@x>y#--: All entities that matched #6-x#-- which also match #6-y#--, such as #6-@n>c#-- for closest enemy.`);
+      s(` #6-@x+y#--: All entities that matched #6-x#-- or match #6-y#--, such as #6-@iti+ccc#-- for entities in either #6-iti#-- or #6-ccc#--.`);
+      s(` #6-@x!y#--: All entities that matched #6-x#-- which don't match #6-y#--, such as #6-@n!peti#-- for enemies which aren't #6-peti#--`);
+      s(` #6-@x|y#--: The same as #6-@x+y#--, except further combinations only affect #6-y#--, not #6-x#--.`);
       s(
         ` These can be chained infinitely (e.g. #6-@n>r|e!p>c|iti#--: all #6-iti#-- entities, a random enemy #-iand#-- the closest entity other than the player).`,
       );
       s(` Evaluation is left-to-right.`);
       s("#@-Created Entity Selectors");
-      s(
-        ` Replacing the #6-@#-- with a #6-\\##-- selects from only ISL-created entities, instead of all entities in the whole world.`,
-      );
+      s(` Replacing the #6-@#-- with a #6-\\##-- selects from only ISL-created entities, instead of all entities in the whole world.`);
     } else {
       if (!command) {
         s("Run [#3-help #7i<command>#--] to get help for a command");
@@ -688,9 +653,7 @@ cle.addKeyword(
         s(" #c-Deletes all your save files.");
         s(" This command will delete #cievery save file that you or the game made.");
         s(" This includes saves from [#3-save#--], and from [#=-ctrl+j#--].");
-        s(
-          " Your #>>icon.database#=-database#-- data will not be deleted, and mod data may remain.",
-        );
+        s(" Your #>>icon.database#=-database#-- data will not be deleted, and mod data may remain.");
         s(" #4bUse with caution - this is #4kirreversible#4b!");
       } else if (command === "quietmode") {
         s("#eiui #-->#3- quietmode");
@@ -734,7 +697,7 @@ commandLine.extend(core);
 commandLine.extend(cle);
 
 function exec(isl, context) {
-  isl.split(/[\n\;]/g).forEach((line) => runCommand(line, context, commandLine));
+  isl.split(/[\n\;]/g).forEach(line => runCommand(line, context, commandLine));
 }
 
 console.log("[Setup] ISL CLI ready.");

@@ -1,12 +1,14 @@
 import { constructFromType } from "../../../core/constructor.js";
 import * as MLF1 from "../../../core/mlf1.js";
-import { roundNum } from "../../../core/number.js";
+import { roundNum, time } from "../../../core/number.js";
 import { Registries } from "../../../core/registry.js";
 import { drawImg, ui } from "../../../core/ui.js";
+import { effectTimer } from "../../../play/effects.js";
 import { game } from "../../../play/game.js";
 import { Log } from "../../../play/messaging.js";
 import { blockSize } from "../../../scaling.js";
 import { ImageParticle } from "../../effect/image-particle.js";
+import { DroppedItemStack } from "../../item/dropped-itemstack.js";
 import { ItemStack } from "../../item/item-stack.js";
 import { Item } from "../../item/item.js";
 import { BulletModel } from "../../projectile/bullet-model.js";
@@ -93,7 +95,7 @@ export class LaunchPad extends Container {
     );
   }
   createExtendedDetails() {
-    return `${super.createExtendedDetails()}\n#=-Launching:\n  #i-${this.launchAmount} items#-- per launch\n  #h-${roundNum(this.launchCooldown / 60, 1)}s#-- launch cooldown\n  -> #e-${roundNum((60 * this.launchAmount) / this.launchCooldown, 2)} items/s#-- throughput`;
+    return `${super.createExtendedDetails()}\n#=-Launching:\n  #i-${this.launchAmount} items#-- per launch\n  #h-${time(this.launchCooldown)}#-- launch cooldown\n  -> #e-${roundNum((60 * this.launchAmount) / this.launchCooldown, 2)} items/s#-- throughput`;
   }
 }
 /**
@@ -106,7 +108,7 @@ export class LandingPad extends Container {
   receiveCooldown = 540;
   #receiveTime = 0;
   inventorySize = 12;
-  #currentFilter = "nothing";
+  filter = "nothing";
   /** @type {BulletModel} */
   #bulletModel = new BulletModel();
   init() {
@@ -139,9 +141,9 @@ export class LandingPad extends Container {
     }
   }
   validateBuy() {
-    if (this.#currentFilter === "nothing") return false;
-    if (game.player.money < (Registries.items.get(this.#currentFilter)?.marketValue ?? 1)) return false;
-    if (!this.inventory.canAddItem(this.#currentFilter)) return false;
+    if (!this.filter || this.filter === "nothing") return false;
+    if (game.player.money < (Registries.items.get(this.filter)?.marketValue ?? 1)) return false;
+    if (!this.inventory.canAddItem(this.filter)) return false;
     return true;
   }
   /**
@@ -151,7 +153,7 @@ export class LandingPad extends Container {
    * @returns
    */
   interaction(ent, stack = ItemStack.EMPTY) {
-    if (stack.item !== "nothing") this.#currentFilter = stack.item;
+    if (stack.item !== "nothing") this.filter = stack.item;
     if (stack.getItem()) Log.send("Set requested item to " + stack.getItem()?.name);
     else return false;
     ui.waitingForMouseUp = true;
@@ -159,53 +161,47 @@ export class LandingPad extends Container {
   }
   highlight(emphasised) {
     super.highlight(emphasised);
-    if (this.#currentFilter && this.#currentFilter !== "nothing") {
-      let img = Registries.items.get(this.#currentFilter).image;
-      drawImg(
-        img ?? "error",
-        this.uiX - 10 * ui.camera.zoom,
-        this.uiY - 10 * ui.camera.zoom,
-        10 * ui.camera.zoom,
-        10 * ui.camera.zoom,
-      );
+    if (this.filter && this.filter !== "nothing") {
+      let img = Registries.items.get(this.filter).image;
+      drawImg(img ?? "error", this.uiX - 10 * ui.camera.zoom, this.uiY - 10 * ui.camera.zoom, 10 * ui.camera.zoom, 10 * ui.camera.zoom);
     }
   }
   buy() {
-    let item = Registries.items.get(this.#currentFilter);
+    let item = Registries.items.get(this.filter);
     let value = item?.marketValue ?? 1;
     game.player.money -= value;
-    Log.send(`#a-Bought 1x ${item?.name ?? "nothing"}#a- for \$${value}`);
-    this.timer.do(() => {
-      this.world.particles.push(
-        new ImageParticle(
-          this.x,
-          this.y,
-          0,
-          60,
-          0,
-          0,
-          this.podImage,
-          1,
-          0,
-          blockSize,
-          blockSize / 2,
-          blockSize,
-          blockSize / 2,
-          0,
-        ),
-      );
-      this.inventory.addItem(this.#currentFilter);
-    }, 395);
+    Log.send(`#a-Bought ${item?.name ?? "nothing"}#a- for \$${value}`);
+    this.timer.doObserved(
+      () => {
+        this.world.particles.push(
+          new ImageParticle(this.x, this.y, 0, 60, 0, 0, this.podImage, 1, 0, blockSize, blockSize / 2, blockSize, blockSize / 2, 0),
+        );
+        this.inventory.addItem(this.filter);
+      },
+      remaining => {
+        effectTimer.doUncancelable(() => {
+          DroppedItemStack.create(new ItemStack(this.filter), this.world, this.x, this.y);
+        }, remaining);
+      },
+      395,
+    );
     this.#bulletModel.emit(this.x, this.y - 3249, 1, 90, 0, 0, this.world, game.player.entity);
+  }
+  break(type) {
+    if (super.break(type)) {
+      this.timer.cancel("*");
+      return true;
+    }
+    return false;
   }
   drawTooltip(x, y, outlineColour, backgroundColour, forceVReverse) {
     super.drawTooltip(x, y, outlineColour, backgroundColour, true);
-    let it = Registries.items.get(this.#currentFilter);
+    let it = Registries.items.get(this.filter);
     MLF1.draw(
       x,
       y,
       `Buying ${it.name ?? "nothing"}${
-        it.name === undefined ? "" : ` (\$${it.marketValue ?? 1} each)`
+        it.name === undefined ? "" : ` (\$${it.marketValue ?? 0} each)`
       }\n${this.validateBuy() ? "Ready to Receive!" : "Not ready"}\n${""
         .padEnd((this.#receiveTime / this.receiveCooldown) * 20, "■")
         .padEnd(20, "□")
@@ -216,5 +212,18 @@ export class LandingPad extends Container {
   }
   createExtendedDetails() {
     return `${super.createExtendedDetails()}\n#=-Buying:\n  #h-${roundNum(60 / this.receiveCooldown, 2)} items/s#-- buy frequency`;
+  }
+  serialise() {
+    let b = super.serialise();
+    b.filter = this.filter;
+    return b;
+  }
+  /**
+   * @param {Unloader} deserialised
+   * @param {object} creator
+   */
+  static applyExtraProps(deserialised, creator) {
+    super.applyExtraProps(deserialised, creator);
+    deserialised.filter = creator.filter ?? "nothing";
   }
 }

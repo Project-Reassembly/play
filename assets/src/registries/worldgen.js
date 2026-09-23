@@ -26,9 +26,10 @@ Registries.worldgen.add("ore-generator", {
 });
 Registries.worldgen.add("ruins-generator", {
   type: "block-generator",
-  name: "Scrap Ruins",
   stageTitle: "Destroying Buildings...",
   separation: 30,
+  name: "Scrap Ruins",
+  team: "scrap",
   variants: [
     {
       weight: 1,
@@ -67,7 +68,7 @@ Registries.worldgen.add("ruins-generator", {
         { x: 0, y: 0, entity: "scavenger" },
         { x: 0, y: 0, entity: "scavenger" },
         { x: 0, y: 0, entity: "scavenger" },
-        { x: 0, y: 0, entity: "scavenger" },
+        { x: 0, y: 0, entity: "scrap-sentinel" },
         { x: 0, y: 1, block: "scrap-wall", direction: 0 },
         { x: 0, y: -1, block: "scrap-pylon", direction: 0 },
         { x: 0, y: 2, block: "scrap-conveyor", direction: 0 },

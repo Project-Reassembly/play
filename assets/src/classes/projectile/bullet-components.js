@@ -4,7 +4,7 @@
  */
 import { col } from "../../core/color.js";
 import { constructFromType } from "../../core/constructor.js";
-import { clamp, rnd, roundNum, tru, Vector } from "../../core/number.js";
+import { clamp, rnd, roundNum, time, tru, Vector } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { rotatedImg, rotatedShape } from "../../core/ui.js";
 import { createLinearEffect, Explosion, NuclearExplosion, repeat } from "../../play/effects.js";
@@ -592,7 +592,7 @@ export class StatusInflictionComponent extends BulletComponent {
   }
   /** Get CMFT describing this component. */
   getInfo() {
-    return `#--Inflicts #a-${Registries.statuses.tryGet(this.effect)?.name ?? this.effect}#-- for #a-${roundNum(this.duration / 60, 1)}s`;
+    return `#--Inflicts #a-${Registries.statuses.tryGet(this.effect)?.name ?? this.effect}#-- for #a-${time(this.duration)}s`;
   }
 }
 
@@ -971,7 +971,7 @@ export class IncendiaryComponent extends BulletComponent {
   }
   /** Get CMFT describing this component. */
   getInfo() {
-    return `#--${this.binomial ? "up to " : `#6-${this.chance * 100}%#-- chance of `}#6-${this.count} fires#-- ~ #6-${this.fire.damage} damage#-- / #6-${roundNum(this.fire.interval / 60, 1)}s`;
+    return `#--${this.binomial ? "up to " : `#6-${this.chance * 100}%#-- chance of `}#6-${this.count} fires#-- ~ #6-${this.fire.damage} damage#-- / #6-${roundNum(this.fire.interval, 1)}s`;
   }
 }
 

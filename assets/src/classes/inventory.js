@@ -34,13 +34,13 @@ class Inventory {
   /**@returns {SerialisedInventory} */
   serialise() {
     this.removeEmpty();
-    return { size: this.size, storage: this.storage.map((x) => (x ? x.serialise() : null)) };
+    return { size: this.size, storage: this.storage.map(x => (x ? x.serialise() : null)) };
   }
   /**@param {SerialisedInventory} created  */
   static deserialise(created) {
     return new this(
       created?.size ?? 0,
-      (created?.storage ?? []).map((x) => (x ? ItemStack.deserialise(x) : x)),
+      (created?.storage ?? []).map(x => (x ? ItemStack.deserialise(x) : x)),
     );
   }
 
@@ -422,7 +422,15 @@ class Inventory {
       const content = this.storage[slot];
       if (!content || content.isEmpty()) continue;
 
-      if (tru(content.dropChance)) DroppedItemStack.create(content, world, x, y);
+      if (content.dropChance !== 1) {
+        // average drop amount
+        let dropAmount = content.count * content.dropChance;
+        // handles single items and rounding problems
+        if (tru(content.dropChance)) dropAmount = Math.ceil(dropAmount);
+        else dropAmount = Math.floor(dropAmount);
+
+        DroppedItemStack.create(content.withCount(dropAmount), world, x, y);
+      } else DroppedItemStack.create(content, world, x, y);
     }
   }
 
@@ -476,8 +484,7 @@ class Inventory {
         if (index >= this.size) break loop;
         let invitemstack = this.storage[index];
         if (!invitemstack) invitemstack = ItemStack.EMPTY;
-        if (!(invitemstack instanceof ItemStack))
-          throw new TypeError(`Item ${index}(${invitemstack}) is not an ItemStack!`);
+        if (!(invitemstack instanceof ItemStack)) throw new TypeError(`Item ${index}(${invitemstack}) is not an ItemStack!`);
         let invitem = invitemstack.getItem();
         displayX = x + item * (itemSize * 1.2);
         displayY = y + row * (itemSize * 1.2) * (reverseVertical ? -1 : 1);
@@ -487,18 +494,18 @@ class Inventory {
         col.fill(backgroundColour);
         rect(displayX, displayY, itemSize, itemSize);
         let selected =
-          ui.mouse.x < displayX + itemSize * 0.5 &&
-          ui.mouse.x > displayX - itemSize * 0.5 &&
-          ui.mouse.y < displayY + itemSize * 0.5 &&
-          ui.mouse.y > displayY - itemSize * 0.5;
+          ui.mouse.x < displayX + itemSize * 0.5
+          && ui.mouse.x > displayX - itemSize * 0.5
+          && ui.mouse.y < displayY + itemSize * 0.5
+          && ui.mouse.y > displayY - itemSize * 0.5;
         if (invitemstack.item !== "nothing" && invitem) {
           if (selected) {
             // if the same item type
             if (
-              Inventory.mouseItemStack.item !== "nothing" &&
-              Inventory.mouseItemStack.item === invitemstack.item &&
-              mouseIsPressed &&
-              !ui.waitingForMouseUp
+              Inventory.mouseItemStack.item !== "nothing"
+              && Inventory.mouseItemStack.item === invitemstack.item
+              && mouseIsPressed
+              && !ui.waitingForMouseUp
             ) {
               //Mouse to inv
               if (!keyIsDown(SHIFT) && this.canPlaceInSlot(index)) {
@@ -536,11 +543,7 @@ class Inventory {
                 }
               }
             }
-            Inventory.tooltip = {
-              item: invitem,
-              count: invitemstack.count,
-              stackSize: invitem.stackSize,
-            };
+            Inventory.tooltip = { item: invitem, count: invitemstack.count, stackSize: invitem.stackSize };
             noFill();
             stroke(255, 200, 0);
             strokeWeight(5);
@@ -554,10 +557,7 @@ class Inventory {
                     Inventory.mouseItemStack = this.storage[index];
                     this.storage[index] = ItemStack.EMPTY;
                   } else if (ui.mouse.button === "right") {
-                    Inventory.mouseItemStack = new ItemStack(
-                      invitemstack.item,
-                      Math.ceil(invitemstack.count * 0.5),
-                    );
+                    Inventory.mouseItemStack = new ItemStack(invitemstack.item, Math.ceil(invitemstack.count * 0.5));
                     invitemstack.count = Math.floor(invitemstack.count * 0.5);
                     if (invitemstack.count === 0) {
                       this.storage[index] = ItemStack.EMPTY;
@@ -569,10 +569,7 @@ class Inventory {
                 //swap
                 if (this.canPickupFromSlot(index) && this.canPlaceInSlot(index)) {
                   ui.waitingForMouseUp = true;
-                  [Inventory.mouseItemStack, this.storage[index]] = [
-                    this.storage[index],
-                    Inventory.mouseItemStack,
-                  ];
+                  [Inventory.mouseItemStack, this.storage[index]] = [this.storage[index], Inventory.mouseItemStack];
                 }
               }
             }
@@ -586,21 +583,13 @@ class Inventory {
           textAlign(RIGHT, BASELINE);
           if (invitemstack.count > 1)
             text(
-              invitemstack.count > 999 ?
-                shortenedNumber(invitemstack.count, 0)
-              : invitemstack.count,
+              invitemstack.count > 999 ? shortenedNumber(invitemstack.count, 0) : invitemstack.count,
               displayX + itemSize * 0.5,
               displayY + itemSize * 0.5,
             );
           pop();
         } else {
-          if (
-            Inventory.mouseItemStack.item !== "nothing" &&
-            selected &&
-            mouseIsPressed &&
-            !ui.waitingForMouseUp &&
-            this.canPlaceInSlot(index)
-          ) {
+          if (Inventory.mouseItemStack.item !== "nothing" && selected && mouseIsPressed && !ui.waitingForMouseUp && this.canPlaceInSlot(index)) {
             if (ui.mouse.button === "right") {
               ui.waitingForMouseUp = true;
               this.storage[index] = new ItemStack(Inventory.mouseItemStack.item);
@@ -622,17 +611,13 @@ class Inventory {
       drawImg(Inventory.mouseItemStack.getItem().image, ui.mouse.x, ui.mouse.y, itemSize, itemSize);
       push();
       noStroke();
-      fill(
-        Inventory.mouseItemStack.count > Inventory.mouseItemStack.getItem().stackSize ? "red" : 255,
-      );
+      fill(Inventory.mouseItemStack.count > Inventory.mouseItemStack.getItem().stackSize ? "red" : 255);
       textFont(fonts.ocr);
       textSize(20);
       textAlign(RIGHT, BASELINE);
       if (Inventory.mouseItemStack.count > 1)
         text(
-          Inventory.mouseItemStack.count > 999 ?
-            shortenedNumber(Inventory.mouseItemStack.count, 0)
-          : Inventory.mouseItemStack.count,
+          Inventory.mouseItemStack.count > 999 ? shortenedNumber(Inventory.mouseItemStack.count, 0) : Inventory.mouseItemStack.count,
           ui.mouse.x + itemSize * 0.5,
           ui.mouse.y + itemSize * 0.5,
         );
@@ -673,8 +658,7 @@ class Inventory {
       ui.mouse.x + 10,
       ui.mouse.y + 10,
       undefined,
-      Corporation.colorof(this.tooltip.item.corp) ||
-        Item.getColourFromRarity(this.tooltip.item.rarity, "light"),
+      Corporation.colorof(this.tooltip.item.corp) || Item.getColourFromRarity(this.tooltip.item.rarity, "light"),
     );
 
     //this.tooltip.item.tooltip.draw(ui.mouse.x + 10, ui.mouse.y + 30);

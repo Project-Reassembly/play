@@ -8,16 +8,16 @@ import { DialogueManager } from "./dialogue.js";
 import { ReactionManager } from "./reactions.js";
 import { TradeInfo, TradingManager } from "./trading.js";
 import {
-  DamageTakenTrigger,
-  DeathTrigger,
-  HealedTrigger,
-  HealthPercentTrigger,
-  HitByBulletTrigger,
-  KillTrigger,
-  ReactionTrigger,
-  ShieldBrokenTrigger,
-  StatusAppliedTrigger,
-  TargetDiedTrigger,
+    DamageTakenTrigger,
+    DeathTrigger,
+    HealedTrigger,
+    HealthPercentTrigger,
+    HitByBulletTrigger,
+    KillTrigger,
+    ReactionTrigger,
+    ShieldBrokenTrigger,
+    StatusAppliedTrigger,
+    TargetDiedTrigger,
 } from "./triggers.js";
 
 /**
@@ -43,33 +43,30 @@ export class InteractableEntity extends EquippedEntity {
 
   init() {
     super.init();
-    if (this.dialogue) {
-      // centralised dialogue for better saving
-      const d = game.player.dialogue.getOrInsertComputed(this.registryName, () =>
-        constructFromType(this.dialogue, DialogueManager),
-      );
+    if (game.player) {
+      if (this.dialogue) {
+        // centralised dialogue for better saving
+        const d = game.player.dialogue.getOrInsertComputed(this.registryName, () => constructFromType(this.dialogue, DialogueManager));
 
-      d.flags = game.player.savedLocalFlags.get(this.registryName) ?? new Set();
+        d.flags = game.player.savedLocalFlags.get(this.registryName) ?? new Set();
 
-      d.entity = this;
-      d.postEntInit();
-      d.updateNode();
-    }
-    if (this.trades) {
-      const t = game.player.trades.getOrInsertComputed(this.registryName, () =>
-        constructFromType({ trades: this.trades, tradeCostX: this.tradeCostX }, TradingManager),
-      );
+        d.entity = this;
+        d.postEntInit();
+        d.updateNode();
+      }
+      if (this.trades) {
+        const t = game.player.trades.getOrInsertComputed(this.registryName, () =>
+          constructFromType({ trades: this.trades, tradeCostX: this.tradeCostX }, TradingManager),
+        );
 
-      t.entity = this;
-      t.updateEverything();
-    }
-    if (this.reactions) {
-      const r = game.player.reactions.getOrInsertComputed(
-        this.registryName,
-        () => new ReactionManager(this.reactions),
-      );
+        t.entity = this;
+        t.updateEverything();
+      }
+      if (this.reactions) {
+        const r = game.player.reactions.getOrInsertComputed(this.registryName, () => new ReactionManager(this.reactions));
 
-      r.reset();
+        r.reset();
+      }
     }
     delete this.dialogue;
     delete this.trades;

@@ -1,6 +1,6 @@
 import { Timer } from "../classes/timer.js";
 import { col } from "../core/color.js";
-import { createUIComponent, createUIImageComponent, ui, UIComponent } from "../core/ui.js";
+import { createUIComponent, createUIImageComponent, ui } from "../core/ui.js";
 
 export const notifyTimer = new Timer();
 ui.addReset("notify", "false");
@@ -62,7 +62,7 @@ const warnBg = createUIComponent(["in-game"], ["notify:true"], 0, -250, 1920, 75
 export function warnTapeNotification(message, color = col.white, subtext= "WARNING", subcol = col.black) {
   color = color | 0;
   subcol = subcol | 0;
-  UIComponent.setCondition("notify", "true");
+  ui.set("notify", "true");
   // setup
   notifyTimer.cancel("*");
   warnBg.setBackgroundColour(col.transparent);
@@ -115,7 +115,7 @@ export function warnTapeNotification(message, color = col.white, subtext= "WARNI
   );
   // end
   notifyTimer.do((i) => {
-    UIComponent.setCondition("notify", "false");
+    ui.set("notify", "false");
   }, 600);
 }
 

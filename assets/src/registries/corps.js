@@ -1,11 +1,10 @@
 import { Decoration } from "../core/cmft.js";
-import { col } from "../core/color.js";
 import { Registries } from "../core/registry.js";
 
 Registries.corps.add("scrap", {
   name: "United Recyclers of Our World",
   alias: "URoW",
-  color: col.from(205, 159,139),
+  color: Decoration.colours.s,
   icon: "icon.scrap",
   description:
     "Stranded on this planet long ago, their original technology was lost to time.\nNow they defend it with makeshift weapons and tools, along with whatever remains of what existed long ago.",

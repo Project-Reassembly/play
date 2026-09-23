@@ -66,7 +66,7 @@ class TileGenerator extends NoiseGenerator {
   /**@type {TileGenerationOptions[]} */
   tiles = [];
   init() {
-    this.tiles = this.tiles.map((x) => constructFromType(x, TileGenerationOptions));
+    this.tiles = this.tiles.map(x => constructFromType(x, TileGenerationOptions));
   }
   forEachPosition(level, x, y, entries) {
     for (let optionsobj of this.tiles) {
@@ -88,6 +88,7 @@ class BlockGenerator extends Generator {
   attempts = 1000;
   chance = 0.1;
   separation = 3;
+  team = "neutral";
   _positions = [];
   generate(seed) {
     rng1.setSeed(seed);
@@ -113,13 +114,7 @@ class BlockGenerator extends Generator {
       }
     }
     if (this.outOfRange(x, y)) {
-      postMessage({
-        type: "build",
-        name: this.name + (extraName ? ` (${extraName})` : ""),
-        blocks: selected.defs,
-        x: x,
-        y: y,
-      });
+      postMessage({ type: "build", name: this.name + (extraName ? ` (${extraName})` : ""), blocks: selected.defs, team: this.team, x: x, y: y });
       if (selected.ores.length > 0) postMessage({ type: "ores", ores: selected.ores, x: x, y: y });
       this._positions.push({ x: x, y: y });
       this._generated++;
@@ -142,7 +137,7 @@ class OreGenerator extends NoiseGenerator {
   /**@type {OreGenerationOptions?} */
   #currentore = null;
   init() {
-    this.ores = this.ores.map((x) => constructFromType(x, OreGenerationOptions));
+    this.ores = this.ores.map(x => constructFromType(x, OreGenerationOptions));
   }
   generate(seed) {
     let progress = 0;
@@ -164,13 +159,8 @@ class OreGenerator extends NoiseGenerator {
     } //else console.log(`failed at ${x}, ${y}: ${level} < ${this.#currentore.threshold}`);
   }
   forEachChunk(entries, i, j) {
-    if (entries.some((x) => x.some((x) => x)))
-      postMessage({
-        type: "chunk",
-        layer: "ores",
-        target: this.#currentore.target,
-        def: { entries: entries, i: i, j: j },
-      });
+    if (entries.some(x => x.some(x => x)))
+      postMessage({ type: "chunk", layer: "ores", target: this.#currentore.target, def: { entries: entries, i: i, j: j } });
   }
   // generate(seed) {
   //   let maxProgress = worldSize ** 2 * this.ores.length;
@@ -247,14 +237,8 @@ function doNoise(seed, level = 100, scale = 1, octaves = 4, falloff = 0.5, funcs
       for (let x = 0; x < chunkSize; x++) {
         //Block coords
         for (let y = 0; y < chunkSize; y++) {
-          let nx = roundNum(
-            scale * ((worldSize / 2 + i) * chunkSize * blockSize + (x * blockSize + blockSize / 2)),
-            2,
-          );
-          let ny = roundNum(
-            scale * ((worldSize / 2 + j) * chunkSize * blockSize + (y * blockSize + blockSize / 2)),
-            2,
-          );
+          let nx = roundNum(scale * ((worldSize / 2 + i) * chunkSize * blockSize + (x * blockSize + blockSize / 2)), 2);
+          let ny = roundNum(scale * ((worldSize / 2 + j) * chunkSize * blockSize + (y * blockSize + blockSize / 2)), 2);
           let n = noise(nx, ny);
           let c = level * n;
           ////////////////////////

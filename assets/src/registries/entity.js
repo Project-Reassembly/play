@@ -1,44 +1,26 @@
 import { Registries } from "../core/registry.js";
 const assrec = [
   { inputs: [{ item: "scrap", count: 5 }], outputs: [{ item: "coal-drill", count: 1 }], time: 180 },
-  {
-    inputs: [{ item: "scrap", count: 4 }],
-    outputs: [{ item: "scrap-pylon", count: 1 }],
-    time: 180,
-  },
-  {
-    inputs: [{ item: "scrap", count: 30 }],
-    outputs: [{ item: "scrap-burner", count: 1 }],
-    time: 480,
-  },
-  {
-    inputs: [{ item: "scrap", count: 10 }],
-    outputs: [{ item: "scrap-drill", count: 1 }],
-    time: 300,
-  },
-  {
-    inputs: [{ item: "scrap", count: 25 }],
-    outputs: [{ item: "scrap-assembler", count: 1 }],
-    time: 600,
-  },
-  {
-    inputs: [{ item: "scrap", count: 20 }],
-    outputs: [{ item: "scrap-storage", count: 1 }],
-    time: 180,
-  },
+  { inputs: [{ item: "scrap", count: 4 }], outputs: [{ item: "scrap-pylon", count: 1 }], time: 180 },
+  { inputs: [{ item: "scrap", count: 30 }], outputs: [{ item: "scrap-burner", count: 1 }], time: 480 },
+  { inputs: [{ item: "scrap", count: 10 }], outputs: [{ item: "scrap-drill", count: 1 }], time: 300 },
+  { inputs: [{ item: "scrap", count: 25 }], outputs: [{ item: "scrap-assembler", count: 1 }], time: 600 },
+  { inputs: [{ item: "scrap", count: 20 }], outputs: [{ item: "scrap-storage", count: 1 }], time: 180 },
 ];
-Registries.entities.add("tonk", { type: "modular-tank" });
+Registries.entities.add("tonk", { type: "modular-tank", hidden: true });
 Registries.entities.add("recycled", {
   type: "player",
   name: "The Recycled",
-  health: 150,
-  light: 100,
+  description: "The player's avatar when playing as URoW. Slow and fairly fragile.",
+  details:
+    "URoW's largest and most recent project - an autonomous, reconstructable machine capable of assembling basic factory parts. The ability to create machines whilst defending them was unprecedented, and is sure to be key to reclaiming the planet. It's - #7byou're#7- - their final hope.",
+  health: 200,
   components: [
     { image: "entity.scrap-sentinel.head", width: 32, height: 32 },
     { image: "entity.scrap-sentinel.body", width: 32, height: 32 },
     { type: "leg-component", image: "entity.scrap-sentinel.legs", width: 32, height: 32 },
   ],
-  armType: { width: 32, height: 11, yOffset: 13, xOffset: 6, image: "arm.scrap" },
+  armType: { width: 32, height: 11, yOffset: 11, xOffset: 6, image: "arm.scrap" },
   team: "scrap",
   width: 25,
   height: 25,
@@ -52,18 +34,20 @@ Registries.entities.alias("recycled", "scrap-player");
 Registries.entities.add("integrity", {
   type: "player",
   name: "Integrity",
+  description: "The player's avatar when playing as ITI. Sturdy, and fairly fast.",
+  details:
+    "InfiniTech Industries' advanced remote-control unit integrated into a standard defense drone. Noramlly operated by a member of staff from a nearby space station, but can accept a Model 23-V7 AI or better for autonomous operation, as seen in the Automated Defense Units.",
   health: 350,
-  light: 100,
   components: [
     { image: "npc.iti.player.head", width: 32, height: 32, xOffset: -3 },
     { image: "npc.iti.generic.body", width: 32, height: 32 },
     { type: "leg-component", image: "npc.iti.generic.legs", width: 32, height: 32 },
   ],
-  armType: { width: 32, height: 11, yOffset: 13, xOffset: 6, image: "arm.iti" },
+  armType: { width: 32, height: 11, yOffset: 11, xOffset: 6, image: "arm.iti" },
   team: "iti",
   width: 25,
   height: 25,
-  speed: 4,
+  speed: 3.5,
   assemblySlots: 4,
   assemblyRecipes: assrec,
   rightHand: [{ item: "iti-laser-pistol" }],
@@ -71,34 +55,38 @@ Registries.entities.add("integrity", {
 Registries.entities.alias("integrity", "iti-player");
 Registries.entities.add("endeavour", {
   type: "player",
+  hidden: true,
   name: "Endeavour",
-  health: 200,
-  light: 100,
+  description: "The player's avatar when playing as Chrono Creations. Fairly sturdy, and fast.",
+  details: "Sorry, no lore here.",
+  health: 250,
   components: [
     { image: "npc.ccc.player.head", width: 32, height: 32, xOffset: -3 },
     { image: "npc.ccc.generic.body", width: 32, height: 32 },
     { type: "leg-component", image: "npc.ccc.generic.legs", width: 32, height: 32 },
   ],
-  armType: { width: 32, height: 11, yOffset: 13, image: "arm.ccc" },
+  armType: { width: 32, height: 11, yOffset: 11, image: "arm.ccc" },
   team: "ccc",
   width: 25,
   height: 25,
-  speed: 4,
+  speed: 4.5,
   assemblySlots: 4,
   assemblyRecipes: assrec,
 });
 Registries.entities.alias("endeavour", "ccc-player");
 Registries.entities.add("proton", {
   type: "player",
+  hidden: true,
   name: "Proton",
+  description: "The player's avatar when playing as PETI. Fragile and fast, with powerful weaponry.",
+  details: "Sorry, no lore here.",
   health: 100,
-  light: 100,
   components: [
     { image: "npc.peti.player.head", width: 32, height: 32, xOffset: -3 },
     { image: "npc.peti.generic.body", width: 32, height: 32 },
     { type: "leg-component", image: "npc.peti.generic.legs", width: 32, height: 32 },
   ],
-  armType: { width: 32, height: 11, yOffset: 13, image: "arm.peti" },
+  armType: { width: 32, height: 11, yOffset: 11, image: "arm.peti" },
   team: "peti",
   width: 25,
   height: 25,
@@ -111,6 +99,9 @@ Registries.entities.alias("proton", "peti-player");
 
 Registries.entities.add("scavenger", {
   name: "Scavenger",
+  description: "Basic enemy entity for most corporations. Spawns inside ruined structures all over the world.",
+  details:
+    "The remnants of a bygone civilisation, and every failed attempt at planetary colonisation. They roam the surface, searching for new intruders to protect their homeworld, and collect resources to support their efforts.\nMost have limited knowledge of factory operations, and very few know of their construction.",
   type: "equipped-entity",
   health: 150,
   speed: 2.5,
@@ -119,6 +110,7 @@ Registries.entities.add("scavenger", {
     { image: "entity.scrap-sentinel.body", width: 32, height: 32 },
     { type: "leg-component", image: "entity.scrap-sentinel.legs", width: 32, height: 32 },
   ],
+  team: "scrap",
   width: 25,
   height: 25,
   aiType: "scavenger",
@@ -127,12 +119,15 @@ Registries.entities.add("scavenger", {
   approachDist: 30,
   rightHand: [{ item: "scrap-shooter", min: 0, max: 1, dropChance: 0.25 }],
   leftHand: [{ item: "scrap-shooter", min: 0, max: 1, dropChance: 0.25 }],
-  armType: { width: 32, height: 11, yOffset: 13, xOffset: 6, image: "arm.scrap" },
+  armType: { width: 32, height: 11, yOffset: 12, xOffset: 6, image: "arm.scrap" },
   ammo: [{ item: "scrap-bullet", min: 100, max: 250, dropChance: 0.5 }],
   inventory: [{ item: "scrap", min: 10, max: 25, dropChance: 0.6 }],
 });
 Registries.entities.add("scrap-sentinel", {
   name: "Scrap Sentinel",
+  description: "Strong enemy entity for most corporations. Spawns inside larger ruined structures.",
+  details:
+    "Unlike Scavengers, these machines prefer to stay close to their 'homes'. They are the guardians of the ruined structures, and try to keep them safe from the inevitable corporate raids. They tend to have greater factory knowledge, but still have too limited resources and facilities to produce true automated lines.\nIn different circumstances, these may have been caregivers and protectors for less fortunate machines.\n\nNo machine is fortunate here.",
   type: "equipped-entity",
   health: 400,
   speed: 2,
@@ -141,6 +136,7 @@ Registries.entities.add("scrap-sentinel", {
     { image: "entity.scrap-sentinel.body", width: 40, height: 40 },
     { type: "leg-component", image: "entity.scrap-sentinel.legs", width: 40, height: 40 },
   ],
+  team: "scrap",
   width: 35,
   height: 35,
   aiType: "guard",
@@ -149,14 +145,17 @@ Registries.entities.add("scrap-sentinel", {
   rightHand: [{ item: "scrap-shooter", dropChance: 0.25 }],
   leftHand: [{ item: "scrap-shooter", dropChance: 0.25 }],
   armType: { width: 35, height: 12, yOffset: 15, xOffset: 7, image: "arm.scrap" },
-  ammo: [{ item: "scrap-bullet", min: 200, max: 500, dropChance: 0.5 }],
+  ammo: [{ item: "scrap-bullet", min: 2000, max: 5000, dropChance: 0.5 }],
   inventory: [{ item: "scrap", min: 20, max: 50, dropChance: 0.6 }],
-  armType: { width: 32, height: 11, yOffset: 13, image: "arm.scrap" },
 });
 Registries.entities.add("iti-corporate-merchant", {
   type: "interactable-entity",
   team: "iti",
   name: "ITI Corporate Merchant",
+  description:
+    "Merchant for #>>icon.iti#i-InfiniTech Industries#--. Sells some ITI items, for a #-islight#-- 25% premium.\nSpawns in a world after playing for #=-10 minutes#--, and will try to spawn close to ITI structures, including those built by a player.",
+  details:
+    "Specialised drone sent to most off-world operations, once it can be reasonably assumed that the area is safe.\nProvides corporate assistance to startup factories, but are known for naming their own prices. ",
   inventorySize: 1,
   components: [
     { image: "npc.iti.corporate-merchant.head", width: 35, height: 35 },
@@ -171,6 +170,7 @@ Registries.entities.add("iti-corporate-merchant", {
       ["health:75"],
       [
         '"[[Unit damage detected]]\nRequesting backup immediately."',
+        "*iti-defenses-called",
         { type: "deliver", xOff: 300, yOff: 300, entity: "iti-defense" },
       ],
     ],
@@ -178,6 +178,7 @@ Registries.entities.add("iti-corporate-merchant", {
       ["health:50"],
       [
         '"[[Major damage sustained]]\nRequesting additional backup."',
+        "*iti-defenses-called",
         { type: "deliver", xOff: 300, yOff: 300, entity: "iti-defense" },
       ],
     ],
@@ -185,11 +186,8 @@ Registries.entities.add("iti-corporate-merchant", {
       ["health:25"],
       [
         '"[[System critically damaged]]\nDeploying last resort force."',
-        {
-          type: "repeat",
-          count: 2,
-          action: { type: "deliver", xOff: 300, yOff: 300, entity: "iti-defense" },
-        },
+        "*iti-defenses-called",
+        { type: "repeat", count: 2, action: { type: "deliver", xOff: 300, yOff: 300, entity: "iti-defense" } },
       ],
     ],
     [["death"], ['"#4-[[Catastrophic System Failure]]"']],
@@ -201,28 +199,18 @@ Registries.entities.add("iti-corporate-merchant", {
           "<close>",
           "*iti-defenses-called",
           '"Agreed. Calling reinforcements."',
-          {
-            type: "repeat",
-            action: { type: "deliver", xOff: 300, yOff: 300, entity: "iti-defense" },
-            count: 3,
-          },
+          { type: "repeat", action: { type: "deliver", xOff: 300, yOff: 300, entity: "iti-defense" }, count: 3 },
         ],
       },
     },
     conversations: {
       "*": {
         line: "#i-InfiniTech Industries#--, corporate merchant model.\nState your intentions.",
-        options: {
-          "I'd like to buy something.": ["<trade>"],
-          "I want a fight!": { actions: ["~-.2", "fight", "agg"], excludeFlags: ["agg"] },
-        },
+        options: { "I'd like to buy something.": ["<trade>"], "I want a fight!": { actions: ["~-.2", "fight", "agg"], excludeFlags: ["agg"] } },
       },
       "fight": {
         line: "#7-[[Hostility detected. Recommended course of action: disengage.]]",
-        options: {
-          "Uhh... Disengage?": ["??"],
-          "I said, I want a fight!": ["'This may not end well.'", "fconf"],
-        },
+        options: { "Uhh... Disengage?": ["??"], "I said, I want a fight!": ["'This may not end well.'", "fconf"] },
       },
       "fight,??": {
         line: `#7-[[Confusion detected, defining #7idisengage#7-]]
@@ -232,10 +220,7 @@ Registries.entities.add("iti-corporate-merchant", {
 - To release (oneself) from an engagement, pledge, or obligation.
 - To free or detach oneself; withdraw.
 `,
-        options: {
-          "So, no fight?": ["-??", "???"],
-          "Whatever, fight me!": ["'This may not end well.'", "fconf", "-??"],
-        },
+        options: { "So, no fight?": ["-??", "???"], "Whatever, fight me!": ["'This may not end well.'", "fconf", "-??"] },
       },
       "fight,???": {
         line: `Correct. Conflict (especially physical) within #>>icon.iti#i-ITI#-- is to be avoided by #=-all personnel#--, especially those on the #-iExoplanet Resource Extraction Initiative#--.`,
@@ -251,11 +236,7 @@ Registries.entities.add("iti-corporate-merchant", {
             "<leave>",
             "left",
             "*iti-defenses-called",
-            {
-              type: "repeat",
-              action: { type: "deliver", xOff: 300, yOff: 300, entity: "instigated-iti-defense" },
-              count: 3,
-            },
+            { type: "repeat", action: { type: "deliver", xOff: 300, yOff: 300, entity: "instigated-iti-defense" }, count: 3 },
           ],
         },
       },
@@ -267,7 +248,7 @@ Registries.entities.add("iti-corporate-merchant", {
   height: 35,
   aiType: "passive",
   targetRange: 200,
-  armType: { width: 35, height: 12, yOffset: 15, xOffset: 7, image: "arm.iti" },
+  armType: { width: 35, height: 12, yOffset: 13, xOffset: 7, image: "arm.iti" },
   // rightHand: [{ item: "iti-laser-caster", dropChance: 0.125 }],
   // leftHand: [{ item: "iti-laser-caster", dropChance: 0.125 }],
 });
@@ -276,7 +257,6 @@ Registries.entities.add("instigated-iti-defense", {
   type: "interactable-entity",
   name: "ITI Personnel Defender",
   health: 500,
-  light: 100,
   reactions: [
     [["target-died:0"], [['"[[Target Eliminated]]"', '"[[Hostile Neutralized]]"'], "<leave>"]],
     [["shot"], ['"Stop resisting."']],
@@ -288,7 +268,7 @@ Registries.entities.add("instigated-iti-defense", {
     { image: "npc.iti.generic.body", width: 32, height: 32 },
     { type: "leg-component", image: "npc.iti.generic.legs", width: 32, height: 32 },
   ],
-  armType: { width: 32, height: 11, yOffset: 13, xOffset: 6, image: "arm.iti" },
+  armType: { width: 32, height: 11, yOffset: 11, xOffset: 6, image: "arm.iti" },
   team: "iti*",
   width: 25,
   height: 25,
@@ -304,12 +284,14 @@ Registries.entities.add("instigated-iti-defense", {
 Registries.entities.add("iti-defense", {
   type: "interactable-entity",
   name: "ITI Personnel Defender",
+  description: "Defender spawned when attacking the #i-ITI Corporate Merchant#--, in groups of three, up to 3 times. Sometimes calls reinforcements.",
+  details:
+    "Standard defense drone dispatched to protect non-combatants in dangerous and violent situations. Fairly lightly armed for ITI, but strong enough to protect against common threats.",
   health: 500,
-  light: 100,
   reactions: [
     [["target-died:0"], [['"[[Target Eliminated]]"', '"[[Potential Hostile Neutralized]]"']]],
     [["shot"], ['"Stop resisting."']],
-    [["health:50"], ['"Requesting backup...\n#c-Network Error"']],
+    [["health:50"], ['"Requesting backup...\n"', ['"\n#c-Network Error"','"\n#c-Request Denied"', { type: "deliver", entity: "iti-defense" }]]],
     [["death"], ['"#4-[[Catastrophic System Failure]]"']],
   ],
   components: [
@@ -317,7 +299,7 @@ Registries.entities.add("iti-defense", {
     { image: "npc.iti.generic.body", width: 32, height: 32 },
     { type: "leg-component", image: "npc.iti.generic.legs", width: 32, height: 32 },
   ],
-  armType: { width: 32, height: 11, yOffset: 13, xOffset: 6, image: "arm.iti" },
+  armType: { width: 32, height: 11, yOffset: 11, xOffset: 6, image: "arm.iti" },
   team: "iti",
   width: 25,
   height: 25,
@@ -337,12 +319,13 @@ Registries.entities.add("scrapper", {
   speed: 2.5,
   isBoss: true,
   components: [
-    { image: "entity.scrap-sentinel.head", width: 50, height: 50 },
+    { image: "entity.scrap-sentinel.head", width: 50, height: 50, xOffset: -3 },
     { image: "entity.scrap-sentinel.body", width: 50, height: 50 },
     { type: "leg-component", image: "entity.scrap-sentinel.legs", width: 50, height: 50 },
   ],
-  width: 50,
-  height: 50,
+  team: "scrap",
+  width: 30,
+  height: 30,
   aiType: "hostile",
   attackRange: 250,
   targetRange: 2600,
@@ -363,97 +346,14 @@ Registries.entities.add("scrapper", {
   armType: { width: 50, height: 16, yOffset: 16, image: "arm.scrap" },
 });
 
-// Tests
-Registries.entities.add("*", {
-  name: "*",
-  type: "equipped-entity",
-  health: 1500,
-  speed: 2.5,
-  components: [
-    { image: "entity.scrap-sentinel.head", width: 32, height: 32 },
-    { image: "entity.scrap-sentinel.body", width: 32, height: 32 },
-    { type: "leg-component", image: "entity.scrap-sentinel.legs", width: 32, height: 32 },
-  ],
-  width: 25,
-  height: 25,
-  ai: {
-    tasks: [
-      {
-        type: "ai.create-bullet",
-        duration: 120,
-        x: 400,
-        y: -400,
-        direction: 135,
-        relativeToCamera: true,
-        bullet: {
-          speed: 0,
-          despawnEffect: "none",
-          lifetime: 300,
-          collides: false,
-          intervalNumber: 1,
-          intervalTime: 1,
-          intervalBullet: {
-            lifetime: 200,
-            extraUpdates: 199,
-            light: 70,
-            speed: 10,
-            trail: true,
-            hitSize: 60,
-            trailShape: "rhombus",
-            trailEffect: "death-laser-trail",
-            hitEffect: "death-laser-hit~200",
-            spawnEffect: "death-laser-fire",
-            knockback: 10,
-            drawer: { hidden: true },
-            damage: [{ type: "laser", amount: 80, spread: 20 }],
-          },
-          fragNumber: 1,
-          fragBullet: {
-            lifetime: 200,
-            extraUpdates: 199,
-            light: 70,
-            speed: 10,
-            trail: true,
-            pierce: 99999,
-            hitSize: 60,
-            trailShape: "rhombus",
-            trailEffect: "death-laser-trail",
-            hitEffect: "death-laser-hit~200",
-            spawnEffect: "death-laser-fire",
-            knockback: 10,
-            drawer: { hidden: true },
-            damage: [{ type: "laser", amount: 80, spread: 20 }],
-          },
-        },
-        // pattern: { amount: 2, spacing: 40 },
-        condition: { type: "aicon.mouse" },
-      },
-    ],
-  },
-  attackRange: 250,
-  targetRange: 500,
-  rightHand: [{ item: "scrap-shooter", min: 0, max: 1, dropChance: 0.25 }],
-  leftHand: [{ item: "scrap-shooter", min: 0, max: 1, dropChance: 0.25 }],
-  armType: { width: 32, height: 11, yOffset: 13, image: "arm.scrap" },
-  ammo: [{ item: "scrap-bullet", min: 100, max: 250, dropChance: 0.5 }],
-  inventory: [{ item: "scrap", min: 10, max: 25, dropChance: 0.6 }],
-});
-
 Registries.entities.add("test-npc", {
   type: "interactable-entity",
+  hidden: true,
   name: "Test NPC",
   health: 350,
-  light: 100,
   reactions: [
     [["damage:30:3"], ['"Ow!"']],
-    [
-      [
-        "shot:120:track-source-target",
-        "shot:120:track-near-source-target",
-        "shot:120:track-nearest",
-      ],
-      ['"Really? Homing bullets?"'],
-    ],
+    [["shot:120:track-source-target", "shot:120:track-near-source-target", "shot:120:track-nearest"], ['"Really? Homing bullets?"']],
     [
       ["health:30"],
       [
@@ -465,7 +365,6 @@ Registries.entities.add("test-npc", {
           spacing: 11.25,
           bullet: {
             lifetime: 100,
-            light: 70,
             hitSize: 10,
             components: [
               { type: "extra-updates", amount: 99 },
@@ -509,29 +408,18 @@ Registries.entities.add("test-npc", {
       },
       "friend": {
         line: "Increase relations with this entity",
-        options: {
-          "[Increase Relations]": ["~0.1"],
-          "[Debug best friend]": ["<best-friend>", "-friend"],
-          "[Return]": ["-friend"],
-        },
+        options: { "[Increase Relations]": ["~0.1"], "[Debug best friend]": ["<best-friend>", "-friend"], "[Return]": ["-friend"] },
       },
       "enemy": {
         line: "Decrease relations with this entity",
-        options: {
-          "[Decrease Relations]": ["~-0.1"],
-          "[Debug mortal enemy]": ["<mortal-enemy>", "-enemy"],
-          "[Return]": ["-enemy"],
-        },
+        options: { "[Decrease Relations]": ["~-0.1"], "[Debug mortal enemy]": ["<mortal-enemy>", "-enemy"], "[Return]": ["-enemy"] },
       },
       "extern": {
         line: "Test how other entities will react to changes with this entity",
         options: {
           "[Decrease Relations]": ["~-0.1", "~test-npc-2:0.2"],
           "[Increase Relations]": ["~0.1", "~test-npc-2:-0.2"],
-          "[Test Reaction]": [
-            "'#=-Adds#-- a global flag which changes the dialogue text of #=-$test-npc-2#--.'",
-            "*test",
-          ],
+          "[Test Reaction]": ["'#=-Adds#-- a global flag which changes the dialogue text of #=-$test-npc-2#--.'", "*test"],
           "[Return]": ["-extern"],
         },
       },
@@ -564,11 +452,7 @@ Registries.entities.add("test-npc", {
       // },
       "trades": {
         line: "Modify and start trades with this entity.",
-        options: {
-          "[New Trade]": ["&peti-charged-laser-blaster"],
-          "[Open Trading Menu]": ["<trade>"],
-          "[Return]": ["-trades"],
-        },
+        options: { "[New Trade]": ["&peti-charged-laser-blaster"], "[Open Trading Menu]": ["<trade>"], "[Return]": ["-trades"] },
       },
     },
   },
@@ -586,22 +470,16 @@ Registries.entities.add("test-npc", {
 Registries.entities.add("test-npc-2", {
   type: "interactable-entity",
   name: "Test NPC 2",
+  hidden: true,
   health: 350,
-  light: 100,
   relations: { reactions: [] },
   dialogue: {
     conversations: {
       "*": {
         line: "This is a menu to test dialogue options, including integration with relationship mechanics.",
-        options: {
-          "[Set Best Friend]": ["<best-friend>"],
-          "[Set Mortal Enemy]": ["<mortal-enemy>"],
-        },
+        options: { "[Set Best Friend]": ["<best-friend>"], "[Set Mortal Enemy]": ["<mortal-enemy>"] },
       },
-      "*test": {
-        line: "Successfully reacted to global flag.",
-        options: { "[Return]": ["'#c-Remove#-- the global flag.'", "-*test"] },
-      },
+      "*test": { line: "Successfully reacted to global flag.", options: { "[Return]": ["'#c-Remove#-- the global flag.'", "-*test"] } },
       // // Equivalent to the above entry
       // "<me>": {
       //   line: "Test Mortal Enemy relations here",

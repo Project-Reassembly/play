@@ -1,7 +1,6 @@
 import Integrate from "../lib/integrate.js";
 /// <reference path="../lib/integrate"/>
 
-
 /** Generic type constructor. Uses `Integrate.types` as the source for any template.
  * @template T
  * @param {Integrate.Unconstructed<T>} object Source to construct from. This object is left unchanged. Type must be present in `Integrate.types`, or else `Object` is used instead.
@@ -20,8 +19,7 @@ function construct(object, defaultType = "generic") {
  * @returns {T}
  */
 function constructFromRegistry(object, registry, defaultType) {
-  if (!(registry instanceof Integrate.TypeRegistry))
-    throw new TypeError("Invalid type registry!"); //Catch bad (nonexistent or non-registry) registry
+  if (!(registry instanceof Integrate.TypeRegistry)) throw new TypeError("Invalid type registry!"); //Catch bad (nonexistent or non-registry) registry
   if (!object) return; //Catch accidental calls using null, undefined or similar
   object.type ??= defaultType;
   return constructFromType(object, registry.get(object.type));
@@ -44,7 +42,7 @@ function constructFromType(object, ctor) {
     cloned = object;
     console.warn("Could not clone object:", error);
   }
-  if(!(instantiated instanceof Integrate.RegisteredItem)) delete cloned.type
+  if (!(instantiated instanceof Integrate.RegisteredItem)) delete cloned.type;
   assign(instantiated, cloned);
   instantiated.init ? instantiated.init() : null; //Initialise if possible.
   return instantiated;
@@ -60,16 +58,14 @@ function assign(target, source) {
   if (!target || !source) return;
   for (let key of Object.getOwnPropertyNames(source)) {
     let value = source[key];
-    let replace = target[key];
-    if (replace !== undefined) {
-      if (typeof replace !== "function") {
-        target[key] = value;
-      } else console.warn("Cannot replace an object's method: " + key);
-    } else {
-      console.warn(
-        `Cannot create properties using 'construct()'-derived functions: ${key} is not present on type ${target.constructor.name}`
-      );
+    if (!(key in target)) {
+      console.warn(`Cannot create properties using 'construct()'-derived functions: ${key} is not present on type ${target.constructor.name}`);
+      continue;
     }
+    let replace = target[key];
+    if (typeof replace !== "function") {
+      target[key] = value;
+    } else console.warn("Cannot replace an object's method: " + key);
   }
   return target;
 }

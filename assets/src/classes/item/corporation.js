@@ -21,6 +21,7 @@ export class Corporation extends Integrate.RegisteredItem {
   static iconof(name) {
     return Registries.corps.tryGet(name)?.icon ?? "";
   }
+  /** @returns {import("../../core/color.js").color} */
   static colorof(name) {
     return (Registries.corps.tryGet(name)?.color ?? 0) | 0;
   }

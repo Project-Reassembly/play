@@ -8,16 +8,16 @@ import { debug } from "../../play/debug.js";
 import { game } from "../../play/game.js";
 import { pointInRectC } from "../physical.js";
 import {
-  action,
-  AddFlagAction,
-  AddGlobalFlagAction,
-  ChangeRelationAction,
-  DialogueAction,
-  PlaceholderTextDialogueAction,
-  PromoteToBestFriendAction,
-  PromoteToMortalEnemyAction,
-  RemoveFlagAction,
-  RemoveGlobalFlagAction,
+    action,
+    AddFlagAction,
+    AddGlobalFlagAction,
+    ChangeRelationAction,
+    DialogueAction,
+    PlaceholderTextDialogueAction,
+    PromoteToBestFriendAction,
+    PromoteToMortalEnemyAction,
+    RemoveFlagAction,
+    RemoveGlobalFlagAction,
 } from "./actions.js";
 import { InteractableEntity } from "./interactable-entity.js";
 import { RelationManager } from "./relations.js";

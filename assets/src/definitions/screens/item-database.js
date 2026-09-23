@@ -3,16 +3,11 @@ import { Item } from "../../classes/item/item.js";
 import { PlaceableItem } from "../../classes/item/placeable.js";
 import { col } from "../../core/color.js";
 import { construct } from "../../core/constructor.js";
-import { roundNum } from "../../core/number.js";
+import { time } from "../../core/number.js";
 import { Registries, TypeRegistries } from "../../core/registry.js";
 import { Serialiser } from "../../core/serialiser.js";
-import {
-  createCMFTComponent,
-  createUIComponent,
-  createUIImageComponent,
-  ui,
-  UIComponent,
-} from "../../core/ui.js";
+import { createCMFTComponent, createUIComponent, createUIImageComponent, ui, UIComponent } from "../../core/ui.js";
+import { refreshEntityDatabaseUI } from "./entity-database.js";
 /** @import Integrate from "../../lib/integrate.js"; */
 export const discovered = {
   /** @type {Set<string>} */
@@ -39,17 +34,10 @@ export const discovered = {
   },
   deserialise() {
     const data = Serialiser.get("db:discovered.items");
-    if (!data)
-      console.error(
-        "Could not find database discovery data! Assuming no knowledge until next reset.",
-      );
-    else if (!Array.isArray(data))
-      console.error(
-        "Database discovery data is corrupted! Assuming no knowledge until next reset. Got",
-        data,
-      );
+    if (!data) console.error("Could not find database discovery data! Assuming no knowledge until next reset.");
+    else if (!Array.isArray(data)) console.error("Database discovery data is corrupted! Assuming no knowledge until next reset. Got", data);
     else {
-      const dstr = data.map((x) => `${x}`);
+      const dstr = data.map(x => `${x}`);
       let modded = 0;
       this.all.clear();
       this.collections.clear();
@@ -62,9 +50,7 @@ export const discovered = {
         this.add(i);
       }
       if (modded > 0)
-        console.log(
-          `${modded} modded/unregistered items are present in the discovery list - they will not be visible, but will persist`,
-        );
+        console.log(`${modded} modded/unregistered items are present in the discovery list - they will not be visible, but will persist`);
       console.log(`Loaded ${this.all.size} discovered items.`);
     }
   },
@@ -86,9 +72,7 @@ export function updateItemCollections() {
     if (!current) discoverable.collections.set(corp, [name]);
     else current.push(name);
   });
-  console.log(
-    `Prepared ${discoverable.all.size} items for discovery, across ${discoverable.collections.size} collections`,
-  );
+  console.log(`Prepared ${discoverable.all.size} items for discovery, across ${discoverable.collections.size} collections`);
   discovered.deserialise();
   refreshDatabaseUI();
 }
@@ -124,6 +108,24 @@ createUIComponent(
   .setTextColour(col.accent);
 createUIComponent(
   ["database"],
+  ["is-in-game-database:false"],
+  880,
+  -500,
+  120,
+  40,
+  "none",
+  () => {
+    ui.menuState = "entity-database";
+    refreshEntityDatabaseUI();
+  },
+  "Entities",
+  true,
+  15,
+)
+  .setBackgroundColour(col.black)
+  .setTextColour(col.accent);
+createUIComponent(
+  ["database"],
   ["is-in-game-database:true"],
   -880,
   -500,
@@ -148,7 +150,7 @@ createUIComponent(["database"], [], 675, -300, 500, 300, "none")
   .setTextColour(col.accent);
 createUIComponent(["database"], [], 675, -420, 0, 0, "none", null, "", true, 30)
   .define("text", () => {
-    const coll = ui.conditions["selected-collection"];
+    const coll = ui.get("selected-collection");
     return coll === "*" ?
         `All Items (${discovered.all.size}/${discoverable.all.size})`
       : `${coll === "" ? "Generic" : Corporation.aliasof(coll) || coll} Collection (${discovered.collections.get(coll)?.length ?? 0}/${discoverable.collections.get(coll)?.length ?? 0})`;
@@ -167,7 +169,7 @@ const csels = [];
 function resetCollectionSelectors() {
   let px = 460,
     py = -365;
-  csels.forEach((s) => s.disconnect());
+  csels.forEach(s => ui.disconnect(s));
   csels.splice(0);
   for (const [name, coll] of discoverable.collections) {
     csels.push(
@@ -179,14 +181,14 @@ function resetCollectionSelectors() {
         50,
         50,
         function () {
-          if (UIComponent.evaluateCondition("selected-collection", name)) {
-            UIComponent.setCondition("selected-collection", "*");
-            csels.forEach((s) => s.setOutlineColour(col.accent));
+          if (ui.is("selected-collection", name)) {
+            ui.set("selected-collection", "*");
+            csels.forEach(s => s.setOutlineColour(col.accent));
             resetItemSelectors();
             return;
           }
-          UIComponent.setCondition("selected-collection", name);
-          csels.forEach((s) => s.setOutlineColour(col.mono(60)));
+          ui.set("selected-collection", name);
+          csels.forEach(s => s.setOutlineColour(col.mono(60)));
           this.setOutlineColour(col.accent);
           resetItemSelectors();
         },
@@ -211,22 +213,19 @@ function resetCollectionSelectors() {
 }
 // ITEM SELECTOR
 ui.addReset("selected-item", "");
-createUIComponent(["database"], [], 675, 150, 500, 600, "none")
-  .setBackgroundColour(col.black)
-  .setOutlineColour(col.accent)
-  .setTextColour(col.accent);
+createUIComponent(["database"], [], 675, 150, 500, 600, "none").setBackgroundColour(col.black).setOutlineColour(col.accent).setTextColour(col.accent);
 
 /** @type {UIComponent[]} */
 const isels = [];
 let pages = 0;
 function resetItemSelectors() {
-  UIComponent.setCondition("item-database-page", "0");
+  ui.set("item-database-page", "0");
   let px = 460,
     py = -115,
     page = 0;
-  isels.forEach((s) => s.disconnect());
+  isels.forEach(s => ui.disconnect(s));
   isels.splice(0);
-  const coll = ui.conditions["selected-collection"];
+  const coll = ui.get("selected-collection");
   const collection = coll === "*" ? discoverable.all : (discoverable.collections.get(coll) ?? []);
   for (const iname of collection) {
     const found = discovered.all.has(iname);
@@ -241,8 +240,8 @@ function resetItemSelectors() {
           50,
           50,
           function () {
-            UIComponent.setCondition("selected-item", iname);
-            isels.forEach((s) => s.setOutlineColour(col.mono(60)));
+            ui.set("selected-item", iname);
+            isels.forEach(s => s.setOutlineColour(col.mono(60)));
             this.setOutlineColour(col.accent);
             const corp = def?.corp ?? "";
             updateDescrPanels(
@@ -256,16 +255,7 @@ function resetItemSelectors() {
           },
           def.image ?? "error",
         ).setOutlineColour(col.mono(60))
-      : createUIImageComponent(
-          ["database"],
-          [`item-database-page:${page}`],
-          px,
-          py,
-          50,
-          50,
-          null,
-          "icon.question",
-        ).setOutlineColour(col.mono(60)),
+      : createUIImageComponent(["database"], [`item-database-page:${page}`], px, py, 50, 50, null, "icon.question").setOutlineColour(col.mono(60)),
     );
     px += 60;
     if (px > 880) {
@@ -283,8 +273,8 @@ function resetItemSelectors() {
 
 export function selectItem(iname) {
   const def = Registries.items.get(iname);
-  UIComponent.setCondition("selected-item", iname);
-  isels.forEach((s) => s.setOutlineColour(col.mono(60)));
+  ui.set("selected-item", iname);
+  isels.forEach(s => s.setOutlineColour(col.mono(60)));
   const corp = def?.corp ?? "";
   updateDescrPanels(
     def?.name ?? iname,
@@ -296,12 +286,12 @@ export function selectItem(iname) {
   );
 }
 export function deselectItem() {
-  UIComponent.setCondition("selected-item", "");
-  isels.forEach((s) => s.setOutlineColour(col.mono(60)));
+  ui.set("selected-item", "");
+  isels.forEach(s => s.setOutlineColour(col.mono(60)));
   updateDescrPanels();
 }
 createUIComponent(["database"], [], 675, 420, 0, 0, "none", null, "", true, 30)
-  .define("text", () => `Page ${+ui.conditions["item-database-page"] + 1}/${pages + 1}`)
+  .define("text", () => `Page ${+ui.get("item-database-page") + 1}/${pages + 1}`)
   .setTextColour(col.accent);
 createUIComponent(
   ["database"],
@@ -312,8 +302,8 @@ createUIComponent(
   30,
   "none",
   () => {
-    const current = +ui.conditions["item-database-page"];
-    if (current > 0) UIComponent.setCondition("item-database-page", current - 1);
+    const current = +ui.get("item-database-page");
+    if (current > 0) ui.set("item-database-page", current - 1);
   },
   "<",
   true,
@@ -331,8 +321,8 @@ createUIComponent(
   30,
   "none",
   () => {
-    const current = +ui.conditions["item-database-page"];
-    if (current < pages) UIComponent.setCondition("item-database-page", current + 1);
+    const current = +ui.get("item-database-page");
+    if (current < pages) ui.set("item-database-page", current + 1);
   },
   ">",
   true,
@@ -342,12 +332,7 @@ createUIComponent(
   .setOutlineColour(col.accent)
   .setTextColour(col.accent);
 
-const stages = [
-  "icon.database.large",
-  "icon.database.one-third",
-  "icon.database.two-thirds",
-  "icon.database.complete",
-];
+const stages = ["icon.database.large", "icon.database.one-third", "icon.database.two-thirds", "icon.database.complete"];
 // PROGRESS
 createUIImageComponent(["database"], [], -890, -380, 185, 185, null, "icon.database.large", false)
   .setBackgroundColour(col.black)
@@ -359,25 +344,14 @@ createUIComponent(["database"], [], -890, -380, 0, 0, "none", null, "", true, 30
 
 // DETAIL VIEWER
 
-createUIComponent(["database"], [], -200, 0, 1200, 900)
-  .setBackgroundColour(col.black)
-  .setOutlineColour(col.accent);
+createUIComponent(["database"], [], -200, 0, 1200, 900).setBackgroundColour(col.black).setOutlineColour(col.accent);
 // deselect
 function close() {
   updateDescrPanels();
-  UIComponent.setCondition("selected-item", "");
-  isels.forEach((c) => c.setOutlineColour(col.mono(60)));
+  ui.set("selected-item", "");
+  isels.forEach(c => c.setOutlineColour(col.mono(60)));
 }
-let c_close = createUIImageComponent(
-  ["database"],
-  [],
-  360,
-  -412,
-  40,
-  40,
-  null,
-  "icon.cross",
-).setOutlineColour(col.mono(60));
+let c_close = createUIImageComponent(["database"], [], 360, -412, 40, 40, null, "icon.cross").setOutlineColour(col.mono(60));
 // name
 let c_name = createCMFTComponent(["database"], [], -200, -420, 1180, 50, "none", null, "", 40)
   .removeBackground()
@@ -418,25 +392,25 @@ function updateDescrPanels(
     c_desc.text = "#a-Select some content#-- to view its details!";
     c_close.setOutlineColour(col.mono(60));
     c_close.press = null;
-    c_close.isInteractive = false;
+    c_close.interactive = false;
     return;
   }
   c_close.setOutlineColour(col.accent);
   c_close.press = close;
-  c_close.isInteractive = true;
+  c_close.interactive = true;
 
   c_name.text = `[#>>${image}#--] #@b${name}#--`;
   c_name.rarityColour = rarity;
 
-  const color = "#" + col.hex(Corporation.colorof(item.corp) || col.white);
+  const color = "#" + col.hex(Corporation.colorof(corp) || col.white);
   const icolor = Registries.images.tryGet(image)?.color || col.white;
   let s = `#abStandard Details#a-\n------------------------------------------
-#>>icon.database#=-Collection:${corp ? `#[${Corporation.colorof(item.corp)}]- ${Corporation.aliasof(item.corp)}` : `#-- Generic`}
+#>>icon.database#=-Collection:${corp ? `#[${Corporation.colorof(corp)}]- ${Corporation.aliasof(corp)}` : `#-- Generic`}
 #=-Maximum Stack Size:#-- ${item.stackSize}
 #a-Average Sell Value:#-- \$${shortenedNumber(item.marketValue, 4, 4, false)}
 #a-Stack Sell Value:#-- \$${shortenedNumber(item.marketValue * item.stackSize, 4, 4, false)}
-#=-Rarity:#-- ${corp ? `#@-${Corporation.aliasof(item.corp)}#--/#[${Item.getColourFromRarity(item.rarity)}]-${item.rarity}` : `#@-${item.rarity}`}
-${corp ? `#=-Manufacturer:#-- #[${Corporation.colorof(item.corp)}]-${Corporation.nameof(item.corp)}` : "#=-No Set Manufacturer"}
+#=-Rarity:#-- ${corp ? `#@-${Corporation.aliasof(corp)}#--/#[${Item.getColourFromRarity(item.rarity)}]-${item.rarity}` : `#@-${item.rarity}`}
+${corp ? `#=-Manufacturer:#-- #[${Corporation.colorof(corp)}]-${Corporation.nameof(corp)}` : "#=-No Set Manufacturer"}
 `;
   if (item instanceof PlaceableItem) {
     const block = item.getBlock();
@@ -451,7 +425,7 @@ ${corp ? `#=-Manufacturer:#-- #[${Corporation.colorof(item.corp)}]-${Corporation
       if (block.maxPower) {
         s += ` #e-${shortenedNumber(block.maxPower)}#-- max power\n`;
         if (block.powerDraw)
-          s += ` #e-${shortenedNumber(block.powerDraw * 60)}/s#-- power use #=-(#h-${roundNum(block.maxPower / (block.powerDraw * 60), 1)}s#-- off-grid time#=-)\n`;
+          s += ` #e-${shortenedNumber(block.powerDraw * 60)}/s#-- power use #=-(#h-${time(block.maxPower / block.powerDraw)}#-- off-grid time#=-)\n`;
       }
     } else s += `\n#c-Block [${item.block}] failed to load (are you missing a mod?)`;
   }
@@ -462,16 +436,14 @@ ${corp ? `#=-Manufacturer:#-- #[${Corporation.colorof(item.corp)}]-${Corporation
   c_tech.text = `#rbTechnical Details#r-\n------------------------------------------
 #>>icon.int#n-Type:#-- ${item.type ?? "item"} #=-(#e-${item.constructor.name}#=-)
 #n-Registry Name:#-- ${item.registryName}
-#=-Corporation/Team ID:${item.corp ? ` #>>${Corporation.iconof(item.corp)}#--#[${Corporation.colorof(item.corp)}]-${item.corp}` : "#=- none"}
-#l-Colour:#[${color}]- \\${color} #--/ #[0x${col.hex(col.withA(icolor, 255))}]-\\#${col.hex(icolor)}
+#=-Corporation/Team ID:${corp ? ` #>>${Corporation.iconof(corp)}#--#[${Corporation.colorof(corp)}]-${corp}` : "#=- none"}
+#l-Name/Image Colour:#[${color}]- \\${color} #--/ #[${col.withA(icolor, 255)}]-\\#${col.hex(icolor)}
 #r-Image Name:#-- ${image}`;
 
-  c_desc.text =
-    "#=bDescription#=-\n-----------------------------------------------\n#--" + uncon.description ??
-    "<no description provided>";
+  c_desc.text = "#=bDescription#=-\n-----------------------------------------------\n#--" + uncon.description ?? "<no description provided>";
   c_ext.text =
-    "#ibExtended Details#i-\n-----------------------------------------------\n#--" +
-    (item.createExtendedDetails() || "<no additional information provided>");
+    "#ibExtended Details#i-\n-----------------------------------------------\n#--"
+    + (item.createExtendedDetails() || "<no additional information provided>");
 }
 updateDescrPanels();
 

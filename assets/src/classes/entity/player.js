@@ -3,7 +3,8 @@ import { construct, constructFromType } from "../../core/constructor.js";
 import { rnd, roundNum, tru, Vector } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { ui, UIComponent } from "../../core/ui.js";
-import { discoverable, discovered } from "../../definitions/screens/database.js";
+import { discoverableEntities, discoveredEntities } from "../../definitions/screens/entity-database.js";
+import { discoverable, discovered } from "../../definitions/screens/item-database.js";
 import { autoScaledEffect } from "../../play/effects.js";
 import { game } from "../../play/game.js";
 import { Log } from "../../play/messaging.js";
@@ -17,6 +18,7 @@ import { BulletModel } from "../projectile/bullet-model.js";
 import { Timer } from "../timer.js";
 import { undeliverEntity } from "../world/events/event-action.js";
 import { WeaponComponent } from "./entity-part.js";
+import { Entity } from "./entity.js";
 import { EquippedEntity } from "./inventory-entity.js";
 export const respawnTimer = new Timer();
 
@@ -76,28 +78,18 @@ class Player extends EquippedEntity {
     if (this.assemblySlots !== 0) {
       this.assemblyInventory = new Inventory(this.assemblySlots, this.assemblyInventory);
       this.assemblyResult = new Inventory(1, this.assemblyResult);
-      this.assemblyRecipes.forEach((recipe) => {
-        recipe.inputs = recipe.inputs.map((inp) => constructFromType(inp, ItemStack));
-        recipe.outputs = recipe.outputs.map((inp) => constructFromType(inp, ItemStack));
+      this.assemblyRecipes.forEach(recipe => {
+        recipe.inputs = recipe.inputs.map(inp => constructFromType(inp, ItemStack));
+        recipe.outputs = recipe.outputs.map(inp => constructFromType(inp, ItemStack));
       });
       this._maxprog = this.assemblyRecipes[this._recipe]?.time ?? 0;
     }
     this.leftArmComponent = construct(
-      Object.assign(this.armType, {
-        type: "weapon-component",
-        recoil: 0.2,
-        rotationalRecoil: -60,
-        recoilSpeed: 4,
-      }),
+      Object.assign(this.armType, { type: "weapon-component", recoil: 0.2, rotationalRecoil: -60, recoilSpeed: 4 }),
       "weapon-component",
     );
     this.rightArmComponent = construct(
-      Object.assign(this.armType, {
-        type: "weapon-component",
-        recoil: 0.2,
-        rotationalRecoil: -60,
-        recoilSpeed: 4,
-      }),
+      Object.assign(this.armType, { type: "weapon-component", recoil: 0.2, rotationalRecoil: -60, recoilSpeed: 4 }),
       "weapon-component",
     );
   }
@@ -176,7 +168,7 @@ class Player extends EquippedEntity {
 
     /** @type {string?} */
     let type = charged ? "big-punch" : "punch";
-    this.doToAccessories((i) => {
+    this.doToAccessories(i => {
       const t = i.selectAtkType(this, charged);
       if (t) type = t;
     });
@@ -186,10 +178,10 @@ class Player extends EquippedEntity {
     if (bul) {
       /** @type {BulletModel} */
       const model = Registries.bullets.get(bul.bullet);
-      model.emit(x, y, 1, degrees(direction), 0, 0, this.world, this).forEach((b) => {
+      model.emit(x, y, 1, degrees(direction), 0, 0, this.world, this).forEach(b => {
         const oh = b.hitex;
-        b.hitex = (obj) => {
-          this.doToAccessories((i) => i.atkPerformed(this, charged));
+        b.hitex = obj => {
+          this.doToAccessories(i => i.atkPerformed(this, charged));
           oh.call(b, obj);
         };
       });
@@ -205,27 +197,11 @@ class Player extends EquippedEntity {
   drawArms() {
     let left = this.leftHand.get(0)?.getItem();
     if (!left || left?.showArm) this.leftArmComponent.draw(this.x, this.y, this.direction, true);
-    if (left?.component)
-      left.component.draw(
-        this.x,
-        this.y,
-        this.direction,
-        true,
-        this.armType.xOffset,
-        this.armType.yOffset,
-      );
+    if (left?.component) left.component.draw(this.x, this.y, this.direction, true, this.armType.xOffset, this.armType.yOffset);
 
     let right = this.rightHand.get(0)?.getItem();
     if (!right || right?.showArm) this.rightArmComponent.draw(this.x, this.y, this.direction);
-    if (right?.component)
-      right.component.draw(
-        this.x,
-        this.y,
-        this.direction,
-        false,
-        this.armType.xOffset,
-        this.armType.yOffset,
-      );
+    if (right?.component) right.component.draw(this.x, this.y, this.direction, false, this.armType.xOffset, this.armType.yOffset);
   }
 
   nextRecipe() {
@@ -244,10 +220,7 @@ class Player extends EquippedEntity {
   }
   tickRecipe(recipe, time) {
     //If items for recipe are present, and outputs fit
-    if (
-      this.assemblyInventory.hasItems(recipe.inputs) &&
-      this.assemblyResult.canAddItems(recipe.outputs)
-    )
+    if (this.assemblyInventory.hasItems(recipe.inputs) && this.assemblyResult.canAddItems(recipe.outputs))
       if (this._progress > time) {
         if (this.onFinish(recipe)) this._progress = 0;
       } else {
@@ -272,20 +245,18 @@ class Player extends EquippedEntity {
     autoScaledEffect(this.craftEffect, this.world, this.x, this.y, Direction.UP);
   }
   createTickEffect() {
-    if (tru(this.tickEffectChance))
-      autoScaledEffect(this.tickEffect, this.world, this.x, this.y, Direction.UP);
+    if (tru(this.tickEffectChance)) autoScaledEffect(this.tickEffect, this.world, this.x, this.y, Direction.UP);
   }
   stringifyRecipe(recipe) {
-    return `${recipe.inputs.map((x) => x.toString(true)).join("\n")}\n -  - -- \\⬇/ -- -  - \n${recipe.outputs.map((x) => x.toString(true)).join("\n")}\n`;
+    return `${recipe.inputs.map(x => x.toString(true)).join("\n")}\n -  - -- \\⬇/ -- -  - \n${recipe.outputs.map(x => x.toString(true)).join("\n")}\n`;
   }
   getRecipeInfo() {
-    return this.assemblyRecipes.length > 0 ?
-        this.stringifyRecipe(this.assemblyRecipes[this._recipe])
-      : "Assembler\nNot available";
+    return this.assemblyRecipes.length > 0 ? this.stringifyRecipe(this.assemblyRecipes[this._recipe]) : "Assembler\nNot available";
     //this.title + "   [" + this._recipe + "]"
   }
   deactivated = false;
   tick() {
+    if (this.age === 0) this.#discoverEntity(this);
     if (this.deactivated) {
       if (this.power && this.emergencyPower < this.maxEmergencyPower) {
         const reserve = Math.min(this.power, this.maxEmergencyPower - this.emergencyPower);
@@ -302,10 +273,8 @@ class Player extends EquippedEntity {
     this.leftArmComponent.tick(this);
     this.rightArmComponent.tick(this);
 
-    if (this.punchChargingR && this.punchChargeR > 20)
-      this._chargeEffectAt(this.rightArmComponent, this.punchChargeR);
-    if (this.punchChargingL && this.punchChargeL > 20)
-      this._chargeEffectAt(this.leftArmComponent, this.punchChargeL);
+    if (this.punchChargingR && this.punchChargeR > 20) this._chargeEffectAt(this.rightArmComponent, this.punchChargeR);
+    if (this.punchChargingL && this.punchChargeL > 20) this._chargeEffectAt(this.leftArmComponent, this.punchChargeL);
     if (this.assemblyRecipes.length > 0) {
       let recipe = this.assemblyRecipes[this._recipe];
       if (!recipe) {
@@ -329,12 +298,7 @@ class Player extends EquippedEntity {
         UIComponent.setCondition("dead", "yes");
       }, this.respawnTime);
 
-      Log.send(
-        `#4-${(rnd.in(Registries.deathmsg.tryGet("power-off")[0]) ?? "(1) died").replaceAll(
-          "(1)",
-          this.name,
-        )}`,
-      );
+      Log.send(`#4-${(rnd.in(Registries.deathmsg.tryGet("power-off")[0]) ?? "(1) died").replaceAll("(1)", this.name)}`);
     }
 
     if (this.power && this.emergencyPower < this.maxEmergencyPower) {
@@ -369,16 +333,9 @@ class Player extends EquippedEntity {
       strokeWeight(1);
       fill(0);
       rect(this.x - this.width, this.y + this.height * 0.5 + 15, this.width * 2, 5);
-      col.fill(
-        col.interp([col.red, col.yellow, col.green], this.emergencyPower / this.maxEmergencyPower),
-      );
+      col.fill(col.interp([col.red, col.yellow, col.green], this.emergencyPower / this.maxEmergencyPower));
       noStroke();
-      rect(
-        this.x - this.width,
-        this.y + this.height * 0.5 + 15,
-        (this.width * 2 * this.emergencyPower) / this.maxEmergencyPower,
-        5,
-      );
+      rect(this.x - this.width, this.y + this.height * 0.5 + 15, (this.width * 2 * this.emergencyPower) / this.maxEmergencyPower, 5);
       pop();
     }
   }
@@ -391,38 +348,22 @@ class Player extends EquippedEntity {
     if (!this.deactivated) {
       let dm = Registries.deathmsg.tryGet(type);
       let messagearray = dm ? dm[source ? 1 : 0] : ["(1) died"];
-      Log.send(
-        `#4-${(rnd.in(messagearray) ?? "(1) died")
-          .replaceAll("(1)", this.name)
-          .replaceAll("(2)", source?.name)}`,
-      );
+      Log.send(`#4-${(rnd.in(messagearray) ?? "(1) died").replaceAll("(1)", this.name).replaceAll("(2)", source?.name)}`);
       if (game.player.entity === this)
         respawnTimer.do(() => {
           ui.waitingForMouseUp = true;
           UIComponent.setCondition("dead", "yes");
         }, this.respawnTime);
     }
-    DroppedItemStack.create(
-      Inventory.mouseItemStack,
-      this.world,
-      this.x,
-      this.y,
-      rnd.float(0, 360),
-      3,
-    );
+    DroppedItemStack.create(Inventory.mouseItemStack, this.world, this.x, this.y, rnd.float(0, 360), 3);
     Inventory.mouseItemStack.clear();
   }
   doAI() {
     if (this.target) {
       this.rotateTowards(this.target.x, this.target.y, this.turnSpeed);
     }
-    const borders = [
-      -blockSize * 0.5,
-      -blockSize * 0.5,
-      totalSize - blockSize * 0.5,
-      totalSize - blockSize * 0.5,
-    ];
-    if (this.controllable && ui.conditions.fc == "false") {
+    const borders = [-blockSize * 0.5, -blockSize * 0.5, totalSize - blockSize * 0.5, totalSize - blockSize * 0.5];
+    if (this.controllable && ui.is("fc", "false")) {
       const v = Vector.ZERO;
       const accel = this.flying ? Math.cbrt(this.speed) / 5 : this.speed / 10;
       if (keyIsDown(87) && this.y > borders[1] /* Top */ + this.hitSize) {
@@ -461,22 +402,41 @@ class Player extends EquippedEntity {
   }
 
   tickDiscovery() {
-    this.inventories.forEach((inv) =>
-      inv.iterate((stack) => {
+    this.inventories.forEach(inv =>
+      inv.iterate(stack => {
         if (discoverable.all.has(stack.item) && !discovered.all.has(stack.item)) {
           discovered.discover(stack.item);
           const corp = stack.getItem().corp;
           const found = discovered.collections.get(corp)?.length ?? 0;
           const total = discoverable.collections.get(corp)?.length ?? 0;
           const complete = found === total;
-          const c =
-            complete ? col.cyan : col.interp([col.red, col.yellow, col.green], found / (total + 1));
+          const c = complete ? col.cyan : col.interp([col.red, col.yellow, col.green], found / (total + 1));
           Log.send(
-            `#>>icon.database#=-Discovered #[${corp}]b${stack.getItem().name}#=- (${Corporation.aliasof(corp) || "generic"}#=- collection, ${complete ? "#[0x30ffff]*complete" : `#[0x${col.hex(c)}]b${found}/${total}`}#=-)`,
+            `#>>icon.database#=-Discovered item #[${Corporation.colorof(corp)}]b${stack.getItem().name}#=- (${Corporation.aliasof(corp) || "generic"}#=- collection, ${complete ? "#[0x30ffff]*complete" : `#[0x${col.hex(c)}]b${found}/${total}`}#=-)`,
           );
         }
       }, true),
     );
+  }
+  kills(other) {
+    super.kills(other);
+    this.#discoverEntity(other);
+  }
+  /** @param {Entity} other  */
+  #discoverEntity(other) {
+    if (!other) return;
+    const type = other?.registryName;
+    if (discoverableEntities.all.has(type) && !discoveredEntities.all.has(type)) {
+      discoveredEntities.discover(type);
+      const corp = other.team;
+      const found = discoveredEntities.teams.get(corp)?.length ?? 0;
+      const total = discoverableEntities.teams.get(corp)?.length ?? 0;
+      const complete = found === total;
+      const c = complete ? col.cyan : col.interp([col.red, col.yellow, col.green], found / (total + 1));
+      Log.send(
+        `#>>icon.database#=-Discovered entity #[${Corporation.colorof(corp)}]b${other.name}#=- (${complete ? "#[0x30ffff]*complete" : `#[0x${col.hex(c)}]b${found}/${total}`}#=-)`,
+      );
+    }
   }
 }
 export { Player };

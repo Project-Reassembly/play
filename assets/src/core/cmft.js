@@ -34,24 +34,17 @@ export const Decoration = new (class DecorationConsts {
     "n": col.from(34, 119, 255), //I*n*tegrate blue
     "p": col.from(255, 100, 100), //PETI red
     "h": col.from(150, 255, 150), //CCC C*H*rono green
+    "s": col.from(205, 159, 139), //Scrap pink? brown? eh, whatever it is
     "r": col.from(200, 150, 255), //Rare purple
     "l": col.from(150, 150, 255), //B*l*ue blue
     "y": col.from(255, 255, 0), //Dev *y*ellow
-    get "s"() {
+    get "+"() {
       //Special, cycles yellow to gold and back
-      return col.from(
-        255,
-        230 + Math.sin(frameCount / 30) * 25,
-        130 + Math.sin(frameCount / 30) * 20,
-      );
+      return col.from(255, 230 + Math.sin(Decoration.timer.ticks / 30) * 25, 130 + Math.sin(Decoration.timer.ticks / 30) * 20);
     },
     get "v"() {
       //...Don't ask.
-      return col.in2rp(
-        col.from(255, 255, 151),
-        col.from(235, 235, 80),
-        0.5 + Math.sin(frameCount / 30) * 0.5,
-      );
+      return col.in2rp(col.from(255, 255, 151), col.from(235, 235, 80), 0.5 + Math.sin(Decoration.timer.ticks / 30) * 0.5);
     },
 
     // Rarity indicator
@@ -65,15 +58,7 @@ export const Decoration = new (class DecorationConsts {
     // default
     "-": null,
   });
-  spectrum = [
-    col.red,
-    col.yellow,
-    col.green,
-    col.cyan,
-    col.lighten(col.blue, 50),
-    col.magenta,
-    col.red,
-  ];
+  spectrum = [col.red, col.yellow, col.green, col.cyan, col.lighten(col.blue, 50), col.magenta, col.red];
   timer = new Timer();
   styles = Object.freeze({
     // what do you *think* these do?
@@ -94,8 +79,8 @@ const styleVals = new Set(Object.values(Decoration.styles));
 /** Additional colours from long specifications. @type {Map<string,import("./color.js").color>} */
 export const extras = new Map();
 
-const cols = [..."0123456789abcdefinphrylsv@~"],
-  styles = [..."bink*X"];
+const cols = [..."0123456789abcdefinphsryl+v@~="],
+  styles = [..."binkX*"];
 /** A collection of text components, with methods for manipulating them collectively.*/
 class Collection {
   /** All-in-one text formatter.
@@ -144,11 +129,7 @@ class Collection {
       const c = source[i];
       // console.log(`char ${c} at ${i}/${source.length} (start ${start})`);
       if (c === "#") {
-        parts.push(
-          new partType(this.#unmess(source.substring(start, i)), cparam2)
-            .setColour(colour)
-            .setStyle(style),
-        );
+        parts.push(new partType(this.#unmess(source.substring(start, i)), cparam2).setColour(colour).setStyle(style));
         // eat the hash
         i++;
         // now get the codes
@@ -194,8 +175,7 @@ class Collection {
             i++;
           } else if (source[i] in Decoration.colours) {
             // console.log(`colour code at ${i}/${source.length} (start ${start})`)
-            if (Object.getOwnPropertyDescriptor(Decoration.colours, source[i]).get)
-              colour = source[i];
+            if (Object.getOwnPropertyDescriptor(Decoration.colours, source[i]).get) colour = source[i];
             else colour = Decoration.colours[source[i]];
             i++;
           } else return this.#error(`Invalid colour code '${source[i]}' at ${i}`);
@@ -228,17 +208,12 @@ class Collection {
         i++;
       }
     }
-    parts.push(
-      new partType(this.#unmess(source.substring(start))).setColour(colour).setStyle(style),
-    );
-    return new this(...parts.filter((x) => x.length > 0));
+    parts.push(new partType(this.#unmess(source.substring(start))).setColour(colour).setStyle(style));
+    return new this(...parts.filter(x => x.length > 0));
   }
   /** @param {string} message  */
   static #error(message) {
-    return new this(
-      new Icon("error.cmft"),
-      new Text(`CMFT Parse Error: ${message}`).setColour(col.red),
-    );
+    return new this(new Icon("error.cmft"), new Text(`CMFT Parse Error: ${message}`).setColour(col.red));
   }
   /** @param {string} string  */
   static #unmess(string) {
@@ -274,7 +249,7 @@ class Collection {
    * @param {Collection | Text} comp
    */
   add(comp) {
-    if (comp instanceof Collection) comp.components.forEach((x) => this.add(x));
+    if (comp instanceof Collection) comp.components.forEach(x => this.add(x));
     else this.components.push(comp);
     return this;
   }
@@ -292,34 +267,31 @@ class Collection {
    * @param {(Collection | Text)[]} comps
    */
   addRange(...comps) {
-    comps.forEach((c) => this.add(c));
+    comps.forEach(c => this.add(c));
     return this;
   }
   text() {
-    let b = this.components
-      .map((x) => x.text.replaceAll("\n", "") + (x.text.endsWith("\n") ? "\n" : ""))
-      .join("");
+    let b = this.components.map(x => x.text.replaceAll("\n", "") + (x.text.endsWith("\n") ? "\n" : "")).join("");
     // console.log(this.components.map((x) => x.text.replaceAll("\n", "\\n")));
     // console.log(b);
     return b;
   }
   toString() {
-    return this.components.map((x) => `${x}`).join();
+    return this.components.map(x => `${x}`).join();
   }
   splitWords() {
-    return new Collection(...this.components.map((x) => x.split(/(?= )/)).flat());
+    return new Collection(...this.components.map(x => x.split(/(?= )/)).flat());
   }
   splitLines() {
-    return new Collection(...this.components.map((x) => x.split(/(?<=\n)/)).flat());
+    return new Collection(...this.components.map(x => x.split(/(?<=\n)/)).flat());
   }
   merge() {
     let merged = [];
     /**@type {Text?} */
     let prev;
-    this.components.forEach((c) => {
+    this.components.forEach(c => {
       if (!prev) prev = c;
-      else if (prev.hasSameStyle(c) && !(prev.text.endsWith("\n") || c.text.startsWith("\n")))
-        prev.append(c.text);
+      else if (prev.hasSameStyle(c) && !(prev.text.endsWith("\n") || c.text.startsWith("\n"))) prev.append(c.text);
       else {
         merged.push(prev);
         prev = c;
@@ -330,9 +302,7 @@ class Collection {
   }
   /**@param {(s:string) => string} mutator  */
   map(mutator) {
-    return new Collection(
-      ...this.components.map((x) => new x.constructor(mutator(x.text)).copyVisuals(x)),
-    );
+    return new Collection(...this.components.map(x => new x.constructor(mutator(x.text)).copyVisuals(x)));
   }
   wrapWords(maxChars = 100) {
     return this.splitLines().splitWords().wrapComponents(maxChars).merge();
@@ -407,7 +377,7 @@ class Collection {
   getWidth(charsize) {
     let lines = [];
     let totalwidth = 0;
-    this.components.forEach((x) => {
+    this.components.forEach(x => {
       totalwidth += x.getWidth(charsize);
       if (x.text.includes("\n")) {
         lines.push(totalwidth);
@@ -423,7 +393,7 @@ class Collection {
     let x = 0,
       y = 0,
       w = 0;
-    this.components.forEach((c) => {
+    this.components.forEach(c => {
       texts.push(new Element(x, y, c, charSize)); //c.draw(x, y, charsize);
       w = c.getWidth(charSize);
       x += w;
@@ -472,16 +442,14 @@ class Text {
     return this;
   }
   toString() {
-    return `[#${col.hex(this.colour)}, ${this.style}${
-      this.effects ? `<${this.effects}>` : ""
-    }] "${this.text}"`;
+    return `[#${col.hex(this.colour)}, ${this.style}${this.effects ? `<${this.effects}>` : ""}] "${this.text}"`;
   }
   append(str) {
     this.text += str;
     return this;
   }
   split(splitter) {
-    return this.text.split(splitter).map((x) => new Text(x).copyVisuals(this));
+    return this.text.split(splitter).map(x => new Text(x).copyVisuals(this));
   }
   clone() {
     return new Text(this.text).copyVisuals(this);
@@ -492,12 +460,7 @@ class Text {
   }
   /**@param {Text} other  */
   hasSameStyle(other) {
-    return (
-      other.constructor === Text &&
-      this.style === other.style &&
-      this.colour === other.colour &&
-      this.effects === other.effects
-    );
+    return other.constructor === Text && this.style === other.style && this.colour === other.colour && this.effects === other.effects;
   }
   /**@readonly */
   get length() {
@@ -545,13 +508,7 @@ class Icon extends Text {
     return new Icon(this.text);
   }
   draw(baseX, baseY, charSize) {
-    ImageContainer.draw(
-      this.text,
-      baseX + charSize * 0.5,
-      baseY + charSize * 0.5,
-      charSize,
-      charSize,
-    );
+    ImageContainer.draw(this.text, baseX + charSize * 0.5, baseY + charSize * 0.5, charSize, charSize);
   }
 }
 /** Another "text" component, but this one draws a healthbar-style meter with a caption. */
@@ -587,10 +544,7 @@ class ProgressBar extends Text {
     const h = charSize - 5;
     const frac = this.frac;
 
-    const oc =
-      this.style === "bold" || this.style === "bold italic" ?
-        ProgressBar.boldOutlineColour
-      : ProgressBar.outlineColour;
+    const oc = this.style === "bold" || this.style === "bold italic" ? ProgressBar.boldOutlineColour : ProgressBar.outlineColour;
     push();
     noStroke();
     //outline
@@ -663,12 +617,12 @@ class Drawer {
     }
     textAlign(LEFT, TOP);
     textFont(fonts.ocr);
-    this.#texts.forEach((x) => x.draw(baseX, baseY, basecol, rarityColour));
+    this.#texts.forEach(x => x.draw(baseX, baseY, basecol, rarityColour));
     pop();
   }
   /**@param {Drawer} other  */
   conjoin(other, offX = 0, offY = 0) {
-    this.#texts.push(...other.#texts.map((t) => t.move(offX, this.height + offY)));
+    this.#texts.push(...other.#texts.map(t => t.move(offX, this.height + offY)));
     if (this.width < other.width) this.width = other.width;
     this.height += other.height;
     return this;
@@ -731,18 +685,13 @@ class Element {
       Element.randomiser.setSeed(this.id + o);
       for (let j = 0; j < 5; j++) {
         let pos = [
-          baseX +
-            o +
-            this.#xOffset +
-            this.charSize *
-              (Element.randomiser.rand() * 0.25 +
-                Math.sin(frameCount / (11 + Element.randomiser.rand() * 10) / 3) * 0.25),
-          baseY +
-            this.#yOffset +
-            this.charSize *
-              (0.35 +
-                Element.randomiser.rand() / 6 +
-                Math.cos(frameCount / (11 + Element.randomiser.rand() * 10) / 3) / 6),
+          baseX
+            + o
+            + this.#xOffset
+            + this.charSize * (Element.randomiser.rand() * 0.25 + Math.sin(frameCount / (11 + Element.randomiser.rand() * 10) / 3) * 0.25),
+          baseY
+            + this.#yOffset
+            + this.charSize * (0.35 + Element.randomiser.rand() / 6 + Math.cos(frameCount / (11 + Element.randomiser.rand() * 10) / 3) / 6),
         ];
         col.fill(dark2);
         circle(...pos, this.charSize);
@@ -782,7 +731,7 @@ class DirectedCollection extends Collection {
   /** @param {Collection} collection @param {...Directive} directives */
   constructor(collection, ...directives) {
     super(...collection.components);
-    directives.forEach((d) => this.directives.set(d.name, d.value));
+    directives.forEach(d => this.directives.set(d.name, d.value));
   }
   /**@param {DirectedString} directedString */
   static createFrom(directedString) {
@@ -814,10 +763,10 @@ class Directive {
 /**@extends {Array<Directive>} @memberof! CMFT*/
 class Directives extends Array {
   has(name) {
-    return this.some((v) => v.name === name);
+    return this.some(v => v.name === name);
   }
   get(name) {
-    return this.find((v) => v.name === name)?.value;
+    return this.find(v => v.name === name)?.value;
   }
 }
 /** Static loader class for CMFT that parses from files. Also includes parser directives.\
@@ -836,11 +785,7 @@ class Loader {
   }
   static #error(message) {
     return new DirectedCollection(
-      new Collection(
-        new Icon("error"),
-        new Text(" CMFT Format Error: ").setColour("4").setStyle("b"),
-        new Text(message).setColour("c"),
-      ),
+      new Collection(new Icon("error"), new Text(" CMFT Format Error: ").setColour("4").setStyle("b"), new Text(message).setColour("c")),
     );
   }
   /**Loads and parses one or more CMFT collections from a file. \
@@ -888,20 +833,17 @@ class Loader {
             DirectedCollection.createFrom(
               new DirectedString(
                 v.lines
-                  .map((x) => x.string)
+                  .map(x => x.string)
                   .join("")
                   .replaceAll("\\n", "\n"),
-                v.lines.flatMap((x) => x.directives),
+                v.lines.flatMap(x => x.directives),
               ),
             ),
           ],
           dirs: v.directives,
         };
       case "split":
-        return {
-          txt: v.lines.map((v) => DirectedCollection.createFrom(v.replaceAll("\\n", "\n"))),
-          dirs: v.directives,
-        };
+        return { txt: v.lines.map(v => DirectedCollection.createFrom(v.replaceAll("\\n", "\n"))), dirs: v.directives };
       case "unknown":
         return { txt: [this.#error(`Ambiguous formatting type`)], dirs: v.directives };
       default:
@@ -909,9 +851,7 @@ class Loader {
     }
   }
   static async drawer(path, charSize = 25, maxChars = 0) {
-    return maxChars ?
-        (await this.load(path)).map((c) => c.wrapWords(maxChars).drawer(charSize))
-      : (await this.load(path)).map((c) => c.drawer(charSize));
+    return maxChars ? (await this.load(path)).map(c => c.wrapWords(maxChars).drawer(charSize)) : (await this.load(path)).map(c => c.drawer(charSize));
   }
   static async #grabLines(path) {
     let a;
@@ -958,7 +898,7 @@ class Loader {
   /**Loads and parses multiple CMFT collections from a file, splitting on newlines. Ignores all `<split-resolver>`/`<split-type>` directives. */
   static async loadSeq(path) {
     let v = await this.#grabLines(path);
-    return v.map((v) => Collection.createFrom(v));
+    return v.map(v => Collection.createFrom(v));
   }
 }
 
@@ -966,10 +906,7 @@ function escape(string) {
   return `${string}`.replace("#", "\\#");
 }
 function drawer(string, charSize = 25, maxChars = 0) {
-  return (
-    maxChars ?
-      Collection.createWrapped(string, maxChars)
-    : Collection.createFrom(string)).drawer(charSize);
+  return (maxChars ? Collection.createWrapped(string, maxChars) : Collection.createFrom(string)).drawer(charSize);
 }
 function blank() {
   return new Drawer().noBG();
@@ -977,7 +914,7 @@ function blank() {
 /** Assembles all possible format codes, using the input string. */
 function formatTest(char = "A") {
   const escaped = escape(char);
-  return cols.flatMap((c) => styles.map((s) => `#${c}${s}${escaped}`)).join("");
+  return cols.flatMap(c => styles.map(s => `#${c}${s}${escaped}`)).join("");
 }
 
 globalThis.ft = formatTest;
@@ -985,18 +922,5 @@ globalThis.ft = formatTest;
 /**
  * Handler and classes for the **CMFT** (**Component Model for Formatting Text**) text formatter.
  * */
-export {
-  blank,
-  Collection,
-  Directive,
-  Directives,
-  Drawer,
-  drawer,
-  Element,
-  escape,
-  formatTest,
-  Icon,
-  Loader,
-  Text
-};
+export { blank, Collection, Directive, Directives, Drawer, drawer, Element, escape, formatTest, Icon, Loader, Text };
 

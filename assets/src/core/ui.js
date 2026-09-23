@@ -8,13 +8,14 @@
 import { Timer } from "../classes/timer.js";
 import { fonts } from "../play/font.js";
 import { contentScale } from "../play/game.js";
-import { blockSize, Direction } from "../scaling.js";
+import { Direction } from "../scaling.js";
 import * as CMFT from "./cmft.js";
 import { col } from "./color.js";
 import { CutsceneHandler } from "./cutscene.js";
 import { ImageContainer } from "./image.js";
+import { KeybindHandler } from "./keys.js";
 import * as MLF1 from "./mlf1.js";
-import { roundNum, Vector } from "./number.js";
+import { Vector } from "./number.js";
 const ui = new (class UI {
   menuState = "title";
   waitingForMouseUp = false;
@@ -31,7 +32,7 @@ const ui = new (class UI {
     #fms = false;
     #bms = false;
     constructor() {
-      addEventListener("mousedown", (e) => {
+      addEventListener("mousedown", e => {
         switch (e.button) {
           case 0:
             this.#lmb = true;
@@ -62,7 +63,7 @@ const ui = new (class UI {
             console.warn(`Unknown button code: ${e.button}`);
         }
       });
-      addEventListener("mouseup", (e) => {
+      addEventListener("mouseup", e => {
         switch (e.button) {
           case 0:
             this.#lmb = false;
@@ -144,48 +145,98 @@ const ui = new (class UI {
     onbackrel(t) {}
   })();
   lastMousePos = { x: 0, blockX: 0, y: 0, blockY: 0 };
-  camera = {
-    x: 0,
-    y: 0,
-    rotation: 0,
-    zoom: 1,
+  camera = new (class Camera {
+    x = 0;
+    y = 0;
+    // rotation = 0; // NO.
+    zoom = 1;
+    /** @readonly */
     get pos() {
       return new Vector(this.x, this.y);
-    },
-  };
+    }
+  })();
   offset = 0;
-  conditions = {};
-  components = [];
+  #conditions = {};
+  /** Sets a UI condition.
+   * @param {string} condition Either the name of the condition, or both the name and value in the form `"name:value"`.
+   * @param {string} value The value, if not specified before.
+   */
+  set(condition, value) {
+    if (typeof condition !== "string") condition = `${condition}`;
+    this.#conditions[condition] = value;
+  }
+  /** Gets the current value of a UI condition.
+   * @param {string} condition The name of the condition.
+   */
+  get(condition) {
+    if (typeof condition !== "string") condition = `${condition}`;
+    return this.#conditions[condition];
+  }
+  /**Checks if a condition has the specified value.
+   * @param {string} condition The name of the condition.
+   * @param {...string} values Values to check the condition against. If this is provided, then no string splitting is done.
+   */
+  is(condition, ...values) {
+    if (typeof condition !== "string") condition = `${condition}`;
+    if (values.length !== 0) {
+      const c = this.#conditions[condition];
+      return c !== undefined && values.includes(c);
+    }
+    return this.#conditions[condition] !== undefined;
+  }
+  /** List of components which are currently active. @readonly */
+  get components() {
+    return this.#screens.getOrInsert(this.menuState, []);
+  }
+  /** @type {Map<string,Set<UIComponent>>} */
+  #screens = new Map();
+  /** @param {UIComponent} component @param {string[]} screens */
+  connect(component, screens) {
+    for (const screen of screens) this.#screens.getOrInsert(screen, new Set()).add(component);
+  }
+  /** @param {UIComponent} component */
+  disconnect(component) {
+    for (const [, screen] of this.#screens) screen.delete(component);
+  }
   currentFPS = 0;
   previousFPS = [];
   /**@type {Block} */
   hoveredBlock = null;
-  texteditor = {
-    text: "",
-    title: "Enter Text:",
-    save: (txt) => {},
-    active: false,
-    isCommandLine: false,
-  };
+  #te = new (class TextEditorData {
+    text = "";
+    title = "Enter Text:";
+    save = txt => {};
+    isCommandLine = false;
+    #tkb = new KeybindHandler();
+    /** Key bindings that operate on the text editor. Take priority over ui keybinds, and therefore game keybinds. @readonly */
+    get keybinds() {
+      return this.#tkb;
+    }
+    keyTriggered = false;
+  })();
+  /** @readonly */
+  get texteditor() {
+    return this.#te;
+  }
   endEdit() {
     this.texteditor.save(this.texteditor.text);
     this.texteditor.text = "";
-    this.texteditor.active = false;
+    this.set("texteditor", "false");
     this.texteditor.isCommandLine = false;
   }
   reset() {
     this.menuState = "title";
     this.waitingForMouseUp = false;
     this.texteditor.text = "";
-    this.texteditor.active = false;
+    this.set("texteditor", "false");
     this.previousFPS = [];
     this.hoveredBlock = null;
-    this.resets.forEach((c) => UIComponent.setCondition(...c));
+    this.resets.forEach(c => UIComponent.setCondition(...c));
     this.wasReset = true;
   }
   wasReset = false;
   timer = new Timer();
-  cutscene = new CutsceneHandler((v) => (ui.menuState = v));
+  cutscene = new CutsceneHandler(v => (ui.menuState = v));
   /** @type {[string,string][]} */
   resets = [];
   /** Adds a condition to be set whenever the UI resets. */
@@ -237,15 +288,8 @@ class UIComponent {
     return this;
   }
   calculateTextWidth() {
-    return globalThis.textWidth ?
-        Math.max(...this.text.split("\n").map((x) => textWidth(x)))
-      : this.width;
+    return globalThis.textWidth ? Math.max(...this.text.split("\n").map(x => textWidth(x))) : this.width;
   }
-
-  disconnect() {
-    ui.components.splice(ui.components.indexOf(this), 1);
-  }
-
   alignLeft() {
     this.ox = this.x; //Save old x
     this.define("x", () => this.ox + Math.max(this.width, this.calculateTextWidth()) * 0.5);
@@ -274,54 +318,40 @@ class UIComponent {
     this.rotation += rotation;
     return this;
   }
-  onlyif(fn = () => true) {
+  /** @param {(component: this) => boolean} fn  */
+  onlyif(fn) {
+    if (!fn) return this;
     this.iffns.push(fn);
     return this;
   }
 
-  /**  @template {keyof ({[T in keyof this as this[T] extends Function ? never : T]: this[T] })} K god this type is horrible @param {K} prop  @param {() => this[K]} getter */
+  /**  @template {keyof ({[T in keyof this as this[T] extends Function ? never : T]: this[T] })} K god this type is horrible @param {K} prop  @param {(this: UIComponent) => this[K]} getter */
   define(prop, getter) {
     if (typeof this[prop] === "function") return this;
-    if (typeof this[prop] === "undefined") return this;
+    if (!(prop in this)) return this;
     return Object.defineProperty(this, prop, { get: getter });
   }
 
   /**Evaluates property:value on game ui: input `"slot:1"` => if `"slot"` is `"1"` (but not if it is equivalent, e.g. `1`) return `true`, else `false`. \
    * The property `texteditor` cannot be set, as it is a special property of the ui. \
-   * Multiple possible properties can be tested for: `slot:1|2|3|4` returns `true` if `"slot"` is _any_ of `"1"`,`"2"`,`"3"` or `"4"`. \
-   * If more parameters are provided, then no string splitting is done.
+   * Multiple possible properties can be tested for: `slot:1|2|3|4` returns `true` if `"slot"` is _any_ of `"1"`,`"2"`,`"3"` or `"4"`.
    */
-  static evaluateCondition(condition, ...values) {
+  static evaluateCondition(condition) {
     if (typeof condition !== "string") condition = `${condition}`;
-    if (values.length !== 0) {
-      const c = ui.conditions[condition];
-      return c !== undefined && values.includes(c);
-    }
     const i = condition.indexOf(":");
     if (i === -1) {
       //If no colon, simply return its presence
-      return ui.conditions[condition] !== undefined;
+      return ui.is(condition) !== undefined;
     }
     const con = condition.substring(0, i);
-    const vals = condition.substring(i + 1);
+    const vals = condition.substring(i + 1).split("|");
 
-    const c = ui.conditions[con];
-    if (c !== undefined) {
-      //Separate property values
-      let values = vals.split("|");
-      //If property exists
-      return values.includes(c); //Check it and return
-    }
-    if (con === "texteditor") {
-      return vals === "true" ? ui.texteditor.active : !ui.texteditor.active;
-    }
-    return true; //If unsure, ignore
+    return ui.is(con, ...vals);
   }
   //Sets property:value on game ui: input "slot:1" => sets "slot" to "1"
   static setCondition(condition, value) {
-    if (typeof condition !== "string") condition = `${condition}`;
     if (value !== undefined) {
-      ui.conditions[condition] = `${value}`;
+      ui.set(condition, value);
     }
     const i = condition.indexOf(":");
     if (i === -1) {
@@ -329,9 +359,8 @@ class UIComponent {
     }
     const con = condition.substring(0, i);
     const val = condition.substring(i + 1);
-    ui.conditions[con] = `${val}`; //Set the property
+    ui.set(con, val);
   }
-  acceptedScreens = [];
   conditions = [];
   iffns = [];
   interactive = false;
@@ -348,10 +377,7 @@ class UIComponent {
 
   updateActivity() {
     //It's active if it should show *and* all the conditions are met
-    this.active =
-      this.acceptedScreens.includes(ui.menuState) &&
-      this.getActivity() &&
-      this.iffns.every((i) => i());
+    this.active = this.getActivity() && this.iffns.every(i => i(this));
   }
   getActivity() {
     if (this.conditions[0] === "any") {
@@ -371,17 +397,7 @@ class UIComponent {
     }
     return false;
   }
-  constructor(
-    x = 0,
-    y = 0,
-    width = 1,
-    height = 1,
-    bevel = "none",
-    onpress = () => {},
-    shownText = "",
-    useOCR = false,
-    shownTextSize = 20,
-  ) {
+  constructor(x = 0, y = 0, width = 1, height = 1, bevel = "none", onpress = () => {}, shownText = "", useOCR = false, shownTextSize = 20) {
     //Initialise component
     this.x = x;
     this.y = y;
@@ -467,10 +483,10 @@ class UIComponent {
   checkMouse() {
     // If the mouse is colliding with the button
     if (
-      ui.mouse.x < this.x + this.width * 0.5 &&
-      ui.mouse.x > this.x - this.width * 0.5 &&
-      ui.mouse.y < this.y + this.height * 0.5 &&
-      ui.mouse.y > this.y - this.height / 2
+      ui.mouse.x < this.x + this.width * 0.5
+      && ui.mouse.x > this.x - this.width * 0.5
+      && ui.mouse.y < this.y + this.height * 0.5
+      && ui.mouse.y > this.y - this.height / 2
     ) {
       //And mouse is down
       if (mouseIsPressed) {
@@ -569,16 +585,8 @@ class HealthbarComponent extends UIComponent {
         col.fill(this.backgroundColour ?? col.from(95, 100, 100, 160));
         this.#shape(this.x - this.width * 0.5, this.y, this.width, this.height, true);
       }
-      col.fill(
-        src ? col.interp(this.healthbarColours, src[this.#current] / src[this.#max]) : col.red,
-      );
-      this.#shape(
-        this.x - this.width * 0.5,
-        this.y,
-        src ? (this.width * src[this.#current]) / src[this.#max] : this.width,
-        this.height,
-        true,
-      );
+      col.fill(src ? col.interp(this.healthbarColours, src[this.#current] / src[this.#max]) : col.red);
+      this.#shape(this.x - this.width * 0.5, this.y, src ? (this.width * src[this.#current]) / src[this.#max] : this.width, this.height, true);
     }
     //Draw optional text
     noStroke();
@@ -700,17 +708,7 @@ class MultilineUIComponent extends UIComponent {
 }
 
 class ImageUIComponent extends UIComponent {
-  constructor(
-    x = 0,
-    y = 0,
-    width = 1,
-    height = 1,
-    shownImage = "error",
-    onpress = () => {},
-    outline = true,
-    scale = 1,
-    pixelate = true,
-  ) {
+  constructor(x = 0, y = 0, width = 1, height = 1, shownImage = "error", onpress = () => {}, outline = true, scale = 1, pixelate = true) {
     //Initialise component
     super(x, y, width, height, "none", onpress, "", false, 0);
     this.image = shownImage;
@@ -766,7 +764,7 @@ class InventoryUIComponent extends UIComponent {
 
 class CMFTUIComponent extends UIComponent {
   /**@param {(text:string) => string} fn*/
-  formatter = (t) => t;
+  formatter = t => t;
   lasttxt = "";
   textdrawer = CMFT.blank();
   hastext = false;
@@ -794,11 +792,7 @@ class CMFTUIComponent extends UIComponent {
       s = textWidth("a");
     }
     // console.log("using text width = " + s + ", height = " + this.textSize);
-    this.textdrawer = CMFT.drawer(
-      this.formatter(t ?? "null"),
-      this.textSize,
-      Math.floor((this.width - 21) / s),
-    ).noBG();
+    this.textdrawer = CMFT.drawer(this.formatter(t ?? "null"), this.textSize, Math.floor((this.width - 21) / s)).noBG();
     this.lasttxt = t;
   }
   draw() {
@@ -806,218 +800,7 @@ class CMFTUIComponent extends UIComponent {
     const t = this.text;
     if (t !== this.lasttxt) this.#settxt(t);
 
-    this.textdrawer.draw(
-      this.x - (this.width - 20) * 0.5,
-      this.y - (this.height - 20) * 0.5,
-      this.textColour,
-      this.rarityColour,
-    );
-  }
-}
-
-export class BulletVisualiser extends UIComponent {
-  /** @type {Integrate.Unconstructed<BulletInstance>} */
-  bullet = {};
-  #off = 0;
-  depth = Infinity;
-  draw() {
-    super.draw();
-    this.#off = this.#drawBulletPath(
-      this.x - this.width * 0.5 + 20,
-      this.y + this.height * 0.5 - this.#off,
-      degrees(this.rotation),
-      this.bullet,
-      this.depth,
-    );
-  }
-  /**
-   *
-   * @param {number} x
-   * @param {number} y
-   * @param {number} d
-   * @param {Integrate.Unconstructed<BulletInstance>} bullet
-   * @returns The height of the visual.
-   */
-  #drawBulletPath(x, y, d, bullet, maxd = Infinity, depth = 0) {
-    const start = new Vector(x, y);
-    let direction = new Vector(1, 0).rotate(d + (bullet.direction ?? 0));
-    bullet.decel ??= 0;
-
-    const updates = (bullet.extraUpdates ?? 0) + 1;
-
-    const speed = bullet.speed ?? 20;
-    const time = Math.ceil((bullet.lifetime ?? 0) / updates, 1);
-    const ptime =
-      bullet.decel > 0 ? Math.min(bullet.lifetime, bullet.speed / bullet.decel) : bullet.lifetime;
-    const range = speed * ptime + 0.5 * (-bullet.decel * ptime * ptime);
-    const color =
-      depth > maxd ? col.from(50, 50, 50, 100)
-      : bullet.trail ? (col.convert(bullet.trailColours[0]) ?? col.white)
-      : col.white;
-
-    const end = start.add(direction.scale(range));
-
-    push();
-    noFill();
-    strokeWeight(bullet.hitSize ?? 2);
-    textSize(15);
-    textFont(fonts.ocr);
-    col.stroke(color);
-    // spawning position
-    circle(x, y, 10);
-    // basic range
-    line(x, y, end.x, end.y);
-    // area damage
-    strokeWeight(2);
-    col.fill(col.withA(color, 100));
-    let toff = 0;
-    if (Array.isArray(bullet.damage))
-      for (let d of bullet.damage) {
-        if (d.radius && d.amount) {
-          if (d.radius > toff) toff = d.radius;
-          circle(end.x, end.y, d.radius * 2);
-        }
-      }
-    toff *= Math.SQRT1_2;
-    toff += 10;
-    noFill();
-    if (bullet.speed > 0) {
-      // speed indicators
-      let s = speed * updates;
-      push();
-      translate(start.x, start.y);
-      rotate(direction.angleRad);
-      for (let dist = s; dist < range; dist += s) {
-        s -= bullet.decel * updates;
-        line(dist, 0, dist - 5, -5);
-        line(dist, 0, dist - 5, 5);
-      }
-      line(range + 5, 5, range - 5, -5);
-      line(range + 5, -5, range - 5, 5);
-      pop();
-    }
-    // splits!
-    if (bullet.fragNumber > 0) {
-      this.#showEmission(
-        direction,
-        end,
-        toff,
-        bullet.fragDirection,
-        bullet.fragSpacing,
-        bullet.fragSpread,
-        bullet.fragNumber,
-        1,
-        bullet.fragBullet,
-        maxd,
-        depth + 1,
-      );
-    }
-    if (bullet.intervalNumber > 0) {
-      const mid = start.add(end).scale(0.5);
-      const off = bullet.fragNumber > 0 ? toff + 60 : toff;
-      const c = Math.max(Math.floor(ptime / ((bullet.intervalTime ?? 0) + 1)), 1);
-      this.#showEmission(
-        direction,
-        mid,
-        off,
-        bullet.intervalDirection,
-        bullet.intervalSpacing,
-        bullet.intervalSpread,
-        bullet.intervalNumber,
-        c,
-        bullet.intervalBullet,
-        maxd,
-        depth + 1,
-      );
-
-      // this.#drawBulletPath(intervalp.x, intervalp.y, direction.angle, bullet.intervalBullet);
-    }
-    // texts
-    noStroke();
-    col.fill(color);
-    textAlign(LEFT);
-    if (bullet.lifetime > 0) {
-      text(`${roundNum(time / 60, 2)}s`, x, y + 15);
-      text(`${roundNum(range / blockSize, 2)} tiles`, x, y + 30);
-    }
-    let ty = end.y + toff;
-    if (Array.isArray(bullet.damage))
-      for (let d of bullet.damage) {
-        if (d.amount) {
-          text(`${d.amount} ${d.radius ? "area " : ""}${d.type}`, end.x + toff, ty);
-          ty += 15;
-        }
-      }
-    pop();
-    return Math.max(ty - y, toff, 40);
-  }
-  /**
-   *
-   * @param {Vector} baseDir
-   * @param {Vector} position
-   * @param {number} offset Distance from 'position'.
-   * @param {number} direction
-   * @param {number} spacing
-   * @param {number} spread
-   * @param {number} count
-   * @param {Integrate.Unconstructed<BulletInstance>} bullet
-   */
-  #showEmission(
-    baseDir,
-    position,
-    offset = 0,
-    direction = 0,
-    spacing = 0,
-    spread = 0,
-    count = 1,
-    bursts = 1,
-    bullet = {},
-    maxdepth,
-    depth,
-  ) {
-    const c = depth > maxdepth ? col.from(50, 50, 50, 100) : col.accent;
-    col.stroke(c);
-    col.fill(col.withA(c, 100));
-    const middle = direction + baseDir.angle;
-    const indicatorSize = 25;
-
-    if (spacing) {
-      const diff = Math.min((Math.abs(spacing) * (count - 1)) / 2, 179);
-      for (let d = middle - diff; d <= middle + diff; d += spacing) {
-        // line(position.x, position.y, ...position.add(baseDir.rotate(d).scale(25)));
-        arc(
-          position.x,
-          position.y,
-          indicatorSize * 2,
-          indicatorSize * 2,
-          radians(d - spread),
-          radians(d + spread),
-          PIE,
-        );
-      }
-    } else if (spread)
-      arc(
-        position.x,
-        position.y,
-        indicatorSize * 2,
-        indicatorSize * 2,
-        radians(middle - spread),
-        radians(middle + spread),
-        PIE,
-      );
-    const s = Math.max(offset, bursts > 1 ? indicatorSize + 15 : indicatorSize);
-
-    line(position.x, position.y, ...position.add(baseDir.rotate(direction).scale(indicatorSize)));
-    const fragp = bullet.lifetime === 0 ? position : position.addXY(s + 30, -(s + 30));
-    line(position.x, position.y, fragp.x, fragp.y);
-
-    noStroke();
-    textAlign(RIGHT);
-    col.fill(c);
-    if (count > 1) text(`${count}x`, position.x + s + 7, position.y - s - 10);
-    if (bursts > 1) text(`${bursts} bursts`, position.x + s - 8, position.y - s + 5);
-
-    this.#drawBulletPath(fragp.x, fragp.y, baseDir.angle + direction, bullet, maxdepth, depth);
+    this.textdrawer.draw(this.x - (this.width - 20) * 0.5, this.y - (this.height - 20) * 0.5, this.textColour, this.rarityColour);
   }
 }
 
@@ -1155,7 +938,7 @@ class SliderUIComponent extends UIComponent {
     shownText = "",
     useOCR = false,
     shownTextSize = 20,
-    onchange = (value) => {},
+    onchange = value => {},
     min = 0,
     max = 100,
   ) {
@@ -1171,20 +954,10 @@ class SliderUIComponent extends UIComponent {
     push();
     //Outline
     col.fill(this.outlineColour);
-    rect(
-      this.x + (this.width + this.length) * 0.5 - this.height * 0.5,
-      this.y,
-      this.length + this.height + 18,
-      this.height * 0.5 + 18,
-    );
+    rect(this.x + (this.width + this.length) * 0.5 - this.height * 0.5, this.y, this.length + this.height + 18, this.height * 0.5 + 18);
     //Empty bit
     fill(0);
-    rect(
-      this.x + (this.width + this.length) * 0.5 - this.height * 0.5,
-      this.y,
-      this.length + this.height - 2,
-      this.height * 0.5 - 2,
-    );
+    rect(this.x + (this.width + this.length) * 0.5 - this.height * 0.5, this.y, this.length + this.height - 2, this.height * 0.5 - 2);
     //Full bit
     fill(255, 255, 0);
     //Get minimum X
@@ -1202,12 +975,7 @@ class SliderUIComponent extends UIComponent {
     let minX = this.x + this.width * 0.5,
       maxX = this.x + this.width * 0.5 + this.length;
     // If the mouse is colliding with the button
-    if (
-      ui.mouse.x < maxX &&
-      ui.mouse.x > minX &&
-      ui.mouse.y < this.y + this.height * 0.5 &&
-      ui.mouse.y > this.y - this.height / 2
-    ) {
+    if (ui.mouse.x < maxX && ui.mouse.x > minX && ui.mouse.y < this.y + this.height * 0.5 && ui.mouse.y > this.y - this.height / 2) {
       //And mouse is down
       if (mouseIsPressed) {
         // - But don't wait, so smooth movement
@@ -1241,73 +1009,19 @@ function createUIComponent(
   shownTextSize = 20,
 ) {
   //Make component
-  const component = new UIComponent(
-    x,
-    y,
-    width,
-    height,
-    bevel,
-    onpress ?? (() => {}),
-    shownText,
-    useOCR,
-    shownTextSize,
-  );
+  const component = new UIComponent(x, y, width, height, bevel, onpress ?? (() => {}), shownText, useOCR, shownTextSize);
   component.conditions = conditions;
-  //Set conditional things
-  component.acceptedScreens = screens;
-  component.isInteractive = !!onpress;
-  //Add to game
-  ui.components.push(component);
-  return component;
-}
-export function createBulletVisualiserComponent(
-  screens = [],
-  conditions = [],
-  x = 0,
-  y = 0,
-  width = 1,
-  height = 1,
-  bevel = "none",
-  onpress = null,
-  bullet = {},
-) {
-  //Make component
-  const component = new BulletVisualiser(x, y, width, height, bevel, onpress ?? (() => {}));
-  component.bullet = bullet;
-  component.conditions = conditions;
-  //Set conditional things
-  component.acceptedScreens = screens;
-  component.isInteractive = !!onpress;
-  //Add to game
-  ui.components.push(component);
+  component.interactive = !!onpress;
+  ui.connect(component, screens);
   return component;
 }
 
-export function createCustomComponent(
-  screens = [],
-  conditions = [],
-  x = 0,
-  y = 0,
-  width = 1,
-  height = 1,
-  onpress = null,
-  drawer = null,
-) {
+export function createCustomComponent(screens = [], conditions = [], x = 0, y = 0, width = 1, height = 1, onpress = null, drawer = null) {
   //Make component
-  const component = new CustomComponent(
-    x,
-    y,
-    width,
-    height,
-    onpress ?? (() => {}),
-    drawer ?? (() => {}),
-  );
+  const component = new CustomComponent(x, y, width, height, onpress ?? (() => {}), drawer ?? (() => {}));
   component.conditions = conditions;
-  //Set conditional things
-  component.acceptedScreens = screens;
-  component.isInteractive = !!onpress;
-  //Add to game
-  ui.components.push(component);
+  component.interactive = !!onpress;
+  ui.connect(component, screens);
   return component;
 }
 
@@ -1325,23 +1039,10 @@ function createMultilineUIComponent(
   shownTextSize = 20,
 ) {
   //Make component
-  const component = new MultilineUIComponent(
-    x,
-    y,
-    width,
-    height,
-    bevel,
-    onpress ?? (() => {}),
-    shownText,
-    useOCR,
-    shownTextSize,
-  );
+  const component = new MultilineUIComponent(x, y, width, height, bevel, onpress ?? (() => {}), shownText, useOCR, shownTextSize);
   component.conditions = conditions;
-  //Set conditional things
-  component.acceptedScreens = screens;
-  component.isInteractive = !!onpress;
-  //Add to game
-  ui.components.push(component);
+  component.interactive = !!onpress;
+  ui.connect(component, screens);
   return component;
 }
 
@@ -1359,116 +1060,19 @@ function createUIImageComponent(
   pixelate = true,
 ) {
   //Make component
-  const component = new ImageUIComponent(
-    x,
-    y,
-    width,
-    height,
-    shownImage,
-    onpress ?? (() => {}),
-    outline,
-    scale,
-    pixelate,
-  );
+  const component = new ImageUIComponent(x, y, width, height, shownImage, onpress ?? (() => {}), outline, scale, pixelate);
   component.conditions = conditions;
-  //Set conditional things
-  component.acceptedScreens = screens;
-  component.isInteractive = !!onpress;
-  //Add to game
-  ui.components.push(component);
+  component.interactive = !!onpress;
+  ui.connect(component, screens);
   return component;
 }
 
-function createUIInventoryComponent(
-  screens = [],
-  conditions = [],
-  x = 0,
-  y = 0,
-  inv = null,
-  rows = null,
-  cols = null,
-  itemSize = 40,
-) {
+function createUIInventoryComponent(screens = [], conditions = [], x = 0, y = 0, inv = null, rows = null, cols = null, itemSize = 40) {
   //Make component
   const component = new InventoryUIComponent(x, y, inv, rows, cols, itemSize);
   component.conditions = conditions;
-  //Set conditional things
-  component.acceptedScreens = screens;
-  //Add to game
-  ui.components.push(component);
+  ui.connect(component, screens);
   return component;
-}
-
-function createGamePropertySelector(
-  screens = [],
-  conditions = [],
-  x = 0,
-  y = 0,
-  bufferWidth = 1,
-  optionWidth = 1,
-  height = 1,
-  property = "",
-  options = [""],
-  defaultOption = null,
-  shownTexts = [""],
-  shownTextSize = 50,
-  onchange = (value) => {},
-) {
-  //Create display name
-  createUIComponent(
-    screens,
-    conditions,
-    x + property.length * shownTextSize * 0.375 + 50,
-    y - 65,
-    0,
-    0,
-    "none",
-    undefined,
-    property,
-    false,
-    shownTextSize * 0.8,
-  );
-  //Create indicator
-  let diffindicator = createUIComponent(
-    screens,
-    conditions,
-    x + bufferWidth * 0.5,
-    y,
-    bufferWidth,
-    height,
-    "right",
-    undefined,
-    "> ",
-    false,
-    shownTextSize,
-  );
-  diffindicator.chosen = defaultOption in options ? options[defaultOption] : null;
-  let len = Math.min(options.length, shownTexts.length); //Get smallest array, don't use blanks
-  for (let i = 0; i < len; i++) {
-    //For each option or text
-    //Make a selector option
-    let component = createUIComponent(
-      screens,
-      conditions,
-      x + bufferWidth + optionWidth * (i + 0.5),
-      y,
-      optionWidth,
-      height,
-      "both",
-      () => {
-        game[property] = options[i]; //Set the property
-        diffindicator.chosen = options[i];
-        onchange(options[i]);
-      },
-      shownTexts[i],
-      true,
-      shownTextSize,
-    );
-    //Highlight if the diffindicator has chosen this button's option
-    Object.defineProperty(component, "emphasised", {
-      get: () => diffindicator.chosen === options[i],
-    });
-  }
 }
 
 function createSliderComponent(
@@ -1503,11 +1107,8 @@ function createSliderComponent(
     max,
   );
   component.conditions = conditions;
-  //Set conditional things
-  component.acceptedScreens = screens;
-  component.isInteractive = !!onchange;
-  //Add to game
-  ui.components.push(component);
+  component.interactive = !!onchange;
+  ui.connect(component, screens);
   return component;
 }
 
@@ -1527,25 +1128,10 @@ function createHealthbarComponent(
   cols = [col.from(255, 255, 0)],
 ) {
   //Make component
-  const component = new HealthbarComponent(
-    x,
-    y,
-    width,
-    height,
-    bevel,
-    onpress ?? (() => {}),
-    shownText,
-    useOCR,
-    shownTextSize,
-    source,
-    cols,
-  );
+  const component = new HealthbarComponent(x, y, width, height, bevel, onpress ?? (() => {}), shownText, useOCR, shownTextSize, source, cols);
   component.conditions = conditions;
-  //Set conditional things
-  component.acceptedScreens = screens;
-  component.isInteractive = !!onpress;
-  //Add to game
-  ui.components.push(component);
+  component.interactive = !!onpress;
+  ui.connect(component, screens);
   return component;
 }
 
@@ -1562,29 +1148,15 @@ function createCMFTComponent(
   shownTextSize = 20,
 ) {
   //Make component
-  const component = new CMFTUIComponent(
-    x,
-    y,
-    width,
-    height,
-    bevel,
-    onpress ?? (() => {}),
-    shownText,
-    true,
-    shownTextSize,
-  );
+  const component = new CMFTUIComponent(x, y, width, height, bevel, onpress ?? (() => {}), shownText, true, shownTextSize);
   component.conditions = conditions;
-  //Set conditional things
-  component.acceptedScreens = screens;
-  component.isInteractive = !!onpress;
-  //Add to game
-  ui.components.push(component);
+  component.interactive = !!onpress;
+  ui.connect(component, screens);
   return component;
 }
 
 export {
   createCMFTComponent,
-  createGamePropertySelector,
   createHealthbarComponent,
   createMultilineUIComponent,
   createSliderComponent,

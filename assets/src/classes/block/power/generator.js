@@ -1,4 +1,4 @@
-import { roundNum } from "../../../core/number.js";
+import { roundNum, time } from "../../../core/number.js";
 import { Factory } from "../production/factory.js";
 
 export class PowerGenerator extends Factory {
@@ -14,6 +14,6 @@ export class PowerGenerator extends Factory {
     return false;
   }
   createExtendedDetails() {
-    return `#=-Power Generation:\n  #e-${roundNum(this.powerGeneration * 60, 1)}#-- energy/s #=-(#h-${roundNum(this.maxPower / (this.powerGeneration * 60), 1)}s#-- to fill#=-)`;
+    return `#=-Power Generation:\n  #e-${roundNum(this.powerGeneration * 60, 1)}#-- energy/s #=-(#h-${time(this.maxPower / this.powerGeneration)}#-- to fill#=-)`;
   }
 }

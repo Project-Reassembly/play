@@ -27,6 +27,14 @@ function shortenedNumber(num = 0, digits = 2, threshold = 3, integral = true) {
   let suffix = sizes[sizeIndex];
   return suffix ? `${truncNum(roundNum(shownNum * 10 ** shownNumSize, 11), digits)}${suffix}` : "∞";
 }
+export function time(frames) {
+  const totalsecs = roundNum(+frames / 60 || 0, 2);
+  const secs = totalsecs % 60,
+    rm = Math.floor(totalsecs / 60),
+    mins = rm % 60,
+    hours = Math.floor(rm / 60);
+  return `${hours ? ` ${hours}h` : ""}${mins ? ` ${mins}m` : ""}${secs ? ` ${secs}s` : ""}`.trim();
+}
 globalThis.shortenedNumber = shortenedNumber;
 function clamp(x, min, max) {
   return Math.max(min, Math.min(max, x));
@@ -93,7 +101,7 @@ function colinterp(cols, factor, forceint = false) {
       let o = Math.max(c1.length, c2.length); //Allows colour arrays of any length
       let out = [];
       for (let i = 0; i < o; i++) out.push((c1[i] ?? 255) * (1 - fact) + (c2[i] ?? 255) * fact);
-      return forceint ? out.map((x) => Math.round(x)) : out;
+      return forceint ? out.map(x => Math.round(x)) : out;
     }
   }
   return cols.at(-1);
@@ -304,10 +312,7 @@ class Vector {
   }
   /**@param {Vector} other */
   lerp(other, factor) {
-    return new Vector(
-      other.x * factor + this.x * (1 - factor),
-      other.y * factor + this.y * (1 - factor),
-    );
+    return new Vector(other.x * factor + this.x * (1 - factor), other.y * factor + this.y * (1 - factor));
   }
   multiLerp(other, divisions) {
     divisions = Math.max(divisions, 1);
