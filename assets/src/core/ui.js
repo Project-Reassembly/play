@@ -212,7 +212,6 @@ const ui = new (class UI {
     get keybinds() {
       return this.#tkb;
     }
-    keyTriggered = false;
   })();
   /** @readonly */
   get texteditor() {

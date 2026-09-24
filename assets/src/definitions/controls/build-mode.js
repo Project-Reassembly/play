@@ -1,11 +1,12 @@
 import { Container } from "../../classes/block/container.js";
+import { discoverable, discovered } from "../../classes/interaction/discoverers.js";
 import { Inventory } from "../../classes/inventory.js";
 import { keys } from "../../core/keys.js";
 import { ui } from "../../core/ui.js";
 import { game } from "../../play/game.js";
 import { Log } from "../../play/messaging.js";
-import { deselectItem, discoverable, discovered, refreshDatabaseUI, selectItem } from "../screens/item-database.js";
-import { keybinds } from "./_list.js";
+import { deselectItem, refreshDatabaseUI, selectItem } from "../screens/item-database.js";
+import { keybinds } from "./manager.js";
 
 const build = keybinds.mode("build");
 

@@ -30,8 +30,8 @@ class LinearEmissionEffect extends LinearEffect {
       let yo = rnd.float(this.maxYOffset, -this.maxYOffset);
       this.create(
         world,
-        positions.map((v) => v.addXY(xo, yo)),
-        impact
+        positions.map(v => v.addXY(xo, yo)),
+        impact,
       );
     };
 
@@ -42,21 +42,20 @@ class LinearEmissionEffect extends LinearEffect {
         let yo = rnd.float(this.maxYOffset, -this.maxYOffset);
         this.create(
           world,
-          p.map((v) => v.addXY(xo, yo)),
-          impact
+          p.map(v => v.addXY(xo, yo)),
+          impact,
         );
       };
     }
-    if (this.emissions > 1)
-      effectTimer.repeat(fn, this.emissions, this.interval, this.delay);
+    if (this.emissions > 1) effectTimer.repeat(fn, this.emissions, this.interval, this.delay);
     else effectTimer.do(fn, this.delay);
   }
   getParticleArray(world, impact) {
-    return impact
-      ? world.impactParticles
-      : this.isFloor
-      ? world.floorParticles
-      : world.particles;
+    return (
+      impact ? world.impactParticles
+      : this.isFloor ? world.floorParticles
+      : world.particles
+    );
   }
 }
 /**A container for many effects at once. */
@@ -64,10 +63,10 @@ class LinearMultiEffect extends LinearEffect {
   /**@type {LinearEffect[]} */
   effects = [];
   init() {
-    this.effects = this.effects.map((x) => construct(x, "linear-effect"));
+    this.effects = this.effects.map(x => construct(x, "linear-effect"));
   }
   execute(world, positions = [], pos = () => [], impact = false) {
-    this.effects.forEach((z) => z.execute(world, positions, pos, impact));
+    this.effects.forEach(z => z.execute(world, positions, pos, impact));
   }
 }
 class LineEmissionEffect extends LinearEmissionEffect {
@@ -83,8 +82,8 @@ class LineEmissionEffect extends LinearEmissionEffect {
     strokeFrom: 10,
     strokeTo: 0,
   };
-  init(){
-    this.line.colours = (this.line.colours ?? []).map(col.convert)
+  init() {
+    this.line.colours = (this.line.colours ?? []).map(col.convert);
   }
   create(world, positions = [], impact = false) {
     repeat(this.amount, () => {
@@ -95,8 +94,8 @@ class LineEmissionEffect extends LinearEmissionEffect {
           this.line.colours,
           this.line.light ?? 0,
           this.line.strokeFrom ?? 10,
-          this.line.strokeTo ?? 0
-        )
+          this.line.strokeTo ?? 0,
+        ),
       );
     });
   }
@@ -117,8 +116,8 @@ class LightningEmissionEffect extends LinearEmissionEffect {
     deviation: 20,
     glowEffect: 0,
   };
-  init(){
-    this.line.colours = (this.line.colours ?? []).map(col.convert)
+  init() {
+    this.line.colours = (this.line.colours ?? []).map(col.convert);
   }
   create(world, positions = [], impact = false) {
     repeat(this.amount, () => {
@@ -131,15 +130,12 @@ class LightningEmissionEffect extends LinearEmissionEffect {
           this.line.strokeFrom ?? 10,
           this.line.strokeTo ?? 0,
           this.line.deviation ?? 20,
-          this.line.lineLength ?? 3
-        )
+          this.line.lineLength ?? 3,
+        ),
       );
     });
   }
 }
 
-export {
-  LightningEmissionEffect, LinearEffect, LinearEmissionEffect, LinearMultiEffect,
-  LineEmissionEffect
-};
+export { LightningEmissionEffect, LinearEffect, LinearEmissionEffect, LinearMultiEffect, LineEmissionEffect };
 

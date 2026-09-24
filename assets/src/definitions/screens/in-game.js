@@ -73,7 +73,7 @@ createUIComponent(["in-game"], ["paused:true"], 0, 0, 847.5, 15, "left", null, "
 createUIComponent(["in-game"], ["paused:true"], 0, 0, 847.5, 15, "right", null, "", true, 20)
   .anchorLeft()
   .anchorTop(100);
-//FPS
+// FPS
 createUIComponent(["in-game"], [], 0, 20, 100, 35, "right", null, "[FPS]", true, 20)
   .alignLeft()
   .anchorLeft()
@@ -1114,3 +1114,29 @@ createUIComponent(
   true,
   15,
 );
+//##############################################################
+
+//                   DEBUG MODE INDICATOR
+
+//##############################################################
+createUIComponent(
+  ["in-game"],
+  ["mode:debug"],
+  0,
+  500,
+  1920,
+  24,
+  "none",
+  null,
+  "",
+  true,
+  15,
+)
+  .define(
+    "text",
+    () =>
+      `Debug Mode | Press a key`,
+  )
+  .setBackgroundColour(col.accent)
+  .setTextColour(col.black)
+  .setOutlineColour(col.black);

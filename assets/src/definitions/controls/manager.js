@@ -23,14 +23,28 @@ export const keybinds = new (class Keybinds {
   mode(mode) {
     return this.#modes.getOrInsert(mode, new KeybindHandler());
   }
-  down(ev) {
-    if (ui.is("texteditor", "true") && this.#texteditor.downEvent(ev)) return;
-    if (this.#ui.downEvent(ev)) return;
-    if (ui.menuState === "in-game") {
-      const mode = this.#modes.get(ui.get("mode"));
-      if (mode && mode.downEvent(ev)) return;
-      if (this.#game.downEvent(ev)) return;
+  tick() {
+    if (ui.is("texteditor", "true")) this.#texteditor.tick();
+    else {
+      this.#ui.tick();
+      if (ui.menuState === "in-game") {
+        const mode = this.#modes.get(ui.get("mode"));
+        mode && mode.tick();
+        this.#game.tick();
+      }
     }
+  }
+  down(ev) {
+    if (ui.is("texteditor", "true")) this.#texteditor.downEvent(ev);
+    else {
+      if (this.#ui.downEvent(ev)) return true;
+      if (ui.menuState === "in-game") {
+        const mode = this.#modes.get(ui.get("mode"));
+        if (mode && mode.downEvent(ev)) return true;
+        if (this.#game.downEvent(ev)) return true;
+      }
+    }
+    return false;
   }
   up(ev) {
     this.#texteditor.upEvent(ev);

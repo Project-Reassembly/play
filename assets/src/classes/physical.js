@@ -81,6 +81,8 @@ export class PhysicalObject extends Integrate.RegisteredItem {
     //COLLISION DETECTION AAAA
     let hx = Math.round(this.x / blockSize);
     let hy = Math.round(this.y / blockSize);
+    const blockwidth = Math.min(this.height, 30);
+    const blockheight = Math.min(this.width, 30);
     //Blocks
     let upright = this.world.getBlock(hx + 1, hy - 1, "blocks");
     let downright = this.world.getBlock(hx + 1, hy + 1, "blocks");
@@ -89,49 +91,28 @@ export class PhysicalObject extends Integrate.RegisteredItem {
     let right = this.world.getBlock(hx + 1, hy, "blocks");
     let downleft = this.world.getBlock(hx - 1, hy + 1, "blocks");
     //Entity colliders
-    let topcollision = this.y + this.height * 0.5;
-    let bottomcollision = this.y - this.height * 0.5;
-    let leftcollision = this.x - this.width * 0.5;
-    let rightcollision = this.x + this.width * 0.5;
+    let topcollision = this.y + blockheight * 0.5;
+    let bottomcollision = this.y - blockheight * 0.5;
+    let leftcollision = this.x - blockwidth * 0.5;
+    let rightcollision = this.x + blockwidth * 0.5;
     //Intermediary
-    let hitsupleft =
-      upleft &&
-      !upleft.walkable &&
-      bottomcollision < upleft.y + blockSize * 0.5 &&
-      leftcollision < upleft.x + blockSize * 0.5;
-    let hitsupright =
-      upright &&
-      !upright.walkable &&
-      bottomcollision < upright.y + blockSize * 0.5 &&
-      rightcollision > upright.x - blockSize * 0.5;
-    let hitsdownleft =
-      downleft &&
-      !downleft.walkable &&
-      topcollision > downleft.y - blockSize * 0.5 &&
-      leftcollision < downleft.x + blockSize * 0.5;
+    let hitsupleft = upleft && !upleft.walkable && bottomcollision < upleft.y + blockSize * 0.5 && leftcollision < upleft.x + blockSize * 0.5;
+    let hitsupright = upright && !upright.walkable && bottomcollision < upright.y + blockSize * 0.5 && rightcollision > upright.x - blockSize * 0.5;
+    let hitsdownleft = downleft && !downleft.walkable && topcollision > downleft.y - blockSize * 0.5 && leftcollision < downleft.x + blockSize * 0.5;
     let hitsdownright =
-      downright &&
-      !downright.walkable &&
-      topcollision > downright.y - blockSize * 0.5 &&
-      rightcollision > downright.x - blockSize * 0.5;
+      downright && !downright.walkable && topcollision > downright.y - blockSize * 0.5 && rightcollision > downright.x - blockSize * 0.5;
     //Movement
-    let noleft =
-      (left && !left.walkable && leftcollision < left.x + blockSize * 0.5) ||
-      hitsupleft ||
-      hitsdownleft;
-    let noright =
-      (right && !right.walkable && rightcollision > right.x - blockSize * 0.5) ||
-      hitsdownright ||
-      hitsupright;
+    let noleft = (left && !left.walkable && leftcollision < left.x + blockSize * 0.5) || hitsupleft || hitsdownleft;
+    let noright = (right && !right.walkable && rightcollision > right.x - blockSize * 0.5) || hitsdownright || hitsupright;
     //Final judgement
     if (noright) {
       const wall = (right ?? upright ?? downright).x - blockSize * 0.5;
-      this.x = wall - this.width * 0.5;
+      this.x = wall - blockwidth * 0.5;
       this.hitHorizontalWall(wall, this.y);
     }
     if (noleft) {
       const wall = (left ?? upleft ?? downleft).x + blockSize * 0.5;
-      this.x = wall + this.width * 0.5;
+      this.x = wall + blockwidth * 0.5;
       this.hitHorizontalWall(wall, this.y);
     }
   }
@@ -142,6 +123,8 @@ export class PhysicalObject extends Integrate.RegisteredItem {
     //COLLISION DETECTION AAAA
     let hx = Math.round(this.x / blockSize);
     let hy = Math.round(this.y / blockSize);
+    const blockwidth = Math.min(this.height, 30);
+    const blockheight = Math.min(this.width, 30);
     //Blocks
     let up = this.world.getBlock(hx, hy - 1, "blocks");
     let upright = this.world.getBlock(hx + 1, hy - 1, "blocks");
@@ -150,47 +133,28 @@ export class PhysicalObject extends Integrate.RegisteredItem {
     let upleft = this.world.getBlock(hx - 1, hy - 1, "blocks");
     let downleft = this.world.getBlock(hx - 1, hy + 1, "blocks");
     //Entity colliders
-    let topcollision = this.y + this.height * 0.5;
-    let bottomcollision = this.y - this.height * 0.5;
-    let leftcollision = this.x - this.width * 0.5;
-    let rightcollision = this.x + this.width * 0.5;
+    let topcollision = this.y + blockheight * 0.5;
+    let bottomcollision = this.y - blockheight * 0.5;
+    let leftcollision = this.x - blockwidth * 0.5;
+    let rightcollision = this.x + blockwidth * 0.5;
     //Intermediary
-    let hitsupleft =
-      upleft &&
-      !upleft.walkable &&
-      bottomcollision < upleft.y + blockSize * 0.5 &&
-      leftcollision < upleft.x + blockSize * 0.5;
-    let hitsupright =
-      upright &&
-      !upright.walkable &&
-      bottomcollision < upright.y + blockSize * 0.5 &&
-      rightcollision > upright.x - blockSize * 0.5;
-    let hitsdownleft =
-      downleft &&
-      !downleft.walkable &&
-      topcollision > downleft.y - blockSize * 0.5 &&
-      leftcollision < downleft.x + blockSize * 0.5;
+    let hitsupleft = upleft && !upleft.walkable && bottomcollision < upleft.y + blockSize * 0.5 && leftcollision < upleft.x + blockSize * 0.5;
+    let hitsupright = upright && !upright.walkable && bottomcollision < upright.y + blockSize * 0.5 && rightcollision > upright.x - blockSize * 0.5;
+    let hitsdownleft = downleft && !downleft.walkable && topcollision > downleft.y - blockSize * 0.5 && leftcollision < downleft.x + blockSize * 0.5;
     let hitsdownright =
-      downright &&
-      !downright.walkable &&
-      topcollision > downright.y - blockSize * 0.5 &&
-      rightcollision > downright.x - blockSize * 0.5;
+      downright && !downright.walkable && topcollision > downright.y - blockSize * 0.5 && rightcollision > downright.x - blockSize * 0.5;
     //Movement
-    let noup =
-      (up && !up.walkable && bottomcollision < up.y + blockSize * 0.5) || hitsupleft || hitsupright;
-    let nodown =
-      (down && !down.walkable && topcollision > down.y - blockSize * 0.5) ||
-      hitsdownright ||
-      hitsdownleft;
+    let noup = (up && !up.walkable && bottomcollision < up.y + blockSize * 0.5) || hitsupleft || hitsupright;
+    let nodown = (down && !down.walkable && topcollision > down.y - blockSize * 0.5) || hitsdownright || hitsdownleft;
     //Final judgement
     if (noup) {
       const wall = (up ?? upleft ?? upright).y + blockSize * 0.5;
-      this.y = wall + this.height * 0.5;
+      this.y = wall + blockheight * 0.5;
       this.hitVerticalWall(this.x, wall);
     }
     if (nodown) {
       const wall = (down ?? downleft ?? downright).y - blockSize * 0.5;
-      this.y = wall - this.height * 0.5;
+      this.y = wall - blockheight * 0.5;
       this.hitVerticalWall(this.x, wall);
     }
   }
@@ -256,6 +220,7 @@ export class PhysicalObject extends Integrate.RegisteredItem {
       stroke(0, 255, 0);
       strokeWeight(2);
       rect(this.x, this.y, this.width, this.height);
+      rect(this.x, this.y, Math.min(this.width, 30), Math.min(this.height, 30));
       pop();
     }
   }
@@ -276,16 +241,7 @@ export class PhysicalObject extends Integrate.RegisteredItem {
    * @param {PhysicalObject} otherObj
    */
   isWithinSquareRange(otherObj, range) {
-    return rectanglesIntersect(
-      otherObj.x,
-      otherObj.y,
-      otherObj.width,
-      otherObj.height,
-      this.x,
-      this.y,
-      range,
-      range,
-    );
+    return rectanglesIntersect(otherObj.x, otherObj.y, otherObj.width, otherObj.height, this.x, this.y, range, range);
   }
   distanceToPoint(x, y) {
     return ((this.y - y) ** 2 + (this.x - x) ** 2) ** 0.5;
@@ -414,12 +370,7 @@ export class ShootableObject extends PhysicalObject {
         Math.round(mag),
 
         createFlashingColourArray(
-          amount >= 0 ?
-            col.interp(
-              this.useYellowShield ? [col.yellow, col.white] : [col.blue, col.cyan, col.white],
-              clamp(frac, 0, 1),
-            )
-          : col.magenta,
+          amount >= 0 ? col.interp(this.useYellowShield ? [col.yellow, col.white] : [col.blue, col.cyan, col.white], clamp(frac, 0, 1)) : col.magenta,
           65,
         ),
 
@@ -457,10 +408,7 @@ export class ShootableObject extends PhysicalObject {
   /** Calculate the damage to deal to this entity after applying armour. */
   calcArmour(amount) {
     let at = Math.log1p(this.armourToughness) / ShootableObject.LN1p4;
-    return (
-      amount *
-      (1 - ((1 - (at + 1) / (this.armour + at + 1)) ** 0.3) ** (amount ** (1 - (at + 1) / 10)))
-    );
+    return amount * (1 - ((1 - (at + 1) / (this.armour + at + 1)) ** 0.3) ** (amount ** (1 - (at + 1) / 10)));
   }
   /** Calculate the damage to do to the entity's shield. */
   calcShield(amount) {
@@ -495,12 +443,7 @@ export class ShootableObject extends PhysicalObject {
       rect(this.x - this.width * 0.5, this.y + this.height * 0.5 - 5, this.width, 5);
       col.fill(col.interp([col.red, col.yellow, col.green], this.health / this.maxHealth));
       noStroke();
-      rect(
-        this.x - this.width * 0.5,
-        this.y + this.height * 0.5 - 5,
-        (this.width * this.health) / this.maxHealth,
-        5,
-      );
+      rect(this.x - this.width * 0.5, this.y + this.height * 0.5 - 5, (this.width * this.health) / this.maxHealth, 5);
       pop();
       this._healthbarShowTime--;
     }
@@ -528,16 +471,7 @@ export class ShootableObject extends PhysicalObject {
  * @returns True if the objects collide.
  */
 function hitboxesIntersect(o1, o2) {
-  return rectanglesIntersect(
-    o1.x,
-    o1.y,
-    o1.width / 2,
-    o1.height / 2,
-    o2.x,
-    o2.y,
-    o2.width / 2,
-    o2.height / 2,
-  );
+  return rectanglesIntersect(o1.x, o1.y, o1.width / 2, o1.height / 2, o2.x, o2.y, o2.width / 2, o2.height / 2);
 }
 /**
  * Checks for collision between 2 rectangular objects/hitboxes.

@@ -147,7 +147,7 @@ export class KeybindHandler {
     }
   })(this.#keys);
   /** @readonly */
-  get controls() {
+  get control() {
     return this.#ct;
   }
   /** Creates and connects a new shortcut binding.
@@ -192,7 +192,7 @@ export class KeybindHandler {
    * @param {KeyboardEvent} ev
    */
   downEvent(ev) {
-    return this.down(ev.code, ev.ctrlKey, ev.shiftKey, ev.altKey);
+    return this.down(ev.code, ev.ctrlKey && ev.key !== "Control", ev.shiftKey && ev.key !== "Shift", ev.altKey && ev.key !== "Alt");
   }
   /**
    * Fires `up` with data from the provided `KeyboardEvent`.
@@ -207,7 +207,7 @@ export class KeybindHandler {
   down(key, ctrl = false, shift = false, alt = false) {
     let fired = false;
     // console.log(`firing [${key}:${(ctrl ? "c" : "") + (shift ? "s" : "") + (alt ? "a" : "")}]`);
-    for (const [name, binding] of this.#keys) {
+    for (const [, binding] of this.#keys) {
       if (binding.shortcut.active(key, ctrl, shift, alt)) {
         binding.press();
         // console.log(`activated ${name}`);
@@ -223,7 +223,7 @@ export class KeybindHandler {
    */
   up(key) {
     // console.log(`unfiring [${key}:*]`);
-    for (const [name, binding] of this.#keys) {
+    for (const [, binding] of this.#keys) {
       if (binding.shortcut.key === key) {
         binding.release();
         // console.log(`deactivated ${name}`);
@@ -266,6 +266,9 @@ export class KeybindHandler {
   descriptor(name) {
     return this.#keys.get(name)?.shortcut;
   }
+  isDown(name) {
+    return this.#keys.get(name)?.down;
+  }
   /** @readonly */
   get all() {
     return new Set(this.#keys.keys());
@@ -299,6 +302,7 @@ const renames = {
 /** @typedef {number & {}} modifier */
 /** Modifier key states. Can be combined with bitwise 'or' operations. */
 export const mods = Object.freeze({
+  /** @type {modifier} */ none: 0b0000,
   /** @type {modifier} */ ctrl: 0b0001,
   /** @type {modifier} */ shift: 0b0010,
   /** @type {modifier} */ alt: 0b0100,
@@ -307,6 +311,12 @@ export const mods = Object.freeze({
 });
 export const keys = Object.freeze({
   unbound: "",
+  alt: "AltLeft",
+  shift: "ShiftLeft",
+  ctrl: "CtrlLeft",
+  altR: "AltRight",
+  shiftR: "ShiftRight",
+  ctrlR: "CtrlRight",
   q: "KeyQ",
   w: "KeyW",
   e: "KeyE",
@@ -398,5 +408,6 @@ function autoname(str) {
   return str
     .replace(/([a-z])([A-Z0-9])/g, "$1 $2")
     .replace(/([A-Z]+)([A-Z0-9][a-z0-9])/g, "$1 $2")
-    .replace("Numpad ", "NP ");
+    .replace(/Numpad(.*)/, "$1 (NP)")
+    .replace(/(Left|Right)/, "($1)");
 }

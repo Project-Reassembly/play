@@ -2052,7 +2052,7 @@ Registries.vfx.add("punch-charged", {
   cone: 360,
   particle: {
     lifetime: 20,
-    speed: .5,
+    speed: 0.5,
     decel: 0,
     colours: [
       [255, 255, 255, 200],
@@ -2330,19 +2330,76 @@ Registries.vfx.add("snipe-trail", {
   },
 });
 
-Registries.vfx.add("iti-laser", {
-  type: "line-emission",
-  amount: 1,
-  line: {
-    lifetime: 20,
-    light: 20,
-    colours: [
-      [255, 30, 30],
-      [255, 0, 0, 50],
-    ],
-    strokeFrom: 6,
-    strokeTo: 0,
-  },
+Registries.vfx.add("iti-laser-extras", {
+  type: "linear-multi",
+  effects: [
+    {
+      type: "lightning-emission",
+      amount: 1,
+      line: {
+        lifetime: 20,
+        light: 20,
+        colours: [
+          [0, 255, 255],
+          [0, 0, 255, 0],
+        ],
+        strokeFrom: 1,
+        strokeTo: 0,
+        deviation: 3,
+        lineLength: 1,
+      },
+    },
+    {
+      type: "line-emission",
+      amount: 1,
+      line: {
+        lifetime: 20,
+        light: 20,
+        colours: [
+          [0, 255, 255],
+          [0, 0, 255, 0],
+        ],
+        strokeFrom: 1,
+        strokeTo: 0,
+      },
+    },
+  ],
+});
+
+Registries.vfx.add("short-iti-laser-extras", {
+  type: "linear-multi",
+  effects: [
+    {
+      type: "lightning-emission",
+      amount: 1,
+      line: {
+        lifetime: 5,
+        light: 20,
+        colours: [
+          [0, 255, 255],
+          [0, 0, 255, 0],
+        ],
+        strokeFrom: 1,
+        strokeTo: 0,
+        deviation: 5,
+        lineLength: 1,
+      },
+    },
+    {
+      type: "line-emission",
+      amount: 1,
+      line: {
+        lifetime: 5,
+        light: 20,
+        colours: [
+          [0, 255, 255],
+          [0, 0, 255, 0],
+        ],
+        strokeFrom: 1,
+        strokeTo: 0,
+      },
+    },
+  ],
 });
 
 Registries.vfx.add("peti-zap", {
@@ -2401,7 +2458,6 @@ Registries.vfx.add("peti-laser-mini", {
     strokeTo: 0,
   },
 });
-
 
 // hmmmmmm
 
@@ -2516,7 +2572,6 @@ Registries.vfx.add("peti-laser-mini", {
 //   ],
 // });
 
-
 Registries.vfx.add("hit-wall", {
   type: "multi-effect",
   effects: [
@@ -2583,7 +2638,7 @@ Registries.vfx.add("hit-wall", {
     },
     {
       type: "particle-emission",
-      cone:0,
+      cone: 0,
       particle: {
         lifetime: 30,
         speed: 0,

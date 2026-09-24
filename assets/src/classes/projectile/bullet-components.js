@@ -5,9 +5,10 @@
 import { col } from "../../core/color.js";
 import { constructFromType } from "../../core/constructor.js";
 import { clamp, rnd, roundNum, time, tru, Vector } from "../../core/number.js";
-import { Registries } from "../../core/registry.js";
+import { Registries, TypeRegistries } from "../../core/registry.js";
 import { rotatedImg, rotatedShape } from "../../core/ui.js";
 import { createLinearEffect, Explosion, NuclearExplosion, repeat } from "../../play/effects.js";
+import { LinearEffect } from "../../play/line-effects.js";
 import { blockSize } from "../../scaling.js";
 import { Fire } from "../effect/fire.js";
 import { ShapeParticle } from "../effect/shape-particle.js";
@@ -179,10 +180,8 @@ export class MovementComponent extends BulletComponent {
       else speedtxt = `Moves#-- at #i-${speed * (amt + 1)} tiles/s`;
     }
     return `#i-${speedtxt}${
-      this.decel > 0 ?
-        `\n#-- decelerating to #i-${roundNum((Math.max(this.speed - this.decel * model.lifetime, 0) * 60) / blockSize, 2)} tiles/s#--`
-      : this.decel < 0 ?
-        `\n#-- accelerating to #i-${(this.speed - this.decel * model.lifetime * 60) / blockSize} tiles/s#--`
+      this.decel > 0 ? `\n#-- decelerating to #i-${roundNum((Math.max(this.speed - this.decel * model.lifetime, 0) * 60) / blockSize, 2)} tiles/s#--`
+      : this.decel < 0 ? `\n#-- accelerating to #i-${(this.speed - this.decel * model.lifetime * 60) / blockSize} tiles/s#--`
       : ""
     }`;
   }
@@ -233,9 +232,7 @@ export class InstantMovementComponent extends BulletComponent {
   onupdate(bullet) {
     if (bullet.entity?.target && bullet.data.get("instantMoved")) {
       //If a target exists
-      const range = bullet.entity.pos.sub(
-        new Vector(bullet.entity.target.x, bullet.entity.target.y),
-      ).magnitude;
+      const range = bullet.entity.pos.sub(new Vector(bullet.entity.target.x, bullet.entity.target.y)).magnitude;
       //find end pos
       let epos = bullet.pos.add(Vector.fromAngleRad(bullet.directionRad).scale(range));
       bullet.x = tx;
@@ -284,12 +281,7 @@ export class TrackNearestComponent extends TrackingComponent {
       //If the bullet exists
       let minDist = Infinity;
       for (let entity of bullet.world.entities) {
-        if (
-          entity.team !== bullet.entity.team &&
-          !entity.dead &&
-          entity.visible &&
-          !bullet.componentDeniesHit(entity)
-        ) {
+        if (entity.team !== bullet.entity.team && !entity.dead && entity.visible && !bullet.componentDeniesHit(entity)) {
           let dist = bullet.distanceTo(entity);
           if (dist < this.range && dist < minDist) {
             //If closer
@@ -303,7 +295,7 @@ export class TrackNearestComponent extends TrackingComponent {
   }
   /** Get CMFT describing this component. */
   getInfo() {
-    return `#b-Tracks#-- the #b-nearest entity#-- within #b-${roundNum(this.range / 30, 1)} tiles`;
+    return `#b-Tracks#-- the #b-nearest enemy#-- ~ #b-${roundNum(this.range / 30, 1)} tiles`;
   }
 }
 
@@ -320,11 +312,7 @@ export class TrackNearSourceTargetComponent extends TrackingComponent {
       let minDist = Infinity;
       selected = bullet.distanceToPoint(pt.x, pt.y) < this.range ? pt : null;
       for (let entity of bullet.world.entities) {
-        if (
-          entity.team !== bullet.entity.team &&
-          !entity.dead &&
-          !bullet.componentDeniesHit(entity)
-        ) {
+        if (entity.team !== bullet.entity.team && !entity.dead && !bullet.componentDeniesHit(entity)) {
           //Only select living entities
           let dist = entity.distanceToPoint(pt.x, pt.y);
           if (dist < this.range && dist < minDist) {
@@ -339,7 +327,7 @@ export class TrackNearSourceTargetComponent extends TrackingComponent {
   }
   /** Get CMFT describing this component. */
   getInfo() {
-    return `#b-Tracks#-- the #b-nearest entity to your mouse#-- within #b-${roundNum(this.range / 30, 1)} tiles`;
+    return `#b-Tracks#-- the #b-enemy pointed at#-- ~ #b-${roundNum(this.range / 30, 1)} tiles`;
   }
 }
 
@@ -353,7 +341,7 @@ export class TrackSourceTargetComponent extends TrackingComponent {
   }
   /** Get CMFT describing this component. */
   getInfo() {
-    return `#b-Tracks your mouse#-- if within #b-${roundNum(this.range / 30, 1)} tiles`;
+    return `#b-Tracks your mouse#-- ~ #b-${roundNum(this.range / 30, 1)} tiles`;
   }
 }
 
@@ -363,8 +351,8 @@ export class VFXTrailComponent extends InvisibleBulletComponent {
     const from = bullet.lastpos,
       to = bullet.pos;
     if (bullet.world?.particles == null) return;
-    if (Registries.vfx.get(this.effect).type === "line-emission")
-      createLinearEffect(this.effect, bullet.world, [from, to]);
+    const t = TypeRegistries.default.get(Registries.vfx.get(this.effect).type);
+    if (t.prototype instanceof LinearEffect) createLinearEffect(this.effect, bullet.world, from.multiLerp(to, 3));
     else bullet.emit(this.effect);
   }
 }
@@ -395,7 +383,7 @@ export class ParticleTrailComponent extends InvisibleBulletComponent {
   /**@param {BulletInstance} bullet @param {Vector} from @param {Vector} to @param {number} spacing  */
   trail(bullet, from, to, spacing) {
     const poses = from.multiLerp(to, Math.ceil(spacing / this.interval));
-    poses.forEach((p) => {
+    poses.forEach(p => {
       const trailparticle = new ShapeParticle(
         p.x,
         p.y,
@@ -538,11 +526,7 @@ export class DamageComponent extends BulletComponent {
    * @param {ShootableObject} thing
    */
   onhit(bullet, thing) {
-    thing.damage(
-      this.damageType,
-      this.amount + rnd.float(-this.spread, this.spread),
-      bullet.entity,
-    );
+    thing.damage(this.damageType, this.amount + rnd.float(-this.spread, this.spread), bullet.entity);
   }
   /** Get CMFT describing this component. */
   getInfo() {
@@ -592,7 +576,7 @@ export class StatusInflictionComponent extends BulletComponent {
   }
   /** Get CMFT describing this component. */
   getInfo() {
-    return `#--Inflicts #a-${Registries.statuses.tryGet(this.effect)?.name ?? this.effect}#-- for #a-${time(this.duration)}s`;
+    return `#--Inflicts #a-${Registries.statuses.tryGet(this.effect)?.name ?? this.effect}#-- for #a-${time(this.duration)}`;
   }
 }
 
@@ -691,7 +675,7 @@ export class BulletTraceComponent extends TraceComponent {
       bullet.world,
       bullet.entity,
     );
-    bullets.forEach((b) => {
+    bullets.forEach(b => {
       b.data.set("steps", bullet.data.get("positions").toReversed());
       b.oncreated();
     });

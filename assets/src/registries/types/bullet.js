@@ -67,7 +67,7 @@ TypeRegistries.bullet.add("trail", ParticleTrailComponent);
 // Spawns a trail made of a visual effect behind the bullet as it travels.
 TypeRegistries.bullet.add("vfx-trail", VFXTrailComponent);
 // Spawns a trail of particles behind the bullet as it travels.
-// Behaves like trails did in older versions (before version 0.0.0-pre98-js)
+// Behaves like trails did in older versions (before version 0.0.0 preview 98)
 TypeRegistries.bullet.add("old-trail", OldTrailComponent);
 // Spawns a trail of particles behind the bullet as it travels.
 // Behaves like MOAB Adventure trails (my other game, https://moab-adventure.github.io/play)

@@ -21,12 +21,7 @@ Registries.items.add("stone", {
   description: "A piece of rock.\nUsed in primitive construction.",
   image: "item.stone",
 });
-Registries.items.add("sand", {
-  name: "Sand",
-  marketValue: 0.1,
-  description: "A pile of sand.",
-  image: "item.sand",
-});
+Registries.items.add("sand", { name: "Sand", marketValue: 0.1, description: "A pile of sand.", image: "item.sand" });
 Registries.items.add("coal", {
   name: "Coal",
   marketValue: 0.75,
@@ -151,8 +146,7 @@ Registries.items.add("makeshift-explosive", {
   type: "throwable",
   name: "Makeshift Explosive",
   marketValue: 5,
-  description:
-    "A small bomb made from coal dust and scrap.\n\nThat's got to be against some convention.",
+  description: "A small bomb made from coal dust and scrap.\n\nThat's got to be against some convention.",
   image: "item.makeshift-explosive",
   bullet: {
     lifetime: 120,
@@ -206,8 +200,7 @@ Registries.items.add("blast-knuckles", {
   type: "accessory",
   name: "Blast Knuckles",
   image: "accessory.blast-knuckles",
-  description:
-    "#7iGet it? Like brass knuckles? But boom?#--\nUses #-bMakeshift Explosive#--s to make #=-charged punches#-- explode violently.",
+  description: "#7iGet it? Like brass knuckles? But boom?#--\nUses #-bMakeshift Explosive#--s to make #=-charged punches#-- explode violently.",
   modifiers: [{ type: "punch", charged: "blast-punch", ammoUsed: "makeshift-explosive" }],
 });
 Registries.items.add("trading-card", {
@@ -259,8 +252,7 @@ Registries.items.add("scrap-repeater", {
   marketValue: 200,
   name: "Scrap Repeater",
   corp: "scrap",
-  description:
-    "Shoots bullets far more quickly.\nMore inaccurate.\n\nIf you shoot enough bullets, you can't miss!\n#[0xff8080]iUnique Boss Drop",
+  description: "Shoots bullets far more quickly.\nMore inaccurate.\n\nIf you shoot enough bullets, you can't miss!\n#[0xff8080]iUnique Boss Drop",
   details:
     "A Gatling-style rotary machine gun, designed to put as many holes in the target in the shortest amount of time as possible. Contains a surprisingly advanced cooling system, powered by the recoil of the gun.\nIt seems to be built for mounting into a much larger frame than your own, as if there was only ever one intended user.",
   image: "weapon.scrap-repeater.item",
@@ -448,8 +440,7 @@ Registries.items.add("iti-laser-pistol", {
   name: "Laser Pistol",
   marketValue: 250,
   corp: "iti",
-  description:
-    "Shoots medium-range small laser beams which set enemies on fire for a short time.\n#6iStandard Issue",
+  description: "Shoots medium-range small laser beams which set enemies on fire for a short time.\n#6iStandard Issue",
   details:
     "The Laser Pistol was InfiniTech Industries' first commercial energy weapon - a type of weapon that uses no physical ammunition, instead drawing power directly from the user's onboard battery. This made it much easier to carry around, but during periods of intense power usage, they have been known to cause shutdowns.",
   image: "weapon.iti-laser-pistol.item",
@@ -464,6 +455,7 @@ Registries.items.add("iti-laser-pistol", {
         components: [
           { type: "movement", speed: 10 },
           { type: "extra-updates", amount: 29 },
+          { type: "line-trace", effect: "iti-laser-extras" },
           {
             type: "trail",
             shape: "rhombus",
@@ -515,29 +507,14 @@ Registries.items.add("iti-laser-caster", {
         hitSize: 3,
         components: [
           { type: "movement", speed: 20 },
+          { type: "vfx-trail", effect: "iti-laser-extras" },
           { type: "trail", colours: [[0, 200, 255, 200]], shape: "rhombus" },
           { type: "shape-drawer", shape: "rhombus", fill: [0, 255, 255], width: 12, height: 4 },
           { type: "status-infliction", effect: "plasma-burn", duration: 360 },
           { type: "knockback", amount: 3 },
           { type: "damage", damageType: "laser", amount: 20, spread: 5 },
-          {
-            type: "explosion",
-            damage: 10,
-            spread: 3,
-            radius: 20,
-            effect: "laser-caster-explosion",
-          },
-          {
-            type: "incendiary",
-            fire: {
-              damage: 5,
-              interval: 10,
-              effect: "laser-caster-fire",
-              status: "plasma-burn",
-              lifetime: 180,
-            },
-            count: 1,
-          },
+          { type: "explosion", damage: 10, spread: 3, radius: 20, effect: "laser-caster-explosion" },
+          { type: "incendiary", fire: { damage: 5, interval: 10, effect: "laser-caster-fire", status: "plasma-burn", lifetime: 180 }, count: 1 },
           {
             type: "frag-bullet",
             number: 6,
@@ -549,6 +526,7 @@ Registries.items.add("iti-laser-caster", {
               components: [
                 { type: "movement", speed: 10 },
                 { type: "track-nearest", range: 100, turnSpeed: 20 },
+                { type: "vfx-trail", effect: "short-iti-laser-extras" },
                 {
                   type: "trail",
                   shape: "rhombus",
@@ -578,13 +556,7 @@ Registries.items.add("iti-laser-caster", {
     ],
     ammos: { none: 0 },
   },
-  shoot: {
-    charge: 60,
-    reload: 180,
-    chargeEffect: "laser-caster-charge",
-    effect: "laser-caster-frag",
-    power: 3500,
-  },
+  shoot: { charge: 60, reload: 180, chargeEffect: "laser-caster-charge", effect: "laser-caster-frag", power: 3500 },
   component: {
     type: "weapon-component",
     width: 32,
@@ -601,8 +573,7 @@ Registries.items.add("iti-energy-repeater", {
   name: "Energy Repeater",
   marketValue: 3000,
   corp: "iti",
-  description:
-    "Rapid-fire mind-guided laser weapon.\nShoots quickfire bursts of plasma bolts.\nAlt-fire to charge a larger explosive bolt.",
+  description: "Rapid-fire mind-guided laser weapon.\nShoots quickfire bursts of plasma bolts.\nAlt-fire to charge a larger explosive bolt.",
   details:
     "After many field reports of users struggling to deal with larger (groups of) targets, ITI added the alternate fire: a larger bolt with explosive potential.\nUnfortunately, some shot speed was lost in the process, but the power use per shot is still much lower than the Laser Caster, its main competitor in the role, so many (mostly newer) users swear by this weapon.",
   image: "weapon.iti-energy-repeater.item",
@@ -612,10 +583,11 @@ Registries.items.add("iti-energy-repeater", {
       {
         lifetime: 15,
         light: 50,
-        hitSize: 3,
+        hitSize: 2,
         components: [
           { type: "track-near-source-target", range: 100, turnSpeed: 20 },
           { type: "movement", speed: 20 },
+          { type: "vfx-trail", effect: "short-iti-laser-extras" },
           {
             type: "trail",
             shape: "rhombus",
@@ -653,6 +625,7 @@ Registries.items.add("iti-energy-repeater", {
         components: [
           { type: "track-near-source-target", range: 150, turnSpeed: 7 },
           { type: "movement", speed: 12 },
+          { type: "vfx-trail", effect: "iti-laser-extras" },
           {
             type: "trail",
             shape: "rhombus",
@@ -665,14 +638,7 @@ Registries.items.add("iti-energy-repeater", {
           { type: "knockback", amount: 3 },
           { type: "status-infliction", effect: "plasma-burn", duration: 180 },
           { type: "shape-drawer", shape: "rhombus", fill: [0, 255, 255], width: 10, height: 4 },
-          {
-            type: "explosion",
-            damageType: "laser",
-            damage: 25,
-            spread: 5,
-            radius: 30,
-            effect: "laser-caster-explosion",
-          },
+          { type: "explosion", damageType: "laser", damage: 25, spread: 5, radius: 30, effect: "laser-caster-explosion" },
         ],
       },
     ],
@@ -748,12 +714,7 @@ Registries.items.add("peti-charged-laser-blaster", {
     ],
     ammos: { none: 0 },
   },
-  shoot: {
-    charge: 45,
-    chargeEffect: "charged-laser-blaster-charge",
-    reload: 20,
-    effect: "laser-caster-explosion-destabilised~10",
-  },
+  shoot: { charge: 45, chargeEffect: "charged-laser-blaster-charge", reload: 20, effect: "laser-caster-explosion-destabilised~10" },
   component: {
     type: "weapon-component",
     width: 32,
@@ -839,11 +800,7 @@ Registries.items.add("peti-electrified-plasma-launcher", {
     ],
     ammos: { none: 0 },
   },
-  shoot: {
-    reload: 60,
-    effect: "laser-caster-explosion-destabilised~10",
-    pattern: { spread: 5, burst: 2, interval: 5 },
-  },
+  shoot: { reload: 60, effect: "laser-caster-explosion-destabilised~10", pattern: { spread: 5, burst: 2, interval: 5 } },
   component: {
     type: "weapon-component",
     width: 32,
@@ -887,12 +844,7 @@ Registries.items.add("peti-plasma-railgun", {
     ],
     ammos: { none: 0 },
   },
-  shoot: {
-    charge: 100,
-    reload: 360,
-    chargeEffect: "plasma-railgun-charge",
-    effect: "plasma-railgun-fire",
-  },
+  shoot: { charge: 100, reload: 360, chargeEffect: "plasma-railgun-charge", effect: "plasma-railgun-fire" },
   component: {
     type: "weapon-component",
     width: 83,
@@ -950,8 +902,7 @@ Registries.items.add("scrap-artillery", {
   type: "turret-item",
   name: "240mm Artillery Emplacement Gun",
   marketValue: 770,
-  description:
-    "Large scrap gun, to be mounted on a Turret Controller. Shoots long-range, fast-moving solid shots made of 4 material ingots.",
+  description: "Large scrap gun, to be mounted on a Turret Controller. Shoots long-range, fast-moving solid shots made of 4 material ingots.",
   baseSize: 2,
   image: "weapon.tank-gun.item",
   shootX: 30,
@@ -1050,14 +1001,7 @@ Registries.items.add("scrap-artillery", {
     ammos: { "iron-ingot": 2, "copper-ingot": 1, "scrap": 0 },
   },
   shoot: { effect: "tonk-shoot", reload: 240 },
-  component: {
-    type: "weapon-component",
-    width: 102,
-    height: 32,
-    image: "weapon.tank-gun.component",
-    recoil: 18,
-    recoilSpeed: 0.2,
-  },
+  component: { type: "weapon-component", width: 102, height: 32, image: "weapon.tank-gun.component", recoil: 18, recoilSpeed: 0.2 },
 });
 
 Registries.items.add("deathbringer-turret", {
@@ -1082,21 +1026,8 @@ Registries.items.add("deathbringer-turret", {
           { type: "extra-updates", amount: 99 },
           { type: "vfx-trail", effect: "deathbringer-trail" },
           { type: "damage", damageType: "laser", amount: 10000, spread: 2000 },
-          {
-            type: "explosion",
-            damageType: "laser",
-            damage: 2000,
-            spread: 300,
-            radius: 300,
-            effect: "none",
-          },
-          {
-            type: "nuclear-explosion",
-            damage: 24000,
-            spread: 3000,
-            radius: 300,
-            effect: "deathbringer-nuke~300",
-          },
+          { type: "explosion", damageType: "laser", damage: 2000, spread: 300, radius: 300, effect: "none" },
+          { type: "nuclear-explosion", damage: 24000, spread: 3000, radius: 300, effect: "deathbringer-nuke~300" },
         ],
       },
     ],
@@ -1136,7 +1067,8 @@ Registries.items.add("iti-energy-cell", {
   name: "Energy Cell",
   marketValue: 100,
   description: "A kind of battery manufactured by InfiniTech Industries.\nUse in air to instantly charge yourself with the battery's energy.",
-  details: "Possibly the oldest product of InfiniTech Industries, predating the name itself - several of these still hold the inscription 'Infinity Technologies' on their back sides.\nIt's probably just a hydrogen fuel cell, yet almost every fielded construct carries at least a few of these with them, just in case.",
+  details:
+    "Possibly the oldest product of InfiniTech Industries, predating the name itself - several of these still hold the inscription 'Infinity Technologies' on their back sides.\nIt's probably just a hydrogen fuel cell, yet almost every fielded construct carries at least a few of these with them, just in case.",
   image: "item.iti-energy-cell",
   recovery: 5000,
   corp: "iti",

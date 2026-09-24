@@ -1,6 +1,7 @@
 import { Entity } from "../../classes/entity/entity.js";
 import { EquippedEntity } from "../../classes/entity/inventory-entity.js";
 import { Player } from "../../classes/entity/player.js";
+import { discoverableEntities, discoveredEntities } from "../../classes/interaction/discoverers.js";
 import { InteractableEntity } from "../../classes/interaction/interactable-entity.js";
 import { TradingManager } from "../../classes/interaction/trading.js";
 import { Corporation } from "../../classes/item/corporation.js";
@@ -10,62 +11,9 @@ import { col } from "../../core/color.js";
 import { construct, constructFromType } from "../../core/constructor.js";
 import { time } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
-import { Serialiser } from "../../core/serialiser.js";
 import { createCMFTComponent, createUIComponent, createUIImageComponent, ui, UIComponent } from "../../core/ui.js";
 import { refreshDatabaseUI } from "./item-database.js";
-/** @import Integrate from "../../lib/integrate.js"; */
-export const discoveredEntities = {
-  /** @type {Set<string>} */
-  all: new Set(),
-  /** @type {Set<string>} */
-  suspended: new Set(),
-  /** @type {Map<string, string[]>} */
-  teams: new Map(),
-  discover(...items) {
-    for (const item of items) this.add(item);
-    this.serialise();
-  },
-  add(item) {
-    this.all.add(item);
-    const c = Registries.items.tryGet(item)?.corp ?? "";
-    const a = this.teams.get(c);
-    if (!a) this.teams.set(c, [item]);
-    else a.push(item);
-  },
-  serialise() {
-    if (!Serialiser.set("db:discovered.entities", [...new Set([...this.all, ...this.suspended])]))
-      console.error("Could not save entity database discovery data!");
-    console.log("Saved discovered entities.");
-  },
-  deserialise() {
-    const data = Serialiser.get("db:discovered.entities");
-    if (!data) console.error("Could not find entity database discovery data! Assuming no knowledge until next reset.");
-    else if (!Array.isArray(data)) console.error("Entity database discovery data is corrupted! Assuming no knowledge until next reset. Got", data);
-    else {
-      const dstr = data.map(x => `${x}`);
-      let modded = 0;
-      this.all.clear();
-      this.teams.clear();
-      for (const i of dstr) {
-        if (!Registries.entities.has(i)) {
-          modded++;
-          this.suspended.add(i);
-          continue;
-        }
-        this.add(i);
-      }
-      if (modded > 0)
-        console.log(`${modded} modded/unregistered entities are present in the discovery list - they will not be visible, but will persist`);
-      console.log(`Loaded ${this.all.size} discovered entities.`);
-    }
-  },
-};
-export const discoverableEntities = {
-  /** @type {Set<string>} */
-  all: new Set(),
-  /** @type {Map<string, string[]>} */
-  teams: new Map(),
-};
+
 export function updateEntityCollections() {
   discoverableEntities.all.clear();
   discoverableEntities.teams.clear();

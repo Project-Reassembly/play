@@ -3,22 +3,20 @@ import { construct, constructFromType } from "../../core/constructor.js";
 import { rnd, roundNum, tru, Vector } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { ui, UIComponent } from "../../core/ui.js";
-import { discoverableEntities, discoveredEntities } from "../../definitions/screens/entity-database.js";
-import { discoverable, discovered } from "../../definitions/screens/item-database.js";
+import { keybinds } from "../../definitions/controls/manager.js";
 import { autoScaledEffect } from "../../play/effects.js";
 import { game } from "../../play/game.js";
 import { Log } from "../../play/messaging.js";
 import { blockSize, Direction, totalSize } from "../../scaling.js";
+import { discoverers } from "../interaction/discoverers.js";
 import { Inventory } from "../inventory.js";
 import { Accessory } from "../item/accessory.js";
-import { Corporation } from "../item/corporation.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
 import { ItemStack } from "../item/item-stack.js";
 import { BulletModel } from "../projectile/bullet-model.js";
 import { Timer } from "../timer.js";
 import { undeliverEntity } from "../world/events/event-action.js";
 import { WeaponComponent } from "./entity-part.js";
-import { Entity } from "./entity.js";
 import { EquippedEntity } from "./inventory-entity.js";
 export const respawnTimer = new Timer();
 
@@ -256,7 +254,7 @@ class Player extends EquippedEntity {
   }
   deactivated = false;
   tick() {
-    if (this.age === 0) this.#discoverEntity(this);
+    if (this.age === 0) discoverers.discoverEntity(this);
     if (this.deactivated) {
       if (this.power && this.emergencyPower < this.maxEmergencyPower) {
         const reserve = Math.min(this.power, this.maxEmergencyPower - this.emergencyPower);
@@ -366,23 +364,11 @@ class Player extends EquippedEntity {
     if (this.controllable && ui.is("fc", "false")) {
       const v = Vector.ZERO;
       const accel = this.flying ? Math.cbrt(this.speed) / 5 : this.speed / 10;
-      if (keyIsDown(87) && this.y > borders[1] /* Top */ + this.hitSize) {
-        //If 'W' pressed
-        v.y -= 1;
-        //this.move(0, -this.speed);
-      }
-      if (keyIsDown(83) && this.y < borders[3] /* Bottom */ - this.hitSize) {
-        //If 'S' pressed
-        v.y += 1;
-      }
-      if (keyIsDown(65) && this.x > borders[0] /* Left */ + this.hitSize) {
-        //If 'A' pressed
-        v.x -= 1;
-      }
-      if (keyIsDown(68) && this.x < borders[2] /* Right */ - this.hitSize) {
-        //If 'D' pressed
-        v.x += 1;
-      }
+      if (keybinds.game.isDown("move-up") && this.y > borders[1] /* Top */ + this.hitSize) v.y -= 1;
+      if (keybinds.game.isDown("move-down") && this.y < borders[3] /* Bottom */ - this.hitSize) v.y += 1;
+      if (keybinds.game.isDown("move-left") && this.x > borders[0] /* Left */ + this.hitSize) v.x -= 1;
+      if (keybinds.game.isDown("move-right") && this.x < borders[2] /* Right */ - this.hitSize) v.x += 1;
+
       if (v.nonzero) this.velocity.add(v.normalise().scale(accel), true);
     }
   }
@@ -402,41 +388,11 @@ class Player extends EquippedEntity {
   }
 
   tickDiscovery() {
-    this.inventories.forEach(inv =>
-      inv.iterate(stack => {
-        if (discoverable.all.has(stack.item) && !discovered.all.has(stack.item)) {
-          discovered.discover(stack.item);
-          const corp = stack.getItem().corp;
-          const found = discovered.collections.get(corp)?.length ?? 0;
-          const total = discoverable.collections.get(corp)?.length ?? 0;
-          const complete = found === total;
-          const c = complete ? col.cyan : col.interp([col.red, col.yellow, col.green], found / (total + 1));
-          Log.send(
-            `#>>icon.database#=-Discovered item #[${Corporation.colorof(corp)}]b${stack.getItem().name}#=- (${Corporation.aliasof(corp) || "generic"}#=- collection, ${complete ? "#[0x30ffff]*complete" : `#[0x${col.hex(c)}]b${found}/${total}`}#=-)`,
-          );
-        }
-      }, true),
-    );
+    this.inventories.forEach(inv => inv.iterate(discoverers.discoverItem, true));
   }
   kills(other) {
     super.kills(other);
-    this.#discoverEntity(other);
-  }
-  /** @param {Entity} other  */
-  #discoverEntity(other) {
-    if (!other) return;
-    const type = other?.registryName;
-    if (discoverableEntities.all.has(type) && !discoveredEntities.all.has(type)) {
-      discoveredEntities.discover(type);
-      const corp = other.team;
-      const found = discoveredEntities.teams.get(corp)?.length ?? 0;
-      const total = discoverableEntities.teams.get(corp)?.length ?? 0;
-      const complete = found === total;
-      const c = complete ? col.cyan : col.interp([col.red, col.yellow, col.green], found / (total + 1));
-      Log.send(
-        `#>>icon.database#=-Discovered entity #[${Corporation.colorof(corp)}]b${other.name}#=- (${complete ? "#[0x30ffff]*complete" : `#[0x${col.hex(c)}]b${found}/${total}`}#=-)`,
-      );
-    }
+    discoverers.discoverEntity(other);
   }
 }
 export { Player };

@@ -1,7 +1,7 @@
 import { keys } from "../../core/keys.js";
 import { ui } from "../../core/ui.js";
 import { game } from "../../play/game.js";
-import { keybinds } from "./_list.js";
+import { keybinds } from "./manager.js";
 
 const fight = keybinds.mode("fight");
 

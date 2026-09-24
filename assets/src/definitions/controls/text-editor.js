@@ -3,7 +3,7 @@ import { ui } from "../../core/ui.js";
 import { exec } from "../../lib/isl/cli.js";
 import { ExecutionContext } from "../../lib/isl/core.js";
 import { game } from "../../play/game.js";
-import { keybinds } from "./_list.js";
+import { keybinds } from "./manager.js";
 
 let histIndex = 0;
 let hist = [];
@@ -11,7 +11,6 @@ keybinds.ui.shortcut.simple("open-command-line", keys.slash, () => {
   ui.set("texteditor", "true");
   ui.texteditor.title = "Command Line";
   ui.texteditor.isCommandLine = true;
-  ui.texteditor.keyTriggered = true;
   ui.texteditor.save = command => {
     exec(
       command,

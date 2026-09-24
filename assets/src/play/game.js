@@ -20,7 +20,6 @@ import { clamp, rnd, roundNum } from "../core/number.js";
 import { constructDelayed, PreloadRegistries, Registries } from "../core/registry.js";
 import { Serialiser } from "../core/serialiser.js";
 import { ImageContainer, rotatedShape, ui } from "../core/ui.js";
-import "../definitions/screens/any.js";
 import "../definitions/screens/in-game.js";
 import "../definitions/screens/item-database.js";
 import { selectors as createCorporationSelectors, creation } from "../definitions/screens/new-game.js";
@@ -51,10 +50,13 @@ import { rotateSelACW, rotateSelCW, selectedDirection } from "../definitions/scr
 import { updateItemCollections } from "../definitions/screens/item-database.js";
 import "../definitions/text-edit.js";
 
-import { keybinds } from "../definitions/controls/_list.js";
+import "../definitions/screens/any.js";
+
 import "../definitions/controls/all-modes.js";
 import "../definitions/controls/build-mode.js";
+import "../definitions/controls/debug.js";
 import "../definitions/controls/fight-mode.js";
+import { keybinds } from "../definitions/controls/manager.js";
 import "../definitions/controls/menus.js";
 import "../definitions/controls/text-editor.js";
 
@@ -143,8 +145,6 @@ const gen = {
     this.mode = "create";
   },
 };
-//
-let freecam = false;
 
 //Initial values for canvas width and height
 const baseWidth = 1920;
@@ -822,6 +822,7 @@ function frame() {
   //Frameskip stuff
   framesToDraw += deltaTime / timePerFrame;
   Decoration.timer.tick();
+  keybinds.tick();
   if (gen.inprogress) {
     drawNeutralBackground();
 
@@ -971,12 +972,12 @@ function tickTimers() {
   respawnTimer.tick();
 }
 
+ui.addReset("fc", "false");
 function tickPausableStuff() {
   tickTimers();
   ReactionTrigger.time++;
   if (game.player.entity) {
-    if (world.impactParticles.length == 0) movePlayer();
-    if (!freecam) {
+    if (ui.is("fc", "false")) {
       ui.camera.x -= (ui.camera.x - game.player.entity.x) * 0.1;
       ui.camera.y -= (ui.camera.y - game.player.entity.y) * 0.1;
     }
@@ -1010,31 +1011,6 @@ function gameFrame() {
   drawInGameMousePreview();
 
   pop();
-}
-
-function movePlayer() {
-  if (ui.is("texteditor", "true")) return ui.set("fc", "true");
-  if (keyIsDown(ALT) /*||  game.player.entity.dead */) {
-    freecam = true;
-    ui.set("fc", "true");
-    if (keyIsDown(87)) {
-      ui.camera.y -= 5;
-    }
-    if (keyIsDown(83)) {
-      ui.camera.y += 5;
-    }
-    if (keyIsDown(65)) {
-      ui.camera.x -= 5;
-    }
-    if (keyIsDown(68)) {
-      ui.camera.x += 5;
-    }
-    // game.player.controllable = false;
-  } else {
-    freecam = false;
-    ui.set("fc", "false");
-    // game.player.controllable = true;
-  }
 }
 
 function updateUIActivity() {
@@ -1280,76 +1256,26 @@ function tryPlace() {
 /**Triggers on any key press
  * @param {KeyboardEvent} ev
  */
-window.keyPressed = function (ev) {
-  // debug
-  if (ui.is("debugging", "true")) {
-    ui.set("debugging", "false");
-
-    if (key === "b") {
-      debug.hitboxes = !debug.hitboxes;
-      Log.send(`#7-[#@-Debug#7-] Hitboxes ${debug.hitboxes ? "shown" : "hidden"}`);
-    } else if (key === "a") {
-      debug.ai = !debug.ai;
-      Log.send(`#7-[#@-Debug#7-] AI targets and areas ${debug.ai ? "shown" : "hidden"}`);
-    } else if (key === "c") {
-      debug.chunkBorders = !debug.chunkBorders;
-      Log.send(`#7-[#@-Debug#7-] Chunk borders ${debug.chunkBorders ? "shown" : "hidden"}`);
-    } else if (key === "t") {
-      ui.set("debug-tools", ui.is("debug-tools", "true") ? "false" : "true");
-      Log.send(`#7-[#@-Debug#7-] Debug tools ${ui.is("debug-tools", "true") ? "shown" : "hidden"}`);
-    } else if (key === "r") {
-      debug.regionBorders = !debug.regionBorders;
-      Log.send(`#7-[#@-Debug#7-] Evaluation region borders ${debug.regionBorders ? "shown" : "hidden"}`);
-    } else if (key === "p") {
-      debug.position = !debug.position;
-      Log.send(`#7-[#@-Debug#7-] Cursor position ${debug.position ? "shown" : "hidden"}`);
-    } else if (key === "x") {
-      debug.text = !debug.text;
-      Log.send(`#7-[#@-Debug#7-] Text blocks ${debug.text ? "shown" : "hidden"}`);
-    } else if (key === "f") {
-      debug.flags = !debug.flags;
-      Log.send(`#7-[#@-Debug#7-] Dialogue flags ${debug.flags ? "shown" : "hidden"}`);
-      game.player.dialogue.forEach(c => c.updateNode());
-    } else if (key === "escape") {
-      for (const key in debug) {
-        debug[key] = false;
-      }
-      Log.send(`#7-[#@-Debug#7-] Disabled everything.`);
-    } else if (key === "f3") {
-      Log.send(`#7-[#@-Debug#7-] Shortcut list:`);
-      Log.send(` #=-F3+B#-- Toggle hitboxes`);
-      Log.send(` #=-F3+A#-- Toggle AI targets/areas`);
-      Log.send(` #=-F3+C#-- Toggle chunk borders`);
-      Log.send(` #=-F3+R#-- Toggle evaluation regions`);
-      Log.send(` #=-F3+P#-- Toggle positions`);
-      Log.send(` #=-F3+X#-- Toggle text blocks`);
-      Log.send(` #=-F3+F#-- Toggle dialogue flags`);
-      Log.send(` #=-F3+T#-- Toggle extra tools (on title screen)`);
-      Log.send(` #=-F3+F3#-- Show this list`);
-      Log.send(` #=-F3+Esc#-- Disable everything`);
-    } else Log.send(`#7-[#@-Debug#7-] Unknown feature: F3 + ${key}.`);
-  } else if (key === "f3") {
-    ui.set("debugging", "true");
-  }
-
+window.onkeydown = function (ev) {
   //DevTools and fullscreen
-  else if (key === "f12" || key === "f11") return true;
+  if (key === "f12" || key === "f11") return;
   else {
     if (keyIsDown("`")) console.log(ev);
-    keybinds.down(ev);
+    if (keybinds.down(ev)) {
+      //Prevent any default behaviour
+      ev.preventDefault();
+      ev.stopPropagation();
+      ev.stopImmediatePropagation();
+    }
   }
-
-  //Prevent any default behaviour
-  ev.preventDefault();
-  ev.stopPropagation();
-  ev.stopImmediatePropagation();
-  return false;
+};
+window.onkeyup = function (ev) {
+  keybinds.up(ev);
 };
 /**@param {KeyboardEvent} ev  */
 window.keyTyped = function (ev) {
   if (tcursor.active) capturedInput(ev.shiftKey || ev.getModifierState("CapsLock") ? key.toUpperCase() : key.toLowerCase());
   if (ui.is("texteditor", "false")) return false;
-  if (ui.texteditor.keyTriggered) return (ui.texteditor.keyTriggered = false);
   if (ev.ctrlKey || ev.altKey) return false;
   else {
     ui.texteditor.text += ev.shiftKey || ev.getModifierState("CapsLock") ? key.toUpperCase() : key.toLowerCase();

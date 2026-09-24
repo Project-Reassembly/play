@@ -7,6 +7,7 @@ import { autoScaledEffect, createDestructionExplosion, liquidDestructionBlast } 
 import { game } from "../../play/game.js";
 import { blockSize, totalSize } from "../../scaling.js";
 import { GroundTile } from "../block/ground-tile.js";
+import { discoverers } from "../interaction/discoverers.js";
 import { PhysicalObject, ShootableObject } from "../physical.js";
 import { Chunk } from "../world/chunk.js";
 import { World } from "../world/world.js";
@@ -125,16 +126,16 @@ class Entity extends ShootableObject {
 
   hitHorizontalWall(x, y) {
     const spd = Math.abs(this.velocity.x);
-    this.velocity.scaleAsymmetrical(0, 1, true);
     if (spd > this.speed) {
+      this.velocity.scaleAsymmetrical(0, 1, true);
       autoScaledEffect("hit-wall", this.world, x, y, 0);
       this.hitSomething(spd - this.speed);
     }
   }
   hitVerticalWall(x, y) {
     const spd = Math.abs(this.velocity.y);
-    this.velocity.scaleAsymmetrical(1, 0, true);
     if (spd > this.speed) {
+      this.velocity.scaleAsymmetrical(1, 0, true);
       autoScaledEffect("hit-wall", this.world, x, y, Math.PI / 2);
       this.hitSomething(spd - this.speed);
     }
@@ -490,6 +491,7 @@ class Entity extends ShootableObject {
   onHealthZeroed(type, source) {
     super.onHealthZeroed(type, source);
     if (source instanceof Entity) source.kills(this);
+    if (this.isBoss) discoverers.discoverEntity(this);
     liquidDestructionBlast(
       this.x,
       this.y,
@@ -497,7 +499,7 @@ class Entity extends ShootableObject {
       col.black,
       col.black,
       col.black,
-      this.components,
+      this.model ? Object.values(this.model.parts) : this.components,
       this.world,
     );
     createDestructionExplosion(this.x, this.y, this);

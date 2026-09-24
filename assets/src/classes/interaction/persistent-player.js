@@ -45,7 +45,7 @@ export class PersistentPlayer {
     return {
       money: this.money,
       relations: this.relations.serialise(),
-      flags: [...this.flags].map((f) => f.substring(1)),
+      flags: [...this.flags].map(f => f.substring(1)),
       /** @type {[string, string[]][]} */
       savedLocalFlags: [...this.dialogue.entries()].map(([s, m]) => [s, [...m.flags]]),
     };
@@ -62,8 +62,10 @@ export class PersistentPlayer {
     const plr = new this();
     plr.money = created.money ?? 10000;
     plr.relations = RelationManager.deserialise(created.relations ?? {});
-    plr.flags = new Set((created.flags ?? []).map((f) => `*${f}`));
+    plr.flags = new Set((created.flags ?? []).map(f => `*${f}`));
     plr.savedLocalFlags = new Map((created.savedLocalFlags ?? []).map(([e, f]) => [e, new Set(f)]));
     return plr;
   }
 }
+
+

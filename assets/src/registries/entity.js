@@ -315,6 +315,8 @@ Registries.entities.add("iti-defense", {
 Registries.entities.add("scrapper", {
   name: "The Scrapper",
   type: "equipped-entity",
+  description: "First boss fight - spawns 30 minutes after the start of the game. Warns players 5 minutes before it spawns.",
+  details: "URoW's previous project. A massive robot, armed with a large minigun and a triple-shot fragmentation cannon.\nBuilt to protect through force alone, its AI's function degraded over time, eventually losing all but the most basic reasoning - now it can barely differentiate 'friend' from 'foe'.",
   health: 2000,
   speed: 2.5,
   isBoss: true,
@@ -324,14 +326,13 @@ Registries.entities.add("scrapper", {
     { type: "leg-component", image: "entity.scrap-sentinel.legs", width: 50, height: 50 },
   ],
   team: "scrap",
-  width: 30,
-  height: 30,
+  width: 45,
+  height: 45,
   aiType: "hostile",
   attackRange: 250,
   targetRange: 2600,
   rightHand: [{ item: "scrap-cannon", dropChance: 0.25 }],
   leftHand: [{ item: "scrap-repeater" }],
-  armType: { width: 50, height: 17, yOffset: 20, image: "arm.scrap" },
   ammo: [
     { item: "scrap", min: 60, max: 100, dropChance: 0.5 },
     { item: "scrap", min: 60, max: 100, dropChance: 0.5 },
@@ -343,6 +344,8 @@ Registries.entities.add("scrapper", {
     { item: "scrap", min: 20, max: 100, dropChance: 0.6 },
     { item: "scrap", min: 20, max: 100, dropChance: 0.6 },
   ],
+  // actually no idea which of these takes precedence, but it doesn't matter anyway.
+  armType: { width: 50, height: 17, yOffset: 20, image: "arm.scrap" },
   armType: { width: 50, height: 16, yOffset: 16, image: "arm.scrap" },
 });
 
