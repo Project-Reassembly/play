@@ -5,13 +5,12 @@
 import { col } from "../../core/color.js";
 import { constructFromType } from "../../core/constructor.js";
 import { clamp, rnd, roundNum, time, tru, Vector } from "../../core/number.js";
-import { Registries, TypeRegistries } from "../../core/registry.js";
+import { Registries } from "../../core/registry.js";
 import { rotatedImg, rotatedShape } from "../../core/ui.js";
-import { createLinearEffect, Explosion, NuclearExplosion, repeat } from "../../play/effects.js";
-import { LinearEffect } from "../../play/line-effects.js";
+import { createEffectBetween, createLinearEffect, Explosion, NuclearExplosion, repeat } from "../../play/effects.js";
 import { blockSize } from "../../scaling.js";
 import { Fire } from "../effect/fire.js";
-import { ShapeParticle } from "../effect/shape-particle.js";
+import { legacyShapeParticle } from "../effect/shape-particle.js";
 import { Entity } from "../entity/entity.js";
 import { BulletModel } from "./bullet-model.js";
 
@@ -347,13 +346,17 @@ export class TrackSourceTargetComponent extends TrackingComponent {
 
 export class VFXTrailComponent extends InvisibleBulletComponent {
   effect = "default";
+  init(){
+    this.effect = Registries.vfx.get(this.effect);
+  }
+  /** @param {BulletInstance} bullet  */
   onupdate(bullet) {
     const from = bullet.lastpos,
       to = bullet.pos;
     if (bullet.world?.particles == null) return;
-    const t = TypeRegistries.default.get(Registries.vfx.get(this.effect).type);
-    if (t.prototype instanceof LinearEffect) createLinearEffect(this.effect, bullet.world, from.multiLerp(to, 3));
-    else bullet.emit(this.effect);
+    createEffectBetween(this.effect, bullet.world, from.x, from.y, to.x, to.y, 1, false);
+    // if (t instanceof LinearEffect) createLinearEffect(this.effect, bullet.world, from.multiLerp(to, 3));
+    // else bullet.emit(this.effect);
   }
 }
 
@@ -384,7 +387,7 @@ export class ParticleTrailComponent extends InvisibleBulletComponent {
   trail(bullet, from, to, spacing) {
     const poses = from.multiLerp(to, Math.ceil(spacing / this.interval));
     poses.forEach(p => {
-      const trailparticle = new ShapeParticle(
+      const trailparticle = legacyShapeParticle(
         p.x,
         p.y,
         bullet.directionRad,
@@ -411,7 +414,7 @@ export class OldTrailComponent extends ParticleTrailComponent {
     for (let e = 0; e <= spacing; e++) {
       bullet.data.decr("trailCounter");
       if (bullet.data.get("trailCounter") <= 1) {
-        let trailparticle = new ShapeParticle(
+        let trailparticle = legacyShapeParticle(
           bullet.x - e * Math.cos(bullet.directionRad),
           bullet.y - e * Math.sin(bullet.directionRad),
           bullet.directionRad,
@@ -448,7 +451,7 @@ export class MOABAdventureTrailComponent extends ParticleTrailComponent {
       if (bullet.data.get("trailCounter") <= 0) {
         let v = Vector.fromAngle(this.direction).scale(e);
         bullet.world.particles.push(
-          new ShapeParticle(
+          legacyShapeParticle(
             bullet.x - v.x,
             bullet.y - v.y,
             bullet.directionRad,

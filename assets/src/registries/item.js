@@ -220,8 +220,8 @@ Registries.items.add("scrap-shooter", {
   image: "weapon.scrap-shooter.item",
   range: 225,
   bullets: {
-    types: [
-      {
+    types: {
+      "scrap-bullet": {
         lifetime: 15,
         light: 30,
         hitSize: 2.5,
@@ -232,8 +232,7 @@ Registries.items.add("scrap-shooter", {
           { type: "damage", damageType: "ballistic", amount: 7, spread: 2 },
         ],
       },
-    ],
-    ammos: { "scrap-bullet": 0 },
+    },
   },
   shoot: { reload: 10, pattern: { spread: 3.5 } },
   component: {
@@ -259,8 +258,8 @@ Registries.items.add("scrap-repeater", {
   range: 250,
   recoil: 0.15,
   bullets: {
-    types: [
-      {
+    types: {
+      "scrap-bullet": {
         lifetime: 25,
         light: 30,
         hitSize: 2.5,
@@ -273,8 +272,7 @@ Registries.items.add("scrap-repeater", {
           { type: "knockback", amount: 0.5 },
         ],
       },
-    ],
-    ammos: { "scrap-bullet": 0 },
+    },
   },
   shoot: { reload: 3, pattern: { spread: 5 } },
   component: {
@@ -297,8 +295,8 @@ Registries.items.add("scrap-cannon", {
   image: "weapon.scrap-cannon.item",
   range: 200,
   bullets: {
-    types: [
-      {
+    types: {
+      scrap: {
         lifetime: 18,
         light: 30,
         hitSize: 5,
@@ -346,8 +344,7 @@ Registries.items.add("scrap-cannon", {
           },
         ],
       },
-    ],
-    ammos: { scrap: 0 },
+    },
   },
   shoot: { effect: "explosion~10", reload: 90, pattern: { spacing: 10, spread: 5, amount: 3 } },
   component: {
@@ -370,8 +367,8 @@ Registries.items.add("scrap-launcher", {
   range: 900,
   shootX: -5,
   bullets: {
-    types: [
-      {
+    types: {
+      "scrap-rocket": {
         lifetime: 600,
         hitSize: 6,
         components: [
@@ -384,8 +381,7 @@ Registries.items.add("scrap-launcher", {
           { type: "image-drawer", image: "bullet.scrap-rocket", width: 16, height: 9 },
         ],
       },
-    ],
-    ammos: { "scrap-rocket": 0 },
+    },
   },
   shoot: { effect: "launcher-smoke", reload: 45 },
   component: {
@@ -447,8 +443,8 @@ Registries.items.add("iti-laser-pistol", {
   range: 300,
   shootX: 0,
   bullets: {
-    types: [
-      {
+    types: {
+      none: {
         lifetime: 30,
         light: 70,
         hitSize: 3,
@@ -473,8 +469,7 @@ Registries.items.add("iti-laser-pistol", {
           { type: "disable-default-vfx" },
         ],
       },
-    ],
-    ammos: { none: 0 },
+    },
   },
   shoot: { reload: 15, effect: "laser-caster-frag", pattern: { spread: 3 }, power: 100 },
   component: {
@@ -500,8 +495,8 @@ Registries.items.add("iti-laser-caster", {
   image: "weapon.iti-laser-caster.item",
   range: 400,
   bullets: {
-    types: [
-      {
+    types: {
+      none: {
         lifetime: 15,
         light: 70,
         hitSize: 3,
@@ -553,8 +548,7 @@ Registries.items.add("iti-laser-caster", {
           },
         ],
       },
-    ],
-    ammos: { none: 0 },
+    },
   },
   shoot: { charge: 60, reload: 180, chargeEffect: "laser-caster-charge", effect: "laser-caster-frag", power: 3500 },
   component: {
@@ -579,8 +573,8 @@ Registries.items.add("iti-energy-repeater", {
   image: "weapon.iti-energy-repeater.item",
   range: 300,
   bullets: {
-    types: [
-      {
+    types: {
+      none: {
         lifetime: 15,
         light: 50,
         hitSize: 2,
@@ -604,8 +598,7 @@ Registries.items.add("iti-energy-repeater", {
           { type: "expiry-vfx", effect: "laser-caster-frag" },
         ],
       },
-    ],
-    ammos: { none: 0 },
+    },
   },
   shoot: {
     chargeEffect: "energy-repeater-charge",
@@ -617,8 +610,8 @@ Registries.items.add("iti-energy-repeater", {
   },
   hasAltFire: true,
   altBullets: {
-    types: [
-      {
+    types: {
+      none: {
         lifetime: 30,
         light: 60,
         hitSize: 2.5,
@@ -641,8 +634,7 @@ Registries.items.add("iti-energy-repeater", {
           { type: "explosion", damageType: "laser", damage: 25, spread: 5, radius: 30, effect: "laser-caster-explosion" },
         ],
       },
-    ],
-    ammos: { none: 0 },
+    },
   },
   altShoot: {
     charge: 60,
@@ -676,8 +668,8 @@ Registries.items.add("peti-charged-laser-blaster", {
   range: 250,
   shootX: 7,
   bullets: {
-    types: [
-      {
+    types: {
+      none: {
         lifetime: 25,
         hitSize: 3,
         components: [
@@ -711,8 +703,7 @@ Registries.items.add("peti-charged-laser-blaster", {
           },
         ],
       },
-    ],
-    ammos: { none: 0 },
+    },
   },
   shoot: { charge: 45, chargeEffect: "charged-laser-blaster-charge", reload: 20, effect: "laser-caster-explosion-destabilised~10" },
   component: {
@@ -738,8 +729,8 @@ Registries.items.add("peti-electrified-plasma-launcher", {
   range: 300,
   shootX: 7,
   bullets: {
-    types: [
-      {
+    types: {
+      none: {
         lifetime: 35,
         light: 70,
         hitSize: 6,
@@ -797,8 +788,7 @@ Registries.items.add("peti-electrified-plasma-launcher", {
           { type: "knockback", amount: 1 },
         ],
       },
-    ],
-    ammos: { none: 0 },
+    },
   },
   shoot: { reload: 60, effect: "laser-caster-explosion-destabilised~10", pattern: { spread: 5, burst: 2, interval: 5 } },
   component: {
@@ -826,8 +816,8 @@ Registries.items.add("peti-plasma-railgun", {
   shootX: 42,
   shootY: -1,
   bullets: {
-    types: [
-      {
+    types: {
+      none: {
         lifetime: 100,
         light: 70,
         hitSize: 10,
@@ -841,8 +831,7 @@ Registries.items.add("peti-plasma-railgun", {
           { type: "knockback", amount: 17 },
         ],
       },
-    ],
-    ammos: { none: 0 },
+    },
   },
   shoot: { charge: 100, reload: 360, chargeEffect: "plasma-railgun-charge", effect: "plasma-railgun-fire" },
   component: {
@@ -869,8 +858,8 @@ Registries.items.add("recycle-mounted", {
   baseSize: 1,
   marketValue: 120,
   bullets: {
-    types: [
-      {
+    types: {
+      "scrap-bullet": {
         lifetime: 30,
         light: 30,
         hitSize: 2.5,
@@ -882,8 +871,7 @@ Registries.items.add("recycle-mounted", {
           { type: "damage", damageType: "ballistic", amount: 15, spread: 4 },
         ],
       },
-    ],
-    ammos: { "scrap-bullet": 0 },
+    },
   },
   shoot: { reload: 10, pattern: { spread: 3.5 } },
   component: {
@@ -911,8 +899,8 @@ Registries.items.add("scrap-artillery", {
   range: 1440,
   ammoUse: 4,
   bullets: {
-    types: [
-      {
+    types: {
+      "scrap": {
         lifetime: 72,
         hitSize: 10,
         light: 30,
@@ -951,7 +939,7 @@ Registries.items.add("scrap-artillery", {
           },
         ],
       },
-      {
+      "copper-ingot": {
         lifetime: 72,
         light: 30,
         hitSize: 10,
@@ -974,7 +962,7 @@ Registries.items.add("scrap-artillery", {
           { type: "expiry-vfx", effect: "explosion~60" },
         ],
       },
-      {
+      "iron-ingot": {
         lifetime: 72,
         light: 30,
         hitSize: 10,
@@ -997,8 +985,7 @@ Registries.items.add("scrap-artillery", {
           { type: "expiry-vfx", effect: "explosion~60" },
         ],
       },
-    ],
-    ammos: { "iron-ingot": 2, "copper-ingot": 1, "scrap": 0 },
+    },
   },
   shoot: { effect: "tonk-shoot", reload: 240 },
   component: { type: "weapon-component", width: 102, height: 32, image: "weapon.tank-gun.component", recoil: 18, recoilSpeed: 0.2 },
@@ -1017,8 +1004,8 @@ Registries.items.add("deathbringer-turret", {
   turnSpeed: 0.1,
   shootCone: 0.1,
   bullets: {
-    types: [
-      {
+    types: {
+      "iti-energy-cell": {
         lifetime: 200,
         hitSize: 10,
         components: [
@@ -1030,8 +1017,7 @@ Registries.items.add("deathbringer-turret", {
           { type: "nuclear-explosion", damage: 24000, spread: 3000, radius: 300, effect: "deathbringer-nuke~300" },
         ],
       },
-    ],
-    ammos: { "iti-destabilised-cell": 0 },
+    },
   },
   shoot: { reload: 480, charge: 120, chargeEffect: "deathbringer-charge" },
   component: {

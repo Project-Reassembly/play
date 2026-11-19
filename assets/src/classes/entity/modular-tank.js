@@ -5,7 +5,7 @@ import { Block } from "../block/block.js";
 import { Container } from "../block/container.js";
 import { Conveyor } from "../block/conveyor.js";
 import { SignBlock } from "../block/decoration.js";
-import { ShapeParticle } from "../effect/shape-particle.js";
+import { legacyShapeParticle } from "../effect/shape-particle.js";
 import { Weapon } from "../item/weapon.js";
 import { World } from "../world/world.js";
 import { WeaponisedComponent } from "./entity-part.js";
@@ -28,7 +28,7 @@ class ModularTankEntity extends InventoryEntity {
     blocks.forEach((element) => {
       if (element)
         world.particles.push(
-          new ShapeParticle(
+          legacyShapeParticle(
             element.x + blockSize / 2,
             element.y + blockSize / 2,
             0,

@@ -16,14 +16,10 @@ class SignBlock extends Block {
     (super.highlight(emphasised), this.drawTooltip(this.uiX + blockSize * 0.5 * ui.camera.zoom, this.uiY - blockSize * 0.5 * ui.camera.zoom));
   }
   interaction(ent, istack) {
-    ui.texteditor.text = this._message;
-    ui.set("texteditor", "true");
-    ui.texteditor.isCommandLine = false;
-    ui.texteditor.title = "Edit Message Text:";
-    ui.texteditor.save = txt => {
+    ui.texteditor.open("Edit Message Text:", false, txt => {
       Log.send("Text changed.");
       this._message = txt;
-    };
+    });
     ui.waitingForMouseUp = true;
   }
   serialise() {

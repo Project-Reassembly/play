@@ -1,53 +1,57 @@
 import { col } from "../../core/color.js";
 import { Particle } from "./particle.js";
-// A hollow circular particle.
-class WaveParticle extends Particle {
-  constructor(
-    x,
-    y,
-    lifetime,
-    fromRadius,
-    toRadius,
-    colours,
-    strokeFrom,
-    strokeTo,
-    light = 0,
-    space = false
-  ) {
-    super(x, y, 0, lifetime, 0, 0, colours, 0, light, space);
-    this.fromRadius = fromRadius;
-    this.toRadius = toRadius;
-    this.radius = fromRadius;
-    this.strokeFrom = strokeFrom;
-    this.stroke = strokeFrom;
-    this.strokeTo = strokeTo;
+
+/**
+ * @typedef {{
+ *   lifetime: number,
+ *   direction: number,
+ *   speed: number,
+ *   decel: number,
+ *   rotateSpeed: number,
+ *   light: number,
+ *   shape: "circle"|"rect"|"square"|"ellipse"|"triangle"|"rhombus"|"moved-triangle"|"inverted-triangle",
+ *   strokeFrom: number,
+ *   strokeTo: number,
+ *   radiusFrom: number,
+ *   radiusTo: number,
+ *   colours: import("../../core/color.js").color[],
+ *   space: boolean,
+ * }} WaveParticleModel
+ */
+
+/** A hollow circle particle. @extends {Particle<WaveParticleModel>}*/
+export class WaveParticle extends Particle {
+  /**
+   *
+   * @param {WaveParticleModel} vfx
+   * @param {number} x
+   * @param {number} y
+   */
+  constructor(vfx, x, y) {
+    super(vfx, x, y);
+    this.color = vfx.colours[0];
+    this.width = vfx.widthFrom;
+    this.radius = vfx.radiusFrom;
+    this.stroke = vfx.strokeFrom;
   }
-  calcSizes(lf) {
-    this.radius = this.fromRadius * lf + this.toRadius * (1 - lf);
-    this.stroke = this.strokeFrom * lf + this.strokeTo * (1 - lf);
+  istep(dt) {
+    const lf = this.lifetime / this.vfx.lifetime;
+    this.radius = this.vfx.radiusFrom * lf + this.vfx.radiusTo * (1 - lf);
+    this.stroke = this.vfx.strokeFrom * lf + this.vfx.strokeTo * (1 - lf);
+
+    this.color = col.interp(this.vfx.colours, 1 - lf);
   }
-  movement(dt) {}
-  calcDecels(dt) {}
-  draw(g) {
-    if (g) {
-      g.push();
-      g.noFill();
-      col.strokeOn(g, this.colour);
-      g.strokeWeight(this.stroke);
-      g.circle(this.x, this.y, this.radius * 2);
-      g.pop();
-    } else {
-      push();
-      noFill();
-      col.stroke(this.colour);
-      strokeWeight(this.stroke);
-      circle(this.x, this.y, this.radius * 2);
-      pop();
-    }
-  }
-  get size() {
-    return this.radius * 2;
+  draw() {
+    push();
+    col.stroke(this.color);
+    strokeWeight(this.stroke);
+    noFill();
+    circle(this.x, this.y, this.radius*2);
+    pop();
   }
 }
-export { WaveParticle };
 
+/** Creates a wave particle with a one-off visual effect. Shouldn't be used. @deprecated. */
+export function legacyWaveParticle(x, y, lifetime, fromRadius, toRadius, colours, strokeFrom, strokeTo, light = 0, space = false) {
+  return new WaveParticle({ lifetime, radiusFrom: fromRadius, radiusTo: toRadius, colours, strokeFrom, strokeTo, light, space }, x, y);
+}

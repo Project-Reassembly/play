@@ -4,13 +4,9 @@ import { constructFromType } from "../../../core/constructor.js";
 import { ImageContainer } from "../../../core/image.js";
 import { effectTimer } from "../../../play/effects.js";
 import { blockSize } from "../../../scaling.js";
-import { LightningParticle } from "../../effect/lightning-particle.js";
+import { legacyLightningParticle } from "../../effect/lightning-particle.js";
 import { ShootableObject } from "../../physical.js";
-import {
-  DamageComponent,
-  ExtraUpdatesComponent,
-  LinearVFXTraceComponent,
-} from "../../projectile/bullet-components.js";
+import { DamageComponent, ExtraUpdatesComponent, LinearVFXTraceComponent } from "../../projectile/bullet-components.js";
 import { BulletModel } from "../../projectile/bullet-model.js";
 import { PylonNetwork } from "../../world/power-network.js";
 import { Block } from "../block.js";
@@ -47,14 +43,7 @@ export class PowerPylon extends Block {
     super.postDraw();
   }
   postDraw2() {
-    for (let i = 1; i < 4; i++)
-      ImageContainer.draw(
-        this.poleImg,
-        this.x,
-        this.y - i * this._extension * 0.25,
-        blockSize,
-        blockSize * 0.25,
-      );
+    for (let i = 1; i < 4; i++) ImageContainer.draw(this.poleImg, this.x, this.y - i * this._extension * 0.25, blockSize, blockSize * 0.25);
     const top = this.y - this._extension * 0.875;
     push();
     noFill();
@@ -76,24 +65,9 @@ export class PowerPylon extends Block {
     for (const b of candidates)
       if (b && b.maxPower && !(b instanceof PowerPylon)) {
         this.network.add(b.gridX, b.gridY);
-        const poses = this.pos
-          .addXY(0, -this._extension * 0.875)
-          .multiLerp(b.pos, Math.ceil(this.range * 1.5));
+        const poses = this.pos.addXY(0, -this._extension * 0.875).multiLerp(b.pos, Math.ceil(this.range * 1.5));
         effectTimer.repeat(
-          () =>
-            this.world.particles.push(
-              new LightningParticle(
-                poses,
-                15,
-                [this.wireColour, col.withA(this.wireColour, 0)],
-                0,
-                4,
-                0,
-                10,
-                1,
-                2,
-              ),
-            ),
+          () => this.world.particles.push(legacyLightningParticle(poses, 15, [this.wireColour, col.withA(this.wireColour, 0)], 0, 4, 0, 10, 1, 2)),
           3,
           4,
         );
@@ -161,9 +135,7 @@ export class DischargePylon extends PowerPylon {
         if (this._extension === blockSize - 1) this.resetConnections();
         this._extension++;
       } else if (this._extension === blockSize)
-        for (const e of this.world.entities)
-          if (this.distanceTo(e) < this.range * blockSize && e.team !== this.team)
-            this.#discharging = true;
+        for (const e of this.world.entities) if (this.distanceTo(e) < this.range * blockSize && e.team !== this.team) this.#discharging = true;
     }
     this.network.tick();
   }
@@ -180,18 +152,7 @@ export class DischargePylon extends PowerPylon {
 
       o: while (zaps > 0) {
         for (const t of targets) {
-          this.#shot.emit(
-            this.x,
-            this.y - this._extension,
-            1,
-            t.pos.subXY(this.x, this.y - this._extension).angle,
-            0,
-            0,
-            this.world,
-            this,
-            1,
-            1,
-          );
+          this.#shot.emit(this.x, this.y - this._extension, 1, t.pos.subXY(this.x, this.y - this._extension).angle, 0, 0, this.world, this, 1, 1);
           zaps--;
           if (zaps <= 0) break o;
         }

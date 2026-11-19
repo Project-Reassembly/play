@@ -25,21 +25,23 @@ export class HasComponents {
   *all() {
     for (const stuff of this.#map.values()) yield* stuff;
   }
-  /** Gets the first component of a type, or null if there is none. @template {V} T @param {Integrate.TypedConstructor<T>} T @returns {T|undefined} */
+  /** Gets the first component of a type, or undefined if there is none. @template {V} T @param {Integrate.TypedConstructor<T>} T @returns {T|undefined} */
   get(T) {
-    const ts = this.#map.get(T);
-    return ts ? ts[0] : undefined;
+    return this.#map.get(T)?.[0];
+  }
+  /** Gets the n-th component of a type, or undefined if there is none at that index. @template {V} T @param {Integrate.TypedConstructor<T>} T @returns {T|undefined} */
+  getN(T, n) {
+    return this.#map.get(T)?.[n];
   }
   /** Gets all components of a type. @template {V} T @param {Integrate.TypedConstructor<T>} T @returns {T[]} */
   getAll(T) {
-    const ts = this.#map.get(T);
-    return ts ?? [];
+    return this.#map.get(T) ?? [];
   }
   /** Removes all components of a type. @template {V} T @param {Integrate.TypedConstructor<T>} T */
   removeAll(T) {
     this.#map.delete(T);
   }
-  /** Removes the last added component of a type and returns it. @template {V} T @param {Integrate.TypedConstructor<T>} T @returns {T|undefined} */
+  /** Removes the last added component of a type and returns it. Returns undefined if there were no components of that type. @template {V} T @param {Integrate.TypedConstructor<T>} T @returns {T|undefined} */
   remove(T) {
     const ts = this.#map.get(T);
     if (!ts) return;
@@ -72,7 +74,7 @@ export class HasComponents {
     for (const T of Ts) if (this.#map.has(T)) return true;
     return false;
   }
-  /** @template {keyof {[K in keyof V as V[K] extends Function ? K : never]: V[K]}} K @param {K} name @param {V[K] extends (...args: infer A) => * ? A : never} params @returns {boolean} True if any function returned `false` to cancel the event. */ //@returns {V[K] extends (...args: *) => infer R ? R : never}
+  /** @template {keyof {[KT in keyof V as V[KT] extends (() => boolean) ? KT : never]: V[KT]}} K @param {K} name @param {V[K] extends (...args: infer A) => boolean ? A : never} params @returns {boolean} True if any function returned `false` to cancel the event. */ //@returns {V[K] extends (...args: *) => infer R ? R : never}
   call(name, ...params) {
     for (const stuff of this.#map.values())
       for (const c of stuff /* if (name in c) */)

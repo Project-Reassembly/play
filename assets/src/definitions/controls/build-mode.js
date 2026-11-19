@@ -1,7 +1,7 @@
 import { Container } from "../../classes/block/container.js";
 import { discoverable, discovered } from "../../classes/interaction/discoverers.js";
 import { Inventory } from "../../classes/inventory.js";
-import { keys } from "../../core/keys.js";
+import { keys, mods } from "../../core/keys.js";
 import { ui } from "../../core/ui.js";
 import { game } from "../../play/game.js";
 import { Log } from "../../play/messaging.js";
@@ -26,7 +26,7 @@ build.shortcut.simple("cycle-block-config-down", keys.left, () => {
   block.leftArrow();
 });
 
-build.shortcut.modified("open-current-database", keys.slash, { shift: true }, () => {
+build.shortcut.modified("open-current-database", keys.slash, mods.shift, () => {
   if (Inventory.tooltip) {
     // Select hovered item
     const iname = Inventory.tooltip.item.registryName;

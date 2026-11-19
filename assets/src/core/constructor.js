@@ -69,5 +69,21 @@ function assign(target, source) {
   }
   return target;
 }
-export { assign, construct, constructFromRegistry, constructFromType };
+/**A version of `Object.assign()` which only copies keys present on `source` but not on `target`. The opposite of `assign`.\
+ * Mutates the original object, and returns it.
+ * @template T
+ * @param {Integrate.Unconstructed<T>} source Object to get overrides from.
+ * @param {T} target Object to override.
+ */
+function assignNull(target, source) {
+  if (!target || !source) return;
+  for (let key of Object.getOwnPropertyNames(source)) {
+    if (key in target) {
+      continue;
+    }
+    target[key] = source[key];
+  }
+  return target;
+}
+export { assign, assignNull, construct, constructFromRegistry, constructFromType };
 

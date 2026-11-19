@@ -665,6 +665,7 @@ function sizeKB(string) {
   return string ? string.length / 512 : 0;
 }
 globalThis.preload = async function () {
+  ui.set("startable", "false");
   RelationManager.createRelationGradients();
   GroundTile.reloadIDs();
   updateItemCollections();
@@ -672,18 +673,26 @@ globalThis.preload = async function () {
 
   loadStats.images = 0;
   loadStats.cutscenes = 0;
+  loadStats.plr = 0;
   loadStats.totalImages = PreloadRegistries.images.size;
   loadStats.totalCutscenes = PreloadRegistries.cutscenes.size;
+  loadStats.totalPLREntries = PreloadRegistries.vfx.size + PreloadRegistries.bullets.size;
 
   await fonts.load();
   console.log("Loaded fonts.");
 
   createCorporationSelectors();
 
+  PreloadRegistries.vfx.forEach((el, name) => {
+    if (!Registries.vfx.has(name)) Registries.vfx.add(name, construct(el, "visual-effect"));
+    loadStats.plr++;
+  });
+  console.log("Loaded VFX.");
+
   PreloadRegistries.bullets.forEach((el, name) => {
     if (!Registries.bullets.has(name)) Registries.bullets.add(name, constructFromType(el, BulletModel));
+    loadStats.plr++;
   });
-
   console.log("Loaded bullets.");
 
   PreloadRegistries.images.forEach((el, name) => {
@@ -714,6 +723,8 @@ globalThis.preload = async function () {
   constructDelayed("preloaded");
 
   console.log("[Setup] Done delayed constructions: <preloaded>");
+
+  ui.set("startable", "true");
 };
 //Set up the canvas, using the previous function
 globalThis.setup = function () {
@@ -913,7 +924,7 @@ export function drawNeutralBackground(yo = 0) {
 
 function fpsUpdate() {
   //calculate FPS
-  if (frameRate && ui?.previousFPS) {
+  if (frameRate && ui.previousFPS) {
     ui.previousFPS.push(frameRate());
     if (ui.previousFPS.length > 5) {
       ui.previousFPS.splice(0, 1);
@@ -1258,7 +1269,7 @@ function tryPlace() {
  */
 window.onkeydown = function (ev) {
   //DevTools and fullscreen
-  if (key === "f12" || key === "f11") return;
+  if (key === "f12" || key === "f11" || errored) return;
   else {
     if (keyIsDown("`")) console.log(ev);
     if (keybinds.down(ev)) {

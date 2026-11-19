@@ -9,28 +9,16 @@ import {
   createHealthbarComponent,
   createUIComponent,
   createUIImageComponent,
-  ui
+  ui,
 } from "../../core/ui.js";
 import { gen } from "../../play/game.js";
 import { refreshDatabaseUI } from "./item-database.js";
 import { newgame_handler } from "./new-game.js";
 // black screen
 let fade = 0;
-ui.addReset("startable:true");
+ui.addReset("startable", "true");
 // title
-createUIImageComponent(
-  ["title"],
-  [],
-  0,
-  -350,
-  609,
-  138,
-  null,
-  "title.project.accent",
-  false,
-  1,
-  true,
-).anchorLeft(60);
+createUIImageComponent(["title"], [], 0, -350, 609, 138, null, "title.project.accent", false, 1, true).anchorLeft(60);
 
 createUIComponent(["title"], [], 0, -250, 0, 0, "none", null, ">> REASSEMBLY", true, 75)
   .anchorLeft(60)
@@ -40,19 +28,7 @@ createUIComponent(["title"], [], 0, -250, 0, 0, "none", null, ">> REASSEMBLY", t
 ui.addReset("title-side", "welcome");
 // side area
 createUIImageComponent(["title"], ["title-side:art"], 450, -35, 700, 700, null, "icon.dev", true);
-createUIComponent(
-  ["title"],
-  ["title-side:art"],
-  450,
-  300,
-  0,
-  0,
-  "none",
-  null,
-  "[[ Insert artwork here ]]",
-  true,
-  30,
-).setTextColour(col.accent);
+createUIComponent(["title"], ["title-side:art"], 450, 300, 0, 0, "none", null, "[[ Insert artwork here ]]", true, 30).setTextColour(col.accent);
 
 createCMFTComponent(
   ["title"],
@@ -163,39 +139,11 @@ Place a #>>generator.scrap-burner#@-Scrap Burner#--, connect it with #>>pylon.sc
   .setOutlineColour(col.accent)
   .setTextColour(col.white);
 
-createUIImageComponent(
-  ["title"],
-  [],
-  850,
-  -330,
-  50,
-  50,
-  () => ui.set("title-side", "controls"),
-  "icon.controls",
-  true,
-).setOutlineColour(col.mono(60));
-createUIImageComponent(
-  ["title"],
-  [],
-  850,
-  -260,
-  50,
-  50,
-  () => ui.set("title-side", "guide"),
-  "icon.question",
-  true,
-).setOutlineColour(col.mono(60));
-createUIImageComponent(
-  ["title"],
-  [],
-  850,
-  -190,
-  50,
-  50,
-  () => ui.set("title-side", "art"),
-  "icon.edit",
-  true,
-).setOutlineColour(col.mono(60));
+createUIImageComponent(["title"], [], 850, -330, 50, 50, () => ui.set("title-side", "controls"), "icon.controls", true).setOutlineColour(
+  col.mono(60),
+);
+createUIImageComponent(["title"], [], 850, -260, 50, 50, () => ui.set("title-side", "guide"), "icon.question", true).setOutlineColour(col.mono(60));
+createUIImageComponent(["title"], [], 850, -190, 50, 50, () => ui.set("title-side", "art"), "icon.edit", true).setOutlineColour(col.mono(60));
 
 // buttons
 
@@ -215,7 +163,7 @@ createUIComponent(
   "none",
   () => {
     ui.set("startable", "false");
-    ui.timer.repeat((i) => (fade = i * 4), 64);
+    ui.timer.repeat(i => (fade = i * 4), 64);
     ui.timer.do(() => {
       fade = 0;
       ui.menuState = "new-game";
@@ -246,7 +194,7 @@ createUIComponent(
   "none",
   () => {
     ui.set("startable", "false");
-    ui.timer.repeat((i) => (fade = i * 4), 64);
+    ui.timer.repeat(i => (fade = i * 4), 64);
     ui.timer.do(() => {
       fade = 0;
       gen.mode = "load";
@@ -288,33 +236,11 @@ createUIComponent(
   .setOutlineColour(col.from(60, 60, 60))
   .setTextColour(col.accent);
 
-createUIImageComponent(
-  ["title"],
-  ["startable:true"],
-  -820,
-  100,
-  75,
-  75,
-  null,
-  "icon.database",
-  false,
-);
+createUIImageComponent(["title"], ["startable:true"], -820, 100, 75, 75, null, "icon.database", false);
 
 // tools
 
-createUIComponent(
-  ["title"],
-  ["debug-tools:true"],
-  -800,
-  240,
-  0,
-  0,
-  "none",
-  null,
-  ">>>>>>>>>",
-  false,
-  75,
-)
+createUIComponent(["title"], ["debug-tools:true"], -800, 240, 0, 0, "none", null, ">>>>>>>>>", false, 75)
   .setTextColour(col.accent)
   .anchorLeft()
   .alignLeft();
@@ -342,10 +268,7 @@ createUIComponent(
 
 // helpline
 
-createUIComponent(["title"], [], 0, 0, 0, 0, "none", null, "Project Helpline", true, 20)
-  .setTextColour(col.accent)
-  .anchorBottom(170)
-  .anchorLeft(120);
+createUIComponent(["title"], [], 0, 0, 0, 0, "none", null, "Project Helpline", true, 20).setTextColour(col.accent).anchorBottom(170).anchorLeft(120);
 
 createUIComponent(["title"], [], 0, 0, 1515, 60, "none", null, "", true, 20)
   .setTextColour(col.from(255, 255, 255))
@@ -365,9 +288,7 @@ let tip = 0;
 /** @type {CMFT.Drawer[]} */
 let tips = [];
 export async function setupTips() {
-  tips = (await CMFT.Loader.drawer("assets/src/definitions/tips.scmft", 20, 123)).map((c) =>
-    c.noBG(),
-  );
+  tips = (await CMFT.Loader.drawer("assets/src/definitions/tips.scmft", 20, 123)).map(c => c.noBG());
   tip = rnd.idx(tips);
 
   randomiseTips();
@@ -387,10 +308,8 @@ createUIComponent(["title"], [], 0, 0, 200, 50, "none", checkUpdate, "", true, 2
   .anchorRight(80)
   .removeOutline()
   .removeBackground()
-  .define(
-    "text",
-    () =>
-      `<version ${gameVersion}${preNumber ? `, preview ${preNumber}` : ""}>\n${versionName ? `"${versionName}"` : ""}${versiongetter ? "\nReload page, update available" : ""}`.trimEnd(),
+  .define("text", () =>
+    `<version ${gameVersion}${preNumber ? `, preview ${preNumber}` : ""}>\n${versionName ? `"${versionName}"` : ""}${versiongetter ? "\nReload page, update available" : ""}`.trimEnd(),
   );
 
 createUIComponent(["title"], [], 0, 0, 1920, 1080).define("backgroundColour", () => fade);
@@ -401,13 +320,42 @@ ui.set("show-load", "true");
 export const loadStats = {
   totalImages: PreloadRegistries.images.size,
   totalCutscenes: PreloadRegistries.cutscenes.size,
+  totalPLREntries: PreloadRegistries.vfx.size,
   images: 0,
   cutscenes: 0,
+  plr: 0,
   hide() {
     ui.set("show-load", "false");
   },
 };
-createUIComponent(["title"], ["show-load:true"], 0, 0, 1920, 1080).setBackgroundColour(150);
+createUIComponent(["title", "new-game", "ide", "database", "in-game"], ["show-load:true"], 0, 0, 1920, 1080).setBackgroundColour(150);
+createUIComponent(
+  ["title", "new-game", "ide", "database", "in-game"],
+  ["show-load:true"],
+  0,
+  -100,
+  0,
+  0,
+  "none",
+  null,
+  "Loading...",
+  true,
+  30,
+).setTextColour(col.accent);
+createHealthbarComponent(
+  ["title", "new-game", "ide", "database", "in-game"],
+  ["show-load:true"],
+  0,
+  -60,
+  1000,
+  20,
+  "both",
+  null,
+  "Preloading registries...",
+  true,
+  15,
+  loadStats,
+).setGetters("plr", "totalPLREntries");
 createHealthbarComponent(
   ["title", "new-game", "ide", "database", "in-game"],
   ["show-load:true"],

@@ -91,29 +91,7 @@ class Collection {
    * @param {string} string
    */
   static createFrom(string) {
-    return (
-      // new Collection(
-      //   ...`${string}`
-      //     .split(/(?<!\\)(?=#)/)
-      //     .map((x) => x.replaceAll("\\#", "#"))
-      //     .filter((x) => x.length > 0)
-      //     .map((x) => {
-      //       if (x.startsWith("#")) {
-      //         if (x.startsWith("#>>")) return new Icon(x.substring(3));
-      //         let c = new Text(x.substring(3));
-      //         /** @type {import("./color.js").color} */
-      //         const code = Decoration.colours[x[1]];
-      //         if (code !== undefined) c.setColour(code);
-      //         /** @type {string} */
-      //         const scode = Decoration.styles[x[2]];
-      //         if (scode !== undefined) c.setStyle(scode);
-      //         return c;
-      //       }
-      //       return new Text(x);
-      //     }),
-      // )
-      this.#parse(string).splitLines().merge()
-    );
+    return this.#parse(string).splitLines().merge();
   }
   static #parse(input) {
     const source = `${input}`;

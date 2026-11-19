@@ -35,13 +35,12 @@ class BlockLauncher extends Weapon {
       let block = holder.world.getBlock(game.mouse.blockX, game.mouse.blockY);
       if (!block) return;
       //Set ammo filter to clicked block
-      Log.send(`Set ammo type to ${block.name}#-- (${block.dropItem}#--)`);
+      Log.send(`#-iSet ammo type to ${block.name}#-- (${block.dropItem}#--)`);
       this.ammoType = block.dropItem;
       this.shoot = constructFromType(this.baseShoot, WeaponShootConfiguration);
       this.current = structuredClone(this.base);
       let reverseEngineering = new WeaponBulletConfiguration();
-      reverseEngineering.ammos[this.ammoType] = 0;
-      reverseEngineering.types = [this.current];
+      reverseEngineering.types[this.ammoType] = this.current;
       this.bullets = reverseEngineering;
       this.modifyBullet();
       ui.waitingForMouseUp = true;

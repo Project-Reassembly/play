@@ -1,10 +1,10 @@
 import { col } from "../core/color.js";
-import { Vector, clamp, rnd, turn } from "../core/number.js";
+import { clamp, rnd, turn, Vector } from "../core/number.js";
 import Integrate from "../lib/integrate.js";
 import { debug } from "../play/debug.js";
 import { emitEffect } from "../play/effects.js";
 import { blockSize } from "../scaling.js";
-import { TextParticle } from "./effect/text-particle.js";
+import { legacyTextParticle } from "./effect/text-particle.js";
 export class PhysicalObject extends Integrate.RegisteredItem {
   static debug = false;
   pos = Vector.ZERO;
@@ -333,7 +333,7 @@ export class ShootableObject extends PhysicalObject {
     const mag = Math.abs(amount);
     const frac = mag / this.maxHealth;
     this.world.particles.push(
-      new TextParticle(
+      legacyTextParticle(
         x,
         y,
         rnd.float(0, Math.PI * 2),
@@ -360,7 +360,7 @@ export class ShootableObject extends PhysicalObject {
     const mag = Math.abs(amount);
     const frac = amount / this._lastMaxShield;
     this.world.particles.push(
-      new TextParticle(
+      legacyTextParticle(
         x,
         y,
         rnd.float(0, Math.PI * 2),

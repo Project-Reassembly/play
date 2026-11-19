@@ -2,7 +2,7 @@ import { col } from "../../../core/color.js";
 import { ImageContainer } from "../../../core/image.js";
 import { effectTimer } from "../../../play/effects.js";
 import { blockSize } from "../../../scaling.js";
-import { LightningParticle } from "../../effect/lightning-particle.js";
+import { legacyLightningParticle } from "../../effect/lightning-particle.js";
 import { Player } from "../../entity/player.js";
 import { ShootableObject } from "../../physical.js";
 import { Block } from "../block.js";
@@ -43,7 +43,7 @@ export class PlayerCharger extends Block {
             effectTimer.repeat(
               () =>
                 this.world.particles.push(
-                  new LightningParticle(
+                  legacyLightningParticle(
                     this.pos
                       .addXY(0, -this._extension * 0.875)
                       .multiLerp(ent.pos, Math.ceil(this.range * 3)),

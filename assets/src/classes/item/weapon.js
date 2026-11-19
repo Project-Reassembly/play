@@ -98,15 +98,16 @@ class Weapon extends Equippable {
     if (this._cooldown <= 0) {
       if (Object.hasOwn(holder, "power") && holder.power < this.powerUse) return;
       //choose ammo
-      let ammoType = "-";
-      for (let ammo in bulletConfig.ammos) {
-        if (bulletConfig.getAmmo(ammo) !== null && entityHasAmmo(holder, ammo, this.ammoUse)) {
+      /** @type {string|undefined} */
+      let ammoType;
+      for (const ammo in bulletConfig.types) {
+        if (entityHasAmmo(holder, ammo, this.ammoUse)) {
           ammoType = ammo;
           break;
         }
       }
       // stop if no ammo type found
-      if (ammoType === "-") return;
+      if (ammoType === undefined) return;
       // fire
       this._lastReload = shoot.reload;
       this._lastCharge = shoot.charge;
@@ -121,7 +122,6 @@ class Weapon extends Equippable {
     }
   }
   _useAmmo(holder, ammoType) {
-    if (ammoType === "none") return true;
     if (entityHasAmmo(holder, ammoType, this.ammoUse)) entityAmmoUse(holder, ammoType, this.ammoUse);
     else return false;
     return true;
@@ -138,21 +138,21 @@ class Weapon extends Equippable {
     this._cooldown = this.getAcceleratedReloadRate(shoot);
     this.accelerate(shoot); //Apply acceleration effects
 
-    this.timer.repeat(
-      () => {
-        holder.knockback((this.recoil * 100) / holder.size);
-        let pos = this._getShootPos(holder);
-        autoScaledEffect(shoot.effect, holder.world, pos.x, pos.y, pos.direction);
-        const model = bulletConfig.getAmmo(ammoType);
-        if (model)
+    const model = bulletConfig.getAmmo(ammoType);
+    if (model)
+      this.timer.repeat(
+        () => {
+          holder.knockback((this.recoil * 100) / holder.size);
+          let pos = this._getShootPos(holder);
+          autoScaledEffect(shoot.effect, holder.world, pos.x, pos.y, pos.direction);
           model.emit(pos.x, pos.y, shoot.pattern.amount, degrees(pos.direction), shoot.pattern.spread, shoot.pattern.spacing, holder.world, holder);
-        if (this.component instanceof WeaponComponent) {
-          this.component.trigger(shoot.recoilScale, shoot.rotRecoilScale);
-        }
-      },
-      shoot.pattern.burst,
-      shoot.pattern.interval,
-    );
+          if (this.component instanceof WeaponComponent) {
+            this.component.trigger(shoot.recoilScale, shoot.rotRecoilScale);
+          }
+        },
+        shoot.pattern.burst,
+        shoot.pattern.interval,
+      );
   }
   /**@param {EquippedEntity} holder  */
   use(holder, isSecondary = false) {
@@ -166,7 +166,7 @@ class Weapon extends Equippable {
   /**@param {EquippedEntity} holder  */
   getContextualisedInfo(holder) {
     let ammoType = "-";
-    for (let ammo in this.bullets.ammos) {
+    for (const ammo in this.bullets.types) {
       if (this.bullets.getAmmo(ammo) !== null && entityHasAmmo(holder, ammo, this.ammoUse)) {
         ammoType = ammo;
         break;
@@ -177,13 +177,14 @@ class Weapon extends Equippable {
         ammoType === "-" ?
           ""
         : entityAmmoCount(holder, ammoType)
+      : holder.power ? `${Math.floor(holder.power / this.shoot.power)}${this.altShoot ? `/${Math.floor(holder.power / this.altShoot.power)}` : ""}`
       : "∞"
     }\n${
       ammoType !== "none" ?
         ammoType === "-" ?
           "None Available"
         : `${crop(Registries.items.get(ammoType).name, 12)} ×${this.ammoUse}`
-      : `${shortenedNumber(this.shoot.power)}${this.altShoot ? `|${shortenedNumber(this.altShoot.power)}` : ""} power`
+      : `${shortenedNumber(this.shoot.power)}${this.altShoot ? `/${shortenedNumber(this.altShoot.power)}` : ""} power`
     }\n${this.createProgressBar()} `;
   }
   createProgressBar() {

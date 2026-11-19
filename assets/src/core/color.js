@@ -13,10 +13,11 @@ export const col = new (class Int32Colours {
    *  ****
    * **Types**:
    *  - `string`: Tries to parse as a hex number of the form `#rrggbbaa`, `#rrggbb`, `0xrrggbbaa`, `0xrrggbb` or a string form of the decimal number.
-   *  - `number` or `bigint`: Just uses the number directly (as an int32).
+   *  - `number`: Just uses the number directly (as an int32).
+   *  - `bigint`: Converts to a number, then uses it.
    *  - `boolean`: White if true, black if false.
    *  - `symbol` or `undefined`: Red.
-   *  - `object`: If an array, maps the array as follows: `[r?, g?, b?, a?]`. If not, uses the `{r?, g?, b?, a?}` properties.
+   *  - `object`: If an array, maps the array based on length: `[rgb]`, `[rgb, a]`, `[r, g, b]`, `[r, g, b, a]`. If not, uses the `{r?, g?, b?, a?}` properties.
    *  - `function`: Calls the input, and converts the result.
    */
   convert = function (something) {
@@ -26,7 +27,7 @@ export const col = new (class Int32Colours {
       case "number":
         return something | 0;
       case "bigint":
-        return something | 0;
+        return Number(something) | 0;
       case "boolean":
         return something ? this.white : this.black;
       case "symbol":
@@ -34,7 +35,11 @@ export const col = new (class Int32Colours {
       case "undefined":
         return col.red;
       case "object":
-        if (something instanceof Array) return this.from(...something, 255);
+        if (something instanceof Array) {
+          if (something.length === 1) return this.mono(something[0]);
+          if (something.length === 2) return this.mono(something[0], something[1]);
+          return this.from(...something, 255);
+        }
         return this.from(something.r, something.g, something.b, something.a);
       case "function":
         return this.convert(something());
@@ -161,10 +166,10 @@ export const col = new (class Int32Colours {
       br = b1 * mf + b2 * (1 - mf);
     return (rr << 24) | (gr << 16) | (br << 8) | (ar & 0xff);
   }
-  /** @param {byte} level  @returns {color} */
-  mono(level) {
+  /** @param {byte} level @param {byte} [alpha=255]  @returns {color} */
+  mono(level, alpha = 255) {
     level = level & 0xff;
-    return (level << 24) | (level << 16) | (level << 8) | 255;
+    return (level << 24) | (level << 16) | (level << 8) | (alpha & 0xff);
   }
   /**@param {color} col @returns {[byte,byte,byte,byte]} */
   array(col) {
@@ -172,37 +177,46 @@ export const col = new (class Int32Colours {
     return [(col >> 24) & 0xff, (col >> 16) & 0xff, (col >> 8) & 0xff, col & 0xff];
   }
   /**
-   * Colour Interpolation function. Finds a colour along a virtual gradient, with arbitrary stops.\
+   * Colour Interpolation function. Finds a colour along a virtual gradient, with an arbitrary number of evenly-spaced stops.\
    * *god this took forever i hate everything*\
-   * **version 2 YEAAA**
+   * **version 3 YEAAAAAAAAAAA**
    * @param {color[]} cols Array of colours. Gradient goes from start to end of array.
    * @param {float} factor Number 0-1. How far along the gradient the point is, from the start.
    * @returns {color} An integer representation of the colour at the specified point along the gradient. The final colour in the array, if `factor` is too large.
    */
   interp(cols, factor) {
-    let l = cols.length;
-    let n = (l - 1) | 0;
+    const l = cols.length;
     if (l < 2) return cols[0] ?? 0;
-    //Look at each gap between numbers
-    for (let choice = 1; choice < l; choice++) {
-      if (factor < choice / n) {
-        //Set some temporary variables
-        const c1 = cols[choice - 1],
-          c2 = cols[choice],
-          fact = factor * n - (choice - 1);
-        const i_f = 1 - fact;
-        //Interpolate between the 2 chosen colours
-        // uhhhhhh what the actual fuck is this
-        // what did i just write
-        return (
-          (((((c1 >> 24) & 0xff) * i_f + ((c2 >> 24) & 0xff) * fact) & 0xff) << 24) |
-          (((((c1 >> 16) & 0xff) * i_f + ((c2 >> 16) & 0xff) * fact) & 0xff) << 16) |
-          (((((c1 >> 8) & 0xff) * i_f + ((c2 >> 8) & 0xff) * fact) & 0xff) << 8) |
-          (((c1 & 0xff) * i_f + (c2 & 0xff) * fact) & 0xff)
-        );
-      }
-    }
-    return cols.at(-1) | 0;
+    // maximum index
+    const n = (l - 1) | 0;
+    // Find previous color
+    const from = Math.floor(factor * n),
+      c1 = cols[from],
+      to = Math.ceil(factor * n),
+      c2 = cols[to];
+    const fact = factor * n - (to - 1),
+      i_f = 1 - fact;
+
+    return (
+      (((((c1 >> 24) & 0xff) * i_f + ((c2 >> 24) & 0xff) * fact) & 0xff) << 24)
+      | (((((c1 >> 16) & 0xff) * i_f + ((c2 >> 16) & 0xff) * fact) & 0xff) << 16)
+      | (((((c1 >> 8) & 0xff) * i_f + ((c2 >> 8) & 0xff) * fact) & 0xff) << 8)
+      | (((c1 & 0xff) * i_f + (c2 & 0xff) * fact) & 0xff)
+    );
+    // for (let choice = 1; choice < l; choice++) {
+    //   if (factor < choice / n) {
+    //     //Set some temporary variables
+    //     const c1 = cols[choice - 1],
+    //       c2 = cols[choice],
+    //       fact = factor * n - (choice - 1);
+    //     const i_f = 1 - fact;
+    //     //Interpolate between the 2 chosen colours
+    //     // uhhhhhh what the actual fuck is this
+    //     // what did i just write
+
+    //   }
+    // }
+    // return cols.at(-1) | 0;
   }
   /**
    * Colour Interpolation function, but between 2 colours only.
@@ -215,10 +229,10 @@ export const col = new (class Int32Colours {
     const fact = factor;
     const i_f = 1 - fact;
     return (
-      (((((c1 >> 24) & 0xff) * i_f + ((c2 >> 24) & 0xff) * fact) & 0xff) << 24) |
-      (((((c1 >> 16) & 0xff) * i_f + ((c2 >> 16) & 0xff) * fact) & 0xff) << 16) |
-      (((((c1 >> 8) & 0xff) * i_f + ((c2 >> 8) & 0xff) * fact) & 0xff) << 8) |
-      (((c1 & 0xff) * i_f + (c2 & 0xff) * fact) & 0xff)
+      (((((c1 >> 24) & 0xff) * i_f + ((c2 >> 24) & 0xff) * fact) & 0xff) << 24)
+      | (((((c1 >> 16) & 0xff) * i_f + ((c2 >> 16) & 0xff) * fact) & 0xff) << 16)
+      | (((((c1 >> 8) & 0xff) * i_f + ((c2 >> 8) & 0xff) * fact) & 0xff) << 8)
+      | (((c1 & 0xff) * i_f + (c2 & 0xff) * fact) & 0xff)
     );
   }
   /**@param {string} str */
@@ -269,17 +283,12 @@ export const col = new (class Int32Colours {
     col = col | 0;
     g.stroke((col >> 24) & 0xff, (col >> 16) & 0xff, (col >> 8) & 0xff, (col & 0xff) | 1);
   }
-  /** Recursively converts every colour-looking property of an object to an actual colour. */
+  /** Recursively converts every colour-looking property of an object to an actual colour. Less complete than `col.convert` - does not handle 2-element arrays. */
   autonorm = function (obj) {
     for (const [k, v] of Object.entries(obj)) {
-      if (
-        v instanceof Array &&
-        (v.length === 3) | (v.length === 4) &&
-        v.every((i) => typeof i === "number")
-      )
+      if (v instanceof Array && (v.length === 3) && (v.length === 4) && v.every(i => typeof i === "number"))
         obj[k] = this.from(v[0], v[1], v[2], v[3]);
-      else if (typeof v === "string" && (v.length === 7 || v.length === 9) && v[0] === "#")
-        obj[k] = this.fromHex(v.substring(1).padEnd(8, "f"));
+      else if (typeof v === "string" && (v.length === 7 || v.length === 9) && v[0] === "#") obj[k] = this.fromHex(v.substring(1).padEnd(8, "f"));
       else if (typeof v === "object" && !(v instanceof Array)) obj[k] = this.autonorm(v);
     }
   }.bind(this);

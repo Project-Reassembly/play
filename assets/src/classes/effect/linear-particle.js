@@ -1,59 +1,49 @@
 import { col } from "../../core/color.js";
 import { Vector } from "../../core/number.js";
 import { Particle } from "./particle.js";
-// An extended particle class which connects 2 points
-class LinearParticle extends Particle {
+/**
+ * @typedef {{
+ *   lifetime: number,
+ *   light: number,
+ *   strokeFrom: number,
+ *   strokeTo: number,
+ *   colours: import("../../core/color.js").color[],
+ * }} LinearParticleModel
+ */
+
+/** An extended shape particle class which connects 2 points. @extends {Particle<LinearParticleModel>} */
+export class LinearParticle extends Particle {
   /**@type {Vector[]} */
   positions = [];
-  size = 0;
   /**
+   * @param {LinearParticleModel} vfx
    * @param {Vector[]} positions
    */
-  constructor(
-    positions,
-    lifetime,
-    colours,
-    light,
-    strokeFrom,
-    strokeTo,
-    space = false
-  ) {
-    let pos1 = positions[0] ?? Vector.ZERO;
-    let pos2 = positions.at(-1) ?? Vector.ZERO;
-    let center = pos1.add(pos2).scale(0.5);
-    super(center.x, center.y, 0, lifetime, 0, 0, colours, 0, light, space);
-    this.pos1 = pos1;
-    this.pos2 = pos2;
+  constructor(vfx, positions) {
+    const p1 = positions[0];
+    super(vfx, p1.x, p1.y, 0);
     this.positions = positions;
-    this.strokeFrom = strokeFrom;
-    this.stroke = strokeFrom;
-    this.strokeTo = strokeTo;
-    this.size = this.pos2.sub(this.pos1).magnitude;
+    this.stroke = vfx.strokeFrom;
+    this.color = vfx.colours[0];
   }
-  calcSizes(lf) {
-    this.stroke = this.strokeFrom * lf + this.strokeTo * (1 - lf);
+  istep(dt) {
+    const lf = this.lifetime / this.vfx.lifetime;
+    this.stroke = this.vfx.strokeFrom * lf + this.vfx.strokeTo * (1 - lf);
+
+    this.colour = col.interp(this.vfx.colours, 1 - lf);
   }
-  calcDecels(dt) {}
-  movement(dt) {}
   draw() {
-    if (this.positions.length >= 2) {
-      push();
-      noFill();
-      //Interpolate colour
-      col.stroke(this.colour);
-      strokeWeight(this.stroke);
-      //Draw the particle
-      this.actualDraw();
-      pop();
-    }
-  }
-  actualDraw() {
+    push();
+    noFill();
+    col.stroke(this.colour);
+    strokeWeight(this.stroke);
+
     beginShape();
-    this.positions.forEach((p) => {
+    for (const p of this.positions) {
       vertex(p.x, p.y);
-    });
+    }
     endShape();
+
+    pop();
   }
 }
-export { LinearParticle };
-

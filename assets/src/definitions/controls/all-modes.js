@@ -18,8 +18,8 @@ keybinds.game.shortcut.simple("toggle-mode", keys.b, () => {
   else ui.set("mode", "build");
 });
 
-keybinds.game.shortcut.modified("save", keys.j, { ctrl: true }, saveGame);
-keybinds.game.shortcut.modified("load", keys.k, { ctrl: true }, loadGame);
+keybinds.game.shortcut.modified("save", keys.j, mods.ctrl, saveGame);
+keybinds.game.shortcut.modified("load", keys.k, mods.ctrl, loadGame);
 
 keybinds.game.shortcut.simple("inventory", keys.e, () => {
   if (ui.is("menu", "inventory")) ui.set("menu", "none");

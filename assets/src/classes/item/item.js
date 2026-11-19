@@ -3,7 +3,7 @@ import { col } from "../../core/color.js";
 import { rnd, tru } from "../../core/number.js";
 import { Registries, TypeRegistries } from "../../core/registry.js";
 import Integrate from "../../lib/integrate.js";
-import { ShapeParticle } from "../effect/shape-particle.js";
+import { legacyShapeParticle } from "../effect/shape-particle.js";
 import { Corporation } from "./corporation.js";
 class Item extends Integrate.RegisteredItem {
   image = "error";
@@ -21,16 +21,9 @@ class Item extends Integrate.RegisteredItem {
   tooltip = null;
   init() {
     // this.description = wrapWords(this.description, 40);
-    this.tooltip = CMFT.drawer(
-      `${this.corp ? `#>>${Corporation.iconof(this.corp)}#@b` : "#@b"}${this.name}#--`,
-      25,
-      40,
-    ).conjoin(
+    this.tooltip = CMFT.drawer(`${this.corp ? `#>>${Corporation.iconof(this.corp)}#@b` : "#@b"}${this.name}#--`, 25, 40).conjoin(
       CMFT.drawer(
-        this.description +
-          (this.marketValue > 0 ?
-            `\n#a-Sell value: \$${shortenedNumber(this.marketValue, 2, 4, false)}`
-          : "\n#4iNo sell value"),
+        this.description + (this.marketValue > 0 ? `\n#a-Sell value: \$${shortenedNumber(this.marketValue, 2, 4, false)}` : "\n#4iNo sell value"),
         20,
         40,
       ),
@@ -59,7 +52,7 @@ class Item extends Integrate.RegisteredItem {
         let size = rnd.float(3, 8);
         let dist = rnd.float(0, 8);
         world.particles.push(
-          new ShapeParticle(
+          legacyShapeParticle(
             x + Math.cos(dir) * dist,
             y + Math.sin(dir) * dist,
             0,
@@ -67,10 +60,7 @@ class Item extends Integrate.RegisteredItem {
             0,
             0,
             "rhombus",
-            [
-              col.lighten(Item.getColourFromRarity(Item.rarity.SPECIAL), 30),
-              col.darken(Item.getColourFromRarity(Item.rarity.SPECIAL), 30),
-            ],
+            [col.lighten(Item.getColourFromRarity(Item.rarity.SPECIAL), 30), col.darken(Item.getColourFromRarity(Item.rarity.SPECIAL), 30)],
             size,
             0,
             size,
@@ -86,6 +76,9 @@ class Item extends Integrate.RegisteredItem {
   }
   createExtendedDetails() {
     return "";
+  }
+  getColour() {
+    return this.corp ? Corporation.colorof(this.corp) : Item.getColourFromRarity(this.rarity);
   }
   /**
    *
@@ -134,20 +127,6 @@ class Item extends Integrate.RegisteredItem {
     DEV: 7,
     /**@readonly */
     ADV: 8,
-    toIcon(rarity) {
-      switch (rarity) {
-        case this.ITI:
-          return "icon.iti";
-        case this.PETI:
-          return "icon.peti";
-        case this.CCC:
-          return "icon.ccc";
-        case this.ADV:
-          return "icon.adv";
-        case this.DEV:
-          return "icon.dev";
-      }
-    },
   };
   /** Smarter way of checking stack size than just getting shit from registry, but faster than constructing the item */
   static stackSizeOf(itemName) {
@@ -160,9 +139,8 @@ class Item extends Integrate.RegisteredItem {
     if (def) return def;
 
     // If in registry but not directly defined, and no type present, use the item default of 100
-    if(!reg.type) return 100;
+    if (!reg.type) return 100;
 
-    
     // If in registry but not directly defined, and there is a type present, try to get its default stack size
     const type = TypeRegistries.default.get(reg.type);
     const tss = new type().stackSize;
@@ -173,5 +151,6 @@ class Item extends Integrate.RegisteredItem {
     return 100;
   }
 }
+Object.freeze(Item.rarity);
 export { Item };
 

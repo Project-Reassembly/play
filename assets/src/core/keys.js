@@ -5,17 +5,17 @@ class ModifiedKey {
   constructor(key, modifiers = 0) {
     this.key = key;
     this.mods = modifiers;
-    //console.log(`created [${key}:${(control ? "c" : "") + (shift ? "s" : "") + (alt ? "a" : "")}]`);
+    // console.log(`created [${key}:${this.mods === mods.ignore ? "i" : (this.mods & mods.ctrl ? "c" : "") + (this.mods & mods.shift ? "s" : "") + (this.mods & mods.alt ? "a" : "")}]`);
   }
   active(key, ctrl, shift, alt) {
     // console.log(
     //   `checking [${key}:${(ctrl ? "c" : "") + (shift ? "s" : "") + (alt ? "a" : "")}] against [${
     //     this.key
-    //   }:${(this.ctrl ? "c" : "") + (this.shift ? "s" : "") + (this.alt ? "a" : "")}]`
+    //   }:${this.mods === mods.ignore ? "i" : (this.mods & mods.ctrl ? "c" : "") + (this.mods & mods.shift ? "s" : "") + (this.mods & mods.alt ? "a" : "")}]`,
     // );
     return (
       this.key === key
-      && (this.mods === -1
+      && (this.mods === mods.ignore
         || (((this.mods & mods.ctrl) !== 0) === ctrl && ((this.mods & mods.shift) !== 0) === shift && ((this.mods & mods.alt) !== 0) === alt))
     );
   }
@@ -37,7 +37,7 @@ class KeyBinding {
    * @param {{ press?: () => void, hold?: () => void, release?: () => void }} events
    */
   constructor(key, modifiers = 0, events = {}) {
-    this.#shortcut = new ModifiedKey("" + key, modifiers);
+    this.#shortcut = new ModifiedKey(String(key), modifiers);
     this.#event_press = events.press;
     this.#event_release = events.release;
     this.#event_hold = events.hold;
@@ -69,8 +69,8 @@ class KeyBinding {
   modify(changes = {}) {
     this.#original ??= this.#shortcut;
     let modifiers = this.#original.mods;
-    if (changes.addMods !== undefined) modifiers = modifiers | changes.addMods;
     if (changes.removeMods !== undefined) modifiers = modifiers & ~changes.removeMods;
+    if (changes.addMods !== undefined) modifiers = modifiers | changes.addMods;
     this.#shortcut = new ModifiedKey(changes.key ?? this.#shortcut.key, modifiers);
   }
   /**Resets this keybind to its original value. */
@@ -78,74 +78,75 @@ class KeyBinding {
     this.#shortcut = this.#original;
   }
 }
-
+class HandlerShortcuts {
+  /** @type {Map<string, KeyBinding>} */
+  #keys;
+  constructor(keys) {
+    Object.freeze(this);
+    this.#keys = keys;
+  }
+  /** Creates and connects a new shortcut binding with no modifiers, and only a keydown event.
+   * @param {{ press?: () => void, hold?: () => void, release?: () => void }} events
+   */
+  simple(name, key, event) {
+    const kb = new KeyBinding(key, 0, { press: event });
+    this.#keys.set(name, kb);
+    return kb;
+  }
+  /** Creates and connects a new shortcut binding with modifiers, but still only a keydown event.
+   * @param {modifier} mods
+   * @param {{ press?: () => void, hold?: () => void, release?: () => void }} events
+   */
+  modified(name, key, mods, event) {
+    const kb = new KeyBinding(key, mods|0, { press: event });
+    this.#keys.set(name, kb);
+    return kb;
+  }
+  /** Creates and connects a new shortcut binding with no modifiers, and keyup / keydown events.
+   * @param {{ press?: () => void, hold?: () => void, release?: () => void }} events
+   */
+  dual(name, key, down, up) {
+    const kb = new KeyBinding(key, 0, { press: down, release: up });
+    this.#keys.set(name, kb);
+    return kb;
+  }
+}
+class HandlerControls {
+  /** @type {Map<string, KeyBinding>} */
+  #keys;
+  constructor(keys) {
+    Object.freeze(this);
+    this.#keys = keys;
+  }
+  /** Creates and connects a new control binding with no modifiers, and only a hold event.
+   * @param {{ press?: () => void, hold?: () => void, release?: () => void }} events
+   */
+  simple(name, key, event) {
+    const kb = new KeyBinding(key, 0, { hold: event });
+    this.#keys.set(name, kb);
+    return kb;
+  }
+  /** Creates and connects a new control binding with modifiers, but still only a hold event.
+   * @param {modifier} mods
+   * @param {{ press?: () => void, hold?: () => void, release?: () => void }} events
+   */
+  modified(name, key, mods, event) {
+    const kb = new KeyBinding(key, mods, { hold: event });
+    this.#keys.set(name, kb);
+    return kb;
+  }
+}
 /** Deals with a whole collection of keybinds. */
 export class KeybindHandler {
   /** @type {Map<string, KeyBinding>} */
   #keys = new Map();
 
-  #sc = new (class Shortcuts {
-    /** @type {Map<string, KeyBinding>} */
-    #keys;
-    constructor(keys) {
-      Object.freeze(this);
-      this.#keys = keys;
-    }
-    /** Creates and connects a new shortcut binding with no modifiers, and only a keydown event.
-     * @param {{ press?: () => void, hold?: () => void, release?: () => void }} events
-     */
-    simple(name, key, event) {
-      const kb = new KeyBinding(key, 0, { press: event });
-      this.#keys.set(name, kb);
-      return kb;
-    }
-    /** Creates and connects a new shortcut binding with modifiers, but still only a keydown event.
-     * @param {modifier} mods
-     * @param {{ press?: () => void, hold?: () => void, release?: () => void }} events
-     */
-    modified(name, key, mods, event) {
-      const kb = new KeyBinding(key, mods, { press: event });
-      this.#keys.set(name, kb);
-      return kb;
-    }
-    /** Creates and connects a new shortcut binding with no modifiers, and keyup / keydown events.
-     * @param {{ press?: () => void, hold?: () => void, release?: () => void }} events
-     */
-    dual(name, key, down, up) {
-      const kb = new KeyBinding(key, 0, { press: down, release: up });
-      this.#keys.set(name, kb);
-      return kb;
-    }
-  })(this.#keys);
+  #sc = new HandlerShortcuts(this.#keys);
   /** @readonly */
   get shortcut() {
     return this.#sc;
   }
-  #ct = new (class Controls {
-    /** @type {Map<string, KeyBinding>} */
-    #keys;
-    constructor(keys) {
-      Object.freeze(this);
-      this.#keys = keys;
-    }
-    /** Creates and connects a new control binding with no modifiers, and only a hold event.
-     * @param {{ press?: () => void, hold?: () => void, release?: () => void }} events
-     */
-    simple(name, key, event) {
-      const kb = new KeyBinding(key, 0, { hold: event });
-      this.#keys.set(name, kb);
-      return kb;
-    }
-    /** Creates and connects a new control binding with modifiers, but still only a hold event.
-     * @param {modifier} mods
-     * @param {{ press?: () => void, hold?: () => void, release?: () => void }} events
-     */
-    modified(name, key, mods, event) {
-      const kb = new KeyBinding(key, mods, { hold: event });
-      this.#keys.set(name, kb);
-      return kb;
-    }
-  })(this.#keys);
+  #ct = new HandlerControls(this.#keys);
   /** @readonly */
   get control() {
     return this.#ct;
@@ -161,9 +162,9 @@ export class KeybindHandler {
   }
 
   /** Changes a binding's settings. Won't change name or event.
-   * @param {{key?: string, ctrl?: boolean, shift?: boolean, alt?: boolean, ignore?: boolean}} mods
+   * @param {{key?: string, addMods?: modifier, removeMods?: modifier}} mods
    */
-  modify(name, mods) {
+  rebind(name, mods) {
     let binding = this.#keys.get(name);
     binding.modify(mods);
   }
@@ -186,6 +187,20 @@ export class KeybindHandler {
   fire(name) {
     let b = this.#keys.get(name);
     return !b || !b.press();
+  }
+  /**
+   * Rebinds the named keybind to the one pressed in the given `KeyboardEvent`.
+   * @param {KeyboardEvent} ev
+   */
+  recordRebinding(name, ev) {
+    return this.rebind(name, {
+      key: ev.code,
+      removeMods: mods.all,
+      addMods:
+        (ev.ctrlKey && ev.key !== "Control" ? mods.ctrl : 0)
+        | (ev.shiftKey && ev.key !== "Shift" ? mods.shift : 0)
+        | (ev.altKey && ev.key !== "Alt" ? mods.alt : 0),
+    });
   }
   /**
    * Fires `down` with data from the provided `KeyboardEvent`.
@@ -237,13 +252,15 @@ export class KeybindHandler {
   /** Returns the key and modifiers associated with the specified binding, presented in human-readable format. */
   describe(name) {
     const b = this.#keys.get(name)?.shortcut;
-    return b ? `${b.ctrl ? "Ctrl + " : ""}${b.shift ? "Shift + " : ""}${b.alt ? "Alt + " : ""}${renames[b.key] ?? autoname(b.key)}` : undefined;
+    return b ?
+        `${b.mods !== mods.ignore ? `${b.mods & mods.ctrl ? "Ctrl + " : ""}${b.mods & mods.shift ? "Shift + " : ""}${b.mods & mods.alt ? "Alt + " : ""}` : "* + "}${renames[b.key] ?? autoname(b.key)}`
+      : undefined;
   }
   /** Returns the key and modifiers associated with the specified binding, presented in CMFT for a coloured human-readable format. */
   describeCMFT(name) {
     const b = this.#keys.get(name)?.shortcut;
     return b ?
-        `${b.ctrl ? "#d-Ctrl#=- + " : ""}${b.shift ? "#d-Shift#=-  + " : ""}${b.alt ? "#d-Alt#=-  + " : ""}#a-${renames[b.key] ?? autoname(b.key)}`
+        `${b.mods !== mods.ignore ? `${b.mods & mods.ctrl ? "#d-Ctrl#=- + " : ""}${b.mods & mods.shift ? "#d-Shift#=-  + " : ""}${b.mods & mods.alt ? "#d-Alt#=-  + " : ""}` : "#db*#=- + "}#a-${renames[b.key] ?? autoname(b.key)}`
       : undefined;
   }
   /** Returns the key name associated with the specified binding. */
@@ -306,6 +323,7 @@ export const mods = Object.freeze({
   /** @type {modifier} */ ctrl: 0b0001,
   /** @type {modifier} */ shift: 0b0010,
   /** @type {modifier} */ alt: 0b0100,
+  /** @type {modifier} */ all: 0b1111,
   /** Ignore modifier states, go in any state. */
   ignore: -1,
 });

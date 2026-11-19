@@ -175,7 +175,7 @@ const deliverShotModel = delay(
   function () {
     return new BulletModel();
   },
-  "hardcoded",
+  "preloaded",
 );
 /** @type {import("../../../core/registry.js").DelayedConstruction<BulletModel>} */
 const undeliverShotModel = delay(
@@ -190,7 +190,7 @@ const undeliverShotModel = delay(
   function () {
     return new BulletModel();
   },
-  "hardcoded",
+  "preloaded",
 );
 
 export function deliverEntity(ent, add = false, world, clearArea = false) {

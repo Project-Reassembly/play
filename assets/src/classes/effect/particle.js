@@ -1,122 +1,70 @@
-import { col } from "../../core/color.js";
-import { rotatedShape, rotatedShapeExt } from "../../core/ui.js";
+import { ui } from "../../core/ui.js";
+/** @typedef {{lifetime: number, speed: number, rotateSpeed: number, decel: number, space: boolean}} BaseParticleModel */
+
+/** @template {BaseParticleModel} T */
 class Particle {
-  _rotOffset = 0;
-  isSpace = false;
-  constructor(
-    x,
-    y,
-    direction = 0,
-    lifetime = 30,
-    speed = 4,
-    decel = 0,
-    colours = [col.red],
-    rotateSpeed = 0,
-    light = 0,
-    space = false,
-  ) {
+  rotoff = 0;
+  /**
+   * @param {T} vfx
+   * @param {*} x
+   * @param {*} y
+   * @param {*} direction
+   */
+  constructor(vfx, x, y, direction = 0) {
+    this.vfx = vfx;
     this.x = x;
     this.y = y;
     this.direction = direction;
-    this.speed = speed;
-    this.lifetime = lifetime;
-    this.decel = decel;
-    this.remove = false;
-    this.colours = colours.map(col.convert);
-    this.colour = this.colours[0] ?? 0;
-    this.maxLifetime = lifetime;
-    this.rotateSpeed = rotateSpeed;
-    this.light = light;
-    this.isSpace = space;
+    this.speed = vfx.speed ?? 0;
+    this.rotateSpeed = vfx.rotateSpeed ?? 0;
+    this.lifetime = vfx.lifetime ?? 30;
   }
-  calcSizes(lf) {}
-  calcLifeFract() {
-    return this.lifetime / this.maxLifetime;
-  }
-  actualDraw(g) {
-    if (g) rotatedShapeExt(g, "circle", this.x, this.y, 5, 5, 0);
-    else rotatedShape("circle", this.x, this.y, 5, 5, 0);
-  }
-
-  calcDecels(dt) {
-    //Decelerate
-    if (this.speed >= this.decel) {
-      this.speed -= this.decel * dt;
-    } else {
-      this.speed = 0;
-    }
-
-    //rotations
-    if (this.rotateSpeed > 0) {
-      if (this.rotateSpeed >= this.decel) {
-        this.rotateSpeed -= this.decel * dt;
-      } else {
-        this.rotateSpeed = 0;
-      }
-    } else if (this.rotateSpeed < 0) {
-      if (this.rotateSpeed <= -this.decel) {
-        this.rotateSpeed += this.decel * dt;
-      } else {
-        this.rotateSpeed = 0;
-      }
-    }
-  }
-  movement(dt) {
-    //Move
-    this.moveTo(
-      this.x + Math.cos(this.direction) * this.speed * dt,
-      this.y + Math.sin(this.direction) * this.speed * dt,
-    );
-    // this.moveToVct(
-    //   new Vector(this.x, this.y).add(Vector.fromAngleRad(this.direction).scale(this.speed * dt)),
-    // );
-    if (this.rotateSpeed) {
-      this._rotOffset += this.rotateSpeed * dt;
-    }
+  istep(dt) {
+    return;
   }
   step(dt) {
     if (this.lifetime >= dt) {
       //Interpolate size
-      const lf = this.calcLifeFract();
-      this.calcSizes(lf);
-      this.calcDecels(dt);
+      this.istep(dt);
 
-      this.movement(dt);
+      if (this.speed) {
+        //Decelerate
+        if (this.speed >= this.vfx.decel) {
+          this.speed -= this.vfx.decel * dt;
+        } else {
+          this.speed = 0;
+        }
 
-      //Colours
-      this.colour = col.interp(this.colours, 1 - lf);
+        //rotations
+        if (this.rotateSpeed > 0) {
+          if (this.rotateSpeed >= this.vfx.decel) {
+            this.rotateSpeed -= this.vfx.decel * dt;
+          } else {
+            this.rotateSpeed = 0;
+          }
+        } else if (this.rotateSpeed < 0) {
+          if (this.rotateSpeed <= -this.vfx.decel) {
+            this.rotateSpeed += this.vfx.decel * dt;
+          } else {
+            this.rotateSpeed = 0;
+          }
+        }
+
+        // Movement
+        this.x += Math.cos(this.direction) * this.speed * dt;
+        this.y += Math.sin(this.direction) * this.speed * dt;
+        if (this.rotateSpeed) {
+          this.rotoff += this.rotateSpeed * dt;
+        }
+      }
+
       //Lifetime
       this.lifetime -= dt;
     } else {
       this.remove = true;
     }
   }
-  moveToVct(vct) {
-    this.moveTo(vct.x, vct.y);
-  }
-  moveTo(x, y) {
-    this.x = x;
-    this.y = y;
-  }
-  draw(g) {
-    if (g) {
-      g.push();
-      g.noStroke();
-      //Interpolate colour
-      col.fillOn(g, this.colour);
-      //Draw the particle
-      this.actualDraw(g);
-      g.pop();
-      return;
-    }
-    push();
-    noStroke();
-    //Interpolate colour
-    col.fill(this.colour);
-    //Draw the particle
-    this.actualDraw();
-    pop();
-  }
+  draw() {}
   get uiX() {
     return (this.x - ui.camera.x) * ui.camera.zoom;
   }

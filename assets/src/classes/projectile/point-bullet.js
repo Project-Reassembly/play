@@ -1,8 +1,8 @@
 import { col } from "../../core/color.js";
 import { rnd, Vector } from "../../core/number.js";
 import { createLinearEffect } from "../../play/effects.js";
-import { ShapeParticle } from "../effect/shape-particle.js";
-import { WaveParticle } from "../effect/wave-particle.js";
+import { legacyShapeParticle } from "../effect/shape-particle.js";
+import { legacyWaveParticle } from "../effect/wave-particle.js";
 import { BulletInstance } from "./bullet.js";
 class PointBullet extends BulletInstance {
   lifetime = 1;
@@ -75,7 +75,7 @@ class PointBullet extends BulletInstance {
       let direction = rnd.float(360); //Random direction
       this.world.particles.push(
         //Create hit effect
-        new ShapeParticle(
+        legacyShapeParticle(
           this.x,
           this.y,
           radians(direction),
@@ -91,7 +91,7 @@ class PointBullet extends BulletInstance {
           0,
           true
         ),
-        new ShapeParticle(
+        legacyShapeParticle(
           this.x,
           this.y,
           radians(direction + 90),
@@ -107,7 +107,7 @@ class PointBullet extends BulletInstance {
           0,
           true
         ),
-        new WaveParticle(
+        legacyWaveParticle(
           this.x,
           this.y,
           30,

@@ -348,7 +348,7 @@ createHealthbarComponent(
   .anchorLeft(75)
   .anchorBottom(50)
   .rotate(-0.1)
-  .removeBackground()
+  .setBackgroundColour(150)
   .removeOutline()
   .setGetters("shield", "_lastMaxShield")
   .define(
@@ -519,7 +519,7 @@ createHealthbarComponent(
       `${world.boss.name} | ${roundNum((world.boss.health / world.boss.maxHealth) * 100, 2)}% [Shield ${roundNum((world.boss.shield / world.boss._lastMaxShield) * 100, 2)}%]`
     : "",
   )
-  .define("healthbarColours", () => [world.boss.useYellowShield ? col.yellow : col.cyan]);
+  .define("healthbarColours", () => [world.boss.shieldcol ? col.yellow : col.cyan]);
 
 //##############################################################
 

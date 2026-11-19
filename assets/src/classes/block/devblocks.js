@@ -6,9 +6,9 @@ import { exec } from "../../lib/isl/cli.js";
 import { ExecutionContext } from "../../lib/isl/core.js";
 import { Log } from "../../play/messaging.js";
 import { blockSize, Direction } from "../../scaling.js";
-import { ImageParticle } from "../effect/image-particle.js";
-import { ShapeParticle } from "../effect/shape-particle.js";
-import { TextParticle } from "../effect/text-particle.js";
+import { legacyImageParticle } from "../effect/image-particle.js";
+import { legacyShapeParticle } from "../effect/shape-particle.js";
+import { legacyTextParticle } from "../effect/text-particle.js";
 import { Inventory } from "../inventory.js";
 import { ItemStack } from "../item/item-stack.js";
 import { Item } from "../item/item.js";
@@ -22,14 +22,14 @@ class StructureReaderBlock extends Block {
   _becomes = null;
   selectable = true;
   title = "Reader";
-  static unreadable = [
+  static unreadable = new Set([
     "dev::structurereader",
     "dev::commandblock",
     "dev::commandblock.chain",
     "dev::commandblock.loop",
     "dev::commandblock.selector",
     "dev::itemcatalog",
-  ];
+  ]);
   drawTooltip(x, y, outline, background) {
     MLF1.draw(x, y, this._outTxt, `${this.title} [${this._range} blocks]`, Item.getColourFromRarity(0, "light"));
   }
@@ -84,9 +84,9 @@ class StructureReaderBlock extends Block {
           by = this.gridY + y;
         let block = this.world.getBlock(bx, by, "blocks");
         let exists = !!block;
-        let unreadable = exists && StructureReaderBlock.unreadable.includes(block.registryName);
+        let unreadable = exists && StructureReaderBlock.unreadable.has(block.registryName);
         this.world.particles.push(
-          new ShapeParticle(
+          legacyShapeParticle(
             bx * blockSize,
             by * blockSize,
             0,
@@ -107,7 +107,7 @@ class StructureReaderBlock extends Block {
             0,
             60,
           ),
-          new TextParticle(
+          legacyTextParticle(
             bx * blockSize,
             by * blockSize,
             0,
@@ -193,7 +193,7 @@ class CommandExecutorBlock extends Block {
   }
   run() {
     this.world.particles.push(
-      new ImageParticle(this.x, this.y, 0, 120, 0, 0, "block.dev.commandblock.heat", 1, 0, blockSize, blockSize, blockSize, blockSize, 0),
+      legacyImageParticle(this.x, this.y, 0, 120, 0, 0, "block.dev.commandblock.heat", 1, 0, blockSize, blockSize, blockSize, blockSize, 0),
     );
     exec(this._command, new ExecutionContext(this.x, this.y, this));
     //Activate next block
@@ -229,14 +229,11 @@ class CommandExecutorBlock extends Block {
       ui.waitingForMouseUp = true;
       return true;
     }
-    ui.texteditor.text = this._command;
-    ui.set("texteditor", "true");
-    ui.texteditor.isCommandLine = true;
-    ui.texteditor.title = "Set Console Command:";
-    ui.texteditor.save = cmd => {
+    ui.texteditor.open("Set Console Command:", true, cmd => {
       Log.send(`#-iSet command to '${cmd}'`);
       this._command = cmd;
-    };
+    });
+    ui.texteditor.text = this._command;
     ui.waitingForMouseUp = true;
   }
   serialise() {

@@ -1,14 +1,14 @@
 import { ExecutorParticle } from "../classes/effect/extra-particles.js";
-import { ImageParticle } from "../classes/effect/image-particle.js";
-import { ShapeParticle } from "../classes/effect/shape-particle.js";
+import { ImageParticle, legacyImageParticle } from "../classes/effect/image-particle.js";
+import { legacyShapeParticle, ShapeParticle } from "../classes/effect/shape-particle.js";
 import { TextParticle } from "../classes/effect/text-particle.js";
-import { WaveParticle } from "../classes/effect/wave-particle.js";
+import { legacyWaveParticle, WaveParticle } from "../classes/effect/wave-particle.js";
 /* @import { Entity } from "../classes/entity/entity.js"; */
 import { PhysicalObject, ShootableObject } from "../classes/physical.js";
 import { Timer } from "../classes/timer.js";
 import { col } from "../core/color.js";
-import { assign, construct } from "../core/constructor.js";
-import { Vector, clamp, rnd, tru } from "../core/number.js";
+import { assign, assignNull, construct } from "../core/constructor.js";
+import { clamp, rnd, tru, Vector } from "../core/number.js";
 import { RegisteredItem } from "../core/registered-item.js";
 import { Registries } from "../core/registry.js";
 import { blockSize } from "../scaling.js";
@@ -86,25 +86,15 @@ class Explosion {
     //   }
     // }
     const rad = this.radius * sizemul;
-    this.world
-      .blocksInSquare(
-        Math.round(this.x / blockSize),
-        Math.round(this.y / blockSize),
-        Math.ceil(this.radius / blockSize),
-      )
-      .forEach((block) => {
-        if (block) {
-          const dist = block.pos.subXY(this.x, this.y).magnitude;
-          if (dist <= rad + blockSize * 0.5) this.hitB(block, dist, damagemul);
-        }
-      });
-    this.world.entities.forEach((entity) => {
+    this.world.blocksInSquare(Math.round(this.x / blockSize), Math.round(this.y / blockSize), Math.ceil(this.radius / blockSize)).forEach(block => {
+      if (block) {
+        const dist = block.pos.subXY(this.x, this.y).magnitude;
+        if (dist <= rad + blockSize * 0.5) this.hitB(block, dist, damagemul);
+      }
+    });
+    this.world.entities.forEach(entity => {
       const dist = entity.pos.subXY(this.x, this.y).magnitude;
-      if (
-        entity.tangible &&
-        dist <= rad + entity.hitSize * 0.5
-      )
-        this.hitE(entity, dist, knockmul, damagemul);
+      if (entity.tangible && dist <= rad + entity.hitSize * 0.5) this.hitE(entity, dist, knockmul, damagemul);
     });
     return this;
   }
@@ -115,22 +105,17 @@ class Explosion {
   /** @param {import("../classes/entity/entity.js").Entity} thing @param {number} fromdist */
   hitE(thing, fromdist, knockmul = 1, damagemul = 1) {
     this.hit(thing, fromdist, damagemul);
-    if (this.status !== "none" && thing.team !== this.team)
-      thing.applyStatus(this.status, this.statusDuration);
+    if (this.status !== "none" && thing.team !== this.team) thing.applyStatus(this.status, this.statusDuration);
     const scale = knockmul * 25;
     thing.knockback(
-      clamp(
-        ((!isNaN(this.knockback) ? this.knockback : this.amount) * scale) / fromdist ** 2,
-        0,
-        128,
-      ),
+      clamp(((!isNaN(this.knockback) ? this.knockback : this.amount) * scale) / fromdist ** 2, 0, 128),
       thing.pos.subXY(this.x, this.y).angle,
     );
   }
   /** @param {import("../classes/block/block.js").Block} thing @param {number} fromdist */
   hitB(thing, fromdist, damagemul = 1) {
     this.hit(thing, fromdist, damagemul);
-    if(thing._explode) thing.activated();
+    if (thing._explode) thing.activated();
   }
 }
 
@@ -145,16 +130,8 @@ class NuclearExplosion extends Explosion {
   }
   dealDamage() {
     for (const e of this.world.entities)
-      if (!e.dead)
-        e.applyStatus(
-          this.status,
-          clamp(
-            this.radius * 16 * Math.SQRT2 - e.distanceToPoint(this.x, this.y),
-            0,
-            this.statusDuration,
-          ),
-        );
-    effectTimer.repeat((i) => {
+      if (!e.dead) e.applyStatus(this.status, clamp(this.radius * 16 * Math.SQRT2 - e.distanceToPoint(this.x, this.y), 0, this.statusDuration));
+    effectTimer.repeat(i => {
       super.dealDamage(12, 4);
     }, this.radius * 3);
     effectTimer.do(
@@ -191,22 +168,13 @@ function createDestructionExplosion(x, y, source) {
     .create()
     .dealDamage();
 }
-function liquidDestructionBlast(
-  x,
-  y,
-  scalar,
-  colour = col.black,
-  colourTo = col.black,
-  variation = col.black,
-  fragments = [],
-  world,
-) {
+function liquidDestructionBlast(x, y, scalar, colour = col.black, colourTo = col.black, variation = col.black, fragments = [], world) {
   let rootMHP = scalar ** 0.45;
   let smallerRootMHP = scalar ** 0.23;
   let blotSize = 20 + 3 * smallerRootMHP;
   for (let i = 0; i < rootMHP; i++) {
     world.floorParticles.push(
-      new ShapeParticle(
+      legacyShapeParticle(
         x,
         y,
         rnd.float(0, 360),
@@ -226,7 +194,7 @@ function liquidDestructionBlast(
     let componentSize = (component.width + component.height) / 2;
     world.particles.push(
       new ExecutorParticle(
-        new ImageParticle(
+        legacyImageParticle(
           x,
           y,
           rnd.float(0, 360),
@@ -244,7 +212,7 @@ function liquidDestructionBlast(
         (ix, iy, speed) => {
           if (speed > 0.1) {
             world.floorParticles.push(
-              new ShapeParticle(
+              legacyShapeParticle(
                 ix,
                 iy,
                 rnd.float(0, 360),
@@ -252,10 +220,7 @@ function liquidDestructionBlast(
                 rnd.float(0.5, 1),
                 0.1,
                 "circle",
-                [
-                  col.mult(colour, rnd.float(0.8, 1.2)),
-                  col.hide(col.mult(colourTo, rnd.float(0.8, 1.2))),
-                ],
+                [col.mult(colour, rnd.float(0.8, 1.2)), col.hide(col.mult(colourTo, rnd.float(0.8, 1.2)))],
                 componentSize / 2,
                 componentSize / 4,
                 componentSize / 2,
@@ -276,13 +241,13 @@ function insanity() {
   effects.lightColour = [255, 100];
   effects.lightScale = 1;
   effects.lighting = true;
-  effectTimer.repeat((i) => {
+  effectTimer.repeat(i => {
     effects.shadeColour = [0, i];
     effects.lightColour = [255, 100 - i / 2.5];
   }, 250);
   effectTimer.do(
     () =>
-      effectTimer.repeat((i) => {
+      effectTimer.repeat(i => {
         effects.shadeColour = [i / 10, 0, 0, 250];
         effects.lightColour = [255, i / 25];
       }, 250),
@@ -290,17 +255,17 @@ function insanity() {
   );
   effectTimer.do(
     () =>
-      effectTimer.repeat((i) => {
+      effectTimer.repeat(i => {
         effects.shadeColour = [25 + i * 2.5, 0, 0, 250 + i / 5];
         effects.lightColour = [255, 10 + i * 1.5];
         effects.lightScale = 1 - i / 27.5;
       }, 25),
     1500,
   );
-  effectTimer.repeat((i) => {
+  effectTimer.repeat(i => {
     let dir = rnd.float(0, TAU);
     let dist = rnd.float(30, 600);
-    let p = new ShapeParticle(
+    let p = legacyShapeParticle(
       game.player.x + cos(dir) * dist,
       game.player.y + sin(dir) * dist,
       dir,
@@ -321,7 +286,7 @@ function insanity() {
   effectTimer.do(() => {
     for (let j = 0; j < 100; j++) game.player.damage("insanity", rnd.float(100, 1000));
     effects.lightScale = 0;
-    effectTimer.repeat((i) => {
+    effectTimer.repeat(i => {
       effects.lightScale = i / 60;
       effects.lightColour = [255, 47.5 + i * 2];
       effects.shadeColour = [85, 0, 0, 254.8 - (254.8 * i) / 60];
@@ -339,15 +304,7 @@ function insanity() {
 class VisualEffect extends RegisteredItem {
   parentise = false;
   create(world, x = 0, y = 0, direction = 0, scale = 1, impact = false) {}
-  execute(
-    world,
-    x = 0,
-    y = 0,
-    direction = 0,
-    scale = 1,
-    pos = () => ({ x: 0, y: 0, direction: 0 }),
-    impact = false,
-  ) {
+  execute(world, x = 0, y = 0, direction = 0, scale = 1, pos = () => ({ x: 0, y: 0, direction: 0 }), impact = false) {
     if (this.parentise) {
       let p = pos();
       this.create(world, p.x, p.y, p.direction, scale, impact);
@@ -364,16 +321,9 @@ class EmissionEffect extends VisualEffect {
   maxXOffset = 0;
   y = 0;
   maxYOffset = 0;
+  cone = 360; // max directional offset
   isFloor = false;
-  execute(
-    world,
-    x = 0,
-    y = 0,
-    direction = 0,
-    scale = 1,
-    pos = () => ({ x: x, y: y, direction: direction }),
-    impact = false,
-  ) {
+  execute(world, x = 0, y = 0, direction = 0, scale = 1, pos = () => ({ x: x, y: y, direction: direction }), impact = false) {
     let fn = () =>
       this.create(
         world,
@@ -412,169 +362,149 @@ class MultiEffect extends VisualEffect {
   /**@type {VisualEffect[]} */
   effects = [];
   init() {
-    this.effects = this.effects.map((x) => construct(x, "visual-effect"));
+    this.effects = this.effects.map(x => construct(x, "visual-effect"));
   }
-  execute(
-    world,
-    x = 0,
-    y = 0,
-    direction = 0,
-    scale = 1,
-    pos = () => ({ x: x, y: y, direction: direction }),
-    impact = false,
-  ) {
-    this.effects.forEach((z) => z.execute(world, x, y, direction, scale, pos, impact));
+  execute(world, x = 0, y = 0, direction = 0, scale = 1, pos = () => ({ x: x, y: y, direction: direction }), impact = false) {
+    this.effects.forEach(z => z.execute(world, x, y, direction, scale, pos, impact));
   }
 }
 
-class ParticleEmissionEffect extends EmissionEffect {
-  cone = 360;
-  //Contains properties for image and text particles too
-  particle = {
-    //All
-    lifetime: 60,
-    direction: 0,
-    speed: 1,
-    decel: 0.015,
-    rotateSpeed: 0,
-    light: 0,
-    //Shape
-    shape: "circle",
-    //Shape/Image
-    widthFrom: 20,
-    widthTo: 30,
-    heightFrom: 20,
-    heightTo: 30,
-    //Shape/Text/Wave
-    colours: [
-      [50, 50, 50, 100],
-      [100, 100, 100, 0],
-    ],
-    //Text
-    text: "text",
-    useOCR: true,
-    sizeFrom: 20,
-    sizeTo: 10,
-    //Image
-    image: "error",
-    opacityFrom: 1,
-    opacityTo: 1,
-    //Wave
-    radiusFrom: 0,
-    radiusTo: 100,
-    strokeFrom: 10,
-    strokeTo: 0,
-    //all
-    space: false,
-  };
+const defaultShapeParticle = {
+  lifetime: 60,
+  direction: 0,
+  speed: 1,
+  decel: 0.015,
+  rotateSpeed: 0,
+  light: 0,
+  shape: "circle",
+  widthFrom: 20,
+  widthTo: 30,
+  heightFrom: 20,
+  heightTo: 30,
+  colours: [
+    [50, 50, 50, 100],
+    [100, 100, 100, 0],
+  ],
+  space: false,
+};
+class ShapeParticleEmissionEffect extends EmissionEffect {
+  /** @type {import("../classes/effect/shape-particle.js").ShapeParticleModel} */
+  particle = {};
   init() {
+    assignNull(this.particle, defaultShapeParticle);
     this.particle.colours = (this.particle.colours ?? []).map(col.convert);
   }
   create(world, x = 0, y = 0, direction = 0, scale = 1, impact = false) {
     repeat(this.amount, () =>
       this.getParticleArray(world, impact).push(
         new ShapeParticle(
+          this.particle,
           x + this.x,
           y + this.y,
-          direction +
-            radians(
-              (this.particle.direction ?? 0) +
-                rnd.float(-(this.cone ?? 360) / 2, (this.cone ?? 360) / 2),
-            ),
-          this.particle.lifetime ?? 60,
-          this.particle.speed ?? 1,
-          this.particle.decel ?? 0.015,
-          this.particle.shape ?? "circle",
-          this.particle.colours ?? [col.from(50, 50, 50, 100), col.from(100, 100, 100, 0)],
-          this.particle.widthFrom ?? 20,
-          this.particle.widthTo ?? 30,
-          this.particle.heightFrom ?? 20,
-          this.particle.heightTo ?? 30,
-          radians(this.particle.rotateSpeed ?? 0),
-          this.particle.light ?? 0,
-          this.particle.space,
+          direction + radians((this.particle.direction ?? 0) + rnd.float(-(this.cone ?? 360) / 2, (this.cone ?? 360) / 2)),
         ),
       ),
     );
   }
 }
 
-class ImageParticleEmissionEffect extends ParticleEmissionEffect {
+const defaultImageParticle = {
+  lifetime: 60,
+  direction: 0,
+  speed: 1,
+  decel: 0.015,
+  rotateSpeed: 0,
+  light: 0,
+  widthFrom: 20,
+  widthTo: 30,
+  heightFrom: 20,
+  heightTo: 30,
+  image: "error",
+  opacityFrom: 1,
+  opacityTo: 1,
+  space: false,
+};
+class ImageParticleEmissionEffect extends EmissionEffect {
+  /** @type {import("../classes/effect/image-particle.js").ImageParticleModel} */
+  particle = {};
+  init() {
+    assignNull(this.particle, defaultImageParticle);
+  }
   create(world, x = 0, y = 0, direction = 0, scale = 1, impact = false) {
     repeat(this.amount, () =>
       this.getParticleArray(world, impact).push(
         new ImageParticle(
+          this.particle,
           x + this.x,
           y + this.y,
-          direction +
-            radians(
-              (this.particle.direction ?? 0) +
-                rnd.float(-(this.cone ?? 360) / 2, (this.cone ?? 360) / 2),
-            ),
-          this.particle.lifetime ?? 60,
-          this.particle.speed ?? 1,
-          this.particle.decel ?? 0.015,
-          this.particle.image,
-          this.particle.opacityFrom ?? 1,
-          this.particle.opacityTo ?? 1,
-          this.particle.widthFrom ?? 20,
-          this.particle.widthTo ?? 30,
-          this.particle.heightFrom ?? 20,
-          this.particle.heightTo ?? 30,
-          radians(this.particle.rotateSpeed ?? 0),
-          this.particle.space,
+          direction + radians((this.particle.direction ?? 0) + rnd.float(-(this.cone ?? 360) / 2, (this.cone ?? 360) / 2)),
         ),
       ),
     );
   }
 }
+const defaultTextParticle = {
+  //All
+  lifetime: 60,
+  direction: 0,
+  speed: 1,
+  decel: 0.015,
+  light: 0,
+  colours: [
+    [50, 50, 50, 100],
+    [100, 100, 100, 0],
+  ],
+  text: "text",
+  useOCR: true,
+  sizeFrom: 20,
+  sizeTo: 10,
+  space: false,
+};
+class TextParticleEmissionEffect extends EmissionEffect {
+  /** @type {import("../classes/effect/text-particle.js").TextParticleModel} */
+  particle = {};
 
-class TextParticleEmissionEffect extends ParticleEmissionEffect {
+  init() {
+    assignNull(this.particle, defaultTextParticle);
+    this.particle.colours = (this.particle.colours ?? []).map(col.convert);
+  }
   create(world, x = 0, y = 0, direction = 0, scale = 1, impact = false) {
     repeat(this.amount, () =>
       this.getParticleArray(world, impact).push(
         new TextParticle(
+          this.particle,
           x + this.x,
           y + this.y,
-          direction +
-            radians(
-              (this.particle.direction ?? 0) +
-                rnd.float(-(this.particle.cone ?? 360) / 2, (this.particle.cone ?? 360) / 2),
-            ),
-          this.particle.lifetime ?? 60,
-          this.particle.speed ?? 1,
-          this.particle.decel ?? 0.015,
-          this.particle.text,
-          this.particle.colours ?? [col.from(50, 50, 50, 100), col.from(100, 100, 100, 0)],
-          this.particle.sizeFrom ?? 20,
-          this.particle.sizeTo ?? 30,
-          radians(this.particle.rotateSpeed ?? 0),
-          this.particle.useOCR ?? true,
-          this.particle.space,
+          direction + radians((this.particle.direction ?? 0) + rnd.float(-(this.particle.cone ?? 360) / 2, (this.particle.cone ?? 360) / 2)),
         ),
       ),
     );
   }
 }
-
-class WaveEmissionEffect extends ParticleEmissionEffect {
+const defaultWaveParticle = {
+  lifetime: 60,
+  direction: 0,
+  rotateSpeed: 0,
+  light: 0,
+  colours: [
+    [50, 50, 50, 100],
+    [100, 100, 100, 0],
+  ],
+  radiusFrom: 0,
+  radiusTo: 100,
+  strokeFrom: 10,
+  strokeTo: 0,
+  space: false,
+};
+class WaveEmissionEffect extends EmissionEffect {
+  /** @type {import("../classes/effect/wave-particle.js").WaveParticleModel} */
+  particle = {};
+  init() {
+    assignNull(this.particle, defaultWaveParticle);
+    this.particle.colours = (this.particle.colours ?? []).map(col.convert);
+  }
   create(world, x = 0, y = 0, direction = 0, scale = 1, impact = false) {
-    repeat(this.amount, () =>
-      this.getParticleArray(world, impact).push(
-        new WaveParticle(
-          x,
-          y,
-          this.particle.lifetime ?? 60,
-          this.particle.radiusFrom ?? 0,
-          this.particle.radiusTo ?? 100,
-          this.particle.colours ?? [col.from(50, 50, 50, 100), col.from(100, 100, 100, 0)],
-          this.particle.strokeFrom ?? 10,
-          this.particle.strokeTo ?? 0,
-          this.particle.light ?? 0,
-          this.particle.space,
-        ),
-      ),
-    );
+    repeat(this.amount, () => this.getParticleArray(world, impact).push(new WaveParticle(this.particle, x, y)));
   }
 }
 
@@ -617,7 +547,7 @@ class ExplosionEffect extends VisualEffect {
     if (this.smoke)
       for (let i = 0; i < scale ** 0.6; i++) {
         world.particles.push(
-          new ShapeParticle(
+          legacyShapeParticle(
             x,
             y,
             radians(rnd.float(0, 360)),
@@ -640,7 +570,7 @@ class ExplosionEffect extends VisualEffect {
     if (this.sparks)
       for (let i = 0; i < scale ** 0.7; i++) {
         world.particles.push(
-          new ShapeParticle(
+          legacyShapeParticle(
             x,
             y,
             radians(rnd.float(0, 360)),
@@ -659,10 +589,7 @@ class ExplosionEffect extends VisualEffect {
           ),
         );
       }
-    if (this.wave)
-      world.particles.push(
-        new WaveParticle(x, y, 30, 0, scale, this.waveColours, scale ** 0.75, 0, 20, this.isSpace),
-      );
+    if (this.wave) world.particles.push(legacyWaveParticle(x, y, 30, 0, scale, this.waveColours, scale ** 0.75, 0, 20, this.isSpace));
     //Screen shake
     if (this.shake && this.radius > 30) {
       effects.shake(this.x, this.y, this.radius ** 0.75, this.radius ** 0.75);
@@ -705,7 +632,7 @@ class NuclearExplosionEffect extends ExplosionEffect {
     if (this.flash)
       for (let i = 0; i < flashAmount; i++) {
         world.particles.push(
-          new ShapeParticle(
+          legacyShapeParticle(
             x,
             y,
             rnd.float(0, TAU),
@@ -721,7 +648,7 @@ class NuclearExplosionEffect extends ExplosionEffect {
             0.005 * (tru(0.5) ? 1 : -1),
             20,
           ),
-          new ShapeParticle(
+          legacyShapeParticle(
             x,
             y,
             rnd.float(0, TAU),
@@ -743,46 +670,13 @@ class NuclearExplosionEffect extends ExplosionEffect {
     //Smoke ring
     if (this.smoke) {
       let wait = Math.min(120, rad);
-      world.particles.push(
-        new WaveParticle(
-          x,
-          y - rad * 3,
-          15 * size ** 0.8,
-          0,
-          size * 24,
-          this.smokeColours,
-          size ** 0.8,
-          size,
-        ),
-      );
+      world.particles.push(legacyWaveParticle(x, y - rad * 3, 15 * size ** 0.8, 0, size * 24, this.smokeColours, size ** 0.8, size));
       effectTimer.do(() => {
         world.particles.push(
-          new WaveParticle(
-            x,
-            y,
-            wait * 0.25,
-            0,
-            size * 24,
-            [col.from(255, 220, 150), col.from(255, 220, 150, 0)],
-            size ** 0.8,
-            size,
-          ),
+          legacyWaveParticle(x, y, wait * 0.25, 0, size * 24, [col.from(255, 220, 150), col.from(255, 220, 150, 0)], size ** 0.8, size),
         );
         world.particles.push(
-          new ShapeParticle(
-            x,
-            y,
-            0,
-            wait * 1.5,
-            0,
-            0,
-            "circle",
-            [col.white, col.from(255, 220, 150, 0)],
-            0,
-            size * 96,
-            0,
-            size * 96,
-          ),
+          legacyShapeParticle(x, y, 0, wait * 1.5, 0, 0, "circle", [col.white, col.from(255, 220, 150, 0)], 0, size * 96, 0, size * 96),
         );
       }, wait);
     }
@@ -793,12 +687,12 @@ class NuclearExplosionEffect extends ExplosionEffect {
     }
     //Now, the mushroom cloud
     if (this.mushroom)
-      effectTimer.repeat((i) => {
+      effectTimer.repeat(i => {
         let progress = i / (size * 3);
         let life = rnd.float(4, 14) * rad ** 0.5;
         if (i < size * 10 - life)
           world.particles.unshift(
-            new ShapeParticle(
+            legacyShapeParticle(
               x,
               y,
               -HALF_PI,
@@ -818,7 +712,7 @@ class NuclearExplosionEffect extends ExplosionEffect {
         let dir = rnd.float(0, TAU),
           dist = rnd.float(rad, rad * 2) * 3;
         world.floorParticles.unshift(
-          new ShapeParticle(
+          legacyShapeParticle(
             x + Math.cos(dir) * dist,
             y + Math.sin(dir) * dist,
             dir + PI,
@@ -837,7 +731,7 @@ class NuclearExplosionEffect extends ExplosionEffect {
         dir = rnd.float(0, TAU);
         dist = rnd.float(rad, rad * 2) * 3;
         world.particles.unshift(
-          new ShapeParticle(
+          legacyShapeParticle(
             x + Math.cos(dir) * dist,
             y + Math.sin(dir) * dist,
             dir + PI,
@@ -857,7 +751,7 @@ class NuclearExplosionEffect extends ExplosionEffect {
 
         for (let j = 0; j < 3; j++)
           world.particles.push(
-            new ShapeParticle(
+            legacyShapeParticle(
               x,
               y - rad * 10 * progress,
               rnd.float(0, TAU),
@@ -882,6 +776,28 @@ function repeat(n, func, ...params) {
   for (let i = 0; i < n; i++) func(...params);
 }
 
+const nullfx = new VisualEffect();
+/**
+ * Creates an effect between 2 points. Can make either linear or point effects. Does not support parentised effects.
+ * @param {string | Object} effect Registry name of the visual effect, or a constructible visual effect.
+ * @param {float} x1 X position of the effect's start.
+ * @param {float} y1 Y position of the effect's start.
+ * @param {float} x2 X position of the effect's end.
+ * @param {float} y2 Y position of the effect's end.
+ * @param {float} scale Extra parameter to determine size of scalable effects.
+ * @returns
+ */
+export function createEffectBetween(effect, world, x1, y1, x2, y2, scale, impact = false) {
+  if (effect === "none") return nullfx;
+  let fx = typeof effect === "object" ? effect : Registries.vfx.get(effect);
+  if (fx instanceof LinearEffect) {
+    fx.execute(world, new Vector(x1, y1).multiLerp(new Vector(x2, y2), 3), undefined, impact);
+  } else if (fx instanceof VisualEffect) {
+    fx.execute(world, (x1 + x2) * 0.5, (y1 + y2) * 0.5, Math.atan2(y2 - y1, x2 - x1), scale, undefined, impact);
+  } else console.warn(`Effect '${effect}' is not a basic effect - consider using createLinearEffect() instead.`);
+  return fx;
+}
+
 /**
  * Creates an effect, independently of any objects.
  * @param {string | Object} effect Registry name of the visual effect, or a constructible visual effect.
@@ -893,16 +809,14 @@ function repeat(n, func, ...params) {
  * @returns
  */
 function createEffect(effect, world, x, y, direction, scale, pos, impact = false) {
-  if (effect === "none") return new VisualEffect();
-  /**@type {VisualEffect} */
-  let fx = construct(
-    typeof effect === "object" ? effect : Registries.vfx.get(effect),
-    "visual-effect",
-  );
-  fx.execute(world, x, y, direction, scale, pos, impact);
+  if (effect === "none") return nullfx;
+  let fx = typeof effect === "object" ? effect : Registries.vfx.get(effect);
+  if (fx instanceof VisualEffect) fx.execute(world, x, y, direction, scale, pos, impact);
+  else console.warn(`Effect '${effect}' is not a basic effect - consider using createLinearEffect() instead.`);
   return fx;
 }
 
+const nullline = new LinearEffect();
 /**
  * Creates a linear effect, independently of any objects.
  * @param {string | Object} effect Registry name of the visual effect, or a constructible visual effect.
@@ -911,13 +825,10 @@ function createEffect(effect, world, x, y, direction, scale, pos, impact = false
  * @returns
  */
 function createLinearEffect(effect, world, positions, pos, impact = false) {
-  if (effect === "none") return new LinearEffect();
-  /**@type {LinearEffect} */
-  let fx = construct(
-    typeof effect === "object" ? effect : Registries.vfx.get(effect),
-    "linear-effect",
-  );
-  fx.execute(world, positions, pos, impact);
+  if (effect === "none") return nullline;
+  let fx = typeof effect === "object" ? effect : Registries.vfx.get(effect);
+  if (fx instanceof LinearEffect) fx.execute(world, positions, pos, impact);
+  else console.warn(`Effect '${effect}' is not a linear effect - consider using createEffect() instead.`);
   return fx;
 }
 
@@ -959,24 +870,24 @@ function emitEffect(effect, source, offX = 0, offY = 0, impact = false) {
 }
 
 export {
-    EmissionEffect,
-    Explosion,
-    ExplosionEffect,
-    ImageParticleEmissionEffect,
-    MultiEffect,
-    NuclearExplosion,
-    NuclearExplosionEffect,
-    ParticleEmissionEffect,
-    TextParticleEmissionEffect,
-    VisualEffect,
-    WaveEmissionEffect,
-    autoScaledEffect,
-    createDestructionExplosion,
-    createEffect,
-    createLinearEffect,
-    effectTimer,
-    emitEffect,
-    liquidDestructionBlast,
-    repeat
+  autoScaledEffect,
+  createDestructionExplosion,
+  createEffect,
+  createLinearEffect,
+  effectTimer,
+  EmissionEffect,
+  emitEffect,
+  Explosion,
+  ExplosionEffect,
+  ImageParticleEmissionEffect,
+  liquidDestructionBlast,
+  MultiEffect,
+  NuclearExplosion,
+  NuclearExplosionEffect,
+  repeat,
+  ShapeParticleEmissionEffect,
+  TextParticleEmissionEffect,
+  VisualEffect,
+  WaveEmissionEffect
 };
 

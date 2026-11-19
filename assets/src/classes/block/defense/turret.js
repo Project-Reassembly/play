@@ -83,29 +83,12 @@ class Turret extends Container {
           const ef = ammo ? ammo.get(ExtraUpdatesComponent) : null;
           const spd = (mc?.speed ?? 10) * (1 + (ef?.amount ?? 0));
           const framesToImpact = d / spd;
-          const predictedOffset =
-            this.target instanceof Entity ?
-              this.target.predictMotion(framesToImpact || 0)
-            : Vector.ZERO;
-          let res = turn(
-            this.gunDirection,
-            this.x,
-            this.y,
-            this.target.x + predictedOffset.x,
-            this.target.y + predictedOffset.y,
-            this.turnSpeed,
-          );
+          const predictedOffset = this.target instanceof Entity ? this.target.predictMotion(framesToImpact || 0) : Vector.ZERO;
+          let res = turn(this.gunDirection, this.x, this.y, this.target.x + predictedOffset.x, this.target.y + predictedOffset.y, this.turnSpeed);
           this.gunDirection = res.direction;
           this.gunCanFire = res.left < this.shootCone;
         } else {
-          let res = turn(
-            this.gunDirection,
-            this.x,
-            this.y,
-            this.target.x,
-            this.target.y,
-            this.turnSpeed,
-          );
+          let res = turn(this.gunDirection, this.x, this.y, this.target.x, this.target.y, this.turnSpeed);
           this.gunDirection = res.direction;
           this.gunCanFire = res.left < this.shootCone;
         }
@@ -162,24 +145,22 @@ class Turret extends Container {
   fire(shoot = this.shoot, bulletConfig = this.bullets) {
     if (this.#cooldown <= 0) {
       //choose ammo
-      let ammoType = "-";
-      for (let ammo in bulletConfig.ammos) {
-        if (bulletConfig.getAmmo(ammo) !== null && this.inventory.hasItem(ammo, this.ammoUse)) {
+      let ammoType;
+      for (const ammo in bulletConfig.types) {
+        if (this.inventory.hasItem(ammo, this.ammoUse)) {
           ammoType = ammo;
           break;
         }
       }
       // stop if no ammo type found
-      if (ammoType === "-") return;
+      if (ammoType === undefined) return;
       // fire
       this.#lastReload = shoot.reload;
       this.#lastCharge = shoot.charge;
       this.#lastAmmo = ammoType;
       if (shoot.charge > 0) {
         let pos = this._getShootPos();
-        autoScaledEffect(shoot.chargeEffect, this.world, pos.x, pos.y, pos.direction, () =>
-          this._getShootPos(),
-        );
+        autoScaledEffect(shoot.chargeEffect, this.world, pos.x, pos.y, pos.direction, () => this._getShootPos());
         this.#cooldown = shoot.reload + shoot.charge;
         this.timer.do(() => {
           this._internalFire(shoot, ammoType, bulletConfig);
@@ -189,8 +170,7 @@ class Turret extends Container {
   }
   _useAmmo(ammoType) {
     if (ammoType === "none") return true;
-    if (this.inventory.hasItem(ammoType, this.ammoUse))
-      this.inventory.removeItem(ammoType, this.ammoUse);
+    if (this.inventory.hasItem(ammoType, this.ammoUse)) this.inventory.removeItem(ammoType, this.ammoUse);
     else return false;
     return true;
   }
@@ -200,22 +180,13 @@ class Turret extends Container {
     this.#cooldown = this.getAcceleratedReloadRate(shoot);
     this.accelerate(shoot); //Apply acceleration effects
 
+    const model = bulletConfig.getAmmo(ammoType);
     this.timer.repeat(
       () => {
         let pos = this._getShootPos();
         autoScaledEffect(shoot.effect, this.world, pos.x, pos.y, pos.direction);
-        const model = bulletConfig.getAmmo(ammoType);
         if (model)
-          model.emit(
-            pos.x,
-            pos.y,
-            shoot.pattern.amount,
-            degrees(pos.direction),
-            shoot.pattern.spread,
-            shoot.pattern.spacing,
-            this.world,
-            this,
-          );
+          model.emit(pos.x, pos.y, shoot.pattern.amount, degrees(pos.direction), shoot.pattern.spread, shoot.pattern.spacing, this.world, this);
         if (this.component instanceof WeaponComponent) {
           this.component.trigger(shoot.recoilScale, 0);
         }
@@ -254,23 +225,14 @@ class Turret extends Container {
     let tempTarget = this.target;
     let entity =
       attackEntities ?
-        this.closestFrom(
-          this.world.entities,
-          this.range,
-          (ent) => !ent.dead && ent.team !== this.team && ent.visible && conditions(ent),
-        )
+        this.closestFrom(this.world.entities, this.range, ent => !ent.dead && ent.team !== this.team && ent.visible && conditions(ent))
       : null;
     let block =
       attackBlocks ?
         this.closestFrom(
-          this.world.blocksInSquare(
-            this.gridX,
-            this.gridY,
-            Math.round(this.range / blockSize),
-            "blocks",
-          ),
+          this.world.blocksInSquare(this.gridX, this.gridY, Math.round(this.range / blockSize), "blocks"),
           this.range,
-          (blk) => blk.team !== this.team && conditions(blk),
+          blk => blk.team !== this.team && conditions(blk),
         )
       : null;
     this.target = this.closestFrom([entity, block], this.range);

@@ -1,65 +1,62 @@
+import { col } from "../../core/color.js";
 import { rnd, Vector } from "../../core/number.js";
 import { LinearParticle } from "./linear-particle.js";
+import { Particle } from "./particle.js";
 
-class LightningParticle extends LinearParticle {
-  /**@type {Vector[]} */
-  points = [];
-  constructor(
-    positions = [],
-    lifetime,
-    colours,
-    light,
-    strokeFrom,
-    strokeTo,
-    deviation,
-    lineLength,
-    glowEffect = 1,
-    space = false
-  ) {
-    super(positions, lifetime, colours, light, strokeFrom, strokeTo, space);
+/**
+ * @typedef {{
+ *   lifetime: number,
+ *   light: number,
+ *   strokeFrom: number,
+ *   strokeTo: number,
+ *   colours: import("../../core/color.js").color[],
+ *   deviation: number,
+ *   lineLength: number
+ * }} LightningParticleModel
+ */
 
-    // //Generate points
-    // let direction = this.pos2.sub(this.pos1);
-    // let iterations = Math.floor((this.size * 2) / lineLength);
-    // let change = direction.scale(1 / iterations);
-    // let pvec = Vector.fromAngle(direction.angle + 90);
-
-    // this.points.push(this.pos1);
-    // for (let devCount = 1; devCount < iterations; devCount++) {
-    //   let here = this.pos1.add(change.scale(devCount));
-    //   this.points.push(here.add(pvec.scale(deviation * rnd(1, -1))));
-    // }
-
-    // this.points.push(this.pos2);
-
-    //Generate points v2
-    let prev = this.pos1;
-    this.points = [this.pos1];
-    for(let p = 1; p < this.positions.length-1; p++){
-      if(p % lineLength !== 0 && p !== this.positions.length - 1) continue;
-      let curr = this.positions[p];
-      let direction = curr.sub(prev);
-      let pvec = Vector.fromAngle(direction.angle + 90);
-      this.points.push(curr.add(pvec.scale(deviation * rnd.float(1, -1))))
-      prev = curr;
-    }
-    this.points.push(this.pos2)
-
-    this.glowEffect = glowEffect;
+/** Special case of linear particle which mutates positions randomly. @extends {Particle<LightningParticleModel>} */
+export class LightningParticle extends LinearParticle {
+  /**
+   * @param {LightningParticleModel} vfx
+   * @param {Vector[]} positions
+   */
+  constructor(vfx, positions = []) {
+    if (positions.length >= 2) {
+      const pos1 = positions[0],
+        pos2 = positions.at(-1);
+      let prev = pos1;
+      const points = [pos1];
+      const pl = positions.length - 1;
+      for (let p = 1; p < pl; p++) {
+        if (p % vfx.lineLength !== 0) continue;
+        let curr = positions[p];
+        let direction = curr.sub(prev);
+        let pvec = Vector.fromAngle(direction.angle + 90);
+        points.push(curr.add(pvec.scale(vfx.deviation * rnd.float(1, -1))));
+        prev = curr;
+      }
+      points.push(pos2);
+      super(vfx, points);
+    } else super(vfx, positions);
   }
-  actualDraw() {
-    let ir = this.stroke;
-    for (let rf = 1; rf > 0; rf -= 1 / this.glowEffect) {
-      strokeWeight(ir * rf);
+  draw() {
+    push();
+    noFill();
+    col.stroke(this.colour);
+    strokeWeight(this.stroke);
 
-      beginShape();
-      this.points.forEach((p) => {
-        vertex(p.x, p.y);
-      });
-      endShape();
+    beginShape();
+    for (const p of this.positions) {
+      vertex(p.x, p.y);
     }
+    endShape();
+
+    pop();
   }
 }
-
-export { LightningParticle };
-
+/**@param {} glowEffect @deprecated */
+export function legacyLightningParticle(positions = [], lifetime, colours, light, strokeFrom, strokeTo, deviation, lineLength, glowEffect, space = false) {
+  const l = new LightningParticle({ strokeTo, strokeFrom, lineLength, space, deviation, light, colours, lifetime }, positions);
+  return l;
+}

@@ -5,22 +5,22 @@ import { Conveyor, LevelLoader, LevelUnloader, Unloader } from "../../classes/bl
 import { SignBlock } from "../../classes/block/decoration.js";
 import { Bomb, NuclearBomb } from "../../classes/block/defense/bomb.js";
 import {
-  TurretBase,
-  TurretController,
-  TurretItem,
+    TurretBase,
+    TurretController,
+    TurretItem,
 } from "../../classes/block/defense/turret-components.js";
 import { Turret } from "../../classes/block/defense/turret.js";
 import { Wall } from "../../classes/block/defense/wall.js";
 import {
-  CommandExecutorBlock,
-  ItemCatalogBlock,
-  StructureReaderBlock,
+    CommandExecutorBlock,
+    ItemCatalogBlock,
+    StructureReaderBlock,
 } from "../../classes/block/devblocks.js";
 import { ItemAttractor } from "../../classes/block/extra-automation/item-attractor.js";
 import {
-  PlasmaCompressor,
-  PlasmaDecompressor,
-  PlasmaGenerator,
+    PlasmaCompressor,
+    PlasmaDecompressor,
+    PlasmaGenerator,
 } from "../../classes/block/plasma-gen-and-compressor.js";
 import { PlasmaBlock, PlasmaPipe, PlasmaTank } from "../../classes/block/plasma-pipe.js";
 import { Burner } from "../../classes/block/power/burner.js";
@@ -36,31 +36,31 @@ import { Tile } from "../../classes/block/tile.js";
 import { TankAssemblyBay } from "../../classes/block/tonq/tank-assembly-bay.js";
 import { StatusEffect } from "../../classes/effect/status-effect.js";
 import {
-  AICondition,
-  AlternativeCondition,
-  CombinedCondition,
-  DataComparisonCondition,
-  HasTargetCondition,
-  KeyDownCondition,
-  MouseDownCondition,
-  NearTargetCondition,
-  StoredTargetCondition,
+    AICondition,
+    AlternativeCondition,
+    CombinedCondition,
+    DataComparisonCondition,
+    HasTargetCondition,
+    KeyDownCondition,
+    MouseDownCondition,
+    NearTargetCondition,
+    StoredTargetCondition,
 } from "../../classes/entity/ai/ai-conditions.js";
 import {
-  AIAttackTask,
-  AITask,
-  CreateBulletsTask,
-  RetargetTask,
-  SetDataTask,
-  ShootBulletsTask,
-  TrackTargetTask,
+    AIAttackTask,
+    AITask,
+    CreateBulletsTask,
+    RetargetTask,
+    SetDataTask,
+    ShootBulletsTask,
+    TrackTargetTask,
 } from "../../classes/entity/ai/ai-tasks.js";
 import {
-  Component,
-  DestructibleComponent,
-  LegComponent,
-  WeaponComponent,
-  WeaponisedComponent,
+    Component,
+    DestructibleComponent,
+    LegComponent,
+    WeaponComponent,
+    WeaponisedComponent,
 } from "../../classes/entity/entity-part.js";
 import { Entity } from "../../classes/entity/entity.js";
 import { EquippedEntity, InventoryEntity } from "../../classes/entity/inventory-entity.js";
@@ -82,20 +82,20 @@ import { World } from "../../classes/world/world.js";
 import { RegisteredItem } from "../../core/registered-item.js";
 import { TypeRegistries } from "../../core/registry.js";
 import {
-  ExplosionEffect,
-  ImageParticleEmissionEffect,
-  MultiEffect,
-  NuclearExplosionEffect,
-  ParticleEmissionEffect,
-  TextParticleEmissionEffect,
-  VisualEffect,
-  WaveEmissionEffect,
+    ExplosionEffect,
+    ImageParticleEmissionEffect,
+    MultiEffect,
+    NuclearExplosionEffect,
+    ShapeParticleEmissionEffect,
+    TextParticleEmissionEffect,
+    VisualEffect,
+    WaveEmissionEffect,
 } from "../../play/effects.js";
 import {
-  LightningEmissionEffect,
-  LinearEffect,
-  LinearMultiEffect,
-  LineEmissionEffect,
+    LightningEmissionEffect,
+    LinearEffect,
+    LinearMultiEffect,
+    LineEmissionEffect,
 } from "../../play/line-effects.js";
 //Basic
 TypeRegistries.default.add("generic", RegisteredItem);
@@ -191,7 +191,7 @@ TypeRegistries.default.add("dev::commandblock", CommandExecutorBlock);
 TypeRegistries.default.add("status-effect", StatusEffect);
 TypeRegistries.default.add("visual-effect", VisualEffect);
 
-TypeRegistries.default.add("particle-emission", ParticleEmissionEffect);
+TypeRegistries.default.add("particle-emission", ShapeParticleEmissionEffect);
 TypeRegistries.default.add("image-particle-emission", ImageParticleEmissionEffect);
 TypeRegistries.default.add("text-particle-emission", TextParticleEmissionEffect);
 TypeRegistries.default.add("wave-emission", WaveEmissionEffect);

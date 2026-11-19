@@ -8,17 +8,14 @@ import { keybinds } from "./manager.js";
 let histIndex = 0;
 let hist = [];
 keybinds.ui.shortcut.simple("open-command-line", keys.slash, () => {
-  ui.set("texteditor", "true");
-  ui.texteditor.title = "Command Line";
-  ui.texteditor.isCommandLine = true;
-  ui.texteditor.save = command => {
+  ui.texteditor.open("Command Line", true, command => {
     exec(
       command,
       game.player?.entity ? new ExecutionContext(game.player.entity.x, game.player.entity.y, game.player.entity) : new ExecutionContext(0, 0, null),
     );
     hist.unshift(command);
     histIndex = -1;
-  };
+  });
 });
 keybinds.texteditor.shortcut.simple("previous-command", keys.up, () => {
   if (ui.texteditor.isCommandLine) {
@@ -49,4 +46,4 @@ keybinds.texteditor.shortcut.modified("paste", keys.v, mods.ctrl, () =>
 keybinds.texteditor.shortcut.modified("clear", keys.delete, mods.ctrl, () => (ui.texteditor.text = ""));
 
 keybinds.texteditor.shortcut.simple("close", keys.escape, () => ui.set("texteditor", "false"));
-keybinds.texteditor.shortcut.simple("accept", keys.enter, () => ui.endEdit());
+keybinds.texteditor.shortcut.simple("accept", keys.enter, () => ui.texteditor.save());

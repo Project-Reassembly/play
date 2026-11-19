@@ -20,11 +20,7 @@ createLinkedBlockAndItem(
   "Coal Wall",
   "block.coal-wall",
   { type: "wall", health: 120, explosiveness: 0.6 },
-  {
-    description:
-      "A block of coal.\nCould be used as defense, though this may not be the best idea.",
-    marketValue: 3.3,
-  },
+  { description: "A block of coal.\nCould be used as defense, though this may not be the best idea.", marketValue: 3.3 },
 );
 createLinkedBlockAndItem(
   "scrap-wall",
@@ -38,45 +34,28 @@ createLinkedBlockAndItem(
   "Copper Wall",
   "base.copper",
   { type: "wall", health: 400 },
-  {
-    description: "A solid copper cube.\n\nCould be used as defense.",
-    marketValue: 15,
-    hidden: true,
-  },
+  { description: "A solid copper cube.\n\nCould be used as defense.", marketValue: 15, hidden: true },
 );
 createLinkedBlockAndItem(
   "iron-wall",
   "Iron Wall",
   "base.iron",
   { type: "wall", health: 600 },
-  {
-    description: "A solid iron cube.\nSomehow doesn't rust.\n\nCould be used as defense.",
-    marketValue: 52,
-    hidden: true,
-  },
+  { description: "A solid iron cube.\nSomehow doesn't rust.\n\nCould be used as defense.", marketValue: 52, hidden: true },
 );
 createLinkedBlockAndItem(
   "tungsten-wall",
   "Tungsten Wall",
   "base.tungsten",
   { type: "wall", health: 1500, armour: 25 },
-  {
-    description:
-      "An extremely dense cube of tungsten.\nGood thing you're a robot.\n\nCould be used as defense.",
-    marketValue: 625,
-    hidden: true,
-  },
+  { description: "An extremely dense cube of tungsten.\nGood thing you're a robot.\n\nCould be used as defense.", marketValue: 625, hidden: true },
 );
 createLinkedBlockAndItem(
   "titanium-wall",
   "Titanium Wall",
   "base.titanium",
   { type: "wall", health: 2000, armour: 5 },
-  {
-    description: "A cube of titanium.\n\nCould be used as defense.",
-    marketValue: 900,
-    hidden: true,
-  },
+  { description: "A cube of titanium.\n\nCould be used as defense.", marketValue: 900, hidden: true },
 );
 //## OFFENSIVE ##
 createLinkedBlockAndItem(
@@ -84,23 +63,13 @@ createLinkedBlockAndItem(
   "Bomb",
   "bomb.basic",
   { type: "bomb", health: 50, fuseEffect: "burning" },
-  {
-    description: "Explodes violently when any enemy gets near.\nCan also be manually triggered.",
-    marketValue: 15,
-  },
+  { description: "Explodes violently when any enemy gets near.\nCan also be manually triggered.", marketValue: 15 },
 );
 createLinkedBlockAndItem(
   "landmine",
   "Landmine",
   "bomb.landmine",
-  {
-    type: "bomb",
-    health: 50,
-    hiddenImg: "bomb.landmine.hidden",
-    walkable: true,
-    autoDetonationRange: 20,
-    detonationDelay: 35,
-  },
+  { type: "bomb", health: 50, hiddenImg: "bomb.landmine.hidden", walkable: true, autoDetonationRange: 20, detonationDelay: 35 },
   {
     image: "bomb.landmine.item",
     description:
@@ -158,8 +127,7 @@ createLinkedBlockAndItem(
     accelerable: false,
   },
   {
-    description:
-      "A Bomb powered by a runaway chain reaction of decaying Uranium.\n#5iPreview Content",
+    description: "A Bomb powered by a runaway chain reaction of decaying Uranium.\n#5iPreview Content",
     hidden: true,
     rarity: Item.rarity.BLUE,
     marketValue: 2500,
@@ -180,12 +148,7 @@ createLinkedBlockAndItem(
     impactFrame: "nuke-impact",
     accelerable: false,
   },
-  {
-    description: "#4-Now I am become Death, destroyer of worlds.\n#5iPreview Content",
-    hidden: true,
-    rarity: Item.rarity.RARE,
-    marketValue: 25000,
-  },
+  { description: "#4-Now I am become Death, destroyer of worlds.\n#5iPreview Content", hidden: true, rarity: Item.rarity.RARE, marketValue: 25000 },
 );
 //## CRAFTERS ##
 //Scrap Tier [0]
@@ -199,11 +162,7 @@ createLinkedBlockAndItem(
     inventorySize: 4,
     resultSize: 3,
     recipes: [
-      {
-        inputs: [{ item: "scrap", count: 1 }],
-        outputs: [{ item: "scrap-bullet", count: 100 }],
-        time: 300,
-      },
+      { inputs: [{ item: "scrap", count: 1 }], outputs: [{ item: "scrap-bullet", count: 100 }], time: 300 },
       {
         inputs: [
           { item: "makeshift-explosive", count: 4 },
@@ -254,11 +213,7 @@ createLinkedBlockAndItem(
         outputs: [{ item: "scrap-launcher", count: 1 }],
         time: 900,
       },
-      {
-        inputs: [{ item: "plate", count: 3 }],
-        outputs: [{ item: "scrap-turret-base", count: 1 }],
-        time: 120,
-      },
+      { inputs: [{ item: "plate", count: 3 }], outputs: [{ item: "scrap-turret-base", count: 1 }], time: 120 },
       {
         inputs: [
           { item: "scrap-turret-base", count: 1 },
@@ -276,11 +231,7 @@ createLinkedBlockAndItem(
         outputs: [{ item: "scrap-artillery", count: 1 }],
         time: 3000,
       },
-      {
-        inputs: [{ item: "scrap", count: 4 }],
-        outputs: [{ item: "scrap-pylon", count: 1 }],
-        time: 60,
-      },
+      { inputs: [{ item: "scrap", count: 4 }], outputs: [{ item: "scrap-pylon", count: 1 }], time: 60 },
       {
         inputs: [
           { item: "scrap", count: 2 },
@@ -289,46 +240,14 @@ createLinkedBlockAndItem(
         outputs: [{ item: "scrap-player-charger", count: 1 }],
         time: 60,
       },
-      {
-        inputs: [{ item: "scrap", count: 30 }],
-        outputs: [{ item: "scrap-burner", count: 1 }],
-        time: 360,
-      },
-      {
-        inputs: [{ item: "scrap", count: 1 }],
-        outputs: [{ item: "scrap-conveyor", count: 1 }],
-        time: 60,
-      },
-      {
-        inputs: [{ item: "scrap", count: 2 }],
-        outputs: [{ item: "scrap-unloader", count: 1 }],
-        time: 90,
-      },
-      {
-        inputs: [{ item: "scrap", count: 20 }],
-        outputs: [{ item: "scrap-storage", count: 1 }],
-        time: 100,
-      },
-      {
-        inputs: [{ item: "scrap", count: 10 }],
-        outputs: [{ item: "scrap-drill", count: 1 }],
-        time: 200,
-      },
-      {
-        inputs: [{ item: "scrap", count: 25 }],
-        outputs: [{ item: "scrap-assembler", count: 1 }],
-        time: 400,
-      },
-      {
-        inputs: [{ item: "scrap", count: 40 }],
-        outputs: [{ item: "scrap-compressor", count: 1 }],
-        time: 400,
-      },
-      {
-        inputs: [{ item: "scrap", count: 30 }],
-        outputs: [{ item: "scrap-smelter", count: 1 }],
-        time: 400,
-      },
+      { inputs: [{ item: "scrap", count: 30 }], outputs: [{ item: "scrap-burner", count: 1 }], time: 360 },
+      { inputs: [{ item: "scrap", count: 1 }], outputs: [{ item: "scrap-conveyor", count: 1 }], time: 60 },
+      { inputs: [{ item: "scrap", count: 2 }], outputs: [{ item: "scrap-unloader", count: 1 }], time: 90 },
+      { inputs: [{ item: "scrap", count: 20 }], outputs: [{ item: "scrap-storage", count: 1 }], time: 100 },
+      { inputs: [{ item: "scrap", count: 10 }], outputs: [{ item: "scrap-drill", count: 1 }], time: 200 },
+      { inputs: [{ item: "scrap", count: 25 }], outputs: [{ item: "scrap-assembler", count: 1 }], time: 400 },
+      { inputs: [{ item: "scrap", count: 40 }], outputs: [{ item: "scrap-compressor", count: 1 }], time: 400 },
+      { inputs: [{ item: "scrap", count: 30 }], outputs: [{ item: "scrap-smelter", count: 1 }], time: 400 },
       {
         inputs: [
           { item: "scrap-assembler", count: 1 },
@@ -357,23 +276,13 @@ createLinkedBlockAndItem(
     powerDraw: 3.3333333334,
     maxPower: 10000,
   },
-  {
-    description:
-      "A simple construction, capable of crafting basic machinery, weapons and ammunition.\n\nCan reproduce.",
-    marketValue: 30,
-  },
+  { description: "A simple construction, capable of crafting basic machinery, weapons and ammunition.\n\nCan reproduce.", marketValue: 30 },
 );
 createLinkedBlockAndItem(
   "scrap-disassembler",
   "Scrap Disassembler",
   "crafter.scrap-disassembler",
-  {
-    type: "uncrafter",
-    title: "Scrap Disassembler",
-    inventorySize: 3,
-    resultSize: 4,
-    counterpart: "scrap-assembler",
-  },
+  { type: "uncrafter", title: "Scrap Disassembler", inventorySize: 3, resultSize: 4, counterpart: "scrap-assembler" },
   { description: "A machine capable of reversing the work of a Scrap Assembler.", marketValue: 60 },
 );
 createLinkedBlockAndItem(
@@ -387,11 +296,7 @@ createLinkedBlockAndItem(
     inventorySize: 4,
     recipes: [
       { inputs: [{ item: "scrap", count: 2 }], outputs: [{ item: "plate", count: 1 }], time: 180 },
-      {
-        inputs: [{ item: "raw-copper", count: 2 }],
-        outputs: [{ item: "copper-ingot", count: 1 }],
-        time: 60,
-      },
+      { inputs: [{ item: "raw-copper", count: 2 }], outputs: [{ item: "copper-ingot", count: 1 }], time: 60 },
     ],
   },
   { description: "Smelts and casts basic ores into ingot form.", marketValue: 40 },
@@ -405,31 +310,11 @@ createLinkedBlockAndItem(
     title: "Scrap Compressor",
     inventorySize: 4,
     recipes: [
-      {
-        inputs: [{ item: "sand", count: 4 }],
-        outputs: [{ item: "sandstone", count: 2 }],
-        time: 20,
-      },
-      {
-        inputs: [{ item: "sandstone", count: 4 }],
-        outputs: [{ item: "sandstone-wall", count: 1 }],
-        time: 80,
-      },
-      {
-        inputs: [{ item: "coal", count: 4 }],
-        outputs: [{ item: "coal-wall", count: 1 }],
-        time: 100,
-      },
-      {
-        inputs: [{ item: "stone", count: 4 }],
-        outputs: [{ item: "stone-wall", count: 1 }],
-        time: 120,
-      },
-      {
-        inputs: [{ item: "scrap", count: 4 }],
-        outputs: [{ item: "scrap-wall", count: 1 }],
-        time: 100,
-      },
+      { inputs: [{ item: "sand", count: 4 }], outputs: [{ item: "sandstone", count: 2 }], time: 20 },
+      { inputs: [{ item: "sandstone", count: 4 }], outputs: [{ item: "sandstone-wall", count: 1 }], time: 80 },
+      { inputs: [{ item: "coal", count: 4 }], outputs: [{ item: "coal-wall", count: 1 }], time: 100 },
+      { inputs: [{ item: "stone", count: 4 }], outputs: [{ item: "stone-wall", count: 1 }], time: 120 },
+      { inputs: [{ item: "scrap", count: 4 }], outputs: [{ item: "scrap-wall", count: 1 }], time: 100 },
       {
         inputs: [
           { item: "coal", count: 5 },
@@ -458,11 +343,7 @@ createLinkedBlockAndItem(
     health: 150,
     tickEffect: "basic-crafter-smoke",
     recipes: [
-      {
-        inputs: [{ item: "copper-ingot", count: 1 }],
-        outputs: [{ item: "copper-wire", count: 6 }],
-        time: 120,
-      },
+      { inputs: [{ item: "copper-ingot", count: 1 }], outputs: [{ item: "copper-wire", count: 6 }], time: 120 },
       {
         inputs: [
           { item: "copper-wire", count: 12 },
@@ -551,8 +432,7 @@ createLinkedBlockAndItem(
     ],
   },
   {
-    description:
-      "Constructs stable machines for use in production and defense.\nMade in the #>>crafter.scrap-assembler#=-Scrap Assembler#--.",
+    description: "Constructs stable machines for use in production and defense.\nMade in the #>>crafter.scrap-assembler#=-Scrap Assembler#--.",
     marketValue: 140,
   },
 );
@@ -568,28 +448,12 @@ createLinkedBlockAndItem(
     tickEffect: "basic-crafter-smoke",
     recipes: [
       { inputs: [{ item: "scrap", count: 2 }], outputs: [{ item: "plate", count: 1 }], time: 150 },
-      {
-        inputs: [{ item: "raw-copper", count: 2 }],
-        outputs: [{ item: "copper-ingot", count: 1 }],
-        time: 45,
-      },
-      {
-        inputs: [{ item: "raw-iron", count: 2 }],
-        outputs: [{ item: "iron-ingot", count: 1 }],
-        time: 75,
-      },
-      {
-        inputs: [{ item: "raw-electrum", count: 2 }],
-        outputs: [{ item: "electrum-ingot", count: 1 }],
-        time: 105,
-      },
+      { inputs: [{ item: "raw-copper", count: 2 }], outputs: [{ item: "copper-ingot", count: 1 }], time: 45 },
+      { inputs: [{ item: "raw-iron", count: 2 }], outputs: [{ item: "iron-ingot", count: 1 }], time: 75 },
+      { inputs: [{ item: "raw-electrum", count: 2 }], outputs: [{ item: "electrum-ingot", count: 1 }], time: 105 },
     ],
   },
-  {
-    description:
-      "Smelts and casts ores into ingot form.\nSlightly faster, and can smelt Iron and Electrum.",
-    marketValue: 215,
-  },
+  { description: "Smelts and casts ores into ingot form.\nSlightly faster, and can smelt Iron and Electrum.", marketValue: 215 },
 );
 //## DRILLS ##
 //Scrap Tier [0]
@@ -625,13 +489,7 @@ createLinkedBlockAndItem(
     topImg: "drill.scrap-drill.top",
     spinnerImg: "drill.scrap-drill.spinner",
     baseImg: "drill.scrap-drill.base",
-    results: {
-      "sand": "sand",
-      "sand-water": "sand",
-      "stone": "stone",
-      "coal-ore": "coal",
-      "copper-ore": "raw-copper",
-    },
+    results: { "sand": "sand", "sand-water": "sand", "stone": "stone", "coal-ore": "coal", "copper-ore": "raw-copper" },
     amount: 1,
     spinSpeed: 1,
     duration: 300,
@@ -672,10 +530,7 @@ createLinkedBlockAndItem(
     powerDraw: 0.8333333334,
     maxPower: 1000,
   },
-  {
-    description: "Slowly collects resources from below it.\nCan drill Iron and Electrum.",
-    marketValue: 60,
-  },
+  { description: "Slowly collects resources from below it.\nCan drill Iron and Electrum.", marketValue: 60 },
 );
 //## CONVEYOR ##
 //Scrap Tier [0]
@@ -683,30 +538,16 @@ createLinkedBlockAndItem(
   "scrap-conveyor",
   "Scrap Conveyor",
   "conveyor.scrap-conveyor.ui",
-  {
-    type: "conveyor",
-    moveTime: 18,
-    baseImg: "base.scrap",
-    beltImg: "conveyor.scrap-conveyor.belt",
-  },
-  {
-    description: "A slow-moving belt.\nTransports items from one place to another.",
-    marketValue: 1.5,
-  },
+  { type: "conveyor", moveTime: 18, baseImg: "base.scrap", beltImg: "conveyor.scrap-conveyor.belt" },
+  { description: "A slow-moving belt.\nTransports items from one place to another.", marketValue: 1.5 },
 );
 createLinkedBlockAndItem(
   "scrap-unloader",
   "Scrap Unloader",
   "conveyor.scrap-unloader.ui",
+  { type: "unloader", moveTime: 18, baseImg: "base.scrap", beltImg: "conveyor.scrap-unloader.belt" },
   {
-    type: "unloader",
-    moveTime: 18,
-    baseImg: "base.scrap",
-    beltImg: "conveyor.scrap-unloader.belt",
-  },
-  {
-    description:
-      "A slow-moving belt.\nTransports items from one place to another.\nPulls selected items from the block behind it.",
+    description: "A slow-moving belt.\nTransports items from one place to another.\nPulls selected items from the block behind it.",
     marketValue: 2.5,
   },
 );
@@ -715,32 +556,16 @@ createLinkedBlockAndItem(
   "basic-conveyor",
   "Basic Conveyor",
   "conveyor.basic-conveyor.ui",
-  {
-    type: "conveyor",
-    moveTime: 15,
-    baseImg: "base.basic",
-    beltImg: "conveyor.basic-conveyor.belt",
-    health: 150,
-  },
-  {
-    description: "A slightly faster-moving belt.\nTransports items from one place to another.",
-    marketValue: 5,
-  },
+  { type: "conveyor", moveTime: 15, baseImg: "base.basic", beltImg: "conveyor.basic-conveyor.belt", health: 150 },
+  { description: "A slightly faster-moving belt.\nTransports items from one place to another.", marketValue: 5 },
 );
 createLinkedBlockAndItem(
   "basic-unloader",
   "Basic Unloader",
   "conveyor.basic-unloader.ui",
+  { type: "unloader", moveTime: 15, baseImg: "base.basic", beltImg: "conveyor.basic-unloader.belt", health: 150 },
   {
-    type: "unloader",
-    moveTime: 15,
-    baseImg: "base.basic",
-    beltImg: "conveyor.basic-unloader.belt",
-    health: 150,
-  },
-  {
-    description:
-      "A slightly faster-moving belt.\nTransports items from one place to another.\nPulls selected items from the block behind it.",
+    description: "A slightly faster-moving belt.\nTransports items from one place to another.\nPulls selected items from the block behind it.",
     marketValue: 10,
   },
 );
@@ -756,10 +581,7 @@ createLinkedBlockAndItem(
     indicatorImg: "conveyor.basic-level-loader.indicator",
     health: 150,
   },
-  {
-    description: "A specialised unloader which will leave up to a certain number of items behind.",
-    marketValue: 25,
-  },
+  { description: "A specialised unloader which will leave up to a certain number of items behind.", marketValue: 25 },
 );
 createLinkedBlockAndItem(
   "basic-level-loader",
@@ -794,22 +616,13 @@ createLinkedBlockAndItem(
     range: 2,
     wireColour: [205, 159, 139],
   },
-  {
-    description: "Connects to nearby blocks, distributing power from generators to factories.",
-    marketValue: 10,
-  },
+  { description: "Connects to nearby blocks, distributing power from generators to factories.", marketValue: 10 },
 );
 createLinkedBlockAndItem(
   "scrap-burner",
   "Scrap Coal Burner",
   "generator.scrap-burner",
-  {
-    type: "burner",
-    fuelTypes: { coal: 600 },
-    maxPower: 25000,
-    inventorySize: 1,
-    tickEffect: "burning",
-  },
+  { type: "burner", fuelTypes: { coal: 600 }, maxPower: 25000, inventorySize: 1, tickEffect: "burning" },
   { description: "Burns coal to produce power." },
 );
 createLinkedBlockAndItem(
@@ -825,11 +638,7 @@ createLinkedBlockAndItem(
     range: 2,
     wireColour: [205, 159, 139],
   },
-  {
-    description:
-      "Connects to nearby players, distributing power to them from nearby generators (or batteries).",
-    marketValue: 10,
-  },
+  { description: "Connects to nearby players, distributing power to them from nearby generators (or batteries).", marketValue: 10 },
 );
 // Copper Tier [1]
 createLinkedBlockAndItem(
@@ -847,10 +656,7 @@ createLinkedBlockAndItem(
     range: 4,
     wireColour: [255, 163, 125],
   },
-  {
-    description: "Connects to nearby blocks, distributing power from generators to factories.",
-    marketValue: 12,
-  },
+  { description: "Connects to nearby blocks, distributing power from generators to factories.", marketValue: 12 },
 );
 createLinkedBlockAndItem(
   "basic-relay",
@@ -868,7 +674,8 @@ createLinkedBlockAndItem(
     wireColour: [255, 163, 125],
   },
   {
-    description: "Connects multiple Power Pylons together, allowing power transfer between them.\nMuch longer range, but doesn't connect to blocks directly.",
+    description:
+      "Connects multiple Power Pylons together, allowing power transfer between them.\nMuch longer range, but doesn't connect to blocks directly.",
   },
 );
 createLinkedBlockAndItem(
@@ -922,8 +729,8 @@ createLinkedBlockAndItem(
     inventorySize: 1,
     range: 450,
     bullets: {
-      types: [
-        {
+      types: {
+        "scrap-bullet": {
           lifetime: 30,
           light: 30,
           hitSize: 2.5,
@@ -935,19 +742,10 @@ createLinkedBlockAndItem(
             { type: "damage", damageType: "ballistic", amount: 15, spread: 4 },
           ],
         },
-      ],
-      ammos: { "scrap-bullet": 0 },
+      },
     },
     shoot: { reload: 13, pattern: { spread: 2.5 } },
-    component: {
-      type: "weapon-component",
-      width: 32,
-      height: 11,
-      xOffset: 5,
-      image: "turret.recycle.component",
-      recoil: 4,
-      recoilSpeed: 0.2,
-    },
+    component: { type: "weapon-component", width: 32, height: 11, xOffset: 5, image: "turret.recycle.component", recoil: 4, recoilSpeed: 0.2 },
     shootX: 20,
     baseImg: "turret.recycle.base",
     maxPower: 10000,
@@ -963,14 +761,9 @@ createLinkedBlockAndItem(
   "scrap-turret-base",
   "Scrap Turret Base",
   "base.scrap.smooth",
+  { type: "turret-base", connectorImage: "turret-base.scrap.connector", otherPart: "scrap-turret-controller" },
   {
-    type: "turret-base",
-    connectorImage: "turret-base.scrap.connector",
-    otherPart: "scrap-turret-controller",
-  },
-  {
-    description:
-      "Basic block to increase the  maximum size of turrets on  a Scrap Turret Controller.",
+    description: "Basic block to increase the  maximum size of turrets on  a Scrap Turret Controller.",
     marketValue: 20, // 3 plates = 15
   },
 );
@@ -978,12 +771,7 @@ createLinkedBlockAndItem(
   "scrap-turret-controller",
   "Scrap Turret Controller",
   "turret-controller.scrap.base",
-  {
-    type: "turret-controller",
-    connectorImage: "turret-base.scrap.connector",
-    otherPart: "scrap-turret-base",
-    maxSize: 2,
-  },
+  { type: "turret-controller", connectorImage: "turret-base.scrap.connector", otherPart: "scrap-turret-base", maxSize: 2 },
   {
     description:
       "Mounting point for turrets.\nMaximum turret size depends on number of bases.\nCheck the#>>icon.database#=-database#-- for placement examples.",
@@ -994,15 +782,10 @@ createLinkedBlockAndItem(
   "peti-turret-base",
   "PETI Turret Base",
   "turret-base.peti.base",
-  {
-    type: "turret-base",
-    connectorImage: "turret-base.peti.connector",
-    otherPart: "peti-turret-controller",
-  },
+  { type: "turret-base", connectorImage: "turret-base.peti.connector", otherPart: "peti-turret-controller" },
   {
     corp: "peti",
-    description:
-      "Block to increase the maximum size of turrets on a PETI Turret Controller.\n#5iPreview Content",
+    description: "Block to increase the maximum size of turrets on a PETI Turret Controller.\n#5iPreview Content",
     hidden: true,
     marketValue: 200, // 3 plates = 15
   },
@@ -1011,12 +794,7 @@ createLinkedBlockAndItem(
   "peti-turret-controller",
   "PETI Turret Controller",
   "turret-controller.peti.base",
-  {
-    type: "turret-controller",
-    connectorImage: "turret-base.peti.connector",
-    otherPart: "peti-turret-base",
-    maxSize: 6,
-  },
+  { type: "turret-controller", connectorImage: "turret-base.peti.connector", otherPart: "peti-turret-base", maxSize: 6 },
   {
     corp: "peti",
     description:
@@ -1033,15 +811,7 @@ createLinkedBlockAndItem(
   {
     type: "item-attractor",
     range: 480,
-    pointer: {
-      type: "weapon-component",
-      width: 32,
-      height: 11,
-      xOffset: 5,
-      image: "turret.recycle.component",
-      recoil: 4,
-      recoilSpeed: 0.2,
-    },
+    pointer: { type: "weapon-component", width: 32, height: 11, xOffset: 5, image: "turret.recycle.component", recoil: 4, recoilSpeed: 0.2 },
     beamX: 20,
     baseImg: "turret.recycle.base",
   },
@@ -1056,25 +826,14 @@ createLinkedBlockAndItem(
   "Plasma Generator",
   "base.tungsten",
   { type: "plasma-generator" },
-  {
-    description:
-      "Pressurises and superheats gas in the atmosphere into plasma.\n#5iPreview Content",
-    hidden: true,
-    corp: "peti",
-    marketValue: 5200,
-  },
+  { description: "Pressurises and superheats gas in the atmosphere into plasma.\n#5iPreview Content", hidden: true, corp: "peti", marketValue: 5200 },
 );
 createLinkedBlockAndItem(
   "plasma-tank",
   "Plasma Tank",
   "tank.plasma-tank.base",
   { type: "plasma-tank", capacity: 512, plasma: "tank.plasma-tank.plasma" },
-  {
-    description: "Stores plasma for later use.\n#5iPreview Content",
-    hidden: true,
-    corp: "peti",
-    marketValue: 3250,
-  },
+  { description: "Stores plasma for later use.\n#5iPreview Content", hidden: true, corp: "peti", marketValue: 3250 },
 );
 createLinkedBlockAndItem(
   "plasma-pipeline",
@@ -1090,8 +849,7 @@ createLinkedBlockAndItem(
     outputPlasma: "ppipe.plasma-pipeline.output-plasma",
   },
   {
-    description:
-      "A pressurised pipe for moving high-temperature ionised gas, known as plasma.\n#5iPreview Content",
+    description: "A pressurised pipe for moving high-temperature ionised gas, known as plasma.\n#5iPreview Content",
     hidden: true,
     corp: "peti",
     marketValue: 500,
@@ -1178,8 +936,7 @@ createLinkedBlockAndItem(
   "capitalism.iti.land",
   { type: "landing-pad", podImage: "capitalism.iti.pod" },
   {
-    description:
-      "Buys items from #>>icon.iti#i-InfiniTech Industries#--, and receives them.\nMust be given an item to use for reference.",
+    description: "Buys items from #>>icon.iti#i-InfiniTech Industries#--, and receives them.\nMust be given an item to use for reference.",
     corp: "iti",
     marketValue: 1250,
   },
@@ -1190,11 +947,7 @@ createLinkedBlockAndItem(
   "Structure Reader",
   "block.dev.structurereader",
   { title: "Structure Reader", type: "dev::structurereader", health: 1000000 },
-  {
-    description: "Outputs a structure array into the console.\n#yiDevelopment Item",
-    rarity: Item.rarity.DEV,
-    hidden: true,
-  },
+  { description: "Outputs a structure array into the console.\n#yiDevelopment Item", rarity: Item.rarity.DEV, hidden: true },
 );
 createLinkedBlockAndItem(
   "dev::itemcatalog",
@@ -1202,8 +955,7 @@ createLinkedBlockAndItem(
   "block.dev.itemcatalog",
   { title: "Item Catalog", type: "dev::itemcatalog", health: 1000000 },
   {
-    description:
-      "Contains an infinite supply of every currently registered item.\nAlso has a trash slot.\n#yiDevelopment Item",
+    description: "Contains an infinite supply of every currently registered item.\nAlso has a trash slot.\n#yiDevelopment Item",
     rarity: Item.rarity.DEV,
     hidden: true,
   },
@@ -1213,11 +965,7 @@ createLinkedBlockAndItem(
   "Command Block",
   "block.dev.commandblock",
   { type: "dev::commandblock", health: 1000000 },
-  {
-    description: "Executes a pre-set command on activation.\n#yiDevelopment Item",
-    rarity: Item.rarity.DEV,
-    hidden: true,
-  },
+  { description: "Executes a pre-set command on activation.\n#yiDevelopment Item", rarity: Item.rarity.DEV, hidden: true },
 );
 createLinkedBlockAndItem(
   "dev::commandblock.chain",
@@ -1225,8 +973,7 @@ createLinkedBlockAndItem(
   "block.dev.commandblock.chain",
   { type: "dev::commandblock", health: 1000000, chaining: true, rotatable: true },
   {
-    description:
-      "Executes a pre-set command on activation.\nCan be pointed into another command block to chain.\n#yiDevelopment Item",
+    description: "Executes a pre-set command on activation.\nCan be pointed into another command block to chain.\n#yiDevelopment Item",
     rarity: Item.rarity.DEV,
     hidden: true,
   },
@@ -1237,8 +984,7 @@ createLinkedBlockAndItem(
   "block.dev.commandblock.loop",
   { type: "dev::commandblock", health: 1000000, loops: true },
   {
-    description:
-      "Executes a pre-set command continuously on activation.\nActivation while running will stop execution.\n#yiDevelopment Item",
+    description: "Executes a pre-set command continuously on activation.\nActivation while running will stop execution.\n#yiDevelopment Item",
     rarity: Item.rarity.DEV,
     hidden: true,
   },

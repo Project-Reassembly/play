@@ -70,9 +70,8 @@ class LinearMultiEffect extends LinearEffect {
   }
 }
 class LineEmissionEffect extends LinearEmissionEffect {
-  //Contains properties for image and text particles too
+  /** @type {import("../classes/effect/linear-particle.js").LinearParticleModel} */
   line = {
-    //All
     lifetime: 60,
     light: 0,
     colours: [
@@ -89,19 +88,15 @@ class LineEmissionEffect extends LinearEmissionEffect {
     repeat(this.amount, () => {
       this.getParticleArray(world, impact).push(
         new LinearParticle(
-          positions,
-          this.line.lifetime ?? 20,
-          this.line.colours,
-          this.line.light ?? 0,
-          this.line.strokeFrom ?? 10,
-          this.line.strokeTo ?? 0,
+          this.line,
+          positions
         ),
       );
     });
   }
 }
 class LightningEmissionEffect extends LinearEmissionEffect {
-  //Contains properties for image and text particles too
+  /** @type {import("../classes/effect/lightning-particle.js").LightningParticleModel} */
   line = {
     //All
     lifetime: 60,
@@ -114,7 +109,6 @@ class LightningEmissionEffect extends LinearEmissionEffect {
     strokeTo: 0,
     lineLength: 3,
     deviation: 20,
-    glowEffect: 0,
   };
   init() {
     this.line.colours = (this.line.colours ?? []).map(col.convert);
@@ -123,14 +117,8 @@ class LightningEmissionEffect extends LinearEmissionEffect {
     repeat(this.amount, () => {
       this.getParticleArray(world, impact).push(
         new LightningParticle(
-          positions,
-          this.line.lifetime ?? 20,
-          this.line.colours,
-          this.line.light ?? 0,
-          this.line.strokeFrom ?? 10,
-          this.line.strokeTo ?? 0,
-          this.line.deviation ?? 20,
-          this.line.lineLength ?? 3,
+          this.line,
+          positions
         ),
       );
     });

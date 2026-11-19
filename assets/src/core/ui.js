@@ -203,25 +203,41 @@ const ui = new (class UI {
   /**@type {Block} */
   hoveredBlock = null;
   #te = new (class TextEditorData {
+    #ui;
+    constructor(ui) {
+      this.#ui = ui;
+    }
     text = "";
     title = "Enter Text:";
-    save = txt => {};
+    #save = txt => {};
     isCommandLine = false;
     #tkb = new KeybindHandler();
     /** Key bindings that operate on the text editor. Take priority over ui keybinds, and therefore game keybinds. @readonly */
     get keybinds() {
       return this.#tkb;
     }
-  })();
+    /**
+     * @param {string} title
+     * @param {boolean} cli
+     * @param {(text: string) => void} [onclose]
+     */
+    open(title, cli = false, onclose) {
+      if (title !== this.title) this.text = "";
+      this.#save = onclose ?? this.#save;
+      this.title = title;
+      this.#ui.set("texteditor", "true");
+      this.isCommandLine = cli;
+    }
+    save() {
+      this.#save(this.text);
+      this.text = "";
+      this.#ui.set("texteditor", "false");
+      this.isCommandLine = false;
+    }
+  })(this);
   /** @readonly */
   get texteditor() {
     return this.#te;
-  }
-  endEdit() {
-    this.texteditor.save(this.texteditor.text);
-    this.texteditor.text = "";
-    this.set("texteditor", "false");
-    this.texteditor.isCommandLine = false;
   }
   reset() {
     this.menuState = "title";
@@ -428,7 +444,7 @@ class UIComponent {
         strokeWeight(7.5);
         if (this.emphasised) col.stroke(this.emphasisColour);
       }
-      if (this.background) col.fill(this.backgroundColour ?? col.from(95, 100, 100, 160));
+      if (this.background) col.fill(this.backgroundColour ?? col.from(95, 100, 100, 200));
       else noFill();
       beginShape();
       if (this.bevel === "none") {

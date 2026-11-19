@@ -10,7 +10,7 @@ import { contentScale, createPlayer } from "../../play/game.js";
 import { blockSize, chunkSize, worldSize } from "../../scaling.js";
 import { GroundTile } from "../block/ground-tile.js";
 import { Particle } from "../effect/particle.js";
-import { ShapeParticle } from "../effect/shape-particle.js";
+import { legacyShapeParticle } from "../effect/shape-particle.js";
 import { Space } from "../effect/space-renderer.js";
 import { Entity } from "../entity/entity.js";
 import { DroppedItemStack } from "../item/dropped-itemstack.js";
@@ -659,7 +659,7 @@ class World {
     const s = Math.sqrt(speed) / 25;
     repeat(Math.ceil(us), () => {
       this.floorParticles.push(
-        new ShapeParticle(
+        legacyShapeParticle(
           x,
           y,
           rnd.float(0, 360),

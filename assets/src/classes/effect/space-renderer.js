@@ -86,6 +86,7 @@ function isInRenderDistance(thing, zoom = 1) {
   if (thing.y > ui.camera.y + height / zoom / 2) return false;
   return true;
 }
+/** I really need to rewrite this. */
 export const Space = {
   config: {
     drawStars: true,
@@ -101,7 +102,7 @@ export const Space = {
    * @param {Particle[]} particles
    */
   draw(particles) {
-    let spaceps = particles.filter((x) => x.isSpace);
+    let spaceps = particles.filter((x) => x.vfx.space);
     if (spaceps.length === 0) return;
     spaceps = spaceps.filter((x) =>
       isInRenderDistance(x, 1, 0, 0, 0, ui.camera.zoom)
@@ -120,15 +121,16 @@ export const Space = {
     //draw colour layer
     if (this.config.allowColouredParticles)
       for (let particle of spaceps) {
-        if (particle.colour.every((x) => x === 255)) particle.draw(this.g2);
+        // If it's fully white, i guess (idk why it's been like a year and a half wtf was i doing with this)
+        if (particle.colour === -1) particle.draw(this.g2);
       }
     //draw space
     image(this.graphics, totalSize / 2, totalSize / 2, totalSize, totalSize);
     //colour the space
     if (this.config.allowColouredParticles) {
-      ctx.globalCompositeOperation = "multiply";
+      this.ctx.globalCompositeOperation = "multiply";
       image(this.g2, totalSize / 2, totalSize / 2, totalSize, totalSize);
-      ctx.globalCompositeOperation = "source-over";
+      this.ctx.globalCompositeOperation = "source-over";
     }
   },
   resetCR() {

@@ -7,7 +7,7 @@ import { effectTimer } from "../../../play/effects.js";
 import { game } from "../../../play/game.js";
 import { Log } from "../../../play/messaging.js";
 import { blockSize } from "../../../scaling.js";
-import { ImageParticle } from "../../effect/image-particle.js";
+import { legacyImageParticle } from "../../effect/image-particle.js";
 import { DroppedItemStack } from "../../item/dropped-itemstack.js";
 import { ItemStack } from "../../item/item-stack.js";
 import { Item } from "../../item/item.js";
@@ -174,7 +174,7 @@ export class LandingPad extends Container {
     this.timer.doObserved(
       () => {
         this.world.particles.push(
-          new ImageParticle(this.x, this.y, 0, 60, 0, 0, this.podImage, 1, 0, blockSize, blockSize / 2, blockSize, blockSize / 2, 0),
+          legacyImageParticle(this.x, this.y, 0, 60, 0, 0, this.podImage, 1, 0, blockSize, blockSize / 2, blockSize, blockSize / 2, 0),
         );
         this.inventory.addItem(this.filter);
       },

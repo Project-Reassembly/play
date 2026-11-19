@@ -23,26 +23,20 @@ class WeaponShootConfiguration {
   }
 }
 class WeaponBulletConfiguration {
-  /** Defines possible bullets. @type {BulletModel[]} */
-  types = [];
-  /** Matches ammo items to bullets. @type {({[item:string]: number|number[]})} */
-  ammos = {};
+  /** Defines possible bullets. @type {{[item: string]: BulletModel}} */
+  types = {};
   /** Bullet models to hide from in-game documentation. */
   unbrowsable = [];
   init() {
-    this.types.forEach((v, i, a) => (a[i] = constructFromType(v, BulletModel)));
-  }
-  get(index) {
-    if (index instanceof Array) return index.map((i) => this.get(i));
-    else return this.types[index] ?? null;
+    for (const name in this.types) {
+      this.types[name] = constructFromType(this.types[name], BulletModel);
+    }
   }
   /** @template {string|string[]} T @param {T} ammo @returns {T extends string[] ? BulletModel[] : (BulletModel|undefined)} */
   getAmmo(ammo) {
-    if (ammo instanceof Array) return ammo.map((i) => this.getAmmo(i));
+    if (ammo instanceof Array) return ammo.map(i => this.types[i]);
     else {
-      let def = this.ammos[ammo];
-      if (def instanceof Array) return def.map((d) => this.types[d]);
-      return this.types[def];
+      return this.types[ammo];
     }
   }
 }

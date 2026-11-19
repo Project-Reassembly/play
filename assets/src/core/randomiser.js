@@ -1,3 +1,5 @@
+import { Vector } from "./number.js";
+
 /** A 32-bit random number generator with several methods to randomise various things. */
 export class Randomiser {
   /**@type {Shr3} */
@@ -5,6 +7,12 @@ export class Randomiser {
   constructor(seed) {
     this.shr = new Shr3(seed);
     return Object.freeze(this);
+  }
+  /** Returns a random 2D vector of length `len`. */
+  vec2(len = 1) {
+    const v = Vector.fromAngle(this.shr.rand() * 360);
+    if (len !== 1) v.scale(len, true);
+    return v;
   }
   /** Returns a random floating-point number between `a` and `b`. If `b` is omitted, it is zero. If `a` is omitted, it is one. @returns {number}*/
   float(a = 1, b = 0) {
@@ -92,9 +100,7 @@ export class Randomiser {
    * @returns {T extends Array ? number : keyof T}
    */
   idx(array) {
-    return Array.isArray(array) ?
-        (this.shr.rand() * array.length) | 0
-      : this.in(Object.keys(array));
+    return Array.isArray(array) ? (this.shr.rand() * array.length) | 0 : this.in(Object.keys(array));
   }
   /** Makes an array of random outputs, with length `count`.
    * `count` may be supplied multiple times, in which case the result will be 2-dimensional.
@@ -159,10 +165,7 @@ class RandomiserArrayWrapper {
   }
   /**@param {() => any} fn @param {any[]} args  */
   #project(ar, fn, len, args) {
-    ar.forEach(
-      (v, i, a) =>
-        (a[i] = Array.isArray(v) ? this.#project(v, fn, len, args) : this.#arr(fn, len, args)),
-    );
+    ar.forEach((v, i, a) => (a[i] = Array.isArray(v) ? this.#project(v, fn, len, args) : this.#arr(fn, len, args)));
     return ar;
   }
   /**@param {() => any} fn @param {any[]} args  */

@@ -1,6 +1,6 @@
 import { col } from "../../core/color.js";
 import { construct, constructFromType } from "../../core/constructor.js";
-import { clamp, rnd, roundNum, tru, Vector } from "../../core/number.js";
+import { rnd, roundNum, tru, Vector } from "../../core/number.js";
 import { Registries } from "../../core/registry.js";
 import { debug } from "../../play/debug.js";
 import { autoScaledEffect, createDestructionExplosion, liquidDestructionBlast } from "../../play/effects.js";
@@ -109,7 +109,6 @@ class Entity extends ShootableObject {
     }
 
     if (this.ai) this.ai = constructFromType(this.ai, AI);
-
     delete this.description;
     delete this.details;
   }
@@ -118,7 +117,7 @@ class Entity extends ShootableObject {
     super.moveTowards(x, y, this.speed * (this.aiType === "passive" ? this.passiveIncentiveModifier : 1), this.turnSpeed, rotate);
   }
 
-  /** Intent to move in a direction. @param {Vector} vct */
+  /** Try to move in a direction. @param {Vector} vct */
   moveInDirection(vct, ignoreBlocks) {
     const accel = this.flying ? Math.cbrt(this.speed) / 5 : this.speed / 10;
     this.velocity.add(vct.normalise().scale(accel), true);
@@ -199,21 +198,9 @@ class Entity extends ShootableObject {
     this.velocity.add(Vector.fromAngle(direction).scale(amount, true), true);
   }
 
+  // left over from old bullets
   hitByBullet(bullet) {
-    if (bullet.entity.team === this.team) return;
-    // if (bullet.controlledKnockback) {
-    //   //Get direction to the target
-    //   let direction = new Vector(bullet.entity.target.x, bullet.entity.target.y).subXY(
-    //     bullet.x,
-    //     bullet.y,
-    //   ).angle;
-    //   this.knock(bullet.knockback, direction, bullet.kineticKnockback); //Knock with default resolution
-    // } else {
-    // this.knock(bullet.knockback, bullet.direction, bullet.kineticKnockback); //Knock with default resolution
-    // }
-    // if (bullet.status !== "none") {
-    //   this.applyStatus(bullet.status, bullet.statusDuration);
-    // }
+    // if (bullet.entity.team === this.team) return;
   }
 
   tick() {
@@ -456,9 +443,9 @@ class Entity extends ShootableObject {
       let effect = Registries.statuses.get(status);
       if (tru(effect.effectChance))
         this.emit(effect.effect, rnd.float(-this.width / 2, this.width / 2), rnd.float(-this.height / 2, this.height / 2));
-      if (time % effect.interval === clamp(10, 0, effect.interval - 1)) {
-        this.damage(effect.damageType, effect.damage);
-        this.heal(effect.healing);
+      if (this.age % effect.interval === 0) {
+        if (effect.damage) this.damage(effect.damageType, effect.damage);
+        if (effect.healing) this.heal(effect.healing);
       }
       for (let key in effect.attributeModifiers) {
         this.attributes.multiply(key, effect.attributeModifiers[key]);

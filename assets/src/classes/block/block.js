@@ -209,7 +209,9 @@ const BreakType = {
   /** The block is being broken by an enemy. */
   attack: Symbol(),
 };
-/** Describes how a block is placed. */
+/** Describes how a block is placed.
+ * @enum
+ */
 const PlaceType = {
   /** Type used for blocks built by the player. */
   build: Symbol(),

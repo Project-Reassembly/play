@@ -1,9 +1,9 @@
-import { Registries } from "../core/registry.js";
-Registries.vfx.add("none", {});
+import { PreloadRegistries } from "../core/registry.js";
+PreloadRegistries.vfx.add("none", {});
 
 //Block effects
 
-Registries.vfx.add("crafter-smoke", {
+PreloadRegistries.vfx.add("crafter-smoke", {
   type: "particle-emission",
   cone: 10,
   particle: {
@@ -23,7 +23,7 @@ Registries.vfx.add("crafter-smoke", {
     light: 0,
   },
 });
-Registries.vfx.add("basic-crafter-smoke", {
+PreloadRegistries.vfx.add("basic-crafter-smoke", {
   type: "particle-emission",
   cone: 30,
   amount: 3,
@@ -44,7 +44,7 @@ Registries.vfx.add("basic-crafter-smoke", {
     light: 0,
   },
 });
-Registries.vfx.add("smelter-sparks", {
+PreloadRegistries.vfx.add("smelter-sparks", {
   type: "particle-emission",
   amount: 4,
   cone: 360,
@@ -64,7 +64,7 @@ Registries.vfx.add("smelter-sparks", {
     light: 20,
   },
 });
-Registries.vfx.add("crafter-craft", {
+PreloadRegistries.vfx.add("crafter-craft", {
   type: "wave-emission",
   particle: {
     lifetime: 20,
@@ -81,8 +81,8 @@ Registries.vfx.add("crafter-craft", {
 
 //Explosions
 
-Registries.vfx.add("explosion", { type: "explosion" });
-Registries.vfx.add("construction-hit", {
+PreloadRegistries.vfx.add("explosion", { type: "explosion" });
+PreloadRegistries.vfx.add("construction-hit", {
   type: "explosion",
   waveColours: [
     [255, 255, 100],
@@ -94,7 +94,7 @@ Registries.vfx.add("construction-hit", {
   ],
   sparks: false,
 });
-Registries.vfx.add("laser-caster-explosion", {
+PreloadRegistries.vfx.add("laser-caster-explosion", {
   type: "explosion",
   waveColours: [
     [255, 255, 255],
@@ -106,7 +106,7 @@ Registries.vfx.add("laser-caster-explosion", {
   ],
   smoke: false,
 });
-Registries.vfx.add("laser-caster-explosion-plasma", {
+PreloadRegistries.vfx.add("laser-caster-explosion-plasma", {
   type: "explosion",
   waveColours: [
     [255, 255, 255],
@@ -118,7 +118,7 @@ Registries.vfx.add("laser-caster-explosion-plasma", {
   ],
   smoke: false,
 });
-Registries.vfx.add("laser-caster-explosion-destabilised", {
+PreloadRegistries.vfx.add("laser-caster-explosion-destabilised", {
   type: "explosion",
   waveColours: [
     [255, 100, 100],
@@ -133,7 +133,7 @@ Registries.vfx.add("laser-caster-explosion-destabilised", {
 
 //Firing effects
 
-Registries.vfx.add("shoot", {
+PreloadRegistries.vfx.add("shoot", {
   type: "multi-effect",
   effects: [
     {
@@ -182,7 +182,7 @@ Registries.vfx.add("shoot", {
     },
   ],
 });
-Registries.vfx.add("stab", {
+PreloadRegistries.vfx.add("stab", {
   type: "particle-emission",
   cone: 0,
   amount: 1,
@@ -205,7 +205,7 @@ Registries.vfx.add("stab", {
   },
 });
 
-Registries.vfx.add("tonk-shoot", {
+PreloadRegistries.vfx.add("tonk-shoot", {
   type: "multi-effect",
   effects: [
     {
@@ -275,7 +275,7 @@ Registries.vfx.add("tonk-shoot", {
     },
   ],
 });
-Registries.vfx.add("launcher-smoke", {
+PreloadRegistries.vfx.add("launcher-smoke", {
   type: "multi-effect",
   effects: [
     {
@@ -305,7 +305,7 @@ Registries.vfx.add("launcher-smoke", {
   ],
 });
 
-Registries.vfx.add("laser-caster-frag", {
+PreloadRegistries.vfx.add("laser-caster-frag", {
   type: "particle-emission",
   amount: 4,
   cone: 20,
@@ -324,7 +324,7 @@ Registries.vfx.add("laser-caster-frag", {
     light: 40,
   },
 });
-Registries.vfx.add("laser-caster-frag-plasma", {
+PreloadRegistries.vfx.add("laser-caster-frag-plasma", {
   type: "particle-emission",
   amount: 4,
   cone: 20,
@@ -344,7 +344,7 @@ Registries.vfx.add("laser-caster-frag-plasma", {
     light: 40,
   },
 });
-Registries.vfx.add("laser-caster-frag-destabilised", {
+PreloadRegistries.vfx.add("laser-caster-frag-destabilised", {
   type: "particle-emission",
   amount: 4,
   cone: 20,
@@ -364,7 +364,7 @@ Registries.vfx.add("laser-caster-frag-destabilised", {
   },
 });
 
-Registries.vfx.add("plasma-railgun-fire", {
+PreloadRegistries.vfx.add("plasma-railgun-fire", {
   type: "multi-effect",
   effects: [
     {
@@ -453,7 +453,7 @@ Registries.vfx.add("plasma-railgun-fire", {
     },
   ],
 });
-Registries.vfx.add("plasma-railgun-impact", {
+PreloadRegistries.vfx.add("plasma-railgun-impact", {
   type: "multi-effect",
   effects: [
     {
@@ -537,7 +537,7 @@ Registries.vfx.add("plasma-railgun-impact", {
     },
   ],
 });
-Registries.vfx.add("plasma-railgun-trail", {
+PreloadRegistries.vfx.add("plasma-railgun-trail", {
   type: "particle-emission",
   amount: 3,
   cone: 0,
@@ -559,7 +559,7 @@ Registries.vfx.add("plasma-railgun-trail", {
     light: 60,
   },
 });
-Registries.vfx.add("plasma-railgun-hit", {
+PreloadRegistries.vfx.add("plasma-railgun-hit", {
   type: "multi-effect",
   effects: [
     {
@@ -615,7 +615,7 @@ Registries.vfx.add("plasma-railgun-hit", {
   ],
 });
 
-Registries.vfx.add("death-laser-fire", {
+PreloadRegistries.vfx.add("death-laser-fire", {
   type: "multi-effect",
   effects: [
     {
@@ -690,7 +690,7 @@ Registries.vfx.add("death-laser-fire", {
     },
   ],
 });
-Registries.vfx.add("death-laser-trail", {
+PreloadRegistries.vfx.add("death-laser-trail", {
   type: "multi-effect",
   effects: [
     {
@@ -737,7 +737,7 @@ Registries.vfx.add("death-laser-trail", {
     },
   ],
 });
-Registries.vfx.add("death-laser-hit", {
+PreloadRegistries.vfx.add("death-laser-hit", {
   type: "multi-effect",
   effects: [
     {
@@ -802,7 +802,7 @@ Registries.vfx.add("death-laser-hit", {
   ],
 });
 
-Registries.vfx.add("deathbringer-trail", {
+PreloadRegistries.vfx.add("deathbringer-trail", {
   type: "multi-effect",
   effects: [
     {
@@ -853,7 +853,7 @@ Registries.vfx.add("deathbringer-trail", {
 });
 
 //impact frames
-Registries.vfx.add("nuke-impact", {
+PreloadRegistries.vfx.add("nuke-impact", {
   type: "multi-effect",
   effects: [
     {
@@ -950,7 +950,7 @@ Registries.vfx.add("nuke-impact", {
     },
   ],
 });
-Registries.vfx.add("deathbringer-charge", {
+PreloadRegistries.vfx.add("deathbringer-charge", {
   type: "multi-effect",
   effects: [
     {
@@ -1012,7 +1012,7 @@ Registries.vfx.add("deathbringer-charge", {
     },
   ],
 });
-Registries.vfx.add("deathbringer-shot-impact", {
+PreloadRegistries.vfx.add("deathbringer-shot-impact", {
   type: "multi-effect",
   effects: [
     {
@@ -1062,8 +1062,8 @@ Registries.vfx.add("deathbringer-shot-impact", {
 
 //Nuclear
 
-Registries.vfx.add("nuke", { type: "nuclear-explosion" });
-Registries.vfx.add("deathbringer-nuke", {
+PreloadRegistries.vfx.add("nuke", { type: "nuclear-explosion" });
+PreloadRegistries.vfx.add("deathbringer-nuke", {
   type: "nuclear-explosion",
   flashColours: [
     [255, 175, 150],
@@ -1084,7 +1084,7 @@ Registries.vfx.add("deathbringer-nuke", {
 
 //Fire
 
-Registries.vfx.add("fire", {
+PreloadRegistries.vfx.add("fire", {
   type: "particle-emission",
   amount: 4,
   particle: {
@@ -1105,7 +1105,7 @@ Registries.vfx.add("fire", {
     light: 80,
   },
 });
-Registries.vfx.add("laser-caster-fire", {
+PreloadRegistries.vfx.add("laser-caster-fire", {
   type: "particle-emission",
   amount: 4,
   particle: {
@@ -1125,7 +1125,7 @@ Registries.vfx.add("laser-caster-fire", {
     light: 100,
   },
 });
-Registries.vfx.add("laser-caster-fire-plasma", {
+PreloadRegistries.vfx.add("laser-caster-fire-plasma", {
   type: "particle-emission",
   amount: 4,
   particle: {
@@ -1146,7 +1146,7 @@ Registries.vfx.add("laser-caster-fire-plasma", {
     light: 100,
   },
 });
-Registries.vfx.add("laser-caster-fire-destabilised", {
+PreloadRegistries.vfx.add("laser-caster-fire-destabilised", {
   type: "particle-emission",
   amount: 4,
   particle: {
@@ -1166,7 +1166,7 @@ Registries.vfx.add("laser-caster-fire-destabilised", {
     light: 100,
   },
 });
-Registries.vfx.add("death-laser-flames", {
+PreloadRegistries.vfx.add("death-laser-flames", {
   type: "particle-emission",
   amount: 4,
   particle: {
@@ -1191,7 +1191,7 @@ Registries.vfx.add("death-laser-flames", {
 
 //Status
 
-Registries.vfx.add("burning", {
+PreloadRegistries.vfx.add("burning", {
   type: "particle-emission",
   amount: 2,
   particle: {
@@ -1212,7 +1212,7 @@ Registries.vfx.add("burning", {
     light: 40,
   },
 });
-Registries.vfx.add("plasma-burn", {
+PreloadRegistries.vfx.add("plasma-burn", {
   type: "particle-emission",
   amount: 2,
   particle: {
@@ -1232,7 +1232,7 @@ Registries.vfx.add("plasma-burn", {
     light: 50,
   },
 });
-Registries.vfx.add("plasma-burn-boosted", {
+PreloadRegistries.vfx.add("plasma-burn-boosted", {
   type: "particle-emission",
   amount: 2,
   particle: {
@@ -1253,7 +1253,7 @@ Registries.vfx.add("plasma-burn-boosted", {
     light: 50,
   },
 });
-Registries.vfx.add("destabilised", {
+PreloadRegistries.vfx.add("destabilised", {
   type: "particle-emission",
   particle: {
     shape: "rect",
@@ -1269,7 +1269,7 @@ Registries.vfx.add("destabilised", {
     light: 50,
   },
 });
-Registries.vfx.add("death-burn", {
+PreloadRegistries.vfx.add("death-burn", {
   type: "particle-emission",
   amount: 2,
   particle: {
@@ -1294,7 +1294,7 @@ Registries.vfx.add("death-burn", {
 
 //Charge
 
-Registries.vfx.add("laser-caster-charge", {
+PreloadRegistries.vfx.add("laser-caster-charge", {
   type: "wave-emission",
   emissions: 4,
   interval: 10,
@@ -1312,7 +1312,7 @@ Registries.vfx.add("laser-caster-charge", {
     light: 30,
   },
 });
-Registries.vfx.add("charged-laser-blaster-charge", {
+PreloadRegistries.vfx.add("charged-laser-blaster-charge", {
   type: "wave-emission",
   parentise: true,
   particle: {
@@ -1328,7 +1328,7 @@ Registries.vfx.add("charged-laser-blaster-charge", {
     light: 30,
   },
 });
-Registries.vfx.add("plasma-railgun-charge", {
+PreloadRegistries.vfx.add("plasma-railgun-charge", {
   type: "wave-emission",
   emissions: 4,
   interval: 20,
@@ -1347,7 +1347,7 @@ Registries.vfx.add("plasma-railgun-charge", {
     light: 30,
   },
 });
-Registries.vfx.add("energy-repeater-charge", {
+PreloadRegistries.vfx.add("energy-repeater-charge", {
   type: "wave-emission",
   particle: {
     lifetime: 20,
@@ -1363,7 +1363,7 @@ Registries.vfx.add("energy-repeater-charge", {
   },
 });
 //Tonk
-Registries.vfx.add("tonk-weld", {
+PreloadRegistries.vfx.add("tonk-weld", {
   type: "particle-emission",
   amount: 3,
   emissions: 6,
@@ -1385,7 +1385,7 @@ Registries.vfx.add("tonk-weld", {
     light: 20,
   },
 });
-Registries.vfx.add("tonk-build", {
+PreloadRegistries.vfx.add("tonk-build", {
   type: "particle-emission",
   amount: 4,
   emissions: 3,
@@ -1407,7 +1407,7 @@ Registries.vfx.add("tonk-build", {
     light: 20,
   },
 });
-Registries.vfx.add("tonk-build-wave", {
+PreloadRegistries.vfx.add("tonk-build-wave", {
   type: "particle-emission",
   amount: 1,
   cone: 0,
@@ -1430,7 +1430,7 @@ Registries.vfx.add("tonk-build-wave", {
     rotateSpeed: 3,
   },
 });
-Registries.vfx.add("tonk-build-square", {
+PreloadRegistries.vfx.add("tonk-build-square", {
   type: "particle-emission",
   amount: 1,
   cone: 0,
@@ -1455,7 +1455,7 @@ Registries.vfx.add("tonk-build-square", {
 
 // launch/landing pads
 
-Registries.vfx.add("iti-pad-trail", {
+PreloadRegistries.vfx.add("iti-pad-trail", {
   type: "multi-effect",
   effects: [
     {
@@ -1546,7 +1546,7 @@ Registries.vfx.add("iti-pad-trail", {
 });
 
 //Misc
-Registries.vfx.add("land-target", {
+PreloadRegistries.vfx.add("land-target", {
   type: "multi-effect",
   effects: [
     {
@@ -1692,7 +1692,7 @@ Registries.vfx.add("land-target", {
     },
   ],
 });
-Registries.vfx.add("land-trail", {
+PreloadRegistries.vfx.add("land-trail", {
   type: "multi-effect",
   effects: [
     {
@@ -1759,7 +1759,7 @@ Registries.vfx.add("land-trail", {
     },
   ],
 });
-Registries.vfx.add("land-effect", {
+PreloadRegistries.vfx.add("land-effect", {
   type: "multi-effect",
   effects: [
     {
@@ -1847,7 +1847,7 @@ Registries.vfx.add("land-effect", {
     },
   ],
 });
-Registries.vfx.add("land-wave", {
+PreloadRegistries.vfx.add("land-wave", {
   type: "wave-emission",
   isFloor: true,
   particle: {
@@ -1865,7 +1865,7 @@ Registries.vfx.add("land-wave", {
     light: 30,
   },
 });
-Registries.vfx.add("land-scorch", {
+PreloadRegistries.vfx.add("land-scorch", {
   type: "multi-effect",
   effects: [
     {
@@ -1945,7 +1945,7 @@ Registries.vfx.add("land-scorch", {
 });
 
 // combat
-Registries.vfx.add("shield-break", {
+PreloadRegistries.vfx.add("shield-break", {
   type: "multi-effect",
   effects: [
     {
@@ -1985,7 +1985,7 @@ Registries.vfx.add("shield-break", {
     },
   ],
 });
-Registries.vfx.add("shield-break-yellow", {
+PreloadRegistries.vfx.add("shield-break-yellow", {
   type: "multi-effect",
   effects: [
     {
@@ -2026,7 +2026,7 @@ Registries.vfx.add("shield-break-yellow", {
   ],
 });
 
-Registries.vfx.add("punch-charge", {
+PreloadRegistries.vfx.add("punch-charge", {
   type: "particle-emission",
   amount: 1,
   cone: 360,
@@ -2046,7 +2046,7 @@ Registries.vfx.add("punch-charge", {
     light: 20,
   },
 });
-Registries.vfx.add("punch-charged", {
+PreloadRegistries.vfx.add("punch-charged", {
   type: "particle-emission",
   amount: 1,
   cone: 360,
@@ -2066,7 +2066,7 @@ Registries.vfx.add("punch-charged", {
     light: 20,
   },
 });
-Registries.vfx.add("punch-charge-complete", {
+PreloadRegistries.vfx.add("punch-charge-complete", {
   type: "wave-emission",
   particle: {
     lifetime: 30,
@@ -2081,7 +2081,7 @@ Registries.vfx.add("punch-charge-complete", {
     light: 30,
   },
 });
-Registries.vfx.add("punch", {
+PreloadRegistries.vfx.add("punch", {
   type: "multi-effect",
   effects: [
     {
@@ -2162,7 +2162,7 @@ Registries.vfx.add("punch", {
     },
   ],
 });
-Registries.vfx.add("big-punch", {
+PreloadRegistries.vfx.add("big-punch", {
   type: "multi-effect",
   effects: [
     {
@@ -2245,7 +2245,7 @@ Registries.vfx.add("big-punch", {
     },
   ],
 });
-Registries.vfx.add("charged-swing", {
+PreloadRegistries.vfx.add("charged-swing", {
   type: "multi-effect",
   effects: [
     {
@@ -2272,7 +2272,7 @@ Registries.vfx.add("charged-swing", {
     },
   ],
 });
-Registries.vfx.add("swing", {
+PreloadRegistries.vfx.add("swing", {
   type: "multi-effect",
   effects: [
     {
@@ -2299,7 +2299,7 @@ Registries.vfx.add("swing", {
     },
   ],
 });
-Registries.vfx.add("charged-punch-trail", {
+PreloadRegistries.vfx.add("charged-punch-trail", {
   type: "line-emission",
   amount: 1,
   line: {
@@ -2315,7 +2315,7 @@ Registries.vfx.add("charged-punch-trail", {
 });
 
 // laser/lightning lines
-Registries.vfx.add("snipe-trail", {
+PreloadRegistries.vfx.add("snipe-trail", {
   type: "line-emission",
   amount: 1,
   line: {
@@ -2330,7 +2330,7 @@ Registries.vfx.add("snipe-trail", {
   },
 });
 
-Registries.vfx.add("iti-laser-extras", {
+PreloadRegistries.vfx.add("iti-laser-extras", {
   type: "linear-multi",
   effects: [
     {
@@ -2366,7 +2366,7 @@ Registries.vfx.add("iti-laser-extras", {
   ],
 });
 
-Registries.vfx.add("short-iti-laser-extras", {
+PreloadRegistries.vfx.add("short-iti-laser-extras", {
   type: "linear-multi",
   effects: [
     {
@@ -2402,7 +2402,7 @@ Registries.vfx.add("short-iti-laser-extras", {
   ],
 });
 
-Registries.vfx.add("peti-zap", {
+PreloadRegistries.vfx.add("peti-zap", {
   type: "lightning-emission",
   amount: 1,
   line: {
@@ -2416,7 +2416,7 @@ Registries.vfx.add("peti-zap", {
     strokeTo: 0,
   },
 });
-Registries.vfx.add("peti-zap-multi", {
+PreloadRegistries.vfx.add("peti-zap-multi", {
   type: "lightning-emission",
   amount: 2,
   line: {
@@ -2430,7 +2430,7 @@ Registries.vfx.add("peti-zap-multi", {
     strokeTo: 0,
   },
 });
-Registries.vfx.add("peti-laser", {
+PreloadRegistries.vfx.add("peti-laser", {
   type: "line-emission",
   amount: 1,
   line: {
@@ -2444,7 +2444,7 @@ Registries.vfx.add("peti-laser", {
     strokeTo: 0,
   },
 });
-Registries.vfx.add("peti-laser-mini", {
+PreloadRegistries.vfx.add("peti-laser-mini", {
   type: "line-emission",
   amount: 1,
   line: {
@@ -2461,7 +2461,7 @@ Registries.vfx.add("peti-laser-mini", {
 
 // hmmmmmm
 
-// Registries.vfx.add("ui", {
+// PreloadRegistries.vfx.add("ui", {
 //   type: "multi-effect",
 //   effects: [
 //     {
@@ -2572,7 +2572,7 @@ Registries.vfx.add("peti-laser-mini", {
 //   ],
 // });
 
-Registries.vfx.add("hit-wall", {
+PreloadRegistries.vfx.add("hit-wall", {
   type: "multi-effect",
   effects: [
     {

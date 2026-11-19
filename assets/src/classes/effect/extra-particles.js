@@ -1,7 +1,7 @@
 class ExecutorParticle {
   /**
    *
-   * @param {ImageParticle|ShapeParticle|TextParticle|WaveParticle} main
+   * @param {Particle} main
    * @param {(x:number, y:number)=>void} creator
    * @param {int} creationInterval
    */
@@ -9,6 +9,9 @@ class ExecutorParticle {
     this.main = main;
     this.creator = creator;
     this.creationInterval = creationInterval;
+  }
+  get vfx() {
+    return this.main.vfx;
   }
   /**@type {ImageParticle|ShapeParticle|TextParticle|WaveParticle} */
   main = null;
@@ -57,3 +60,4 @@ class ExecutorParticle {
 // }
 
 export { ExecutorParticle };
+

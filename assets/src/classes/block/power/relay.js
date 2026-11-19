@@ -3,7 +3,7 @@ import { col } from "../../../core/color.js";
 import { ImageContainer } from "../../../core/image.js";
 import { effectTimer } from "../../../play/effects.js";
 import { blockSize } from "../../../scaling.js";
-import { LightningParticle } from "../../effect/lightning-particle.js";
+import { legacyLightningParticle } from "../../effect/lightning-particle.js";
 import { ShootableObject } from "../../physical.js";
 import { ConnectedRelayNetwork, RelayNetwork } from "../../world/power-network.js";
 import { Block } from "../block.js";
@@ -91,7 +91,7 @@ export class PowerRelay extends Block {
         effectTimer.repeat(
           () =>
             this.world.particles.push(
-              new LightningParticle(
+              legacyLightningParticle(
                 poses,
                 15,
                 [this.wireColour, col.withA(this.wireColour, 0)],

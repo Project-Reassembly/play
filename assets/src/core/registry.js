@@ -32,21 +32,22 @@ const Registries = Object.freeze(
     entities = new Integrate.Registry();
     /**@readonly @type {Integrate.Registry<StatusEffect>} */
     statuses = new Integrate.Registry();
-    /**@readonly @type {Integrate.Registry<VisualEffect>} */
-    vfx = new Integrate.Registry();
     /**@readonly @type {Integrate.Registry<Generator>} */
     worldgen = new Integrate.Registry();
     /**@readonly @type {Integrate.Registry<Corporation>} */
     corps = new Integrate.Registry();
     /**@readonly @type {Integrate.Registry<WorldEvent>} */
     events = new Integrate.Registry();
-    //Slightly odd registries
-    /**@readonly @type {Integrate.Registry<[string[], string[]]>} */
-    deathmsg = new Integrate.Registry();
+    // Preload registries
     /**@readonly @type {Integrate.Registry<Cutscene>} */
     cutscenes = new Integrate.Registry();
     /**@readonly @type {Integrate.Registry<BulletModel>} */
     bullets = new Integrate.Registry();
+    /**@readonly @type {Integrate.Registry<VisualEffect>} */
+    vfx = new Integrate.Registry();
+    // Slightly odd registries
+    /**@readonly @type {Integrate.Registry<[string[], string[]]>} */
+    deathmsg = new Integrate.Registry();
     /**@readonly Smaller registries for less important stuff, especially those without an actual class associated with them. */
     small = Object.freeze(
       new (class SmallRegistries {
@@ -92,6 +93,8 @@ const PreloadRegistries = Object.freeze(
     stati = new Integrate.Registry();
     /**@readonly @type {Integrate.Registry<BulletModel>} */
     bullets = new Integrate.Registry();
+    /**@readonly @type {Integrate.Registry<VisualEffect>} */
+    vfx = new Integrate.Registry();
   })(),
 );
 

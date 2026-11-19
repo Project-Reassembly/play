@@ -4,7 +4,7 @@ import { ImageContainer } from "../../../core/image.js";
 import { roundNum, Vector } from "../../../core/number.js";
 import { effectTimer } from "../../../play/effects.js";
 import { blockSize } from "../../../scaling.js";
-import { WaveParticle } from "../../effect/wave-particle.js";
+import { legacyWaveParticle } from "../../effect/wave-particle.js";
 import { Component } from "../../entity/entity-part.js";
 import { DroppedItemStack } from "../../item/dropped-itemstack.js";
 import { ShootableObject } from "../../physical.js";
@@ -70,7 +70,7 @@ export class ItemAttractor extends Container {
                 ),
                 end = searchItem.pos;
               this.world.particles.push(
-                new WaveParticle(
+                legacyWaveParticle(
                   start.x,
                   start.y,
                   15,
@@ -80,7 +80,7 @@ export class ItemAttractor extends Container {
                   5,
                   0,
                 ),
-                new WaveParticle(
+                legacyWaveParticle(
                   end.x,
                   end.y,
                   15,

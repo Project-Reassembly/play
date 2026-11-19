@@ -7,8 +7,8 @@ import { drawImg, rotatedImg } from "../../../core/ui.js";
 import { debug } from "../../../play/debug.js";
 import { autoScaledEffect } from "../../../play/effects.js";
 import { blockSize } from "../../../scaling.js";
-import { TextParticle } from "../../effect/text-particle.js";
-import { WaveParticle } from "../../effect/wave-particle.js";
+import { legacyTextParticle } from "../../effect/text-particle.js";
+import { legacyWaveParticle } from "../../effect/wave-particle.js";
 import { WeaponComponent } from "../../entity/entity-part.js";
 import { Entity } from "../../entity/entity.js";
 import { Inventory } from "../../inventory.js";
@@ -330,7 +330,7 @@ export class TurretController extends TurretBase {
     if (targetSize > this.maxSize) {
       this.#warnSquare(0, 0);
       this.world.particles.push(
-        new TextParticle(
+        legacyTextParticle(
           (this.gridX + 0.5) * blockSize,
           (this.gridY + 0.5 - targetSize) * blockSize - 10 * targetSize,
           0,
@@ -353,7 +353,7 @@ export class TurretController extends TurretBase {
         if (!this.checkConnectionTo(-size, -size)) this.#warnSquare(-size, -size);
       }
       this.world.particles.push(
-        new TextParticle(
+        legacyTextParticle(
           (this.gridX + 0.5) * blockSize,
           (this.gridY + 0.5 - targetSize) * blockSize - 10 * targetSize,
           0,
@@ -372,7 +372,7 @@ export class TurretController extends TurretBase {
   }
   #warnSquare(x, y) {
     this.world.particles.push(
-      new WaveParticle(
+      legacyWaveParticle(
         (this.gridX + x) * blockSize,
         (this.gridY + y) * blockSize,
         0,
@@ -382,7 +382,7 @@ export class TurretController extends TurretBase {
         5,
         5,
       ),
-      new TextParticle(
+      legacyTextParticle(
         (this.gridX + x) * blockSize,
         (this.gridY + y) * blockSize,
         0,
